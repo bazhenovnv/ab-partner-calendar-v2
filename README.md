@@ -1,1 +1,1 @@
-# Calendar AB New
+# ab-partner-calendar-v2
