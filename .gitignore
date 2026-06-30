@@ -16,3 +16,11 @@ pnpm-debug.log*
 .DS_Store
 .idea/
 .vscode/
+.env.local
+.env.*.local
+postgres-data/
+redis-data/
+apps/backend/uploads/
+apps/backend/prisma/dev.db
+*.patch
+tmp/
