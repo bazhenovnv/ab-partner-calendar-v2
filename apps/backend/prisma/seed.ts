@@ -1,0 +1,105 @@
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
+import { DEFAULT_DIRECTIONS, HASHTAG_TO_DIRECTIONS, FOOTER_PROJECTS, LEGAL_OPERATOR, CONTACT_EMAIL } from '@ab-afisha/shared';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('Seeding database...');
+
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'changeme_in_production';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@ab-event.pro';
+
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      passwordHash: await bcrypt.hash(adminPassword, 12),
+      name: 'Администратор',
+      role: 'ADMIN',
+    },
+  });
+
+  for (let i = 0; i < DEFAULT_DIRECTIONS.length; i++) {
+    const d = DEFAULT_DIRECTIONS[i];
+    await prisma.direction.upsert({
+      where: { slug: d.slug },
+      update: { name: d.name, sortOrder: i },
+      create: { name: d.name, slug: d.slug, sortOrder: i },
+    });
+  }
+
+  for (const [hashtag, directionSlugs] of Object.entries(HASHTAG_TO_DIRECTIONS)) {
+    const isMainEvent = hashtag === '#Хит';
+    await prisma.hashtagMapping.upsert({
+      where: { hashtag },
+      update: { isMainEvent },
+      create: { hashtag, isMainEvent },
+    });
+    if (directionSlugs.length > 0) {
+      const dir = await prisma.direction.findFirst({ where: { slug: directionSlugs[0] } });
+      if (dir) {
+        await prisma.hashtagMapping.update({
+          where: { hashtag },
+          data: { directionId: dir.id },
+        });
+      }
+    }
+  }
+
+  for (let i = 0; i < FOOTER_PROJECTS.length; i++) {
+    const p = FOOTER_PROJECTS[i];
+    await prisma.footerProject.upsert({
+      where: { id: `footer-${i}` },
+      update: { title: p.title, url: p.url, sortOrder: i },
+      create: { id: `footer-${i}`, title: p.title, url: p.url, sortOrder: i },
+    });
+  }
+
+  const quotes = [
+    { text: 'Бухгалтер — это тот, кто решает проблемы, о существовании которых вы не подозревали, способами, которых вы не понимаете.', author: null },
+    { text: 'Знание законов не освобождает от налогов, но иногда помогает их оптимизировать.', author: null },
+    { text: 'Профессиональный рост — это не случайность, это результат постоянного обучения.', author: null },
+  ];
+  for (let i = 0; i < quotes.length; i++) {
+    const q = quotes[i];
+    await prisma.quote.upsert({
+      where: { id: `seed-quote-${i}` },
+      update: {},
+      create: { id: `seed-quote-${i}`, text: q.text, author: q.author, sortOrder: i },
+    });
+  }
+
+  const legalDocs = [
+    {
+      type: 'PRIVACY_POLICY' as const,
+      title: 'Политика конфиденциальности',
+      content: `<h2>Политика конфиденциальности</h2><p>Настоящая Политика определяет порядок обработки персональных данных пользователей сайта ab-event.pro.</p><h3>Оператор</h3><p>${LEGAL_OPERATOR.name}, ОГРН ${LEGAL_OPERATOR.ogrn}, ИНН ${LEGAL_OPERATOR.inn}.<br/>Адрес: ${LEGAL_OPERATOR.address}.<br/>Email: ${CONTACT_EMAIL}</p>`,
+    },
+    {
+      type: 'USER_AGREEMENT' as const,
+      title: 'Пользовательское соглашение',
+      content: `<h2>Пользовательское соглашение</h2><p>Настоящее Соглашение регулирует использование сайта ab-event.pro.</p><h3>Оператор</h3><p>${LEGAL_OPERATOR.name}, ОГРН ${LEGAL_OPERATOR.ogrn}, ИНН ${LEGAL_OPERATOR.inn}.<br/>Адрес: ${LEGAL_OPERATOR.address}.<br/>Email: ${CONTACT_EMAIL}</p>`,
+    },
+    {
+      type: 'PERSONAL_DATA_CONSENT' as const,
+      title: 'Согласие на обработку персональных данных',
+      content: `<h2>Согласие на обработку персональных данных</h2><p>Настоящим даю согласие ${LEGAL_OPERATOR.name} (ОГРН ${LEGAL_OPERATOR.ogrn}, ИНН ${LEGAL_OPERATOR.inn}) на обработку моих персональных данных.</p>`,
+    },
+  ];
+
+  for (const doc of legalDocs) {
+    await prisma.legalDoc.upsert({
+      where: { type: doc.type },
+      update: {},
+      create: { ...doc, isDraft: false, publishedAt: new Date() },
+    });
+  }
+
+  console.log('Seed complete.');
+}
+
+main()
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(() => prisma.$disconnect());
