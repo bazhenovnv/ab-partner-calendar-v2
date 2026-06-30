@@ -1,0 +1,27 @@
+{
+  "name": "ab-afisha",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "build": "pnpm --filter '@ab-afisha/shared' build && pnpm --filter './apps/*' build",
+    "lint": "pnpm --recursive lint",
+    "typecheck": "pnpm --recursive typecheck",
+    "db:generate": "pnpm --filter backend exec prisma generate",
+    "db:migrate": "pnpm --filter backend exec prisma migrate dev",
+    "db:deploy": "pnpm --filter backend exec prisma migrate deploy",
+    "db:seed": "pnpm --filter backend exec prisma db seed",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
