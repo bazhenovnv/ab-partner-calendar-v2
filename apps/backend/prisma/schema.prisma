@@ -1,0 +1,413 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  ARCHIVE
+  NEEDS_ATTENTION
+  DELETED
+}
+
+enum EventAutoStatus {
+  PLANNED
+  LIVE
+  COMPLETED
+}
+
+enum EventFormat {
+  ONLINE
+  OFFLINE
+}
+
+enum PriceType {
+  FREE
+  PAID
+}
+
+enum ImportSource {
+  MAX
+  API
+  MANUAL
+}
+
+enum BotChannel {
+  TELEGRAM
+  MAX
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+enum ReminderOffset {
+  MINUTES_5
+  MINUTES_10
+  HOUR_1
+  DAY_1
+  DAY_3
+  MORNING_OF_DAY
+}
+
+enum LegalDocType {
+  PRIVACY_POLICY
+  USER_AGREEMENT
+  PERSONAL_DATA_CONSENT
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String
+  name             String
+  role             UserRole  @default(EDITOR)
+  isActive         Boolean   @default(true)
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  actionLogs       ActionLog[]
+  eventStatusChanges Event[] @relation("ManualStatusBy")
+}
+
+model Direction {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  events    EventDirection[]
+  hashtagMappings HashtagMapping[]
+}
+
+model City {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  region    String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  events    Event[]
+}
+
+model Event {
+  id               String          @id @default(uuid())
+  title            String
+  shortDescription String?
+  fullDescription  String?
+
+  startDate        DateTime
+  endDate          DateTime?
+  startTime        String?
+  timezone         String          @default("Europe/Moscow")
+
+  status           EventStatus     @default(DRAFT)
+  autoStatus       EventAutoStatus @default(PLANNED)
+  isManualStatus   Boolean         @default(false)
+  manualStatusBy   User?           @relation("ManualStatusBy", fields: [manualStatusById], references: [id])
+  manualStatusById String?
+  manualStatusAt   DateTime?
+
+  format           EventFormat     @default(ONLINE)
+  cityId           String?
+  city             City?           @relation(fields: [cityId], references: [id])
+  cityName         String?
+  address          String?
+  venue            String?
+  isOnline         Boolean         @default(false)
+
+  eventUrl         String?
+  ticketUrl        String?
+  ticketSalesEnabled Boolean       @default(false)
+  speaker          String?
+
+  priceType        PriceType       @default(FREE)
+  priceText        String?
+
+  mainEvent        Boolean         @default(false)
+  sortOrder        Int             @default(0)
+
+  source           ImportSource    @default(MANUAL)
+  sourcePostUrl    String?         @unique
+  sourceChannelUrl String?
+  externalId       String?
+  lastSyncedAt     DateTime?
+
+  publishedAt      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  images           EventImage[]
+  directions       EventDirection[]
+  tags             EventTag[]
+  reminders        Reminder[]
+  views            EventView[]
+  versions         EventVersion[]
+
+  @@index([startDate])
+  @@index([status])
+  @@index([autoStatus])
+  @@index([mainEvent])
+  @@index([externalId])
+  @@index([sourcePostUrl])
+}
+
+model EventImage {
+  id           String   @id @default(uuid())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  originalUrl  String?
+  eventCardUrl String?
+  mainEventUrl String?
+  modalUrl     String?
+  thumbnailUrl String?
+
+  cropX        Float    @default(0)
+  cropY        Float    @default(0)
+  cropScale    Float    @default(1)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([eventId])
+}
+
+model EventDirection {
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  directionId String
+  direction   Direction @relation(fields: [directionId], references: [id])
+
+  @@id([eventId, directionId])
+}
+
+model EventTag {
+  id      String @id @default(uuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag     String
+
+  @@index([eventId])
+}
+
+model EventVersion {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  snapshot  Json
+  createdAt DateTime @default(now())
+  createdBy String?
+
+  @@index([eventId])
+}
+
+model Quote {
+  id        String   @id @default(uuid())
+  text      String
+  author    String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FooterProject {
+  id        String   @id @default(uuid())
+  title     String
+  url       String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BotUser {
+  id             String     @id @default(uuid())
+  channel        BotChannel
+  externalId     String
+  username       String?
+  firstName      String?
+  lastActivityAt DateTime   @default(now())
+  subscribedAt   DateTime   @default(now())
+  createdAt      DateTime   @default(now())
+
+  reminders      Reminder[]
+
+  @@unique([channel, externalId])
+}
+
+model Reminder {
+  id          String         @id @default(uuid())
+  botUserId   String
+  botUser     BotUser        @relation(fields: [botUserId], references: [id])
+  eventId     String
+  event       Event          @relation(fields: [eventId], references: [id])
+  offset      ReminderOffset
+  scheduledAt DateTime
+  sentAt      DateTime?
+  failedAt    DateTime?
+  failReason  String?
+  createdAt   DateTime       @default(now())
+
+  @@index([scheduledAt])
+  @@index([eventId])
+}
+
+model MaxImportLog {
+  id          String   @id @default(uuid())
+  runAt       DateTime @default(now())
+  postsFound  Int      @default(0)
+  imported    Int      @default(0)
+  updated     Int      @default(0)
+  skipped     Int      @default(0)
+  errors      Int      @default(0)
+  errorDetail Json?
+}
+
+model HashtagMapping {
+  id          String     @id @default(uuid())
+  hashtag     String     @unique
+  directionId String?
+  direction   Direction? @relation(fields: [directionId], references: [id])
+  isMainEvent Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+}
+
+model ApiSource {
+  id           String   @id @default(uuid())
+  name         String
+  url          String
+  method       String   @default("GET")
+  headers      Json     @default("{}")
+  authType     String   @default("none")
+  authConfig   Json     @default("{}")
+  syncPeriod   Int      @default(60)
+  fieldMapping Json     @default("{}")
+  syncMode     String   @default("new_and_update")
+  isEnabled    Boolean  @default(false)
+  lastSyncAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  logs         ApiSourceLog[]
+}
+
+model ApiSourceLog {
+  id          String    @id @default(uuid())
+  sourceId    String
+  source      ApiSource @relation(fields: [sourceId], references: [id])
+  runAt       DateTime  @default(now())
+  success     Boolean
+  imported    Int       @default(0)
+  errors      Int       @default(0)
+  errorDetail String?
+}
+
+model EventView {
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  sessionId String?
+  action    String
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([createdAt])
+}
+
+model SiteVisit {
+  id        String   @id @default(uuid())
+  page      String
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model SiteConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model SiteConfigVersion {
+  id        String   @id @default(uuid())
+  key       String
+  value     Json
+  createdAt DateTime @default(now())
+  createdBy String?
+}
+
+model LegalDoc {
+  id          String       @id @default(uuid())
+  type        LegalDocType @unique
+  title       String
+  content     String
+  isDraft     Boolean      @default(true)
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  versions    LegalDocVersion[]
+}
+
+model LegalDocVersion {
+  id        String   @id @default(uuid())
+  docId     String
+  doc       LegalDoc @relation(fields: [docId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+  createdBy String?
+
+  @@index([docId])
+}
+
+model AdminNotification {
+  id         String   @id @default(uuid())
+  type       String
+  message    String
+  payload    Json?
+  sentAt     DateTime?
+  failedAt   DateTime?
+  failReason String?
+  createdAt  DateTime @default(now())
+}
+
+model ActionLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  context   String
+  message   String
+  stack     String?
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
