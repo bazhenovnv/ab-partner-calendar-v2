@@ -50,7 +50,7 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
         <noscript>
           <div>
             <img
-              src={\`https://mc.yandex.ru/watch/${METRIKA_ID}\`}
+              src={`https://mc.yandex.ru/watch/${METRIKA_ID}`}
               style={{ position: 'absolute', left: '-9999px' }}
               alt=""
             />
