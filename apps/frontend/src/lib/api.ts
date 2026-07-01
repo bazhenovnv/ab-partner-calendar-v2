@@ -28,8 +28,9 @@ export const api = {
 const BACKEND = process.env.BACKEND_URL ?? 'http://backend:3001';
 
 async function serverFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const hasNoStore = (init as RequestInit & { cache?: string } | undefined)?.cache === 'no-store';
   const res = await fetch(`${BACKEND}/api${path}`, {
-    next: { revalidate: 60 },
+    ...(hasNoStore ? {} : { next: { revalidate: 60 } }),
     ...init,
   });
   if (!res.ok) throw new Error(`Backend ${res.status}: ${path}`);

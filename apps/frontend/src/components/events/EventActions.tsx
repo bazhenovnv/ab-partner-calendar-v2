@@ -12,7 +12,7 @@ interface EventActionsProps {
 export function EventActions({ event }: EventActionsProps) {
   const registrationUrl = event.ticketUrl ?? event.eventUrl;
   const reminderUrl = BOT_USERNAME
-    ? `https://t.me/${BOT_USERNAME}?start=reminder_${event.id}`
+    ? `https://t.me/${BOT_USERNAME}?start=remind_${event.id}`
     : null;
 
   const handleIcsDownload = () => {
