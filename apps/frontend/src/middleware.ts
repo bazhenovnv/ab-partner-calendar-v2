@@ -11,7 +11,9 @@ export async function middleware(request: NextRequest) {
 
   try {
     const backendUrl = process.env.BACKEND_URL ?? 'http://backend:3001';
-    const res = await fetch(`${backendUrl}/api/admin/site-status`, { next: { revalidate: 30 } });
+    // Edge Runtime does not support Next.js Data Cache; plain fetch is used.
+    // To reduce load, consider adding a CDN or in-process TTL cache in a future stage.
+    const res = await fetch(`${backendUrl}/api/admin/site-status`, { cache: 'no-store' });
     if (res.ok) {
       const data = (await res.json()) as { maintenanceEnabled: boolean };
       if (data.maintenanceEnabled) {

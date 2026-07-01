@@ -1,5 +1,19 @@
 # Project Changelog
 
+## Stage 12 — Production Blockers
+
+- **[C-01] `docker-compose.prod.yml`**: добавлен `BOT_INTERNAL_TOKEN` в `backend` и `bots`. `NEXT_PUBLIC_CONTACT_EMAIL` уже присутствовал (строка 76).
+- **[S-01] `docker-compose.yml` (dev)**: добавлен `BOT_INTERNAL_TOKEN` со значением по умолчанию для локальной разработки.
+- **[C-02] `apps/backend/Dockerfile`**: добавлен `prisma generate` в runner-стадию после `pnpm install --prod`. Добавлен `/docker-entrypoint.sh` — запускает `prisma migrate deploy` перед стартом Node.js.
+- **[C-03] `apps/frontend/src/middleware.ts`**: убрана опция `{ next: { revalidate: 30 } }` (не работает в Edge Runtime). Заменена на `{ cache: 'no-store' }`.
+- **[C-04] `apps/backend/src/main.ts`**: CORS расширен — добавлены `https://www.ab-event.pro` и `https://test.ab-event.pro`.
+- **[M-04] `apps/backend/src/app.module.ts`**: `ThrottlerGuard` подключён глобально через `APP_GUARD`. Rate-limiting теперь активен на всех эндпоинтах, включая `/api/auth/login`.
+- **[ENV] `apps/backend/.env.example`**: добавлены `SEED_ADMIN_EMAIL` и `SEED_ADMIN_PASSWORD`.
+- **[ENV] `.env.example`**: добавлен `NEXT_PUBLIC_CONTACT_EMAIL`.
+- **ADR-012**: задокументирован подход с Docker entrypoint для migrate deploy.
+
+Закрытые production-блокеры: C-01, C-02, C-03, C-04, M-04.
+
 ## Stage 10 — Maintenance Page
 
 - Backend `AdminModule`:

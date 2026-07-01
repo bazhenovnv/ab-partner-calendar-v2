@@ -48,6 +48,7 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
       ADMIN_TELEGRAM_CHAT_ID: ${ADMIN_TELEGRAM_CHAT_ID}
+      BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN}
       THROTTLE_LIMIT: 200
     expose:
       - "3001"
@@ -91,6 +92,7 @@ services:
       DATABASE_URL: postgresql://ab_afisha:${POSTGRES_PASSWORD}@postgres:5432/ab_afisha
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       ADMIN_TELEGRAM_CHAT_ID: ${ADMIN_TELEGRAM_CHAT_ID}
+      BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN}
     depends_on:
       backend:
         condition: service_healthy

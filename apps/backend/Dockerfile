@@ -28,6 +28,13 @@ COPY --from=build /app/apps/backend/dist ./apps/backend/dist
 COPY --from=build /app/apps/backend/prisma ./apps/backend/prisma
 
 RUN pnpm install --prod --frozen-lockfile
+# Generate Prisma Client in the production image after prod deps are installed
+RUN pnpm --filter backend exec prisma generate
 
 WORKDIR /app/apps/backend
+
+COPY apps/backend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["node", "dist/main"]
