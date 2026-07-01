@@ -1,6 +1,6 @@
 import {
+  BadGatewayException,
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -141,27 +141,41 @@ export class BroadcastsService {
       throw new BadRequestException('Test send only available for DRAFT broadcasts');
     }
 
-    // Attempt to send via Telegram (admin preview)
     const tgToken = process.env.TELEGRAM_BOT_TOKEN;
-    let sent = false;
-    if (tgToken && adminChatId) {
-      try {
-        const text = this.buildMessageText(broadcast as any);
-        const res = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: adminChatId,
-            text: `[ТЕСТ РАССЫЛКИ]\n\n${text}`,
-            parse_mode: 'HTML',
-          }),
-        });
-        sent = res.ok;
-      } catch (err) {
-        this.logger.warn(`Test send to admin failed: ${err}`);
-      }
+    if (!tgToken) {
+      throw new BadRequestException('TELEGRAM_BOT_TOKEN is not configured');
+    }
+    if (!adminChatId) {
+      throw new BadRequestException(
+        'adminChatId is required (pass ?adminChatId= or set ADMIN_TELEGRAM_CHAT_ID env var)',
+      );
     }
 
+    const text = this.buildMessageText(broadcast as any);
+    let apiErrorDescription: string | undefined;
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: adminChatId,
+          text: `[ТЕСТ РАССЫЛКИ]\n\n${text}`,
+          parse_mode: 'HTML',
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { description?: string };
+        apiErrorDescription = body.description ?? `Telegram API HTTP ${res.status}`;
+      }
+    } catch (err: unknown) {
+      throw new BadGatewayException(`Telegram API unreachable: ${String(err)}`);
+    }
+
+    if (apiErrorDescription) {
+      throw new BadGatewayException(`Telegram API error: ${apiErrorDescription}`);
+    }
+
+    // Only mark testSentAt after confirmed delivery
     await this.prisma.broadcast.update({
       where: { id },
       data: { testSentAt: new Date() },
@@ -171,11 +185,11 @@ export class BroadcastsService {
       data: {
         broadcastId: id,
         level: 'info',
-        message: `Test send to admin ${adminChatId}. Telegram API: ${sent ? 'ok' : 'skipped/failed'}`,
+        message: `Test send delivered to admin chat ${adminChatId}`,
       },
     });
 
-    return { ok: true, sent };
+    return { ok: true };
   }
 
   // ── enqueue / schedule ────────────────────────────────────────────────────
@@ -451,7 +465,12 @@ export class BroadcastsService {
       data: { status: 'SCHEDULED' as any },
     });
 
-    await this.broadcastQueue.add('send', { broadcastId: next.id }, { attempts: 1 });
-    this.logger.log(`Started next queued broadcast: ${next.id}`);
+    const delay =
+      next.scheduledAt && next.scheduledAt.getTime() > Date.now()
+        ? next.scheduledAt.getTime() - Date.now()
+        : 0;
+
+    await this.broadcastQueue.add('send', { broadcastId: next.id }, { delay, attempts: 1 });
+    this.logger.log(`Started next queued broadcast: ${next.id} (delay=${delay}ms)`);
   }
 }

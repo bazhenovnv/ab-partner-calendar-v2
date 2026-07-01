@@ -57,9 +57,6 @@ export class BroadcastProcessor {
     const messageText = this.broadcastsService.buildMessageText(broadcast as any);
 
     // Add unsubscribe footer (BR-025)
-    const apiBase = process.env.BACKEND_URL
-      ? `${process.env.BACKEND_URL}/api`
-      : 'http://backend:3001/api';
     const unsubText = `\n\n<i>Чтобы отписаться от рассылок, ответьте /unsubscribe</i>`;
     const fullText = messageText + unsubText;
 
@@ -67,9 +64,10 @@ export class BroadcastProcessor {
     let countFailed = 0;
     let countSkipped = 0;
 
-    // Process in batches of 50
+    // Process in batches of 50.
+    // Always query the first N PENDING rows — status changes remove them from
+    // subsequent queries, so no skip/offset is needed or correct here.
     const BATCH = 50;
-    let offset = 0;
 
     while (true) {
       // Re-check if cancelled
@@ -84,7 +82,6 @@ export class BroadcastProcessor {
 
       const recipients = await this.prisma.broadcastRecipient.findMany({
         where: { broadcastId, status: 'PENDING' as any },
-        skip: offset,
         take: BATCH,
         orderBy: { createdAt: 'asc' },
       });
@@ -133,7 +130,6 @@ export class BroadcastProcessor {
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
-      offset += BATCH;
     }
 
     // Mark broadcast complete
@@ -158,8 +154,5 @@ export class BroadcastProcessor {
 
     // Start next queued broadcast (BR-021)
     await this.broadcastsService.startNextQueued();
-
-    // Suppress unused variable warning — apiBase used for future unsubscribe link
-    void apiBase;
   }
 }
