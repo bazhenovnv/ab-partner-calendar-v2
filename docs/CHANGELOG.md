@@ -1,5 +1,17 @@
 # Project Changelog
 
+## Stage 1 — Legal/Core schema preparation
+
+- Extended `LegalDocType` enum: added `COOKIE_POLICY` and `BROADCAST_CONSENT`.
+- Added `LegalDocVersion.publishedAt` — each version now stores its publication date.
+- Extended `BotUser` with: `phone`, `phoneVerifiedAt`, `allowMarketingMessages` (default true), `allowServiceNotifications` (default true), `legalAcceptedAt`, `broadcastConsentAcceptedAt`.
+- Added `BroadcastStatus`, `BroadcastChannel`, `BroadcastRecipientStatus` enums.
+- Added `Broadcast`, `BroadcastRecipient`, `BroadcastLog` models (schema foundation; no sending logic yet).
+- Added migration `20260701200000_legal_core_schema`.
+- Seed: added `COOKIE_POLICY` and `BROADCAST_CONSENT` legal docs with placeholder content.
+- Seed: added broadcast SiteConfig defaults (enabled=false, Telegram rate 20/s, MAX rate 10/s, cooldown 24h, testSendRequired=true).
+- Shared types: added `LegalDocType`, `BroadcastStatus`, `BroadcastChannel`, `BroadcastRecipientStatus`.
+
 ## v11
 
 - Added five legal document pages: `/legal/privacy`, `/legal/terms`, `/legal/consent`, `/legal/cookies`, `/legal/broadcast-consent`.
