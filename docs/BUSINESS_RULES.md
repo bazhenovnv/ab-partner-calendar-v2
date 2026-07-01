@@ -81,7 +81,7 @@ Every mass broadcast must include an unsubscribe action. When user unsubscribes,
 Marketing unsubscribe disables informational broadcasts only. Service reminders are not affected. Personal data consent withdrawal is handled separately through the legal process.
 
 ## BR-027: Legal document pages
-The public site must expose: `/legal/privacy`, `/legal/terms`, `/legal/consent`, `/legal/cookies`, `/legal/broadcast-consent`. Footer must link to at least the first four.
+The public site must expose: `/legal/privacy`, `/legal/terms`, `/legal/consent`, `/legal/cookies`, `/legal/broadcast-consent`. Footer must contain links to all five documents.
 
 ## BR-028: Cookie banner legal links
 Cookie banner must link to `/legal/privacy`. Link to `/legal/cookies` if UI space allows.

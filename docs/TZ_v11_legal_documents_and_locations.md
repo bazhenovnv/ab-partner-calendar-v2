@@ -22,7 +22,13 @@ info-event@a-b.ru
 
 ## Placement
 
-Footer of the public site must contain links to all legal documents or at least the first four documents with the broadcast consent available in the legal section and bot flows.
+Footer of the public site must contain links to all five legal documents:
+
+- `/legal/privacy` — Политика конфиденциальности;
+- `/legal/terms` — Пользовательское соглашение;
+- `/legal/consent` — Согласие на обработку персональных данных;
+- `/legal/cookies` — Политика Cookie и аналитики;
+- `/legal/broadcast-consent` — Согласие на информационные рассылки.
 
 Cookie banner:
 
