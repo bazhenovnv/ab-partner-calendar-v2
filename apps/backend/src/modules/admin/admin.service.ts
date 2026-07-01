@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 // Keys exposed to admin settings UI
@@ -35,6 +36,8 @@ export class AdminService {
   async updateSetting(key: string, value: unknown): Promise<SiteConfigRow> {
     const existing = await this.prisma.siteConfig.findUnique({ where: { key } });
     if (!existing) throw new NotFoundException(`SiteConfig key not found: ${key}`);
-    return this.prisma.siteConfig.update({ where: { key }, data: { value } });
+    const jsonValue: Prisma.InputJsonValue =
+      value === null ? Prisma.JsonNull : (value as Prisma.InputJsonValue);
+    return this.prisma.siteConfig.update({ where: { key }, data: { value: jsonValue } });
   }
 }
