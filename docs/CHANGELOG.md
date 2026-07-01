@@ -1,5 +1,21 @@
 # Project Changelog
 
+## Stage 2 — Legal module + public legal pages
+
+- Backend `LegalModule` fully implemented:
+  - `GET /api/legal` — list all documents
+  - `GET /api/legal/:type` — get document by type (public)
+  - `PATCH /api/legal/admin/:type` — update title/content as draft (ADMIN only)
+  - `POST /api/legal/admin/:type/publish` — publish new version with `publishedAt`, saves to `LegalDocVersion` history (ADMIN only)
+  - `GET /api/legal/admin/:type/versions` — list version history (ADMIN only)
+- Frontend: 5 legal pages under `/legal/[slug]` (SSG, revalidate 1h):
+  - `/legal/privacy`, `/legal/terms`, `/legal/consent`, `/legal/cookies`, `/legal/broadcast-consent`
+- Each page fetches content from backend at build/revalidation; shows inline fallback message if API is unavailable.
+- Footer on home page contains links to all 5 legal documents (BR-027).
+- Legal page footer also links to all 5 documents.
+- Added `src/lib/legal.ts` in frontend: `LEGAL_LINKS`, `SLUG_TO_TYPE`, `FALLBACK_CONTENT`, `fetchLegalDoc`.
+- CSS for legal pages added to `globals.css` (desktop + mobile 390px).
+
 ## Stage 1 — Legal/Core schema preparation
 
 - Extended `LegalDocType` enum: added `COOKIE_POLICY` and `BROADCAST_CONSENT`.
