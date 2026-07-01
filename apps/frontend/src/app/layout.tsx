@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import './globals.css';
-import CookieBanner from '@/components/CookieBanner';
+import CookieBannerGate from '@/components/CookieBannerGate';
 
 const montserrat = Montserrat({
   subsets: ['cyrillic', 'latin'],
@@ -58,7 +58,7 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
           </div>
         </noscript>
         {children}
-        <CookieBanner />
+        <CookieBannerGate />
       </body>
     </html>
   );
