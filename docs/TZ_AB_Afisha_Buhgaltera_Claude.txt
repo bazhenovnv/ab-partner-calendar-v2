@@ -2,7 +2,7 @@
 
 Проект разрабатывается с нуля в репозитории bazhenovnv/ab-partner-calendar-v2.
 Production-домен: ab-event.pro.
-Контактная почта на период запуска: ab-event.pro@yandex.ru.
+Контактная почта на период запуска: info-event@a-b.ru.
 Яндекс.Метрика: 110270689.
 Сервер: Timeweb Cloud VPS, IPv4 77.232.136.248, host kvnvm-277.
 Стек: Next.js, React, TypeScript, NestJS, PostgreSQL, Redis, Docker, Nginx, Sharp, Telegram/MAX-боты.
@@ -13,10 +13,10 @@ Production-домен: ab-event.pro.
 
 Название блока: Главные события. Старое название Важные события не использовать.
 
-Footer email: ab-event.pro@yandex.ru. При клике email копируется в буфер обмена, затем открывается mailto:ab-event.pro@yandex.ru. Показывать toast Email скопирован. При блокировке Clipboard API всё равно открывать mailto и показывать fallback.
+Footer email: info-event@a-b.ru. При клике email копируется в буфер обмена, затем открывается mailto:info-event@a-b.ru. Показывать toast Email скопирован. При блокировке Clipboard API всё равно открывать mailto и показывать fallback.
 
 MAX-импорт: источник https://max.ru/join/tumioTNhr5Kh90TaDp1Tzgn-uDKw8Eko7KFhXdKeu9c, проверка каждый час. Один MAX-пост = одно событие. Подборки автоматически не разбивать. #Хит => mainEvent=true и попадание в Главные события.
 
-Юридические документы: оператор ООО «АБ ГРУПП», ОГРН 1212300074766, ИНН 2308283450, адрес Краснодар, ул. Красных Партизан, д. 164, помещение 5. Email в документах: ab-event.pro@yandex.ru.
+Юридические документы: оператор ООО «АБ ГРУПП», ОГРН 1212300074766, ИНН 2308283450, адрес Краснодар, ул. Красных Партизан, д. 164, помещение 5. Email в документах: info-event@a-b.ru.
 
 Полная версия v6 с PDF, customer-версией, макетами и assets находится в архиве AB_Afisha_Claude_transfer_package_v6.zip, подготовленном отдельно для передачи Claude/Claude Code.

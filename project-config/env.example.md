@@ -12,6 +12,6 @@ MAX_BOT_TOKEN=<set-on-server>
 ADMIN_TELEGRAM_URL=https://t.me/Bazhenovnv
 JWT_SECRET=<set-on-server>
 SESSION_SECRET=<set-on-server>
-PUBLIC_CONTACT_EMAIL=ab-event.pro@yandex.ru
-NEXT_PUBLIC_CONTACT_EMAIL=ab-event.pro@yandex.ru
+PUBLIC_CONTACT_EMAIL=info-event@a-b.ru
+NEXT_PUBLIC_CONTACT_EMAIL=info-event@a-b.ru
 ```

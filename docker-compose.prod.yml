@@ -72,7 +72,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_SITE_URL: https://ab-event.pro
       NEXT_PUBLIC_YANDEX_METRIKA_ID: ${YANDEX_METRIKA_ID:-110270689}
-      NEXT_PUBLIC_CONTACT_EMAIL: ab-event.pro@yandex.ru
+      NEXT_PUBLIC_CONTACT_EMAIL: info-event@a-b.ru
       BACKEND_URL: http://backend:3001
     expose:
       - "3000"

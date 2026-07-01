@@ -22,7 +22,7 @@
 ## Ключевые параметры
 
 - Production-домен: `ab-event.pro`.
-- Рабочая почта на период запуска: `ab-event.pro@yandex.ru`.
+- Рабочая почта на период запуска: `info-event@a-b.ru`.
 - Яндекс.Метрика: `110270689`.
 - VPS: Timeweb Cloud, IPv4 `77.232.136.248`, host `kvnvm-277`.
 - Стек: Next.js, React, TypeScript, NestJS, PostgreSQL, Redis, Docker, Nginx.

@@ -46,4 +46,4 @@ Update v5: customer and Claude PDFs regenerated without automatic section-number
 
 ## Contact email
 
-Current project contact email: `ab-event.pro@yandex.ru`. Use it in the footer and legal documents. Click behavior: copy to clipboard and open `mailto:`. See `project-config/CONTACT_EMAIL.md`.
+Current project contact email: `info-event@a-b.ru`. Use it in the footer and legal documents. Click behavior: copy to clipboard and open `mailto:`. See `project-config/CONTACT_EMAIL.md`.

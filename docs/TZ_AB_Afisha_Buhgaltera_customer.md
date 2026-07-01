@@ -5,7 +5,7 @@
 - Проект: `АБ Афиша Бухгалтера`.
 - Production-домен: `ab-event.pro`.
 - Репозиторий: `bazhenovnv/ab-partner-calendar-v2`.
-- Контактная почта на период запуска: `ab-event.pro@yandex.ru`.
+- Контактная почта на период запуска: `info-event@a-b.ru`.
 - Яндекс.Метрика: `110270689`.
 - VPS: Timeweb Cloud, IPv4 `77.232.136.248`, host `kvnvm-277`.
 
@@ -29,7 +29,7 @@
 На период запуска используется:
 
 ```text
-ab-event.pro@yandex.ru
+info-event@a-b.ru
 ```
 
 Поведение клика по email на сайте:
@@ -43,7 +43,7 @@ ab-event.pro@yandex.ru
 
 Оператор: ООО «АБ ГРУПП», ОГРН 1212300074766, ИНН 2308283450.
 
-В документах использовать email: `ab-event.pro@yandex.ru`.
+В документах использовать email: `info-event@a-b.ru`.
 
 Нужны документы:
 

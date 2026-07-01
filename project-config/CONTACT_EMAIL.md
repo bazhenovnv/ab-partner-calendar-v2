@@ -3,8 +3,8 @@
 Current approved contact email:
 
 ```env
-PUBLIC_CONTACT_EMAIL=ab-event.pro@yandex.ru
-NEXT_PUBLIC_CONTACT_EMAIL=ab-event.pro@yandex.ru
+PUBLIC_CONTACT_EMAIL=info-event@a-b.ru
+NEXT_PUBLIC_CONTACT_EMAIL=info-event@a-b.ru
 ```
 
 Use this email in:
@@ -17,8 +17,8 @@ Use this email in:
 
 Frontend behavior for visible email links:
 
-1. On click, copy `ab-event.pro@yandex.ru` to clipboard via Clipboard API.
-2. Open the user's mail client with `mailto:ab-event.pro@yandex.ru`.
+1. On click, copy `info-event@a-b.ru` to clipboard via Clipboard API.
+2. Open the user's mail client with `mailto:info-event@a-b.ru`.
 3. Show a toast: `Email скопирован`.
 4. If clipboard access is blocked, still open `mailto:` and show fallback toast: `Откройте почту или скопируйте адрес вручную`.
 5. The element must be keyboard-accessible and have a clear `aria-label`.
