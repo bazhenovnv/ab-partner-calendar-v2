@@ -136,3 +136,10 @@ export interface LegalDocVersion {
   createdBy: string | null;
   createdAt: string;
 }
+
+// ── SiteConfig settings ────────────────────────────────────────────────────
+
+export interface SiteConfigRow {
+  key: string;
+  value: unknown;
+}
