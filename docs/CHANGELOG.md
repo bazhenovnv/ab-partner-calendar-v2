@@ -1,5 +1,23 @@
 # Project Changelog
 
+## Stage 6 — Admin UI for broadcasts
+
+- New frontend admin section at `/admin`:
+  - **`/admin/login`** — JWT login form (POST `/auth/login`, stores token in localStorage).
+  - **`/admin/broadcasts`** — paginated list with status badges, channel, dates; cancel/delete inline actions.
+  - **`/admin/broadcasts/new`** — create draft broadcast (POST `/broadcasts`).
+  - **`/admin/broadcasts/[id]`** — detail page with:
+    - Stats bar: total / pending / sent / failed / skipped.
+    - Toolbar: test-send (adminChatId input), Schedule (blocked by BR-022 if no testSentAt), Cancel, Delete.
+    - Warning banner if test-send not yet performed (BR-022).
+    - Edit form for DRAFT broadcasts; read-only view for other statuses.
+    - Recipients tab with paginated table (channel, username, externalId, status, reason, sentAt).
+    - Logs tab with colour-coded level entries.
+- Shared components: `StatusBadge`, `fmtDate`, `fmtDateTime` (`BroadcastsShared.tsx`);
+  reusable `BroadcastForm` with fields title, messageText, channel, imageUrl, buttonText/URL, scheduledAt.
+- Admin CSS design tokens appended to `globals.css` (`.adm-*` classes).
+- API client `apps/frontend/src/lib/admin-api.ts` with JWT Bearer auth from localStorage.
+
 ## Stage 5 — Broadcasts backend foundation
 
 - `BroadcastsModule` added to backend (`apps/backend/src/modules/broadcasts/`):
