@@ -109,6 +109,12 @@ async function main() {
     });
   }
 
+  await prisma.siteConfig.upsert({
+    where: { key: 'bot.phoneRequired' },
+    update: {},
+    create: { key: 'bot.phoneRequired', value: false },
+  });
+
   const cookieConfig: { key: string; value: unknown }[] = [
     { key: 'cookie.noticeEnabled', value: true },
     {
