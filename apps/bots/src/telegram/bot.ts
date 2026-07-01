@@ -2,8 +2,8 @@ import { Bot } from 'grammy';
 import { SITE_URL } from '@ab-afisha/shared';
 
 const MSK_OFFSET_MS = 3 * 60 * 60_000;
+const BACKEND_URL = process.env.BACKEND_URL ?? 'http://backend:3001';
 
-// Parse "ДД.ММ.ГГГГ ЧЧ:ММ" MSK input → UTC Date
 function parseMskDateInput(text: string): Date | null {
   const t = text.trim();
   let match = /^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{1,2}):(\d{2})$/.exec(t);
@@ -34,8 +34,26 @@ function formatMsk(date: Date): string {
   }).format(date);
 }
 
-// userId → eventId currently awaiting reminder time input
-const awaitingReminderTime = new Map<number, string>();
+async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<boolean> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/reminders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        botUserId,
+        eventId,
+        remindAt: remindAt.toISOString(),
+        timezone: 'Europe/Moscow',
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// Telegram userId → { eventId, botUserId } while awaiting time input
+const awaitingReminderTime = new Map<number, { eventId: string; botUserId: string }>();
 
 export function startTelegramBot(token: string) {
   const bot = new Bot(token);
@@ -43,8 +61,10 @@ export function startTelegramBot(token: string) {
   bot.command('start', async (ctx) => {
     const payload = ctx.match?.trim();
     if (payload?.startsWith('remind_')) {
-      const eventId = payload.replace('remind_', '');
-      awaitingReminderTime.set(ctx.from!.id, eventId);
+      const parts = payload.replace('remind_', '').split('_');
+      const eventId = parts[0];
+      const botUserId = parts[1] ?? String(ctx.from!.id);
+      awaitingReminderTime.set(ctx.from!.id, { eventId, botUserId });
       await ctx.reply(
         `Введите дату и время напоминания по московскому времени (UTC+3) в формате:\n\n<b>ДД.ММ.ГГГГ ЧЧ:ММ</b>\n\nПример: <b>15.07.2025 09:00</b>\n\nНапоминание должно быть раньше начала мероприятия.`,
         { parse_mode: 'HTML' },
@@ -65,9 +85,8 @@ export function startTelegramBot(token: string) {
 
   bot.on('message:text', async (ctx) => {
     const userId = ctx.from.id;
-    const eventId = awaitingReminderTime.get(userId);
-
-    if (!eventId) return;
+    const state = awaitingReminderTime.get(userId);
+    if (!state) return;
 
     const remindAt = parseMskDateInput(ctx.message.text);
     if (!remindAt) {
@@ -84,10 +103,18 @@ export function startTelegramBot(token: string) {
     }
 
     awaitingReminderTime.delete(userId);
-    await ctx.reply(
-      `Готово! Напоминание установлено на <b>${formatMsk(remindAt)}</b> МСК.\n\nМы напомним вам об этом мероприятии.`,
-      { parse_mode: 'HTML' },
-    );
+    const saved = await saveReminder(state.botUserId, state.eventId, remindAt);
+
+    if (saved) {
+      await ctx.reply(
+        `Готово! Напоминание установлено на <b>${formatMsk(remindAt)}</b> МСК.\n\nМы напомним вам об этом мероприятии.`,
+        { parse_mode: 'HTML' },
+      );
+    } else {
+      await ctx.reply(
+        `Не удалось сохранить напоминание. Пожалуйста, попробуйте позже или обратитесь на сайт ${SITE_URL}`,
+      );
+    }
   });
 
   bot.catch((err) => { console.error('[telegram-bot] Error:', err); });

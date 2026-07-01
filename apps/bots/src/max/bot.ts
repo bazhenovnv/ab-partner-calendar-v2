@@ -1,6 +1,7 @@
 import { SITE_URL } from '@ab-afisha/shared';
 
 const MSK_OFFSET_MS = 3 * 60 * 60_000;
+const BACKEND_URL = process.env.BACKEND_URL ?? 'http://backend:3001';
 
 function parseMskDateInput(text: string): Date | null {
   const t = text.trim();
@@ -32,8 +33,26 @@ function formatMsk(date: Date): string {
   }).format(date);
 }
 
-// userId → eventId currently awaiting reminder time input
-const awaitingReminderTime = new Map<string, string>();
+async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<boolean> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/reminders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        botUserId,
+        eventId,
+        remindAt: remindAt.toISOString(),
+        timezone: 'Europe/Moscow',
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// chatId → { eventId, botUserId } while awaiting time input
+const awaitingReminderTime = new Map<string, { eventId: string; botUserId: string }>();
 
 export function startMaxBot(token: string) {
   console.log('[max-bot] MAX bot initialised (HTTP polling mode)');
@@ -72,8 +91,10 @@ async function handleMaxUpdate(token: string, update: any) {
   if (text.startsWith('/start')) {
     const payload = text.replace('/start', '').trim();
     if (payload.startsWith('remind_')) {
-      const eventId = payload.replace('remind_', '');
-      awaitingReminderTime.set(chatId, eventId);
+      const parts = payload.replace('remind_', '').split('_');
+      const eventId = parts[0];
+      const botUserId = parts[1] ?? chatId;
+      awaitingReminderTime.set(chatId, { eventId, botUserId });
       await sendMaxMessage(token, chatId,
         'Введите дату и время напоминания по московскому времени (UTC+3) в формате:\n\nДД.ММ.ГГГГ ЧЧ:ММ\n\nПример: 15.07.2025 09:00\n\nНапоминание должно быть раньше начала мероприятия.',
       );
@@ -86,8 +107,8 @@ async function handleMaxUpdate(token: string, update: any) {
     return;
   }
 
-  const eventId = awaitingReminderTime.get(chatId);
-  if (eventId) {
+  const state = awaitingReminderTime.get(chatId);
+  if (state) {
     const remindAt = parseMskDateInput(text);
     if (!remindAt) {
       await sendMaxMessage(token, chatId, 'Не удалось распознать дату. Введите в формате ДД.ММ.ГГГГ ЧЧ:ММ, например: 15.07.2025 09:00');
@@ -98,7 +119,12 @@ async function handleMaxUpdate(token: string, update: any) {
       return;
     }
     awaitingReminderTime.delete(chatId);
-    await sendMaxMessage(token, chatId, `Готово! Напоминание установлено на ${formatMsk(remindAt)} МСК.\n\nМы напомним вам об этом мероприятии.`);
+    const saved = await saveReminder(state.botUserId, state.eventId, remindAt);
+    if (saved) {
+      await sendMaxMessage(token, chatId, `Готово! Напоминание установлено на ${formatMsk(remindAt)} МСК.\n\nМы напомним вам об этом мероприятии.`);
+    } else {
+      await sendMaxMessage(token, chatId, `Не удалось сохранить напоминание. Пожалуйста, попробуйте позже или обратитесь на сайт ${SITE_URL}`);
+    }
   }
 }
 
