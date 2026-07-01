@@ -13,6 +13,10 @@ export const SETTINGS_KEYS = [
   'broadcast.maxRatePerSecond',
   'broadcast.maxRecipients',
   'broadcast.allowSimultaneous',
+  'maintenance.enabled',
+  'maintenance.title',
+  'maintenance.description',
+  'maintenance.imageUrl',
 ] as const;
 
 export type SettingsKey = (typeof SETTINGS_KEYS)[number];
@@ -45,6 +49,19 @@ export class AdminService {
       where: { key: { in: SETTINGS_KEYS as unknown as string[] } },
       orderBy: { key: 'asc' },
     });
+  }
+
+  async getSiteStatus(): Promise<{ maintenanceEnabled: boolean; title: string; description: string; imageUrl: string }> {
+    const rows = await this.prisma.siteConfig.findMany({
+      where: { key: { in: ['maintenance.enabled', 'maintenance.title', 'maintenance.description', 'maintenance.imageUrl'] } },
+    });
+    const map = Object.fromEntries(rows.map((r: { key: string; value: unknown }) => [r.key, r.value]));
+    return {
+      maintenanceEnabled: map['maintenance.enabled'] === true,
+      title: typeof map['maintenance.title'] === 'string' ? (map['maintenance.title'] as string) : 'Технические работы',
+      description: typeof map['maintenance.description'] === 'string' ? (map['maintenance.description'] as string) : '',
+      imageUrl: typeof map['maintenance.imageUrl'] === 'string' ? (map['maintenance.imageUrl'] as string) : '',
+    };
   }
 
   async updateSetting(key: string, value: unknown): Promise<SiteConfigRow> {

@@ -69,9 +69,33 @@ const SETTINGS_META: Record<string, SettingMeta> = {
     type: 'boolean',
     group: 'Рассылки',
   },
+  'maintenance.enabled': {
+    label: 'Режим техобслуживания',
+    description: 'Если включено, публичный сайт показывает страницу технических работ. Админка остаётся доступной.',
+    type: 'boolean',
+    group: 'Техобслуживание',
+  },
+  'maintenance.title': {
+    label: 'Заголовок',
+    description: 'Заголовок страницы техобслуживания.',
+    type: 'text',
+    group: 'Техобслуживание',
+  },
+  'maintenance.description': {
+    label: 'Описание',
+    description: 'Текст под заголовком страницы техобслуживания.',
+    type: 'text',
+    group: 'Техобслуживание',
+  },
+  'maintenance.imageUrl': {
+    label: 'URL изображения',
+    description: 'Необязательное изображение на странице техобслуживания (абсолютный URL).',
+    type: 'text',
+    group: 'Техобслуживание',
+  },
 };
 
-const GROUP_ORDER = ['Бот', 'Cookie', 'Рассылки'];
+const GROUP_ORDER = ['Бот', 'Cookie', 'Рассылки', 'Техобслуживание'];
 
 // ── helpers ────────────────────────────────────────────────────────────────
 

@@ -400,3 +400,9 @@ body {
 .adm-input--num { width: 100px; }
 .adm-select--sm { padding: .3rem .5rem; font-size: .875rem; border: 1px solid #d1d5db; border-radius: 6px; }
 .adm-textarea--sm { width: 100%; font-size: .8rem; padding: .4rem .5rem; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; }
+
+/* Maintenance page */
+.maint-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; padding: 2rem; text-align: center; background: #f9fafb; }
+.maint-image { max-width: 320px; width: 100%; border-radius: 12px; }
+.maint-title { font-size: 1.75rem; font-weight: 700; color: #1f2937; margin: 0; }
+.maint-description { font-size: 1rem; color: #6b7280; max-width: 480px; margin: 0; line-height: 1.6; }
