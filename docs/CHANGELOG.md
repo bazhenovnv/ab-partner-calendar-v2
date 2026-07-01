@@ -1,5 +1,27 @@
 # Project Changelog
 
+## Stage 5 — Broadcasts backend foundation
+
+- `BroadcastsModule` added to backend (`apps/backend/src/modules/broadcasts/`):
+  - **CRUD**: `POST /broadcasts`, `GET /broadcasts`, `GET /broadcasts/:id`,
+    `PATCH /broadcasts/:id`, `DELETE /broadcasts/:id` — ADMIN JWT.
+  - **Lifecycle**: `POST /broadcasts/:id/test-send` (admin preview via Telegram),
+    `POST /broadcasts/:id/schedule` (enqueue to Bull), `POST /broadcasts/:id/cancel`.
+  - **Analytics**: `GET /broadcasts/:id/recipients`, `GET /broadcasts/:id/logs`.
+  - **Unsubscribe**: `POST /broadcasts/unsubscribe` — bot-authenticated (X-Bot-Internal-Token);
+    sets `BotUser.allowMarketingMessages = false` (BR-025). Service reminders unaffected (BR-026).
+- **Bull queue** `broadcast` with processor `BroadcastProcessor`:
+  - Builds `BroadcastRecipient` rows from eligible users (`allowMarketingMessages=true`,
+    `legalAcceptedAt` not null, channel filter).
+  - Applies 24 h cooldown per user before sending (BR-023, configurable via SiteConfig).
+  - Rate limiting: Telegram 20 msg/s, MAX 10 msg/s (configurable, BR-024).
+  - Sends directly via Telegram Bot API / MAX API from backend.
+  - Updates recipient statuses (SENT / FAILED / SKIPPED) and writes BroadcastLog.
+  - On completion: starts next QUEUED broadcast (BR-021).
+- Test send required before scheduling (BR-022).
+- `/unsubscribe` command added to Telegram and MAX bots — calls `POST /broadcasts/unsubscribe`.
+- No frontend admin UI on this stage.
+
 ## Stage 4 — Bot first-start legal notice + phone flow
 
 - Telegram bot (`apps/bots/src/telegram/bot.ts`):

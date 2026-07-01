@@ -394,6 +394,24 @@ export function startTelegramBot(token: string) {
     }
   });
 
+  bot.command('unsubscribe', async (ctx) => {
+    const externalId = String(ctx.from!.id);
+    try {
+      const res = await fetch(`${API_BASE}/broadcasts/unsubscribe`, {
+        method: 'POST',
+        headers: BOT_HEADERS,
+        body: JSON.stringify({ channel: 'TELEGRAM', externalId }),
+      });
+      if (res.ok) {
+        await ctx.reply('Вы отписались от информационных рассылок. Напоминания о мероприятиях продолжат приходить в обычном режиме.');
+      } else {
+        await ctx.reply('Не удалось обработать запрос. Попробуйте позже.');
+      }
+    } catch {
+      await ctx.reply('Ошибка соединения. Попробуйте позже.');
+    }
+  });
+
   bot.catch((err) => { console.error('[telegram-bot] Error:', err); });
   bot.start();
 }
