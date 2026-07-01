@@ -6,6 +6,10 @@ export type ImportSource = 'MAX' | 'API' | 'MANUAL';
 export type BotChannel = 'TELEGRAM' | 'MAX';
 export type UserRole = 'ADMIN' | 'EDITOR';
 export type ReminderStatus = 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED';
+export type LegalDocType = 'PRIVACY_POLICY' | 'USER_AGREEMENT' | 'PERSONAL_DATA_CONSENT' | 'COOKIE_POLICY' | 'BROADCAST_CONSENT';
+export type BroadcastStatus = 'DRAFT' | 'SCHEDULED' | 'QUEUED' | 'SENDING' | 'PAUSED' | 'SENT' | 'FAILED' | 'CANCELLED';
+export type BroadcastChannel = 'TELEGRAM' | 'MAX' | 'ALL';
+export type BroadcastRecipientStatus = 'PENDING' | 'SENT' | 'DELIVERED' | 'FAILED' | 'SKIPPED';
 
 export interface ReminderItem {
   id: string;

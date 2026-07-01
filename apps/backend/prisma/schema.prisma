@@ -59,6 +59,33 @@ enum LegalDocType {
   PRIVACY_POLICY
   USER_AGREEMENT
   PERSONAL_DATA_CONSENT
+  COOKIE_POLICY
+  BROADCAST_CONSENT
+}
+
+enum BroadcastStatus {
+  DRAFT
+  SCHEDULED
+  QUEUED
+  SENDING
+  PAUSED
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum BroadcastChannel {
+  TELEGRAM
+  MAX
+  ALL
+}
+
+enum BroadcastRecipientStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  SKIPPED
 }
 
 model User {
@@ -232,16 +259,23 @@ model FooterProject {
 }
 
 model BotUser {
-  id             String     @id @default(uuid())
-  channel        BotChannel
-  externalId     String
-  username       String?
-  firstName      String?
-  lastActivityAt DateTime   @default(now())
-  subscribedAt   DateTime   @default(now())
-  createdAt      DateTime   @default(now())
+  id                          String     @id @default(uuid())
+  channel                     BotChannel
+  externalId                  String
+  username                    String?
+  firstName                   String?
+  phone                       String?
+  phoneVerifiedAt             DateTime?
+  allowMarketingMessages      Boolean    @default(true)
+  allowServiceNotifications   Boolean    @default(true)
+  legalAcceptedAt             DateTime?
+  broadcastConsentAcceptedAt  DateTime?
+  lastActivityAt              DateTime   @default(now())
+  subscribedAt                DateTime   @default(now())
+  createdAt                   DateTime   @default(now())
 
-  reminders      Reminder[]
+  reminders            Reminder[]
+  broadcastRecipients  BroadcastRecipient[]
 
   @@unique([channel, externalId])
 }
@@ -366,14 +400,70 @@ model LegalDoc {
 }
 
 model LegalDocVersion {
-  id        String   @id @default(uuid())
-  docId     String
-  doc       LegalDoc @relation(fields: [docId], references: [id])
-  content   String
-  createdAt DateTime @default(now())
-  createdBy String?
+  id          String    @id @default(uuid())
+  docId       String
+  doc         LegalDoc  @relation(fields: [docId], references: [id])
+  content     String
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  createdBy   String?
 
   @@index([docId])
+}
+
+model Broadcast {
+  id             String            @id @default(uuid())
+  title          String
+  messageText    String
+  imageUrl       String?
+  buttonText     String?
+  buttonUrl      String?
+  channel        BroadcastChannel  @default(ALL)
+  audienceFilter Json              @default("{}")
+  status         BroadcastStatus   @default(DRAFT)
+  scheduledAt    DateTime?
+  testSentAt     DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  recipients  BroadcastRecipient[]
+  logs        BroadcastLog[]
+
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model BroadcastRecipient {
+  id           String                   @id @default(uuid())
+  broadcastId  String
+  broadcast    Broadcast                @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  botUserId    String
+  botUser      BotUser                  @relation(fields: [botUserId], references: [id], onDelete: Cascade)
+  channel      BotChannel
+  status       BroadcastRecipientStatus @default(PENDING)
+  sentAt       DateTime?
+  failedAt     DateTime?
+  failReason   String?
+  skippedReason String?
+  createdAt    DateTime                 @default(now())
+
+  @@index([broadcastId])
+  @@index([botUserId])
+}
+
+model BroadcastLog {
+  id          String    @id @default(uuid())
+  broadcastId String
+  broadcast   Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  level       String    @default("info")
+  message     String
+  payload     Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([broadcastId])
+  @@index([createdAt])
 }
 
 model AdminNotification {

@@ -148,7 +148,7 @@ export class EventsService {
 
     // Fallback to completed if no active main events
     const activeCount = events.filter(
-      (e) => e.autoStatus === 'PLANNED' || e.autoStatus === 'LIVE',
+      (e: { autoStatus: string }) => e.autoStatus === 'PLANNED' || e.autoStatus === 'LIVE',
     ).length;
 
     if (activeCount === 0) {
