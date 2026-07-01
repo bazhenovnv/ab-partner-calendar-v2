@@ -2,6 +2,9 @@ import { SITE_URL } from '@ab-afisha/shared';
 
 const MSK_OFFSET_MS = 3 * 60 * 60_000;
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://backend:3001';
+const API_BASE = `${BACKEND_URL}/api`;
+const BOT_TOKEN = process.env.BOT_INTERNAL_TOKEN ?? '';
+const BOT_HEADERS = { 'Content-Type': 'application/json', 'X-Bot-Internal-Token': BOT_TOKEN };
 const MAX_API = 'https://api.max.ru/v1';
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -48,9 +51,9 @@ interface BotUserSnapshot {
 
 async function apiBotUpsert(externalId: string, username?: string | null): Promise<BotUserSnapshot | null> {
   try {
-    const res = await fetch(`${BACKEND_URL}/bots/users/upsert`, {
+    const res = await fetch(`${API_BASE}/bots/users/upsert`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: BOT_HEADERS,
       body: JSON.stringify({ channel: 'MAX', externalId, username }),
     });
     return res.ok ? (res.json() as Promise<BotUserSnapshot>) : null;
@@ -61,9 +64,9 @@ async function apiBotUpsert(externalId: string, username?: string | null): Promi
 
 async function apiAcceptLegal(id: string, acceptBroadcastConsent: boolean): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/bots/users/${id}/accept-legal`, {
+    const res = await fetch(`${API_BASE}/bots/users/${id}/accept-legal`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: BOT_HEADERS,
       body: JSON.stringify({ acceptBroadcastConsent }),
     });
     return res.ok;
@@ -74,9 +77,9 @@ async function apiAcceptLegal(id: string, acceptBroadcastConsent: boolean): Prom
 
 async function apiSavePhone(id: string, phone: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/bots/users/${id}/phone`, {
+    const res = await fetch(`${API_BASE}/bots/users/${id}/phone`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: BOT_HEADERS,
       body: JSON.stringify({ phone }),
     });
     return res.ok;
@@ -87,7 +90,7 @@ async function apiSavePhone(id: string, phone: string): Promise<boolean> {
 
 async function apiPhoneRequired(): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/bots/config`);
+    const res = await fetch(`${API_BASE}/bots/config`);
     if (!res.ok) return false;
     const data = await res.json() as { phoneRequired: boolean };
     return data.phoneRequired === true;
@@ -100,9 +103,9 @@ type SaveResult = { ok: true } | { ok: false; duplicate: true } | { ok: false; d
 
 async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<SaveResult> {
   try {
-    const res = await fetch(`${BACKEND_URL}/reminders`, {
+    const res = await fetch(`${API_BASE}/reminders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: BOT_HEADERS,
       body: JSON.stringify({
         botUserId,
         eventId,
