@@ -26,3 +26,9 @@ Legal document content is stored in the database (LegalDocument model) to allow 
 
 ## ADR-009: Marketing unsubscribe is separate from personal data withdrawal
 `allowMarketingMessages = false` disables informational broadcasts only. Full personal data consent withdrawal is a separate legal process and is not handled by the bot unsubscribe action.
+
+## ADR-010: BOT_INTERNAL_TOKEN for internal API security
+Bot services (`apps/bots`) communicate with backend via internal API endpoints that must not be publicly accessible. A shared secret `BOT_INTERNAL_TOKEN` is passed as the `X-Bot-Internal-Token` HTTP header on all bot→backend write calls. Backend validates the header on: `POST /bots/users/*`, `POST /broadcasts/unsubscribe`, `POST /reminders`, `PATCH /reminders/:id/cancel`. If the token is not configured in the backend, it logs an error and returns HTTP 403 to prevent silent data writes. The token must be at least 32 characters and generated per-environment (never shared between prod/staging). It is documented in all `.env.example` files.
+
+## ADR-011: Broadcast recipient eligibility requires explicit broadcast consent
+To receive a mass broadcast, a BotUser must have `broadcastConsentAcceptedAt IS NOT NULL` in addition to `allowMarketingMessages=true` and `legalAcceptedAt IS NOT NULL`. This consent is recorded when the user accepts the legal notice with marketing enabled. This ensures no user receives marketing messages without having seen and accepted the broadcast consent document.

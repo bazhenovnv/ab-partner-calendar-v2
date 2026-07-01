@@ -1,5 +1,16 @@
 # Project Changelog
 
+## Stage 7 — Critical production fixes
+
+- **[BR-022 / race condition fix]** `enqueue()` now checks for active broadcasts across all three statuses: `SCHEDULED`, `QUEUED`, `SENDING` (previously only `QUEUED` + `SENDING`). Prevents two broadcasts starting simultaneously.
+- **[BR-022 / allowSimultaneous]** `enqueue()` reads `broadcast.allowSimultaneous` from SiteConfig (default `false`). When `true`, the simultaneous-send check is skipped.
+- **[BR-031 / broadcastConsentAcceptedAt]** `buildRecipients()` now requires `broadcastConsentAcceptedAt IS NOT NULL` in addition to `allowMarketingMessages=true` and `legalAcceptedAt IS NOT NULL`.
+- **[BR-032 / maxRecipients]** `buildRecipients()` reads `broadcast.maxRecipients` from SiteConfig (default `0` = unlimited). When non-zero, limits recipients per broadcast.
+- **[BR-033 / reminders security]** `POST /reminders` and `PATCH /reminders/:id/cancel` now require `X-Bot-Internal-Token` header (same pattern as `POST /bots/users/*`). Both Telegram and MAX bots already send this header.
+- **[ENV]** Added `BOT_INTERNAL_TOKEN` to root `.env.example` (was already in `apps/backend/.env.example` and `apps/bots/.env.example`).
+- **[Hashtags / BR-017]** Added missing hashtag→direction mappings: `#АУСН`, `#ПСН`, `#ОСНО`, `#НПД`, `#ЕСХН` → `['sno', 'taxes']`.
+- **[Docs]** BUSINESS_RULES.md: updated BR-022, added BR-031, BR-032, BR-033. ADR.md: added ADR-010 (BOT_INTERNAL_TOKEN), ADR-011 (broadcast consent).
+
 ## Stage 6 — Admin UI for broadcasts
 
 - New frontend admin section at `/admin`:
