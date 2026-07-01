@@ -48,6 +48,7 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
       ADMIN_TELEGRAM_CHAT_ID: ${ADMIN_TELEGRAM_CHAT_ID:-}
+      BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN:-dev_bot_token_change_me}
     ports:
       - "3001:3001"
     depends_on:
@@ -94,6 +95,7 @@ services:
       DATABASE_URL: postgresql://ab_afisha:${POSTGRES_PASSWORD:-dev_password_change_me}@postgres:5432/ab_afisha
       REDIS_URL: redis://redis:6379
       ADMIN_TELEGRAM_CHAT_ID: ${ADMIN_TELEGRAM_CHAT_ID:-}
+      BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN:-dev_bot_token_change_me}
     depends_on:
       backend:
         condition: service_healthy

@@ -13,10 +13,13 @@ async function bootstrap() {
   const isProduction = config.get('NODE_ENV') === 'production';
 
   app.use(helmet());
+  const productionOrigins = [
+    'https://ab-event.pro',
+    'https://www.ab-event.pro',
+    'https://test.ab-event.pro',
+  ];
   app.enableCors({
-    origin: isProduction
-      ? [config.get('NEXT_PUBLIC_SITE_URL', 'https://ab-event.pro')]
-      : ['http://localhost:3000'],
+    origin: isProduction ? productionOrigins : ['http://localhost:3000'],
     credentials: true,
   });
 
