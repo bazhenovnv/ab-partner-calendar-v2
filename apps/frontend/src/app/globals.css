@@ -373,3 +373,14 @@ body {
 
 /* Pagination */
 .adm-pagination { display: flex; align-items: center; gap: .75rem; margin-top: 1rem; }
+
+/* Legal admin */
+.adm-textarea--legal { font-family: 'Courier New', Courier, monospace; font-size: .8rem; min-height: 480px; }
+.adm-legal-warning { background: #fffbeb; border: 1px solid #f59e0b; border-radius: 6px; padding: .75rem 1rem; margin-bottom: 1.25rem; font-size: .875rem; color: #92400e; }
+.adm-legal-preview { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2rem; max-width: 800px; }
+.adm-legal-preview__title { font-size: 1.25rem; font-weight: 700; color: var(--color-primary); margin-bottom: 1.5rem; }
+.adm-legal-preview__body { font-size: .9rem; line-height: 1.7; color: #333; }
+.adm-legal-preview__body h1,.adm-legal-preview__body h2,.adm-legal-preview__body h3 { color: var(--color-primary); margin: 1.25rem 0 .5rem; }
+.adm-legal-preview__body p { margin: .5rem 0; }
+.adm-legal-preview__body ul,.adm-legal-preview__body ol { padding-left: 1.5rem; margin: .5rem 0; }
+.adm-legal-preview__body a { color: var(--color-mint); }

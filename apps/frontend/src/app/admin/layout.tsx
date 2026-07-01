@@ -41,6 +41,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             Рассылки
           </Link>
+          <Link
+            href="/admin/legal"
+            className={`adm-sidebar__link${pathname.startsWith('/admin/legal') ? ' adm-sidebar__link--active' : ''}`}
+          >
+            Документы
+          </Link>
         </nav>
         <button className="adm-sidebar__logout" onClick={logout} type="button">
           Выйти

@@ -107,3 +107,32 @@ export interface Paginated<T> {
   page: number;
   limit: number;
 }
+
+// ── Legal docs ─────────────────────────────────────────────────────────────
+
+export type LegalDocType =
+  | 'PRIVACY_POLICY'
+  | 'USER_AGREEMENT'
+  | 'PERSONAL_DATA_CONSENT'
+  | 'COOKIE_POLICY'
+  | 'BROADCAST_CONSENT';
+
+export interface LegalDoc {
+  id: string;
+  type: LegalDocType;
+  title: string;
+  content: string;
+  isDraft: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LegalDocVersion {
+  id: string;
+  docId: string;
+  content: string;
+  publishedAt: string;
+  createdBy: string | null;
+  createdAt: string;
+}

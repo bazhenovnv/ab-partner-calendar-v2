@@ -1,5 +1,19 @@
 # Project Changelog
 
+## Stage 8 — Admin UI for Legal Documents
+
+- New admin section `/admin/legal`:
+  - **List page** — таблица 5 документов: название, статус (черновик/опубликован), дата публикации, ссылка на публичную страницу.
+  - **Detail/edit page** `/admin/legal/[type]` с тремя вкладками:
+    - **Редактор** — поля «Заголовок» и «Содержимое (HTML)»; кнопки «Сохранить черновик» (`PATCH /legal/admin/:type`) и «Опубликовать версию» (`POST /legal/admin/:type/publish`).
+    - **История версий** — таблица всех опубликованных версий с датами и автором; кнопка «Восстановить» загружает содержимое версии в редактор.
+    - **Предпросмотр** — рендер HTML-содержимого редактора.
+  - Предупреждение в редакторе: не изменять тексты без официального архива от юриста.
+- `admin/layout.tsx` — добавлена ссылка «Документы» в sidebar.
+- `lib/admin-api.ts` — добавлены типы `LegalDoc`, `LegalDocVersion`, `LegalDocType`.
+- `globals.css` — добавлены стили `.adm-textarea--legal`, `.adm-legal-warning`, `.adm-legal-preview`.
+- Placeholder-тексты документов **не изменены** (ждём официальный DOCX/PDF архив).
+
 ## Stage 7 — Critical production fixes
 
 - **[BR-022 / race condition fix]** `enqueue()` now checks for active broadcasts across all three statuses: `SCHEDULED`, `QUEUED`, `SENDING` (previously only `QUEUED` + `SENDING`). Prevents two broadcasts starting simultaneously.
