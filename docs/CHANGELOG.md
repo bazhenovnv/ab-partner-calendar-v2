@@ -1,5 +1,18 @@
 # Project Changelog
 
+## Stage 3 — Cookie Banner
+
+- Frontend `CookieBanner` client component (`src/components/CookieBanner.tsx`):
+  - Shows on first visit; hidden after user clicks «Понятно».
+  - State persisted in `localStorage` (`cookie_notice_accepted`).
+  - Links to `/legal/privacy` and `/legal/cookies`.
+  - Desktop: compact fixed bottom bar; mobile 390px: full-width stacked layout with safe-area padding.
+  - Keyboard accessible (`focus-visible` outline on button).
+  - Yandex.Метрика remains active — banner is informational only (BR-016, ADR-006).
+- Backend seed: added `cookie.noticeEnabled`, `cookie.noticeText`, `cookie.buttonText` SiteConfig defaults.
+- CSS for banner added to `globals.css`.
+- `CookieBanner` rendered in root `layout.tsx`.
+
 ## Stage 2 — Legal module + public legal pages
 
 - Backend `LegalModule` fully implemented:

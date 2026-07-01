@@ -109,6 +109,24 @@ async function main() {
     });
   }
 
+  const cookieConfig: { key: string; value: unknown }[] = [
+    { key: 'cookie.noticeEnabled', value: true },
+    {
+      key: 'cookie.noticeText',
+      value:
+        'Мы используем cookie и аналитику, чтобы сайт работал корректно, а также для анализа посещаемости, улучшения сервиса и диагностики ошибок. Продолжая пользоваться сайтом, вы соглашаетесь с обработкой данных в соответствии с Политикой конфиденциальности.',
+    },
+    { key: 'cookie.buttonText', value: 'Понятно' },
+  ];
+
+  for (const cfg of cookieConfig) {
+    await prisma.siteConfig.upsert({
+      where: { key: cfg.key },
+      update: {},
+      create: { key: cfg.key, value: cfg.value as any },
+    });
+  }
+
   const broadcastConfig: { key: string; value: unknown }[] = [
     { key: 'broadcast.enabled', value: false },
     { key: 'broadcast.telegramRatePerSecond', value: 20 },
