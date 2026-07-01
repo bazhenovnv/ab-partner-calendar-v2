@@ -22,6 +22,20 @@ export interface SiteConfigRow {
   value: unknown;
 }
 
+function toInputJsonValue(value: unknown): Prisma.InputJsonValue {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  ) {
+    return value;
+  }
+  return value as Prisma.InputJsonValue;
+}
+
 @Injectable()
 export class AdminService {
   constructor(private readonly prisma: PrismaService) {}
@@ -36,8 +50,6 @@ export class AdminService {
   async updateSetting(key: string, value: unknown): Promise<SiteConfigRow> {
     const existing = await this.prisma.siteConfig.findUnique({ where: { key } });
     if (!existing) throw new NotFoundException(`SiteConfig key not found: ${key}`);
-    const jsonValue: Prisma.InputJsonValue =
-      value === null ? Prisma.JsonNull : (value as Prisma.InputJsonValue);
-    return this.prisma.siteConfig.update({ where: { key }, data: { value: jsonValue } });
+    return this.prisma.siteConfig.update({ where: { key }, data: { value: toInputJsonValue(value) } });
   }
 }
