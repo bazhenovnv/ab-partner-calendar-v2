@@ -66,7 +66,7 @@ Dropdown chevron indicates only open/closed state: closed down, open rotated up.
 Service reminders always have higher priority than mass broadcasts. Mass broadcasts must never delay service reminders.
 
 ## BR-022: One active broadcast
-Only one mass broadcast can be actively sending at a time. If another broadcast is already sending, the next one receives status `QUEUED`.
+Only one mass broadcast can be actively sending at a time. Broadcasts in status `SCHEDULED`, `QUEUED`, or `SENDING` all count as active. If any of these exist, the next broadcast receives status `QUEUED`. This behaviour can be overridden via SiteConfig key `broadcast.allowSimultaneous=true`.
 
 ## BR-023: Broadcast cooldown
 Default: no more than 1 mass broadcast per user in 24 hours. Admin can change cooldown (6, 12, 24, 48, 72 hours or custom). Admin can disable cooldown intentionally. Service reminders do not count toward this cooldown.
@@ -91,3 +91,17 @@ On first start, bots must show legal notice referencing Privacy Policy, User Agr
 
 ## BR-030: Legal documents versioning
 Admin can publish new versions of legal documents. Each version stores publication date. Previous versions are kept for history.
+
+## BR-031: Broadcast recipient eligibility
+A BotUser is eligible to receive a mass broadcast only if all three conditions are met:
+1. `allowMarketingMessages = true`
+2. `legalAcceptedAt IS NOT NULL`
+3. `broadcastConsentAcceptedAt IS NOT NULL`
+
+These fields are set together when the user accepts the legal notice in the bot. `broadcastConsentAcceptedAt` is set only when the user accepted legal with marketing messages enabled.
+
+## BR-032: Broadcast recipient limit
+SiteConfig key `broadcast.maxRecipients` (default: 0 = unlimited) caps the number of recipients per broadcast. When non-zero, only the first N eligible users are targeted.
+
+## BR-033: Internal bot API security
+All write endpoints called by bots (`POST /reminders`, `POST /bots/users/*`, `POST /broadcasts/unsubscribe`) must be authenticated via the `X-Bot-Internal-Token` header. The token value is set in `BOT_INTERNAL_TOKEN` environment variable and must match in both backend and bots services. Backend rejects requests with a missing or invalid token with HTTP 403.

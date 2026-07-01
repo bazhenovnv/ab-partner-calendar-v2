@@ -27,6 +27,11 @@ export const DEFAULT_DIRECTIONS = [
 export const HASHTAG_TO_DIRECTIONS: Record<string, string[]> = {
   '#Хит': [],
   '#УСН': ['sno', 'taxes'],
+  '#АУСН': ['sno', 'taxes'],
+  '#ПСН': ['sno', 'taxes'],
+  '#ОСНО': ['sno', 'taxes'],
+  '#НПД': ['sno', 'taxes'],
+  '#ЕСХН': ['sno', 'taxes'],
   '#Налоги': ['taxes'],
   '#НДС': ['nds'],
   '#1С': ['1c'],

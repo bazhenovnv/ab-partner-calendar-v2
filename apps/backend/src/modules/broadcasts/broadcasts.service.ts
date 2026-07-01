@@ -61,6 +61,19 @@ export class BroadcastsService {
     return this.getSiteConfigNumber('broadcast.maxRatePerSecond', 10);
   }
 
+  async getMaxRecipients(): Promise<number> {
+    return this.getSiteConfigNumber('broadcast.maxRecipients', 0);
+  }
+
+  private async getSiteConfigBool(key: string, fallback: boolean): Promise<boolean> {
+    const cfg = await this.prisma.siteConfig.findUnique({ where: { key } });
+    return typeof cfg?.value === 'boolean' ? (cfg.value as boolean) : fallback;
+  }
+
+  async getAllowSimultaneous(): Promise<boolean> {
+    return this.getSiteConfigBool('broadcast.allowSimultaneous', false);
+  }
+
   // ── CRUD ──────────────────────────────────────────────────────────────────
 
   async findAll(page = 1, limit = 20) {
@@ -206,13 +219,16 @@ export class BroadcastsService {
       );
     }
 
-    // Check if another broadcast is currently SENDING (BR-021)
-    const sending = await this.prisma.broadcast.findFirst({
-      where: { status: { in: ['SENDING', 'QUEUED'] as any[] } },
-      orderBy: { createdAt: 'asc' },
-    });
+    // BR-021: only one broadcast active at a time (unless allowSimultaneous=true)
+    const allowSimultaneous = await this.getAllowSimultaneous();
+    const active = allowSimultaneous
+      ? null
+      : await this.prisma.broadcast.findFirst({
+          where: { status: { in: ['SCHEDULED', 'QUEUED', 'SENDING'] as any[] }, id: { not: id } },
+          orderBy: { createdAt: 'asc' },
+        });
 
-    const newStatus = sending ? 'QUEUED' : 'SCHEDULED';
+    const newStatus = active ? 'QUEUED' : 'SCHEDULED';
     await this.prisma.broadcast.update({
       where: { id },
       data: { status: newStatus as any },
@@ -340,13 +356,17 @@ export class BroadcastsService {
 
     const channelFilter = this.buildChannelFilter(broadcast.channel as string);
 
+    const maxRecipients = await this.getMaxRecipients();
+
     const users = await this.prisma.botUser.findMany({
       where: {
         allowMarketingMessages: true,
         legalAcceptedAt: { not: null },
+        broadcastConsentAcceptedAt: { not: null },
         ...channelFilter,
       },
       select: { id: true, channel: true },
+      ...(maxRecipients > 0 ? { take: maxRecipients } : {}),
     });
 
     // Create recipients in bulk (skip existing)
