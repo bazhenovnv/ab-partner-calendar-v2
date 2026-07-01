@@ -384,3 +384,19 @@ body {
 .adm-legal-preview__body p { margin: .5rem 0; }
 .adm-legal-preview__body ul,.adm-legal-preview__body ol { padding-left: 1.5rem; margin: .5rem 0; }
 .adm-legal-preview__body a { color: var(--color-mint); }
+
+/* Settings page */
+.adm-settings-group { margin-top: 2rem; }
+.adm-settings-group__title { font-size: 1rem; font-weight: 700; color: var(--color-primary); margin-bottom: .75rem; padding-bottom: .375rem; border-bottom: 2px solid #e5e7eb; }
+.adm-settings-list { display: flex; flex-direction: column; gap: .75rem; }
+.adm-setting { display: flex; align-items: flex-start; gap: 1.5rem; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem 1.25rem; }
+.adm-setting__info { flex: 1; min-width: 0; }
+.adm-setting__label { display: block; font-weight: 600; font-size: .9rem; color: #1f2937; }
+.adm-setting__desc { display: block; font-size: .8rem; color: #6b7280; margin-top: .2rem; }
+.adm-setting__key { display: block; font-size: .75rem; color: #9ca3af; margin-top: .3rem; }
+.adm-setting__control { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; min-width: 260px; flex-wrap: wrap; }
+.adm-setting__msg { font-size: .8rem; color: #16a34a; }
+.adm-setting__msg--err { color: #dc2626; }
+.adm-input--num { width: 100px; }
+.adm-select--sm { padding: .3rem .5rem; font-size: .875rem; border: 1px solid #d1d5db; border-radius: 6px; }
+.adm-textarea--sm { width: 100%; font-size: .8rem; padding: .4rem .5rem; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; }

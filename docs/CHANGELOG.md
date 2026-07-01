@@ -1,5 +1,33 @@
 # Project Changelog
 
+## Stage 9 — Admin UI for Settings (SiteConfig)
+
+- New backend endpoints in `AdminModule`:
+  - `GET /admin/settings` — возвращает 9 exposed SiteConfig ключей (ADMIN JWT).
+  - `PATCH /admin/settings/:key` — обновляет один ключ; неизвестные ключи отклоняются с 400.
+- New frontend page `/admin/settings`:
+  - Настройки сгруппированы: **Бот**, **Cookie**, **Рассылки**.
+  - Boolean-поля — `<select>` (Включено / Выключено).
+  - Number-поля — `<input type="number">`.
+  - Text-поля — `<textarea>`.
+  - Кнопка «Сохранить» активна только при изменении; inline-сообщение об успехе/ошибке.
+- Sidebar: добавлена ссылка «Настройки».
+- `admin-api.ts`: добавлен тип `SiteConfigRow`.
+- `globals.css`: стили `.adm-settings-*`, `.adm-setting`, `.adm-input--num`, `.adm-select--sm`, `.adm-textarea--sm`.
+
+Exposed settings:
+| Ключ | Тип | Описание |
+|---|---|---|
+| `bot.phoneRequired` | boolean | Требовать телефон в боте |
+| `cookie.noticeEnabled` | boolean | Показывать cookie-баннер |
+| `cookie.noticeText` | text | Текст баннера |
+| `cookie.buttonText` | text | Кнопка баннера |
+| `broadcast.cooldownHours` | number | Cooldown между рассылками (ч) |
+| `broadcast.telegramRatePerSecond` | number | Скорость Telegram |
+| `broadcast.maxRatePerSecond` | number | Скорость MAX |
+| `broadcast.maxRecipients` | number | Лимит получателей (0=∞) |
+| `broadcast.allowSimultaneous` | boolean | Одновременные рассылки |
+
 ## Stage 8 — Admin UI for Legal Documents
 
 - New admin section `/admin/legal`:
