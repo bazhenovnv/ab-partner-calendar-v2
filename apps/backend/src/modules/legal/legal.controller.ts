@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LegalService, LegalDocTypeValue, UpdateLegalDocDto, PublishLegalDocDto } from './legal.service';
@@ -24,7 +25,7 @@ const VALID_TYPES: LegalDocTypeValue[] = [
 
 function assertValidType(type: string): asserts type is LegalDocTypeValue {
   if (!VALID_TYPES.includes(type as LegalDocTypeValue)) {
-    throw new Error(`Invalid legal doc type: ${type}`);
+    throw new BadRequestException(`Invalid legal doc type: ${type}`);
   }
 }
 
