@@ -61,3 +61,33 @@ Calendar header must always show month and year, e.g. `Май 2026`.
 
 ## BR-020: Dropdown chevron
 Dropdown chevron indicates only open/closed state: closed down, open rotated up.
+
+## BR-021: Mass broadcast priority
+Service reminders always have higher priority than mass broadcasts. Mass broadcasts must never delay service reminders.
+
+## BR-022: One active broadcast
+Only one mass broadcast can be actively sending at a time. If another broadcast is already sending, the next one receives status `QUEUED`.
+
+## BR-023: Broadcast cooldown
+Default: no more than 1 mass broadcast per user in 24 hours. Admin can change cooldown (6, 12, 24, 48, 72 hours or custom). Admin can disable cooldown intentionally. Service reminders do not count toward this cooldown.
+
+## BR-024: Broadcast test send required
+A successful test send to an admin recipient is required before mass send is enabled. Without it, the mass send button is disabled.
+
+## BR-025: Broadcast unsubscribe
+Every mass broadcast must include an unsubscribe action. When user unsubscribes, `allowMarketingMessages = false`. Service reminders continue to work. User can re-enable broadcasts later in bot settings.
+
+## BR-026: Marketing vs service notifications
+Marketing unsubscribe disables informational broadcasts only. Service reminders are not affected. Personal data consent withdrawal is handled separately through the legal process.
+
+## BR-027: Legal document pages
+The public site must expose: `/legal/privacy`, `/legal/terms`, `/legal/consent`, `/legal/cookies`, `/legal/broadcast-consent`. Footer must link to at least the first four.
+
+## BR-028: Cookie banner legal links
+Cookie banner must link to `/legal/privacy`. Link to `/legal/cookies` if UI space allows.
+
+## BR-029: Bot legal notice on first start
+On first start, bots must show legal notice referencing Privacy Policy, User Agreement, Personal Data Consent and (if marketing broadcasts are enabled) Broadcast Consent. Continuing to use the bot means accepting these documents.
+
+## BR-030: Legal documents versioning
+Admin can publish new versions of legal documents. Each version stores publication date. Previous versions are kept for history.

@@ -1,0 +1,52 @@
+# Project Changelog
+
+## v11
+
+- Added five legal document pages: `/legal/privacy`, `/legal/terms`, `/legal/consent`, `/legal/cookies`, `/legal/broadcast-consent`.
+- Footer must link to all five legal documents (at minimum the first four).
+- Cookie banner must link to `/legal/privacy` and optionally `/legal/cookies`.
+- Bot first-start legal notice must reference all relevant documents including broadcast consent when marketing broadcasts are enabled.
+- Admin must be able to edit and version legal documents; each version stores publication date; previous versions are kept.
+- Legal documents must cover all data categories: cookies, IP, device/browser, Telegram/MAX IDs, phone (if enabled), reminders, broadcast consent flag, broadcast delivery stats, admin action logs.
+- Marketing unsubscribe is not personal data consent withdrawal; they are separate processes.
+- Legal package DOCX/PDF files prepared externally for lawyer review.
+
+## v10
+
+- Added mass broadcast subsystem for Telegram and MAX.
+- New admin section `/admin/broadcasts` (Рассылки) with subsections: all broadcasts, create, queue, history, analytics, settings.
+- Supported channels: Telegram, MAX, Telegram + MAX.
+- Audience targeting: all users, Telegram only, MAX only, allowMarketingMessages=true, users with reminders, by city/region (later), by direction (later), by registration period.
+- Broadcast statuses: DRAFT, SCHEDULED, QUEUED, SENDING, PAUSED, SENT, FAILED, CANCELLED.
+- Test send to admin required before mass send; mass send button disabled without it.
+- Only one broadcast can send at a time; next goes to QUEUED.
+- Default rate limits: Telegram 20 msg/sec, MAX 10 msg/sec (admin-configurable).
+- Default cooldown: 1 mass broadcast per user per 24 hours (admin-configurable: 6/12/24/48/72h or custom; can be disabled).
+- Every broadcast must include unsubscribe action; unsubscribe sets `allowMarketingMessages = false`.
+- Service reminders are not affected by marketing unsubscribe.
+- BotUser gains `allowMarketingMessages` and `allowServiceNotifications` flags.
+- Analytics per broadcast: recipients, queued, sent, delivered, failed, skipped by cooldown, skipped unsubscribed, bot blocked, errors, unsubscribe count, startedAt, completedAt.
+- Business rules added: BR-021 to BR-026.
+
+## v9
+
+- Added cookie and analytics notice requirements.
+- Added admin control for cookie notice.
+- Legal documents must mention cookies, Yandex Metrika and internal analytics.
+
+## v8
+
+- Added minimal standalone maintenance page without header/footer.
+- Added admin settings for maintenance page.
+- Reminder date/time selection clarified: only inside Telegram/MAX bot after messenger selection.
+- Contact email changed to `info-event@a-b.ru`.
+- Legal documents placement on site and bots clarified.
+- Status wording changed: `Завершено` instead of `Проведено`.
+- Extended tax hashtag mapping.
+
+## v7
+
+- Test domain set to `test.ab-event.pro`.
+- Dropdown chevron animation defined.
+- Calendar header must show month and year.
+- Development workflow: do not merge PR if backend build/typecheck fails.
