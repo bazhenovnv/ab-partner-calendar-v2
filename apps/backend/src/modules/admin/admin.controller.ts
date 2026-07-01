@@ -27,6 +27,12 @@ export class AdminController {
     return { status: 'ok', module: 'admin' };
   }
 
+  /** Public: site status for middleware (no auth) */
+  @Get('site-status')
+  getSiteStatus() {
+    return this.adminService.getSiteStatus();
+  }
+
   /** Admin: get all exposed SiteConfig settings */
   @Get('settings')
   @UseGuards(JwtAuthGuard, RolesGuard)

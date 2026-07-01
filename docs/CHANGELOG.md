@@ -1,5 +1,32 @@
 # Project Changelog
 
+## Stage 10 — Maintenance Page
+
+- Backend `AdminModule`:
+  - `GET /admin/site-status` (public, no auth) — возвращает `{ maintenanceEnabled, title, description, imageUrl }` из SiteConfig.
+  - `AdminService.getSiteStatus()` — читает 4 ключа `maintenance.*` из SiteConfig.
+  - Добавлено 4 ключа в `SETTINGS_KEYS`: `maintenance.enabled`, `maintenance.title`, `maintenance.description`, `maintenance.imageUrl`.
+- Frontend Next.js middleware (`src/middleware.ts`):
+  - Edge Runtime; вызывает `/api/admin/site-status` при каждом публичном запросе (кэш 30 с).
+  - Если `maintenanceEnabled=true` — redirect на `/maintenance`.
+  - Bypass-список: `/admin/*`, `/maintenance`, `/legal/*`, `/_next/*`, `/api/*`, `/favicon.ico`.
+- New standalone page `/maintenance` (Server Component, `force-dynamic`):
+  - Без Header, Footer и CookieBanner.
+  - Показывает `maintenance.title`, `maintenance.description`, опционально `maintenance.imageUrl`.
+- Admin settings page `/admin/settings`:
+  - Добавлена группа **Техобслуживание** с 4 полями.
+  - `GROUP_ORDER` расширен: `['Бот', 'Cookie', 'Рассылки', 'Техобслуживание']`.
+- Seed: добавлены defaults для 4 ключей `maintenance.*`.
+- `globals.css`: стили `.maint-page`, `.maint-image`, `.maint-title`, `.maint-description`.
+
+Exposed maintenance settings:
+| Ключ | Тип | Описание |
+|---|---|---|
+| `maintenance.enabled` | boolean | Включить режим техобслуживания |
+| `maintenance.title` | text | Заголовок страницы |
+| `maintenance.description` | text | Текст страницы |
+| `maintenance.imageUrl` | text | URL изображения (опционально) |
+
 ## Stage 9 — Admin UI for Settings (SiteConfig)
 
 - New backend endpoints in `AdminModule`:

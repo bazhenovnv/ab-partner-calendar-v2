@@ -152,6 +152,24 @@ async function main() {
     });
   }
 
+  const maintenanceConfig = [
+    { key: 'maintenance.enabled', value: false },
+    { key: 'maintenance.title', value: 'Технические работы' },
+    {
+      key: 'maintenance.description',
+      value: 'Сайт временно недоступен. Мы работаем над улучшениями. Пожалуйста, зайдите позже.',
+    },
+    { key: 'maintenance.imageUrl', value: '' },
+  ];
+
+  for (const cfg of maintenanceConfig) {
+    await prisma.siteConfig.upsert({
+      where: { key: cfg.key },
+      update: {},
+      create: { key: cfg.key, value: cfg.value as any },
+    });
+  }
+
   console.log('Seed complete.');
 }
 
