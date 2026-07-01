@@ -13,16 +13,32 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ab-event.pro';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { id } = await params;
     const event = await fetchEventById(id);
+    const image = event.images?.[0];
+    const ogImage =
+      image?.mainEventUrl ?? image?.eventCardUrl ?? image?.originalUrl ?? undefined;
+    const canonical = `${SITE_URL}/events/${id}`;
     return {
       title: event.title,
       description: event.shortDescription ?? undefined,
+      alternates: { canonical },
+      openGraph: {
+        title: event.title,
+        description: event.shortDescription ?? undefined,
+        url: canonical,
+        type: 'article',
+        locale: 'ru_RU',
+        siteName: 'АБ Афиша Бухгалтера',
+        ...(ogImage ? { images: [{ url: ogImage, alt: event.title }] } : {}),
+      },
     };
   } catch {
-    return { title: 'Мероприятие' };
+    return { title: 'Мероприятие', robots: { index: false } };
   }
 }
 

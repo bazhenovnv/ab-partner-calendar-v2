@@ -1,5 +1,15 @@
 # Project Changelog
 
+## Stage 14 — SEO
+
+- **`apps/frontend/src/app/robots.ts`**: добавлен `/robots.txt` через `MetadataRoute.Robots`. Запрещает индексацию `/admin`, `/api/`, `/_next/`; указывает sitemap URL.
+- **`apps/frontend/src/app/sitemap.ts`**: добавлен `/sitemap.xml` через `MetadataRoute.Sitemap`. Статические маршруты: `/`, `/legal/*`; динамические: `/events/[id]` для опубликованных событий (до 200 записей, revalidate 3600 с).
+- **`apps/frontend/src/app/admin/layout.tsx`**: преобразован в Server Component для поддержки `export const metadata`. Клиентская логика вынесена в `AdminLayoutClient.tsx`.
+- **`apps/frontend/src/app/admin/AdminLayoutClient.tsx`**: новый client component с sidebar, навигацией и logout.
+- **`apps/frontend/src/app/maintenance/page.tsx`**: `generateMetadata` возвращает `robots: { index: false, follow: false }`.
+- **`apps/frontend/src/app/page.tsx`**: добавлены `alternates.canonical` и `openGraph` с полными метаданными.
+- **`apps/frontend/src/app/events/[id]/page.tsx`**: `generateMetadata` добавлены canonical URL и OG-теги (включая OG Image из первого изображения события).
+
 ## Stage 12 — Production Blockers
 
 - **[C-01] `docker-compose.prod.yml`**: добавлен `BOT_INTERNAL_TOKEN` в `backend` и `bots`. `NEXT_PUBLIC_CONTACT_EMAIL` уже присутствовал (строка 76).
