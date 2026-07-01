@@ -194,6 +194,7 @@ export default function BroadcastDetailPage() {
               className="adm-btn adm-btn--primary"
               onClick={handleSchedule}
               type="button"
+              disabled={!broadcast.testSentAt}
               title={!broadcast.testSentAt ? 'Сначала выполните тест-отправку' : undefined}
             >
               {broadcast.testSentAt ? 'Запустить рассылку' : '⚠ Запустить (тест не пройден)'}
