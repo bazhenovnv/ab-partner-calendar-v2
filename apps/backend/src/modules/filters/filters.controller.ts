@@ -11,4 +11,14 @@ export class FiltersController {
   health() {
     return { status: 'ok', module: 'filters' };
   }
+
+  @Get('directions')
+  getDirections() {
+    return this.filtersService.getDirections();
+  }
+
+  @Get('cities')
+  getCities() {
+    return this.filtersService.getCities();
+  }
 }
