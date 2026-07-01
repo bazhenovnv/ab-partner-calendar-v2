@@ -34,7 +34,9 @@ function formatMsk(date: Date): string {
   }).format(date);
 }
 
-async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<boolean> {
+type SaveResult = { ok: true } | { ok: false; duplicate: true } | { ok: false; duplicate: false };
+
+async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<SaveResult> {
   try {
     const res = await fetch(`${BACKEND_URL}/reminders`, {
       method: 'POST',
@@ -46,9 +48,11 @@ async function saveReminder(botUserId: string, eventId: string, remindAt: Date):
         timezone: 'Europe/Moscow',
       }),
     });
-    return res.ok;
+    if (res.ok) return { ok: true };
+    if (res.status === 409) return { ok: false, duplicate: true };
+    return { ok: false, duplicate: false };
   } catch {
-    return false;
+    return { ok: false, duplicate: false };
   }
 }
 
@@ -103,11 +107,16 @@ export function startTelegramBot(token: string) {
     }
 
     awaitingReminderTime.delete(userId);
-    const saved = await saveReminder(state.botUserId, state.eventId, remindAt);
+    const result = await saveReminder(state.botUserId, state.eventId, remindAt);
 
-    if (saved) {
+    if (result.ok) {
       await ctx.reply(
         `Готово! Напоминание установлено на <b>${formatMsk(remindAt)}</b> МСК.\n\nМы напомним вам об этом мероприятии.`,
+        { parse_mode: 'HTML' },
+      );
+    } else if (result.duplicate) {
+      await ctx.reply(
+        `Напоминание на <b>${formatMsk(remindAt)}</b> МСК уже установлено для этого мероприятия.`,
         { parse_mode: 'HTML' },
       );
     } else {

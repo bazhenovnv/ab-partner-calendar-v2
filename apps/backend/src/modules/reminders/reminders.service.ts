@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReminderDto } from './create-reminder.dto';
@@ -20,15 +20,36 @@ export class RemindersService {
 
     const event = await this.prisma.event.findFirst({
       where: { id: dto.eventId },
-      select: { id: true, startAt: true },
+      select: { id: true, startDate: true },
     });
     if (!event) throw new NotFoundException('Event not found');
-    if (remindAt.getTime() >= event.startAt.getTime()) {
+    if (remindAt.getTime() >= event.startDate.getTime()) {
       throw new BadRequestException('remindAt must be before event start time');
     }
 
     const botUser = await this.prisma.botUser.findUnique({ where: { id: dto.botUserId } });
     if (!botUser) throw new NotFoundException('BotUser not found');
+
+    // Deduplication: same user + same event + same minute → duplicate
+    const windowStart = new Date(remindAt);
+    windowStart.setSeconds(0, 0);
+    const windowEnd = new Date(windowStart.getTime() + 60_000);
+
+    const existing = await this.prisma.reminder.findFirst({
+      where: {
+        botUserId: dto.botUserId,
+        eventId: dto.eventId,
+        status: 'PENDING',
+        remindAt: { gte: windowStart, lt: windowEnd },
+      },
+    });
+    if (existing) {
+      throw new ConflictException({
+        message: 'Reminder already exists for this time',
+        reminderId: existing.id,
+        remindAt: existing.remindAt,
+      });
+    }
 
     return this.prisma.reminder.create({
       data: {

@@ -33,7 +33,9 @@ function formatMsk(date: Date): string {
   }).format(date);
 }
 
-async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<boolean> {
+type SaveResult = { ok: true } | { ok: false; duplicate: true } | { ok: false; duplicate: false };
+
+async function saveReminder(botUserId: string, eventId: string, remindAt: Date): Promise<SaveResult> {
   try {
     const res = await fetch(`${BACKEND_URL}/reminders`, {
       method: 'POST',
@@ -45,9 +47,11 @@ async function saveReminder(botUserId: string, eventId: string, remindAt: Date):
         timezone: 'Europe/Moscow',
       }),
     });
-    return res.ok;
+    if (res.ok) return { ok: true };
+    if (res.status === 409) return { ok: false, duplicate: true };
+    return { ok: false, duplicate: false };
   } catch {
-    return false;
+    return { ok: false, duplicate: false };
   }
 }
 
@@ -119,9 +123,11 @@ async function handleMaxUpdate(token: string, update: any) {
       return;
     }
     awaitingReminderTime.delete(chatId);
-    const saved = await saveReminder(state.botUserId, state.eventId, remindAt);
-    if (saved) {
+    const result = await saveReminder(state.botUserId, state.eventId, remindAt);
+    if (result.ok) {
       await sendMaxMessage(token, chatId, `Готово! Напоминание установлено на ${formatMsk(remindAt)} МСК.\n\nМы напомним вам об этом мероприятии.`);
+    } else if (result.duplicate) {
+      await sendMaxMessage(token, chatId, `Напоминание на ${formatMsk(remindAt)} МСК уже установлено для этого мероприятия.`);
     } else {
       await sendMaxMessage(token, chatId, `Не удалось сохранить напоминание. Пожалуйста, попробуйте позже или обратитесь на сайт ${SITE_URL}`);
     }

@@ -249,9 +249,9 @@ model BotUser {
 model Reminder {
   id         String         @id @default(uuid())
   botUserId  String
-  botUser    BotUser        @relation(fields: [botUserId], references: [id])
+  botUser    BotUser        @relation(fields: [botUserId], references: [id], onDelete: Restrict)
   eventId    String
-  event      Event          @relation(fields: [eventId], references: [id])
+  event      Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   remindAt   DateTime
   timezone   String         @default("Europe/Moscow")
   status     ReminderStatus @default(PENDING)
