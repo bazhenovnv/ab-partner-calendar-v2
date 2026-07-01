@@ -240,6 +240,24 @@ async function handleMaxUpdate(token: string, update: any) {
     return;
   }
 
+  if (text === '/unsubscribe') {
+    try {
+      const res = await fetch(`${API_BASE}/broadcasts/unsubscribe`, {
+        method: 'POST',
+        headers: BOT_HEADERS,
+        body: JSON.stringify({ channel: 'MAX', externalId }),
+      });
+      if (res.ok) {
+        await sendMaxMessage(token, chatId, 'Вы отписались от информационных рассылок. Напоминания о мероприятиях продолжат приходить в обычном режиме.');
+      } else {
+        await sendMaxMessage(token, chatId, 'Не удалось обработать запрос. Попробуйте позже.');
+      }
+    } catch {
+      await sendMaxMessage(token, chatId, 'Ошибка соединения. Попробуйте позже.');
+    }
+    return;
+  }
+
   const state = userState.get(chatId);
   if (!state) return;
 

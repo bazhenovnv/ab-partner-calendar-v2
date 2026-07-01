@@ -20,6 +20,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BuilderModule } from './modules/builder/builder.module';
 import { LegalModule } from './modules/legal/legal.module';
+import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { LegalModule } from './modules/legal/legal.module';
     AnalyticsModule,
     BuilderModule,
     LegalModule,
+    BroadcastsModule,
   ],
 })
 export class AppModule {}
