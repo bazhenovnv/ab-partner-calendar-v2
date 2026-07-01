@@ -11,6 +11,14 @@
 - `TZ_AB_Afisha_Buhgaltera_Claude.md` — техническое задание для Claude.ai / Claude Code.
 - `TZ_AB_Afisha_Buhgaltera_Claude.txt` — текстовая версия ТЗ для Claude.ai.
 - `TZ_AB_Afisha_Buhgaltera_customer.md` — версия ТЗ для заказчика.
+- `TZ_v7_additions.md` — дополнения ТЗ v7.
+- `TZ_v8_additions.md` — дополнения ТЗ v8.
+- `TZ_v9_cookie_analytics_notice.md` — дополнения ТЗ v9 (Cookie/аналитика).
+- `TZ_v10_broadcasts.md` — дополнения ТЗ v10 (Массовые рассылки).
+- `TZ_v11_legal_documents_and_locations.md` — дополнения ТЗ v11 (Юридические документы).
+- `BUSINESS_RULES.md` — реестр бизнес-правил проекта (BR-001 и далее).
+- `ADR.md` — журнал архитектурных решений.
+- `CHANGELOG.md` — история версий требований.
 
 Конфигурационные заметки:
 
@@ -22,7 +30,7 @@
 ## Ключевые параметры
 
 - Production-домен: `ab-event.pro`.
-- Рабочая почта на период запуска: `ab-event.pro@yandex.ru`.
+- Рабочая почта на период запуска: `info-event@a-b.ru`.
 - Яндекс.Метрика: `110270689`.
 - VPS: Timeweb Cloud, IPv4 `77.232.136.248`, host `kvnvm-277`.
 - Стек: Next.js, React, TypeScript, NestJS, PostgreSQL, Redis, Docker, Nginx.

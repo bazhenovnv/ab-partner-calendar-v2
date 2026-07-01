@@ -1,6 +1,6 @@
 export const SITE_URL = 'https://ab-event.pro';
 export const STAGING_URL = 'https://test.ab-event.pro';
-export const CONTACT_EMAIL = 'ab-event.pro@yandex.ru';
+export const CONTACT_EMAIL = 'info-event@a-b.ru';
 export const YANDEX_METRIKA_ID = 110270689;
 
 export const TELEGRAM_CHANNEL = 'https://t.me/ab_afisha_buh';
@@ -45,14 +45,6 @@ export const FOOTER_PROJECTS = [
   { title: 'АБ Креатив', url: 'https://ab-creative.ru/' },
 ] as const;
 
-export const REMINDER_OPTIONS = [
-  { value: '5m', label: 'За 5 минут' },
-  { value: '10m', label: 'За 10 минут' },
-  { value: '1h', label: 'За 1 час' },
-  { value: '1d', label: 'За 1 день' },
-  { value: '3d', label: 'За 3 дня' },
-  { value: 'morning', label: 'Утром в день события' },
-] as const;
 
 export const LEGAL_OPERATOR = {
   name: 'ООО «АБ ГРУПП»',

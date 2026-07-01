@@ -4,7 +4,7 @@
 
 Production-домен: `ab-event.pro`.
 
-Контактная почта на период запуска: `ab-event.pro@yandex.ru`.
+Контактная почта на период запуска: `info-event@a-b.ru`.
 
 ## Цель
 
@@ -68,12 +68,12 @@ Production VPS:
 
 ## Footer и email
 
-Project contact email: `ab-event.pro@yandex.ru`.
+Project contact email: `info-event@a-b.ru`.
 
 Поведение клика по email:
 
-1. Скопировать `ab-event.pro@yandex.ru` в буфер обмена.
-2. Открыть почтовый клиент пользователя через `mailto:ab-event.pro@yandex.ru`.
+1. Скопировать `info-event@a-b.ru` в буфер обмена.
+2. Открыть почтовый клиент пользователя через `mailto:info-event@a-b.ru`.
 3. Показать toast: `Email скопирован`.
 4. Если Clipboard API заблокирован, всё равно открыть `mailto:` и показать fallback-сообщение.
 5. Элемент должен быть доступен с клавиатуры и иметь понятный `aria-label`.
@@ -116,7 +116,7 @@ Next.js/React SPA requirements:
 
 Документы: Политика конфиденциальности, Пользовательское соглашение, Согласие на обработку персональных данных.
 
-Во всех документах использовать email: `ab-event.pro@yandex.ru`.
+Во всех документах использовать email: `info-event@a-b.ru`.
 
 ## Примечание
 

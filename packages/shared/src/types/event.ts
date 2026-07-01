@@ -5,6 +5,21 @@ export type PriceType = 'FREE' | 'PAID';
 export type ImportSource = 'MAX' | 'API' | 'MANUAL';
 export type BotChannel = 'TELEGRAM' | 'MAX';
 export type UserRole = 'ADMIN' | 'EDITOR';
+export type ReminderStatus = 'PENDING' | 'SENT' | 'FAILED' | 'CANCELLED';
+
+export interface ReminderItem {
+  id: string;
+  eventId: string;
+  botUserId: string;
+  remindAt: string;
+  timezone: string;
+  status: ReminderStatus;
+  sentAt: string | null;
+  failedAt: string | null;
+  failReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface EventDirection {
   id: string;

@@ -48,13 +48,11 @@ enum UserRole {
   EDITOR
 }
 
-enum ReminderOffset {
-  MINUTES_5
-  MINUTES_10
-  HOUR_1
-  DAY_1
-  DAY_3
-  MORNING_OF_DAY
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
 }
 
 enum LegalDocType {
@@ -249,20 +247,23 @@ model BotUser {
 }
 
 model Reminder {
-  id          String         @id @default(uuid())
-  botUserId   String
-  botUser     BotUser        @relation(fields: [botUserId], references: [id])
-  eventId     String
-  event       Event          @relation(fields: [eventId], references: [id])
-  offset      ReminderOffset
-  scheduledAt DateTime
-  sentAt      DateTime?
-  failedAt    DateTime?
-  failReason  String?
-  createdAt   DateTime       @default(now())
+  id         String         @id @default(uuid())
+  botUserId  String
+  botUser    BotUser        @relation(fields: [botUserId], references: [id], onDelete: Restrict)
+  eventId    String
+  event      Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  remindAt   DateTime
+  timezone   String         @default("Europe/Moscow")
+  status     ReminderStatus @default(PENDING)
+  sentAt     DateTime?
+  failedAt   DateTime?
+  failReason String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
 
-  @@index([scheduledAt])
+  @@index([remindAt])
   @@index([eventId])
+  @@index([status])
 }
 
 model MaxImportLog {

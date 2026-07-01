@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - "claude/**"
+
+jobs:
+  ci:
+    name: Install / Lint / Typecheck / Build
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ab_afisha
+          POSTGRES_USER: ab_afisha
+          POSTGRES_PASSWORD: ci_test_db_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://ab_afisha:ci_test_db_password@localhost:5432/ab_afisha
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ""
+      JWT_SECRET: ci-jwt-secret-at-least-32-characters-long-ok
+      SESSION_SECRET: ci-session-secret-at-least-32-characters-ok
+      JWT_EXPIRES_IN: 8h
+      NODE_ENV: test
+      PORT: "3001"
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      TELEGRAM_BOT_TOKEN: ""
+      MAX_BOT_TOKEN: ""
+      ADMIN_TELEGRAM_CHAT_ID: ""
+      THROTTLE_LIMIT: "100"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      # pnpm install runs @prisma/engines postinstall which downloads the engine binary.
+      # The pnpm store cache (keyed to pnpm-lock.yaml hash) avoids re-downloading on
+      # subsequent runs. --frozen-lockfile guarantees reproducibility.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # shared must be compiled before backend/frontend can import its types
+      - name: Build shared package
+        run: pnpm --filter '@ab-afisha/shared' build
+
+      # Explicit generate after install — idempotent, ensures @prisma/client types exist
+      # even if the postinstall step was skipped or cached.
+      - name: Generate Prisma client
+        run: pnpm db:generate
+        working-directory: .
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck (shared + bots + frontend + backend)
+        run: pnpm typecheck
+
+      # Apply migrations to the service-container postgres before building backend,
+      # so that any migration-time SQL errors surface in CI rather than at deploy.
+      - name: Run database migrations
+        run: pnpm db:deploy
+
+      # Build order: shared → backend (nest build) → frontend (next build) → bots (tsc)
+      - name: Build all apps
+        run: pnpm build
