@@ -1,5 +1,28 @@
 # Project Changelog
 
+## Stage 4 — Bot first-start legal notice + phone flow
+
+- Telegram bot (`apps/bots/src/telegram/bot.ts`):
+  - First `/start` (plain or deep-link) upserts BotUser via `POST /bots/users/upsert`.
+  - If `legalAcceptedAt` is null — shows legal notice (links to `/legal/privacy`, `/legal/terms`,
+    `/legal/consent`; `/legal/broadcast-consent` if `allowMarketingMessages=true`) with inline
+    button «Принимаю»; acceptance stored via `POST /bots/users/:id/accept-legal`.
+  - If `bot.phoneRequired=true` and phone not set — requests phone via native contact-share
+    keyboard button or manual +7XXXXXXXXXX input; stored via `POST /bots/users/:id/phone`.
+  - Deep-link `remind_{eventId}` context preserved through legal/phone flow.
+- MAX bot (`apps/bots/src/max/bot.ts`):
+  - Same first-start legal notice and legal acceptance flow (text «Принимаю»).
+  - Phone flow fallback: MAX does not support native contact-sharing buttons; user types phone
+    number as plain text in +7XXXXXXXXXX format. Documented in console log at startup.
+  - Deep-link `remind_{eventId}` context also preserved.
+- Backend `BotsModule`:
+  - `BotsService`: `upsertBotUser`, `acceptLegal`, `savePhone`, `isPhoneRequired`.
+  - `BotsController`: `POST /bots/users/upsert`, `POST /bots/users/:id/accept-legal`,
+    `POST /bots/users/:id/phone`, `GET /bots/config`.
+  - `BotsModule` now imports `PrismaModule`.
+- Seed: added `bot.phoneRequired` SiteConfig default (`false`).
+- BotUser fields used: `phone`, `phoneVerifiedAt`, `legalAcceptedAt`, `broadcastConsentAcceptedAt`.
+
 ## Stage 3 — Cookie Banner
 
 - Frontend `CookieBanner` client component (`src/components/CookieBanner.tsx`):
