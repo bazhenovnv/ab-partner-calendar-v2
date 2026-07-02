@@ -1,5 +1,39 @@
 # Project Changelog
 
+## Stage 15 — Public UX / Finish
+
+### Loading states
+- **`app/loading.tsx`**: скелетон главной страницы (hero + calendar + фильтры + сетка карточек).
+- **`app/events/[id]/loading.tsx`**: скелетон страницы мероприятия (hero + мета + действия + описание).
+
+### Error states
+- **`app/error.tsx`**: client-side error boundary для публичных роутов с кнопками «Попробовать снова» / «На главную».
+- **`app/global-error.tsx`**: глобальный top-level error boundary (500), рендерит полную HTML-страницу с минимальным UI.
+
+### 404 полировка
+- **`app/events/[id]/not-found.tsx`**: redesigned с иконкой, кодом 404, подробным текстом, active/focus состояниями.
+
+### Accessibility (a11y)
+- **`app/layout.tsx`** + **`components/layout/PublicShell.tsx`**: добавлен `skip-to-content` link + `id="main-content"` на `<main>`.
+- **`app/globals.css`**: CSS для `.skip-to-content` (видим только при фокусе), `@keyframes fade-in`, `.animate-fade-in`.
+- **`MainEventsBanner.tsx`**: `role="tablist"` / `role="tab"` для dot-навигации; `aria-roledescription="carousel"`, `aria-live`, `aria-selected`, `tabIndex` роутинг, keyboard `ArrowLeft`/`ArrowRight`.
+
+### Анимации и переходы
+- **`MainEventsBanner.tsx`**: стрелка в кнопке «Подробнее»; активное состояние `active:bg-*` для кнопки.
+- **`error.tsx`**: плавный focus-visible на кнопках.
+- **`not-found.tsx`**: active states на кнопках.
+
+### Image оптимизация
+- **`EventCard.tsx`**: `loading="lazy"` + `placeholder="blur"` с base64 SVG blurDataURL.
+- **`MainEventsBanner.tsx`**: `placeholder="blur"` + `blurDataURL` для hero-изображений.
+- **`app/events/[id]/page.tsx`**: `placeholder="blur"` + `blurDataURL` для hero.
+
+### Header (BR-014, TZ)
+- **`components/layout/SiteHeader.tsx`**: добавлены внешние ссылки Telegram, MAX, «Стать партнёром» согласно требованиям TZ; `target="_blank" rel="noopener noreferrer"`; keyboard focus-visible.
+
+### Footer (BR-014, TZ)
+- **`components/layout/SiteFooter.tsx`**: email click → `navigator.clipboard.writeText` + открытие `mailto:` + toast «Email скопирован» / «Почтовый клиент открыт»; `'use client'`; `role="status" aria-live="polite"` на toast.
+
 ## Stage 14 — SEO
 
 - **`apps/frontend/src/app/robots.ts`**: добавлен `/robots.txt` через `MetadataRoute.Robots`. Запрещает индексацию `/admin`, `/api/`, `/_next/`; указывает sitemap URL.
