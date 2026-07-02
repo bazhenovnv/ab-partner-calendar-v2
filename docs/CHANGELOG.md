@@ -1,5 +1,31 @@
 # Project Changelog
 
+## Stage 27 — Admin Dashboard
+
+### `apps/backend/src/modules/admin/admin.service.ts`
+- Добавлен метод `getDashboard()`: 11 параллельных запросов через `Promise.all` — 8 `count()` + 3 `findMany(take=5/10)`.
+- Возвращает: `stats` (8 счётчиков), `needsAttentionList` (до 10 событий), `upcomingEvents` (до 5), `recentBroadcasts` (до 5).
+
+### `apps/backend/src/modules/admin/admin.controller.ts`
+- Добавлен `GET /admin/dashboard` под `@Roles('ADMIN', 'EDITOR')` + `JwtAuthGuard + RolesGuard`.
+
+### `apps/frontend/src/app/admin/page.tsx`
+- Заменён redirect на полноценный dashboard.
+- Карточки статистики (8 штук): всего мероприятий, опубликовано, черновики, требует внимания, активные рассылки, подписчики ботов, ожидающих напоминаний, юр. черновики.
+- Блок быстрых действий: + Создать мероприятие, + Создать рассылку, Юридические документы, Настройки.
+- Блок «Требуют внимания»: таблица до 10 событий со ссылкой на редактирование.
+- Блок «Ближайшие мероприятия»: 5 предстоящих опубликованных событий.
+- Блок «Последние рассылки»: 5 последних рассылок с badge статуса.
+- Loading/error states; кнопка «Обновить».
+
+### `apps/frontend/src/app/admin/AdminLayoutClient.tsx`
+- Добавлен пункт «Дашборд» в sidebar (первый, exact-match `/admin`).
+
+### `apps/frontend/src/lib/admin-api.ts`
+- Добавлены типы: `DashboardStats`, `DashboardNeedsAttention`, `DashboardUpcomingEvent`, `DashboardRecentBroadcast`, `DashboardData`.
+
+---
+
 ## Stage 26 — Directions in Admin Event Forms
 
 ### `apps/frontend/src/components/admin/DirectionsPicker.tsx` (новый файл)

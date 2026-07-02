@@ -196,3 +196,47 @@ export interface AdminDirection {
   name: string;
   slug: string;
 }
+
+// ── Dashboard ───────────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  totalEvents: number;
+  publishedEvents: number;
+  draftEvents: number;
+  needsAttentionEvents: number;
+  activeBroadcasts: number;
+  totalBotUsers: number;
+  pendingReminders: number;
+  legalDrafts: number;
+}
+
+export interface DashboardNeedsAttention {
+  id: string;
+  title: string;
+  updatedAt: string;
+  cityName: string | null;
+}
+
+export interface DashboardUpcomingEvent {
+  id: string;
+  title: string;
+  startDate: string;
+  autoStatus: string;
+  cityName: string | null;
+  city: { name: string } | null;
+}
+
+export interface DashboardRecentBroadcast {
+  id: string;
+  title: string;
+  status: BroadcastStatus;
+  createdAt: string;
+  scheduledAt: string | null;
+}
+
+export interface DashboardData {
+  stats: DashboardStats;
+  needsAttentionList: DashboardNeedsAttention[];
+  upcomingEvents: DashboardUpcomingEvent[];
+  recentBroadcasts: DashboardRecentBroadcast[];
+}

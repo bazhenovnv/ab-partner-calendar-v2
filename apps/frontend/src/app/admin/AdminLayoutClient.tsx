@@ -36,6 +36,12 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         <div className="adm-sidebar__logo">АБ Афиша</div>
         <nav className="adm-sidebar__nav">
           <Link
+            href="/admin"
+            className={`adm-sidebar__link${pathname === '/admin' ? ' adm-sidebar__link--active' : ''}`}
+          >
+            Дашборд
+          </Link>
+          <Link
             href="/admin/events"
             className={`adm-sidebar__link${pathname.startsWith('/admin/events') ? ' adm-sidebar__link--active' : ''}`}
           >
