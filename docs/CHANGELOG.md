@@ -4,9 +4,9 @@
 
 ### `infra/nginx/conf.d/prod.conf`
 - Добавлен `Content-Security-Policy` в main vhost (`ab-event.pro`): `default-src 'self'`, `script-src` с `unsafe-inline`/`unsafe-eval` и Яндекс.Метрика (`mc.yandex.ru`, `yastatic.net`), `img-src https:` для внешних изображений, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`.
-- Добавлен `Content-Security-Policy` в test vhost (`test.ab-event.pro`) — идентичный main.
-- Добавлен `Strict-Transport-Security "max-age=3600"` в test vhost (ранее отсутствовал).
-- Добавлен `Referrer-Policy "strict-origin-when-cross-origin"` в test vhost (ранее отсутствовал).
+- `test.ab-event.pro` 443 block закомментирован (требует отдельный TLS-сертификат, который может отсутствовать); добавлен TODO-комментарий с инструкцией по включению.
+- `test.ab-event.pro` убран из HTTP redirect block (порт 80); добавлен отдельный HTTP server block для test с теми же security headers + CSP, но без HTTPS.
+- HTTP redirect на порту 80 теперь только для `ab-event.pro` и `www.ab-event.pro`.
 
 ### `infra/nginx/conf.d/default.conf`
 - Добавлен явный комментарий: файл предназначен только для локальной разработки (HTTP, `server_name _`). В production не монтируется.
