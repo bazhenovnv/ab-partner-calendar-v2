@@ -56,9 +56,13 @@ export function SiteHeader() {
             href={PARTNER_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden mobile:flex items-center gap-1.5 bg-mint/15 text-mint hover:bg-mint/25 transition-colors text-sm font-medium px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ml-1"
+            aria-label="Стать партнёром АБ Афиша"
+            className="flex items-center gap-1.5 bg-mint/15 text-mint hover:bg-mint/25 active:bg-mint/35 transition-colors text-sm font-medium px-2.5 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint ml-1"
           >
-            Стать партнёром
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6ZM7 4v3.5l2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="hidden mobile:inline">Стать партнёром</span>
           </a>
         </nav>
       </div>

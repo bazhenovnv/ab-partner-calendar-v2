@@ -73,10 +73,16 @@ html {
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
+  border-radius: 4px;
 }
 
 .legal-back:hover {
   text-decoration: underline;
+}
+
+.legal-back:focus-visible {
+  outline: 2px solid var(--color-mint);
+  outline-offset: 3px;
 }
 
 .legal-main {

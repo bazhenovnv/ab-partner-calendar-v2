@@ -1,5 +1,39 @@
 # Project Changelog
 
+## Stage 17 — Production UI Polish
+
+### `apps/frontend/src/app/events/[id]/loading.tsx`
+- Скелетон обновлён под Stage 16 layout: статус-бейдж, info-карточка (3-col + строки), мобильные CTA кнопки.
+
+### `apps/frontend/src/components/events/EventDetailActions.tsx`
+- Добавлен `tablet:flex-row tablet:flex-wrap` — кнопки выстраиваются в ряд на планшете/десктопе.
+
+### `apps/frontend/src/components/events/EventCard.tsx`
+- Добавлен `active:scale-[0.99] active:shadow-base` для тактильного отклика на мобайле.
+
+### `apps/frontend/src/components/events/EventsSection.tsx`
+- `EmptyState`: добавлена кнопка «Сбросить все фильтры» (сбрасывает фильтры и выбранную дату).
+- Кнопки пагинации: добавлены `active:bg-date-hover/70`.
+
+### `apps/frontend/src/components/events/MainEventsBanner.tsx`
+- Dot-навигация: кнопки теперь имеют touch-area 32×32px, добавлен `active:bg-white/90`.
+
+### `apps/frontend/src/components/layout/SiteHeader.tsx`
+- «Стать партнёром»: доступна на всех разрешениях (на 390px — только иконка, текст скрыт); добавлен `active:bg-mint/35` и `aria-label`.
+
+### `apps/frontend/src/app/error.tsx`
+- Кнопки `w-full mobile:w-auto` для корректного вида на 390px; добавлен `active:` state.
+
+### `apps/frontend/src/app/events/[id]/not-found.tsx`
+- Кнопка `w-full mobile:w-auto` для 390px.
+
+### `apps/frontend/src/app/globals.css`
+- `.legal-back`: добавлен `focus-visible` outline.
+
+### `apps/frontend/src/app/maintenance/page.tsx`
+- `<img>`: добавлен `eslint-disable` комментарий (intentional — URL из настроек админки); добавлены `width`/`height` атрибуты.
+
+
 ## Stage 16 — Mobile Event Page 390px
 
 ### `apps/frontend/src/app/events/[id]/page.tsx`

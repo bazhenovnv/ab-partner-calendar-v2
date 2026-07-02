@@ -31,7 +31,7 @@ export function EventCard({ event, className }: EventCardProps) {
       className={cn(
         'group block rounded-2xl overflow-hidden bg-white shadow-base',
         'border border-dropdown-border hover:border-primary/20',
-        'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
+        'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99] active:shadow-base',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2',
         className,
       )}

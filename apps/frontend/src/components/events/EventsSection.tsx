@@ -132,13 +132,19 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
             {loading ? (
               <EventGridSkeleton count={LIMIT} />
             ) : events.length === 0 ? (
-              <EmptyState hasFilters={
-                !!selectedDate ||
-                filters.format !== '' ||
-                filters.priceType !== '' ||
-                filters.autoStatus !== '' ||
-                filters.directions.length > 0
-              } />
+              <EmptyState
+                hasFilters={
+                  !!selectedDate ||
+                  filters.format !== '' ||
+                  filters.priceType !== '' ||
+                  filters.autoStatus !== '' ||
+                  filters.directions.length > 0
+                }
+                onReset={() => {
+                  setSelectedDate(null);
+                  handleFilterChange({ directions: [], format: '', priceType: '', autoStatus: '' });
+                }}
+              />
             ) : (
               <>
                 <div className="grid grid-cols-1 tablet:grid-cols-2 wide:grid-cols-3 gap-6">
@@ -167,7 +173,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
   );
 }
 
-function EmptyState({ hasFilters }: { hasFilters: boolean }) {
+function EmptyState({ hasFilters, onReset }: { hasFilters: boolean; onReset?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
@@ -179,9 +185,18 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
       <p className="font-montserrat font-semibold text-primary/60 text-lg mb-1">
         {hasFilters ? 'По вашим фильтрам ничего не найдено' : 'Мероприятий пока нет'}
       </p>
-      <p className="text-sm text-primary/40">
+      <p className="text-sm text-primary/40 mb-4">
         {hasFilters ? 'Попробуйте изменить или сбросить фильтры' : 'Загляните позже — скоро появятся новые события'}
       </p>
+      {hasFilters && onReset && (
+        <button
+          type="button"
+          onClick={onReset}
+          className="text-sm font-medium text-selected-day hover:text-selected-day/80 active:text-selected-day/60 underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2 rounded"
+        >
+          Сбросить все фильтры
+        </button>
+      )}
     </div>
   );
 }
@@ -206,7 +221,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
           'w-9 h-9 rounded-lg flex items-center justify-center text-sm transition-colors',
           currentPage === 1
             ? 'text-primary/20 cursor-not-allowed'
-            : 'text-primary hover:bg-date-hover',
+            : 'text-primary hover:bg-date-hover active:bg-date-hover/70',
         )}
       >
         ‹
@@ -228,7 +243,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
               'w-9 h-9 rounded-lg text-sm font-medium transition-colors',
               p === currentPage
                 ? 'bg-primary text-white'
-                : 'text-primary hover:bg-date-hover',
+                : 'text-primary hover:bg-date-hover active:bg-date-hover/70',
             )}
           >
             {p}
@@ -245,7 +260,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
           'w-9 h-9 rounded-lg flex items-center justify-center text-sm transition-colors',
           currentPage === totalPages
             ? 'text-primary/20 cursor-not-allowed'
-            : 'text-primary hover:bg-date-hover',
+            : 'text-primary hover:bg-date-hover active:bg-date-hover/70',
         )}
       >
         ›

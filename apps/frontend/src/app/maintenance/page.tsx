@@ -34,7 +34,8 @@ export default async function MaintenancePage() {
   return (
     <div className="maint-page">
       {status.imageUrl && (
-        <img src={status.imageUrl} alt="" className="maint-image" />
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={status.imageUrl} alt="" className="maint-image" width={320} height={320} />
       )}
       <h1 className="maint-title">{status.title}</h1>
       <p className="maint-description">{status.description}</p>
