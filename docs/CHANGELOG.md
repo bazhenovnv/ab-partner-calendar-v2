@@ -1,5 +1,29 @@
 # Project Changelog
 
+## Stage 26 — Directions in Admin Event Forms
+
+### `apps/frontend/src/components/admin/DirectionsPicker.tsx` (новый файл)
+- Переиспользуемый компонент checkbox-пикера направлений.
+- Загружает `GET /filters/directions` (только активные, отсортированные по `sortOrder`).
+- Показывает loading/error/empty state.
+- Checkbox с подсветкой выбранного (border + background через CSS-переменные).
+
+### `apps/frontend/src/app/admin/events/new/page.tsx`
+- Добавлен блок «Направления» с `DirectionsPicker` перед полем «Теги».
+- State `directionIds: string[]` хранит выбранные id.
+- При создании передаёт `directionIds` в `POST /events/admin`.
+
+### `apps/frontend/src/app/admin/events/[id]/page.tsx`
+- Добавлен блок «Направления» с `DirectionsPicker` перед полем «Теги».
+- `directionIds` предзаполняется из `event.directions[].direction.id` при загрузке.
+- При сохранении передаёт `directionIds` в `PUT /events/admin/:id`.
+- После сохранения `directionIds` синхронизируется с ответом сервера.
+
+### `apps/frontend/src/lib/admin-api.ts`
+- Добавлен тип `AdminDirection { id, name, slug }`.
+
+---
+
 ## Stage 25 — Admin Events UI
 
 ### `apps/frontend/src/app/admin/AdminLayoutClient.tsx`

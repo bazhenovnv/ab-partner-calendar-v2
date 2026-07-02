@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { adminApi, ApiError } from '@/lib/admin-api';
 import type { EventFormat, PriceType } from '@/lib/admin-api';
+import DirectionsPicker from '@/components/admin/DirectionsPicker';
 
 interface FormState {
   title: string;
@@ -51,6 +52,7 @@ const INITIAL: FormState = {
 export default function EventNewPage() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(INITIAL);
+  const [directionIds, setDirectionIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -93,6 +95,7 @@ export default function EventNewPage() {
       body.ticketSalesEnabled = form.ticketSalesEnabled;
       if (form.priceText.trim()) body.priceText = form.priceText.trim();
       body.mainEvent = form.mainEvent;
+      if (directionIds.length > 0) body.directionIds = directionIds;
       if (form.tags.trim()) {
         body.tags = form.tags.split(',').map((t) => t.trim()).filter(Boolean);
       }
@@ -274,6 +277,11 @@ export default function EventNewPage() {
             onChange={(e) => set('ticketUrl', e.target.value)}
           />
         </label>
+
+        <div className="adm-label">
+          Направления
+          <DirectionsPicker selected={directionIds} onChange={setDirectionIds} />
+        </div>
 
         <label className="adm-label">
           Теги (через запятую)
