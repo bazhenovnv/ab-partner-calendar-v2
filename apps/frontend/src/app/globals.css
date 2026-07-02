@@ -19,6 +19,41 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ─── Skip-to-content ────────────────────────────────────────── */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+  background: var(--color-mint);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 8px 0;
+}
+.skip-to-content:focus {
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ─── Utility animations ─────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out forwards;
+}
+
 /* ─── Legal pages ─────────────────────────────────────────────── */
 .legal-page {
   min-height: 100vh;

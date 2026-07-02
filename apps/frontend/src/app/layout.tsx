@@ -48,6 +48,12 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
         />
       </head>
       <body>
+        <a
+          href="#main-content"
+          className="skip-to-content"
+        >
+          Перейти к содержимому
+        </a>
         <noscript>
           <div>
             <img

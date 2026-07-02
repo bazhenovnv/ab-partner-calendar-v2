@@ -4,6 +4,9 @@ import { cn } from '@/lib/utils';
 import { formatEventDate, formatFormat, formatPrice } from '@/lib/format';
 import type { PublicEvent } from '@/types/event';
 
+const CARD_BLUR_PLACEHOLDER =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIyNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0IiBmaWxsLW9wYWNpdHk9IjAuMDUiLz48L3N2Zz4=';
+
 interface EventCardProps {
   event: PublicEvent;
   className?: string;
@@ -40,8 +43,11 @@ export function EventCard({ event, className }: EventCardProps) {
             src={imgUrl}
             alt={event.title}
             fill
+            loading="lazy"
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            placeholder="blur"
+            blurDataURL={CARD_BLUR_PLACEHOLDER}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

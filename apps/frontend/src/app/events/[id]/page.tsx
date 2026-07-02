@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+
+const HERO_BLUR =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTAwIiBoZWlnaHQ9IjUwNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0IiBmaWxsLW9wYWNpdHk9IjAuMDgiLz48L3N2Zz4=';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { fetchEventById } from '@/lib/api';
@@ -80,6 +83,8 @@ export default async function EventPage({ params }: Props) {
               priority
               sizes="(max-width: 900px) 100vw, 900px"
               className="object-cover"
+              placeholder="blur"
+              blurDataURL={HERO_BLUR}
             />
           </div>
         )}

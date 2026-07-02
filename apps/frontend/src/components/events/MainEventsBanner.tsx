@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -11,8 +11,16 @@ interface MainEventsBannerProps {
   events: PublicEvent[];
 }
 
+const BLUR_PLACEHOLDER =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQ4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwRDIzNDQiLz48L3N2Zz4=';
+
 export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const [current, setCurrent] = useState(0);
+
+  const goTo = useCallback(
+    (i: number) => setCurrent(((i % events.length) + events.length) % events.length),
+    [events.length],
+  );
 
   if (!events.length) return null;
 
@@ -26,8 +34,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
       className="relative w-full bg-primary overflow-hidden"
       style={{ minHeight: '360px' }}
       aria-label="Главные мероприятия"
+      aria-roledescription="carousel"
     >
-      <div className="relative aspect-[21/9] max-h-[520px] min-h-[280px] tablet:min-h-[360px]">
+      <div
+        className="relative aspect-[21/9] max-h-[520px] min-h-[280px] tablet:min-h-[360px]"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label={`Мероприятие ${current + 1} из ${events.length}: ${event.title}`}
+      >
         {imgUrl ? (
           <Image
             src={imgUrl}
@@ -35,7 +49,9 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className="object-cover transition-opacity duration-500"
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary to-selected-day" />
@@ -69,25 +85,38 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center gap-2 bg-mint text-primary font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-mint/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="inline-flex items-center gap-2 bg-mint text-primary font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-mint/90 active:bg-mint/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
             Подробнее
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3 7h8M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </Link>
         </div>
       </div>
 
       {events.length > 1 && (
-        <div className="absolute bottom-4 right-6 tablet:bottom-6 tablet:right-10 flex gap-2">
-          {events.map((_, i) => (
+        <div
+          className="absolute bottom-4 right-6 tablet:bottom-6 tablet:right-10 flex gap-2"
+          role="tablist"
+          aria-label="Навигация по мероприятиям"
+        >
+          {events.map((ev, i) => (
             <button
-              key={i}
+              key={ev.id}
               type="button"
-              onClick={() => setCurrent(i)}
-              aria-label={`Перейти к мероприятию ${i + 1}`}
-              aria-current={i === current ? 'true' : undefined}
+              role="tab"
+              onClick={() => goTo(i)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') goTo(i + 1);
+                if (e.key === 'ArrowLeft') goTo(i - 1);
+              }}
+              aria-label={`Мероприятие ${i + 1}: ${ev.title}`}
+              aria-selected={i === current}
+              tabIndex={i === current ? 0 : -1}
               className={cn(
-                'w-2 h-2 rounded-full transition-all duration-200',
-                i === current ? 'bg-mint w-5' : 'bg-white/40 hover:bg-white/70',
+                'h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                i === current ? 'bg-mint w-5' : 'bg-white/40 hover:bg-white/70 w-2',
               )}
             />
           ))}
