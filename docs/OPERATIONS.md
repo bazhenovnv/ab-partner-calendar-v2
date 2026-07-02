@@ -396,3 +396,119 @@ docker compose -f docker-compose.prod.yml exec postgres \
 - Redis недоступен → Bull не может обработать очередь (см. 9.4)
 - `TELEGRAM_BOT_TOKEN`/`MAX_BOT_TOKEN` не задан
 - Рассылка в статусе `QUEUED` зависла → проверить Redis и перезапустить backend
+
+---
+
+## 10. Перенос на новый сервер (Server Replacement)
+
+> **Контекст (2026-07-02):** старый сервер `77.232.136.248` (host `kvnvm-277`) удалён.
+> Откат DNS на старый сервер **невозможен** — сервер не существует.
+> Rollback доступен только через восстановление backup на новом сервере (раздел 5).
+
+### 10.1 Подготовка нового сервера
+
+1. Получить IP нового сервера от Timeweb Cloud (`<NEW_TIMEWEB_SERVER_IP>`).
+2. Проверить базовое ПО:
+
+```bash
+ssh root@<NEW_TIMEWEB_SERVER_IP>
+docker --version
+docker compose version
+ufw status
+certbot --version
+```
+
+3. Если Docker/certbot не установлены — выполнить разделы **2.3–2.4** из `DEPLOY.md`.
+
+### 10.2 DNS propagation
+
+Снизить TTL до 300 **до** переключения (за 24–48 ч):
+
+```bash
+# Проверить текущий TTL
+dig ab-event.pro +noall +answer
+```
+
+Установить A-записи в панели DNS:
+
+| Имя | Значение |
+|-----|----------|
+| `@` | `<NEW_TIMEWEB_SERVER_IP>` |
+| `www` | `<NEW_TIMEWEB_SERVER_IP>` |
+| `test` | `<NEW_TIMEWEB_SERVER_IP>` |
+
+Проверить распространение:
+
+```bash
+# Проверить с нескольких resolver'ов
+dig ab-event.pro +short @8.8.8.8
+dig ab-event.pro +short @1.1.1.1
+dig ab-event.pro +short @77.88.8.8
+```
+
+Ждать, пока все три вернут `<NEW_TIMEWEB_SERVER_IP>`.
+
+### 10.3 Перенос данных (backup → restore)
+
+На **старом** сервере (если он ещё доступен) — снять дамп:
+
+```bash
+cd /srv/ab-afisha
+docker compose -f docker-compose.prod.yml exec -T postgres \
+  pg_dump -U ab_afisha ab_afisha > /srv/backups/migration-$(date +%Y%m%d-%H%M).sql
+```
+
+Передать дамп на новый сервер:
+
+```bash
+scp /srv/backups/migration-*.sql root@<NEW_TIMEWEB_SERVER_IP>:/srv/backups/
+```
+
+> Если старый сервер уже недоступен — восстановить из последнего резервного backup
+> (Timeweb Cloud Backup, внешнее хранилище или локальная копия).
+
+### 10.4 Первый деплой на новый сервер
+
+Выполнить полную процедуру из `DEPLOY.md` (разделы 1–11) на новом сервере.
+
+Если перенос данных выполнен (раздел 10.3):
+- **Пропустить** раздел 9.1 (`prisma db seed`) — данные уже восстановлены из дампа.
+- Выполнить restore (раздел 5 этого документа) **до** первого запуска стека.
+
+### 10.5 Smoke test после переключения DNS
+
+После того как DNS распространился, выполнить smoke test (раздел 11 DEPLOY.md):
+
+```bash
+# Быстрая проверка с нового IP
+curl -s --resolve ab-event.pro:443:<NEW_TIMEWEB_SERVER_IP> https://ab-event.pro/api/health
+```
+
+Ожидается: `{"status":"ok","services":{"api":"ok","database":"ok"}}`
+
+Дополнительно:
+
+```bash
+# Проверить SSL-сертификат на новом сервере
+curl -svI https://ab-event.pro/ 2>&1 | grep -E "subject:|issuer:|expire"
+```
+
+### 10.6 Rollback
+
+> ⚠️ **Rollback DNS на старый сервер недоступен** — старый сервер удалён.
+
+Если новый сервер работает некорректно:
+1. Включить maintenance mode через админку (`/admin/settings` → `maintenance.enabled = true`).
+2. Диагностировать проблему по логам (`docker compose -f docker-compose.prod.yml logs`).
+3. При необходимости — восстановить данные из backup (раздел 5).
+4. Не переключать DNS обратно — старого сервера не существует.
+
+### 10.7 После стабилизации
+
+Вернуть TTL DNS-записей на стандартное значение:
+
+```bash
+# Установить TTL обратно в 3600 в панели DNS-провайдера
+# Проверить:
+dig ab-event.pro +noall +answer
+```

@@ -1,5 +1,38 @@
 # Project Changelog
 
+## Stage 29 — New Timeweb Server Migration Docs
+
+### `docs/DEPLOY.md`
+- Добавлена секция «⚠️ Актуальный сервер (обновлено 2026-07-02)» в начало документа.
+- Указано, что старый сервер `77.232.136.248` (host `kvnvm-277`) **удалён**.
+- IP нового сервера указан как placeholder: `<NEW_TIMEWEB_SERVER_IP>`.
+- Добавлена таблица параметров нового сервера: Provider, IP (placeholder), Deploy path `/srv/ab-afisha`, OS Ubuntu 22.04/24.04, домены.
+- Добавлена таблица DNS A-записей с placeholder IP.
+- Добавлен раздел «Проверка готовности сервера (cloud-init)»: `docker --version`, `docker compose version`, `ufw status`, `certbot --version`.
+- Обновлена таблица DNS в разделе 3: `<IP-адрес-сервера>` → `<NEW_TIMEWEB_SERVER_IP>`.
+- `test.ab-event.pro` явно обозначен как HTTP-only до выпуска SSL.
+
+### `docs/OPERATIONS.md`
+- Добавлен раздел **10. Перенос на новый сервер (Server Replacement)**:
+  - 10.1 Подготовка нового сервера (cloud-init check).
+  - 10.2 DNS propagation: снижение TTL, установка A-записей, проверка через 3 resolver'а.
+  - 10.3 Перенос данных: pg_dump → scp → restore на новом сервере.
+  - 10.4 Первый деплой на новый сервер (ссылка на DEPLOY.md).
+  - 10.5 Smoke test после переключения DNS (`--resolve` trick).
+  - 10.6 Rollback: откат DNS на старый сервер **невозможен** (сервер удалён); rollback только через backup на новом сервере.
+  - 10.7 После стабилизации: вернуть TTL в 3600.
+
+### `docs/ADR.md`
+- Добавлен **ADR-014: Domain-first deployment — no server IP hardcoded in runtime**.
+  - Runtime использует только домены; IP — только в deploy-документации как placeholder.
+  - Миграция сервера требует обновления только DNS A-записей и placeholder в документации.
+  - Зафиксирован исторический IP `77.232.136.248` как deprecated.
+
+### `README.md`
+- Строка `VPS: Timeweb Cloud, IPv4 \`77.232.136.248\`` обновлена: IP заменён на `<NEW_TIMEWEB_SERVER_IP>`, добавлена пометка об удалении старого сервера.
+
+---
+
 ## Stage 28 — Quotes Admin UI
 
 ### `apps/backend/src/modules/quotes/quotes.service.ts`
