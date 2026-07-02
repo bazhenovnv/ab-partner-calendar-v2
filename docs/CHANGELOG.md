@@ -1,5 +1,25 @@
 # Project Changelog
 
+## Stage 24 — Pre-Deploy Env Fix
+
+### `.env.example`
+- Добавлена переменная `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` в секцию `Bots` с комментарием: username Telegram-бота без `@`; без неё кнопка «Напомнить» на сайте скрыта.
+
+### `apps/frontend/.env.example`
+- Добавлена переменная `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` с комментарием.
+
+### `docker-compose.prod.yml`
+- В секцию `frontend.environment` добавлена `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:-}` (пустая строка по умолчанию — кнопка скрыта, не ломает запуск).
+
+### `.dockerignore` (новый файл)
+- Создан в корне репозитория.
+- Исключает из Docker build context: `.git`, `.github`, `node_modules`, `**/node_modules`, `.next`, `**/.next`, `dist`, `**/dist`, `coverage`, `.env`, `.env.*` (кроме `.env.example`), `*.log`, `.DS_Store`, `.idea`, `.vscode`, `tmp`, `.temp`, `docs`.
+- НЕ исключает: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `packages/`, `apps/`, `apps/backend/prisma/`.
+- Проверено по всем трём Dockerfile: ни один не копирует `docs/` — исключение безопасно.
+
+### `docs/DEPLOY.md`
+- В раздел «Обязательные переменные» добавлена `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` с пояснением формата (`username без @`) и последствий отсутствия (кнопка «Напомнить» скрыта).
+
 ## Stage 23 — Deploy & Operations Documentation
 
 ### `docs/DEPLOY.md` (новый файл)
