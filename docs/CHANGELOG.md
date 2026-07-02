@@ -1,5 +1,19 @@
 # Project Changelog
 
+## Stage 20 — Broadcast MAX Compatibility (MED-1)
+
+### `apps/backend/src/modules/broadcasts/broadcasts.service.ts`
+- Добавлен `buildTelegramMessage()` — HTML-форматирование: кнопка как `<a href>`.
+- Добавлен `buildMaxMessage()` — plain text: кнопка как `{label}: {url}` без HTML-тегов.
+- Метод `buildMessageText()` сохранён как deprecated-обёртка над `buildTelegramMessage()` для обратной совместимости.
+- `testSend()` явно использует `buildTelegramMessage()` (тест всегда в Telegram admin).
+
+### `apps/backend/src/modules/broadcasts/broadcast.processor.ts`
+- Убран единый `fullText` с HTML-тегами для всех каналов.
+- Перед циклом рассылки строятся два отдельных текста: `telegramText` (HTML + `<i>` footer) и `maxText` (plain text + plain footer).
+- В цикле выбирается `text = recipient.channel === 'MAX' ? maxText : telegramText`.
+- Unsubscribe footer (BR-025): Telegram — `<i>...</i>`, MAX — plain text без тегов.
+
 ## Stage 19 — Fix Reminder Dispatch (CRIT-1)
 
 ### `apps/backend/src/modules/reminders/reminders.service.ts`

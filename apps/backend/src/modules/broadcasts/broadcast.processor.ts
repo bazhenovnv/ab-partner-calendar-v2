@@ -54,11 +54,15 @@ export class BroadcastProcessor {
     const tgRate = await this.broadcastsService.getTelegramRate();
     const maxRate = await this.broadcastsService.getMaxRate();
 
-    const messageText = this.broadcastsService.buildMessageText(broadcast as any);
+    // Build channel-specific texts with unsubscribe footers (BR-025).
+    // Telegram supports HTML; MAX is plain text only.
+    const telegramText =
+      this.broadcastsService.buildTelegramMessage(broadcast as any) +
+      `\n\n<i>Чтобы отписаться от рассылок, ответьте /unsubscribe</i>`;
 
-    // Add unsubscribe footer (BR-025)
-    const unsubText = `\n\n<i>Чтобы отписаться от рассылок, ответьте /unsubscribe</i>`;
-    const fullText = messageText + unsubText;
+    const maxText =
+      this.broadcastsService.buildMaxMessage(broadcast as any) +
+      `\n\nЧтобы отписаться от рассылок, ответьте /unsubscribe`;
 
     let countSent = 0;
     let countFailed = 0;
@@ -106,9 +110,10 @@ export class BroadcastProcessor {
           continue;
         }
 
+        const text = (recipient.channel as string) === 'MAX' ? maxText : telegramText;
         const result = await this.broadcastsService.sendToRecipient(
           { id: recipient.id, botUserId: recipient.botUserId, channel: recipient.channel as string },
-          fullText,
+          text,
         );
 
         if (result.success) {
