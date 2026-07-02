@@ -1,5 +1,19 @@
 # Project Changelog
 
+## Stage 21 — Nginx Production Hardening (MIN-1, MIN-5)
+
+### `infra/nginx/conf.d/prod.conf`
+- Добавлен `Content-Security-Policy` в main vhost (`ab-event.pro`): `default-src 'self'`, `script-src` с `unsafe-inline`/`unsafe-eval` и Яндекс.Метрика (`mc.yandex.ru`, `yastatic.net`), `img-src https:` для внешних изображений, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`.
+- `test.ab-event.pro` 443 block закомментирован (требует отдельный TLS-сертификат, который может отсутствовать); добавлен TODO-комментарий с инструкцией по включению.
+- `test.ab-event.pro` убран из HTTP redirect block (порт 80); добавлен отдельный HTTP server block для test с теми же security headers + CSP, но без HTTPS.
+- HTTP redirect на порту 80 теперь только для `ab-event.pro` и `www.ab-event.pro`.
+
+### `infra/nginx/conf.d/default.conf`
+- Добавлен явный комментарий: файл предназначен только для локальной разработки (HTTP, `server_name _`). В production не монтируется.
+
+### `docs/ADR.md`
+- Добавлен ADR-013: решение по CSP на уровне nginx и разделению dev/prod конфигов.
+
 ## Stage 20 — Broadcast MAX Compatibility (MED-1)
 
 ### `apps/backend/src/modules/broadcasts/broadcasts.service.ts`
