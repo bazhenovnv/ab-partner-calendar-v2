@@ -1,5 +1,23 @@
 # Project Changelog
 
+## Stage 16 — Mobile Event Page 390px
+
+### `apps/frontend/src/app/events/[id]/page.tsx`
+- Статус-бейдж над изображением: «Идёт сейчас» (с pulse-анимацией) / «Запланировано» / «Завершено» из `event.autoStatus`.
+- Hero-изображение 16:9 с blur-placeholder и `rounded-2xl`.
+- Краткое описание перед info-карточкой (видно на мобайле сразу под заголовком).
+- Info-карточка: 3-колоночный grid (Дата / Время / Стоимость) с SVG-иконками и разделителями; строки Формат, Адрес (офлайн-только), Спикер.
+- CTA вынесены в новый компонент `EventDetailActions`.
+- Полное описание после CTA.
+
+### `apps/frontend/src/components/events/EventDetailActions.tsx` (новый)
+- `w-full` кнопки на мобайле, `tablet:w-auto` на планшете+.
+- «Купить билет» / «Зарегистрироваться»: mint filled.
+- «Напомнить»: outlined, bell-иконка, deep-link `remind_${event.id}`.
+- «Добавить в календарь (.ics)»: tertiary кнопка.
+- `role="group"` + `aria-label`.
+
+
 ## Stage 15 — Public UX / Finish
 
 ### Loading states
