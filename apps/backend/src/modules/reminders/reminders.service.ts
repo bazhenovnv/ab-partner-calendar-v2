@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReminderDto } from './create-reminder.dto';
 
-const SITE_URL = 'https://ab-event.pro';
 const TG_API = 'https://api.telegram.org';
 const MAX_API = 'https://api.max.ru/v1';
 
@@ -21,6 +20,7 @@ function formatMsk(date: Date): string {
 @Injectable()
 export class RemindersService {
   private readonly logger = new Logger(RemindersService.name);
+  private readonly siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? 'https://ab-event.pro';
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -160,7 +160,7 @@ export class RemindersService {
     for (const reminder of due) {
       try {
         const { event, botUser } = reminder;
-        const eventUrl = `${SITE_URL}/events/${event.id}`;
+        const eventUrl = `${this.siteUrl}/events/${event.id}`;
         const eventDateMsk = formatMsk(event.startDate);
 
         let text: string;
