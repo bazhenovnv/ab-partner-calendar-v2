@@ -25,7 +25,7 @@ async function getSiteStatus(): Promise<SiteStatus> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const status = await getSiteStatus();
-  return { title: status.title };
+  return { title: status.title, robots: { index: false, follow: false } };
 }
 
 export default async function MaintenancePage() {
