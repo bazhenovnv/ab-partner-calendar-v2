@@ -1,5 +1,33 @@
 # Project Changelog
 
+## Stage 25 — Admin Events UI
+
+### `apps/frontend/src/app/admin/AdminLayoutClient.tsx`
+- Добавлен пункт «Мероприятия» в sidebar (перед «Рассылки»), с подсветкой активного пункта.
+
+### `apps/frontend/src/app/admin/events/page.tsx` (новый файл)
+- Страница списка мероприятий `/admin/events`.
+- Поиск по названию, фильтр по статусу, пагинация (20/стр).
+- Таблица: название, статус (badge), формат, дата, город.
+- Кнопки: «Изменить» → `/admin/events/[id]`, «Опубликовать» (DRAFT), «Архив».
+
+### `apps/frontend/src/app/admin/events/new/page.tsx` (новый файл)
+- Страница создания мероприятия `/admin/events/new`.
+- Поля: название, описания, даты, время, формат, тип цены, цена, город, адрес, площадка, спикер, ссылки, теги, флаги mainEvent и ticketSalesEnabled.
+- Клиентская валидация перед POST `/events/admin`.
+- После создания — редирект на страницу редактирования.
+
+### `apps/frontend/src/app/admin/events/[id]/page.tsx` (новый файл)
+- Страница редактирования мероприятия `/admin/events/[id]`.
+- Загрузка GET `/events/admin/:id`, сохранение PUT `/events/admin/:id`.
+- Управление статусом: Опубликовать, Скрыть/Опубликовать, Архив, Удалить.
+- Inline success/error-сообщения без перезагрузки страницы.
+
+### `apps/frontend/src/lib/admin-api.ts`
+- Добавлены типы: `EventStatus`, `EventAutoStatus`, `EventFormat`, `PriceType`, `AdminEvent`, `AdminEventsResponse`.
+
+---
+
 ## Stage 24 — Pre-Deploy Env Fix
 
 ### `.env.example`
