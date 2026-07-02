@@ -33,6 +33,15 @@ export class AdminController {
     return this.adminService.getSiteStatus();
   }
 
+  /** Admin/Editor: dashboard aggregated stats */
+  @Get('dashboard')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'EDITOR')
+  @ApiBearerAuth()
+  getDashboard() {
+    return this.adminService.getDashboard();
+  }
+
   /** Admin: get all exposed SiteConfig settings */
   @Get('settings')
   @UseGuards(JwtAuthGuard, RolesGuard)
