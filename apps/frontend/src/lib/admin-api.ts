@@ -42,6 +42,8 @@ export const adminApi = {
     request<T>(path, { method: 'POST', body: body !== undefined ? JSON.stringify(body) : undefined }),
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
+  put: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
   del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
 
@@ -142,4 +144,47 @@ export interface LegalDocVersion {
 export interface SiteConfigRow {
   key: string;
   value: unknown;
+}
+
+// ── Events ─────────────────────────────────────────────────────────────────
+
+export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'HIDDEN' | 'ARCHIVE' | 'NEEDS_ATTENTION' | 'DELETED';
+export type EventAutoStatus = 'PLANNED' | 'LIVE' | 'COMPLETED';
+export type EventFormat = 'ONLINE' | 'OFFLINE';
+export type PriceType = 'FREE' | 'PAID';
+
+export interface AdminEvent {
+  id: string;
+  title: string;
+  status: EventStatus;
+  autoStatus: EventAutoStatus;
+  format: EventFormat;
+  priceType: PriceType;
+  priceText: string | null;
+  startDate: string;
+  endDate: string | null;
+  startTime: string | null;
+  shortDescription: string | null;
+  fullDescription: string | null;
+  cityId: string | null;
+  cityName: string | null;
+  address: string | null;
+  venue: string | null;
+  speaker: string | null;
+  eventUrl: string | null;
+  ticketUrl: string | null;
+  ticketSalesEnabled: boolean;
+  mainEvent: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  city: { name: string; region: string } | null;
+  images: { thumbnailUrl?: string | null } | null;
+  directions?: Array<{ direction: { id: string; name: string; slug: string } }>;
+  tags?: Array<{ tag: string }>;
+}
+
+export interface AdminEventsResponse {
+  events: AdminEvent[];
+  total: number;
 }
