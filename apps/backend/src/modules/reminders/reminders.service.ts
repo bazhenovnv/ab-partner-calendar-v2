@@ -3,9 +3,24 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReminderDto } from './create-reminder.dto';
 
+const TG_API = 'https://api.telegram.org';
+const MAX_API = 'https://api.max.ru/v1';
+
+function formatMsk(date: Date): string {
+  return date.toLocaleString('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 @Injectable()
 export class RemindersService {
   private readonly logger = new Logger(RemindersService.name);
+  private readonly siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? 'https://ab-event.pro';
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -92,11 +107,86 @@ export class RemindersService {
     });
   }
 
+  // ── private dispatch helpers ──────────────────────────────────────────────
+
+  private async dispatchTelegram(externalId: string, text: string): Promise<void> {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    if (!token) throw new Error('TELEGRAM_BOT_TOKEN not configured');
+
+    const res = await fetch(`${TG_API}/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: externalId,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`Telegram API error ${res.status}: ${body}`);
+    }
+  }
+
+  private async dispatchMax(externalId: string, text: string): Promise<void> {
+    const token = process.env.MAX_BOT_TOKEN;
+    if (!token) throw new Error('MAX_BOT_TOKEN not configured');
+
+    const res = await fetch(`${MAX_API}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ chat_id: externalId, text }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`MAX API error ${res.status}: ${body}`);
+    }
+  }
+
+  // ── cron: dispatch due reminders (BR-010, BR-011, BR-021) ─────────────────
+
   @Cron(CronExpression.EVERY_MINUTE)
   async processDueReminders() {
     const due = await this.findPending();
     if (!due.length) return;
-    this.logger.log(`Processing ${due.length} due reminder(s)`);
-    // Actual dispatch is handled by bots polling or a dedicated notification worker.
+    this.logger.log(`Dispatching ${due.length} due reminder(s)`);
+
+    for (const reminder of due) {
+      try {
+        const { event, botUser } = reminder;
+        const eventUrl = `${this.siteUrl}/events/${event.id}`;
+        const eventDateMsk = formatMsk(event.startDate);
+
+        let text: string;
+        if (botUser.channel === 'TELEGRAM') {
+          text =
+            `🔔 Напоминание о мероприятии\n\n` +
+            `<b>${event.title}</b>\n` +
+            `📅 Начало: ${eventDateMsk} МСК\n\n` +
+            `<a href="${eventUrl}">Подробнее о мероприятии</a>`;
+          await this.dispatchTelegram(botUser.externalId, text);
+        } else {
+          text =
+            `🔔 Напоминание о мероприятии\n\n` +
+            `${event.title}\n` +
+            `Начало: ${eventDateMsk} МСК\n\n` +
+            `Подробнее: ${eventUrl}`;
+          await this.dispatchMax(botUser.externalId, text);
+        }
+
+        await this.markSent(reminder.id);
+        this.logger.log(`Reminder ${reminder.id} sent via ${botUser.channel} to ${botUser.externalId}`);
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err);
+        await this.markFailed(reminder.id, reason).catch(() => null);
+        this.logger.error(`Reminder ${reminder.id} failed: ${reason}`);
+      }
+    }
   }
 }
