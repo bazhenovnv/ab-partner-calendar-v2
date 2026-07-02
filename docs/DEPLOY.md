@@ -154,6 +154,9 @@ TELEGRAM_BOT_TOKEN=<токен из @BotFather>
 MAX_BOT_TOKEN=<токен MAX-бота>
 ADMIN_TELEGRAM_CHAT_ID=<chat_id для уведомлений администратора>
 BOT_INTERNAL_TOKEN=<сгенерировать: openssl rand -hex 32>
+# Username Telegram-бота без @, например: ab_afisha_bot
+# Без этой переменной кнопка «Напомнить» на страницах мероприятий будет скрыта.
+NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=<username бота без @>
 
 # ── Аналитика ─────────────────────────────────────────────────────────────────
 YANDEX_METRIKA_ID=110270689

@@ -74,6 +74,7 @@ services:
       NEXT_PUBLIC_SITE_URL: https://ab-event.pro
       NEXT_PUBLIC_YANDEX_METRIKA_ID: ${YANDEX_METRIKA_ID:-110270689}
       NEXT_PUBLIC_CONTACT_EMAIL: info-event@a-b.ru
+      NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:-}
       BACKEND_URL: http://backend:3001
     expose:
       - "3000"
