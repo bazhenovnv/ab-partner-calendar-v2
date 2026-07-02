@@ -115,10 +115,19 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
               aria-selected={i === current}
               tabIndex={i === current ? 0 : -1}
               className={cn(
-                'h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
-                i === current ? 'bg-mint w-5' : 'bg-white/40 hover:bg-white/70 w-2',
+                'relative h-8 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full',
+                i === current ? 'w-8' : 'w-6',
               )}
-            />
+            >
+              <span
+                className={cn(
+                  'block h-2 rounded-full transition-all duration-300',
+                  i === current
+                    ? 'bg-mint w-5 scale-100'
+                    : 'bg-white/40 hover:bg-white/70 active:bg-white/90 w-2',
+                )}
+              />
+            </button>
           ))}
         </div>
       )}

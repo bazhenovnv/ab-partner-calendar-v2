@@ -34,13 +34,13 @@ export default function Error({ error, reset }: ErrorProps) {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 bg-primary text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="w-full mobile:w-auto inline-flex items-center justify-center gap-2 bg-primary text-white font-semibold px-6 py-3 rounded-xl text-sm hover:bg-primary/90 active:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Попробовать снова
           </button>
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 border border-primary/20 text-primary font-medium px-6 py-3 rounded-xl text-sm hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="w-full mobile:w-auto inline-flex items-center justify-center gap-2 border border-primary/20 text-primary font-medium px-6 py-3 rounded-xl text-sm hover:bg-primary/5 active:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             На главную
           </Link>

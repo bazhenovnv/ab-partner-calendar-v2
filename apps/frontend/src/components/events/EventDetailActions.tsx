@@ -32,7 +32,7 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
 
   return (
     <div
-      className="flex flex-col gap-3 mb-6"
+      className="flex flex-col tablet:flex-row tablet:flex-wrap gap-3 mb-6"
       role="group"
       aria-label="Действия с мероприятием"
     >
