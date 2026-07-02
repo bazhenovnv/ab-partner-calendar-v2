@@ -164,7 +164,7 @@ export class BroadcastsService {
       );
     }
 
-    const text = this.buildMessageText(broadcast as any);
+    const text = this.buildTelegramMessage(broadcast as any);
     let apiErrorDescription: string | undefined;
     try {
       const res = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
@@ -398,14 +398,30 @@ export class BroadcastsService {
     return {}; // ALL
   }
 
-  // ── internal: message text builder ───────────────────────────────────────
+  // ── internal: message text builders ──────────────────────────────────────
 
-  buildMessageText(broadcast: { messageText: string; buttonText?: string | null; buttonUrl?: string | null }): string {
+  /** Telegram HTML-formatted message body (no unsubscribe footer). */
+  buildTelegramMessage(broadcast: { messageText: string; buttonText?: string | null; buttonUrl?: string | null }): string {
     let text = broadcast.messageText;
     if (broadcast.buttonText && broadcast.buttonUrl) {
       text += `\n\n<a href="${broadcast.buttonUrl}">${broadcast.buttonText}</a>`;
     }
     return text;
+  }
+
+  /** MAX plain-text message body — no HTML tags (no unsubscribe footer). */
+  buildMaxMessage(broadcast: { messageText: string; buttonText?: string | null; buttonUrl?: string | null }): string {
+    let text = broadcast.messageText;
+    if (broadcast.buttonUrl) {
+      const label = broadcast.buttonText ? `${broadcast.buttonText}: ` : '';
+      text += `\n\n${label}${broadcast.buttonUrl}`;
+    }
+    return text;
+  }
+
+  /** @deprecated Use buildTelegramMessage or buildMaxMessage */
+  buildMessageText(broadcast: { messageText: string; buttonText?: string | null; buttonUrl?: string | null }): string {
+    return this.buildTelegramMessage(broadcast);
   }
 
   // ── internal: check cooldown ──────────────────────────────────────────────
