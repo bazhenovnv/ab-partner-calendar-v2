@@ -31,6 +31,8 @@ export default function EventsListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [format, setFormat] = useState('');
+  const [city, setCity] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +43,8 @@ export default function EventsListPage() {
       const params = new URLSearchParams({ page: String(page), limit: '20' });
       if (search) params.set('search', search);
       if (status) params.set('status', status);
+      if (format) params.set('format', format);
+      if (city) params.set('city', city);
       const res = await adminApi.get<AdminEventsResponse>(`/events/admin?${params}`);
       setData(res);
     } catch (err) {
@@ -48,7 +52,7 @@ export default function EventsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status]);
+  }, [page, search, status, format, city]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -109,6 +113,25 @@ export default function EventsListPage() {
               <option key={s} value={s}>{STATUS_LABELS[s]}</option>
             ))}
           </select>
+        </div>
+        <div className="adm-toolbar__group">
+          <select
+            className="adm-select"
+            value={format}
+            onChange={(e) => { setFormat(e.target.value); setPage(1); }}
+          >
+            <option value="">Все форматы</option>
+            <option value="ONLINE">Онлайн</option>
+            <option value="OFFLINE">Офлайн</option>
+          </select>
+        </div>
+        <div className="adm-toolbar__group">
+          <input
+            className="adm-input adm-input--sm"
+            placeholder="Город…"
+            value={city}
+            onChange={(e) => { setCity(e.target.value); setPage(1); }}
+          />
         </div>
         <button type="submit" className="adm-btn adm-btn--secondary adm-btn--sm">Найти</button>
       </form>

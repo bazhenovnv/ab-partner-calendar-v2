@@ -141,7 +141,7 @@ export default function EventEditPage() {
           : [],
       };
 
-      const updated = await adminApi.patch<AdminEvent>(`/events/admin/${id}`, body);
+      const updated = await adminApi.put<AdminEvent>(`/events/admin/${id}`, body);
       setEvent(updated);
       setForm(eventToForm(updated));
       setOk('Сохранено');
