@@ -35,3 +35,6 @@ The backend container runs `prisma migrate deploy` via `/docker-entrypoint.sh` b
 
 ## ADR-011: Broadcast recipient eligibility requires explicit broadcast consent
 To receive a mass broadcast, a BotUser must have `broadcastConsentAcceptedAt IS NOT NULL` in addition to `allowMarketingMessages=true` and `legalAcceptedAt IS NOT NULL`. This consent is recorded when the user accepts the legal notice with marketing enabled. This ensures no user receives marketing messages without having seen and accepted the broadcast consent document.
+
+## ADR-013: nginx CSP and security header hardening
+Content-Security-Policy is added at the nginx level (not in Next.js headers config) because all traffic passes through nginx in production, keeping the policy in one place. The policy uses `unsafe-inline` and `unsafe-eval` in `script-src` because Next.js App Router requires them for hydration inline scripts. `mc.yandex.ru` and `yastatic.net` are whitelisted for Yandex Metrika. `img-src https:` is used broadly to allow event images from external CDNs. The `default.conf` file is dev-only (HTTP, `server_name _`) and is explicitly NOT mounted in production — only `prod.conf` is mounted as `/etc/nginx/conf.d/default.conf` via docker-compose.prod.yml. The `test.ab-event.pro` vhost received HSTS (short max-age=3600) and Referrer-Policy to match production security posture.

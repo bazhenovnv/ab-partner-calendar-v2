@@ -1,5 +1,19 @@
 # Project Changelog
 
+## Stage 21 — Nginx Production Hardening (MIN-1, MIN-5)
+
+### `infra/nginx/conf.d/prod.conf`
+- Добавлен `Content-Security-Policy` в main vhost (`ab-event.pro`): `default-src 'self'`, `script-src` с `unsafe-inline`/`unsafe-eval` и Яндекс.Метрика (`mc.yandex.ru`, `yastatic.net`), `img-src https:` для внешних изображений, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`.
+- Добавлен `Content-Security-Policy` в test vhost (`test.ab-event.pro`) — идентичный main.
+- Добавлен `Strict-Transport-Security "max-age=3600"` в test vhost (ранее отсутствовал).
+- Добавлен `Referrer-Policy "strict-origin-when-cross-origin"` в test vhost (ранее отсутствовал).
+
+### `infra/nginx/conf.d/default.conf`
+- Добавлен явный комментарий: файл предназначен только для локальной разработки (HTTP, `server_name _`). В production не монтируется.
+
+### `docs/ADR.md`
+- Добавлен ADR-013: решение по CSP на уровне nginx и разделению dev/prod конфигов.
+
 ## Stage 20 — Broadcast MAX Compatibility (MED-1)
 
 ### `apps/backend/src/modules/broadcasts/broadcasts.service.ts`
