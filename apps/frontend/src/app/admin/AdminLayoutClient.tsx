@@ -60,6 +60,12 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             Документы
           </Link>
           <Link
+            href="/admin/quotes"
+            className={`adm-sidebar__link${pathname.startsWith('/admin/quotes') ? ' adm-sidebar__link--active' : ''}`}
+          >
+            Цитаты
+          </Link>
+          <Link
             href="/admin/settings"
             className={`adm-sidebar__link${pathname.startsWith('/admin/settings') ? ' adm-sidebar__link--active' : ''}`}
           >

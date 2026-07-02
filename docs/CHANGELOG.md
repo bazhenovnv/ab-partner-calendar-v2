@@ -1,5 +1,37 @@
 # Project Changelog
 
+## Stage 28 — Quotes Admin UI
+
+### `apps/backend/src/modules/quotes/quotes.service.ts`
+- Реализованы методы: `listPublic()`, `listAdmin()`, `create()`, `update()`, `toggle()`, `remove()`.
+- `listPublic()` возвращает только активные цитаты, отсортированные по `sortOrder`.
+- `toggle()` инвертирует `isActive`.
+- `findOrFail()` бросает `NotFoundException` при отсутствии цитаты.
+
+### `apps/backend/src/modules/quotes/quotes.controller.ts`
+- `GET /quotes/public` — без авторизации, активные цитаты для публичного фронтенда.
+- `GET /quotes/admin` — `ADMIN + EDITOR`, все цитаты.
+- `POST /quotes/admin` — `ADMIN + EDITOR`, создание.
+- `PUT /quotes/admin/:id` — `ADMIN + EDITOR`, обновление.
+- `PATCH /quotes/admin/:id/toggle` — `ADMIN + EDITOR`, переключение статуса.
+- `DELETE /quotes/admin/:id` — `ADMIN` only, удаление (HTTP 204).
+
+### `apps/frontend/src/lib/admin-api.ts`
+- Добавлен интерфейс `AdminQuote` (`id`, `text`, `author`, `isActive`, `sortOrder`, `createdAt`, `updatedAt`).
+
+### `apps/frontend/src/app/admin/AdminLayoutClient.tsx`
+- Добавлен пункт «Цитаты» (`/admin/quotes`) в sidebar между «Документы» и «Настройки» (нет, перед «Настройки»).
+
+### `apps/frontend/src/app/admin/quotes/page.tsx` (новый файл)
+- Список всех цитат с таблицей: порядок, текст, автор, статус (badge), действия.
+- Inline-форма создания/редактирования: текст, автор, sortOrder.
+- Toggle active/inactive через `PATCH /quotes/admin/:id/toggle`.
+- Удаление с `confirm()`.
+- Loading, error, empty states.
+- Кнопка «Обновить».
+
+---
+
 ## Stage 27 — Admin Dashboard
 
 ### `apps/backend/src/modules/admin/admin.service.ts`

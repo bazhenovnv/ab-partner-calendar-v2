@@ -197,6 +197,18 @@ export interface AdminDirection {
   slug: string;
 }
 
+// ── Quotes ──────────────────────────────────────────────────────────────────
+
+export interface AdminQuote {
+  id: string;
+  text: string;
+  author: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Dashboard ───────────────────────────────────────────────────────────────
 
 export interface DashboardStats {
