@@ -188,3 +188,11 @@ export interface AdminEventsResponse {
   events: AdminEvent[];
   total: number;
 }
+
+// ── Directions ──────────────────────────────────────────────────────────────
+
+export interface AdminDirection {
+  id: string;
+  name: string;
+  slug: string;
+}

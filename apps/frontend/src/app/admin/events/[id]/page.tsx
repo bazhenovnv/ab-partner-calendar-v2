@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { adminApi, ApiError, type AdminEvent, type EventStatus, type EventFormat, type PriceType } from '@/lib/admin-api';
+import DirectionsPicker from '@/components/admin/DirectionsPicker';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
   DRAFT: 'Черновик',
@@ -78,6 +79,7 @@ export default function EventEditPage() {
 
   const [event, setEvent] = useState<AdminEvent | null>(null);
   const [form, setForm] = useState<FormState | null>(null);
+  const [directionIds, setDirectionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -89,6 +91,7 @@ export default function EventEditPage() {
         const ev = await adminApi.get<AdminEvent>(`/events/admin/${id}`);
         setEvent(ev);
         setForm(eventToForm(ev));
+        setDirectionIds(ev.directions?.map((d) => d.direction.id) ?? []);
       } catch (err) {
         setError(err instanceof ApiError ? err.message : 'Ошибка загрузки');
       } finally {
@@ -136,6 +139,7 @@ export default function EventEditPage() {
         ticketSalesEnabled: form.ticketSalesEnabled,
         priceText: form.priceText.trim() || null,
         mainEvent: form.mainEvent,
+        directionIds,
         tags: form.tags.trim()
           ? form.tags.split(',').map((t) => t.trim()).filter(Boolean)
           : [],
@@ -144,6 +148,9 @@ export default function EventEditPage() {
       const updated = await adminApi.put<AdminEvent>(`/events/admin/${id}`, body);
       setEvent(updated);
       setForm(eventToForm(updated));
+      if (updated.directions) {
+        setDirectionIds(updated.directions.map((d) => d.direction.id));
+      }
       setOk('Сохранено');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Ошибка при сохранении');
@@ -405,6 +412,11 @@ export default function EventEditPage() {
             onChange={(e) => setField('ticketUrl', e.target.value)}
           />
         </label>
+
+        <div className="adm-label">
+          Направления
+          <DirectionsPicker selected={directionIds} onChange={setDirectionIds} />
+        </div>
 
         <label className="adm-label">
           Теги (через запятую)
