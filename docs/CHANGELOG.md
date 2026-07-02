@@ -1,5 +1,31 @@
 # Project Changelog
 
+## Stage 23 — Deploy & Operations Documentation
+
+### `docs/DEPLOY.md` (новый файл)
+- Полное руководство по первому развёртыванию на VPS Timeweb Cloud.
+- Требования к серверу, установка Docker и Docker Compose plugin.
+- Настройка DNS: A-записи для `ab-event.pro`, `www`, `test`.
+- Выпуск SSL-сертификата через certbot для `ab-event.pro`/`www.ab-event.pro`; `test.ab-event.pro` — HTTP-only с инструкцией перехода на HTTPS.
+- Создание `.env`: список обязательных переменных, генерация секретов через `openssl rand -hex`.
+- Сборка Docker-образов: три отдельные команды `docker build -f apps/*/Dockerfile` (build context = корень репозитория; `build:` секций в `docker-compose.prod.yml` нет).
+- Запуск стека: `docker compose -f docker-compose.prod.yml up -d`, ожидание healthcheck.
+- Инициализация БД: `pnpm exec prisma db seed` (только первый deploy), проверка admin через psql с `-d ab_afisha`.
+- Обязательная смена admin-пароля после первого входа.
+- Полный smoke test: 13 пунктов (`/api/health`, `/`, `/events`, `/events/<id>`, `/legal/*`, `/robots.txt`, `/sitemap.xml`, `/maintenance`, headers, `/api/auth/login`, `http://test.ab-event.pro`, Telegram `/start`, MAX `/start`).
+
+### `docs/OPERATIONS.md` (новый файл)
+- Руководство по эксплуатации и обслуживанию production-окружения.
+- Обновление: `git pull` → rebuild images → `docker compose up -d`.
+- Обязательный `pg_dump` перед каждым обновлением, меняющим схему БД.
+- Backup PostgreSQL: ручной и через cron (ежедневно в 03:00), ротация файлов старше 30 дней.
+- Restore PostgreSQL: DROP + CREATE + psql restore, порядок остановки сервисов.
+- Rollback приложения: через docker tag или пересборку из предыдущего коммита.
+- Rollback схемы БД: только через backup/restore или обратную миграцию. Явно запрещено использовать `prisma migrate resolve --rolled-back` как способ отката данных.
+- Обновление SSL: `certbot renew` с pre/post-hook для nginx, автоматизация через cron.
+- Мониторинг: `curl /api/health`, `docker stats`, `df -h`.
+- Действия при сбоях: backend, nginx, bots, redis, postgres, reminder dispatch, broadcast queue.
+
 ## Stage 21 — Nginx Production Hardening (MIN-1, MIN-5)
 
 ### `infra/nginx/conf.d/prod.conf`
