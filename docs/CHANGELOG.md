@@ -1,5 +1,16 @@
 # Project Changelog
 
+## Stage 19 — Fix Reminder Dispatch (CRIT-1)
+
+### `apps/backend/src/modules/reminders/reminders.service.ts`
+- Реализован реальный dispatch напоминаний в `processDueReminders()`.
+- Для каждого due reminder: получаем `botUser.channel` и `botUser.externalId` из include; формируем текст сообщения с названием мероприятия, датой начала (МСК) и ссылкой на страницу.
+- Telegram: отправка через `https://api.telegram.org/botTOKEN/sendMessage` с `parse_mode: HTML`; токен из `TELEGRAM_BOT_TOKEN`.
+- MAX: отправка через `https://api.max.ru/v1/messages` с `Authorization: Bearer TOKEN`; plain-text (без HTML-тегов); токен из `MAX_BOT_TOKEN`.
+- При успехе: `markSent(id)`. При ошибке: `markFailed(id, reason)` + лог; ошибка одного напоминания не останавливает остальные.
+- Добавлен `formatMsk()` хелпер для форматирования дат в UTC+3.
+- Удалён устаревший комментарий "dispatch handled by bots polling".
+
 ## Stage 17 — Production UI Polish
 
 ### `apps/frontend/src/app/events/[id]/loading.tsx`
