@@ -12,7 +12,7 @@
 | Параметр | Значение |
 |----------|----------|
 | Provider | Timeweb Cloud |
-| IP | `<NEW_TIMEWEB_SERVER_IP>` |
+| IP | `5.129.243.179` |
 | Deploy path | `/srv/ab-afisha` |
 | OS | Ubuntu 22.04 LTS или 24.04 LTS |
 | Production domain | `ab-event.pro` |
@@ -25,12 +25,12 @@
 
 | Имя | Тип | Значение | TTL |
 |-----|-----|----------|-----|
-| `@` (корень) | A | `<NEW_TIMEWEB_SERVER_IP>` | 3600 |
-| `www` | A | `<NEW_TIMEWEB_SERVER_IP>` | 3600 |
-| `test` | A | `<NEW_TIMEWEB_SERVER_IP>` | 3600 |
+| `@` (корень) | A | `5.129.243.179` | 3600 |
+| `www` | A | `5.129.243.179` | 3600 |
+| `test` | A | `5.129.243.179` | 3600 |
 
 > После изменения DNS снизить TTL до 300 перед переключением и подождать до 24 часов для полного распространения.
-> Проверить: `dig ab-event.pro +short` — должен вернуть `<NEW_TIMEWEB_SERVER_IP>`.
+> Проверить: `dig ab-event.pro +short` — должен вернуть `5.129.243.179`.
 
 ### Проверка готовности сервера (cloud-init)
 
@@ -113,12 +113,12 @@ apt install -y certbot
 
 | Имя | Тип | Значение | TTL |
 |-----|-----|----------|-----|
-| `@` (корень) | A | `<NEW_TIMEWEB_SERVER_IP>` | 3600 |
-| `www` | A | `<NEW_TIMEWEB_SERVER_IP>` | 3600 |
-| `test` | A | `<NEW_TIMEWEB_SERVER_IP>` | 3600 |
+| `@` (корень) | A | `5.129.243.179` | 3600 |
+| `www` | A | `5.129.243.179` | 3600 |
+| `test` | A | `5.129.243.179` | 3600 |
 
 > После изменения DNS подождать до 24 часов для полного распространения.
-> Проверить: `dig ab-event.pro +short` — должен вернуть `<NEW_TIMEWEB_SERVER_IP>`.
+> Проверить: `dig ab-event.pro +short` — должен вернуть `5.129.243.179`.
 
 ---
 

@@ -1,5 +1,25 @@
 # Project Changelog
 
+## Stage 30 — Final Server Configuration
+
+### `README.md`
+- Placeholder `<NEW_TIMEWEB_SERVER_IP>` заменён на реальный IP: `5.129.243.179`.
+
+### `docs/DEPLOY.md`
+- Все вхождения `<NEW_TIMEWEB_SERVER_IP>` заменены на `5.129.243.179` (9 мест: таблица параметров сервера, DNS A-записи в шапке и в разделе 3).
+
+### `docs/OPERATIONS.md`
+- Все вхождения `<NEW_TIMEWEB_SERVER_IP>` заменены на `5.129.243.179` (8 мест: раздел 10 — SSH-команда, DNS-таблица, scp-команда, smoke test с `--resolve`).
+
+**Итоговые параметры сервера:**
+- Provider: Timeweb Cloud
+- IP: `5.129.243.179`
+- Deploy path: `/srv/ab-afisha`
+- Domain: `ab-event.pro` / `www.ab-event.pro`
+- Staging: `test.ab-event.pro` (HTTP-only)
+
+---
+
 ## Stage 29 — New Timeweb Server Migration Docs
 
 ### `docs/DEPLOY.md`

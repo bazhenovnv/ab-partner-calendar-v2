@@ -407,11 +407,11 @@ docker compose -f docker-compose.prod.yml exec postgres \
 
 ### 10.1 Подготовка нового сервера
 
-1. Получить IP нового сервера от Timeweb Cloud (`<NEW_TIMEWEB_SERVER_IP>`).
+1. Получить IP нового сервера от Timeweb Cloud (`5.129.243.179`).
 2. Проверить базовое ПО:
 
 ```bash
-ssh root@<NEW_TIMEWEB_SERVER_IP>
+ssh root@5.129.243.179
 docker --version
 docker compose version
 ufw status
@@ -433,9 +433,9 @@ dig ab-event.pro +noall +answer
 
 | Имя | Значение |
 |-----|----------|
-| `@` | `<NEW_TIMEWEB_SERVER_IP>` |
-| `www` | `<NEW_TIMEWEB_SERVER_IP>` |
-| `test` | `<NEW_TIMEWEB_SERVER_IP>` |
+| `@` | `5.129.243.179` |
+| `www` | `5.129.243.179` |
+| `test` | `5.129.243.179` |
 
 Проверить распространение:
 
@@ -446,7 +446,7 @@ dig ab-event.pro +short @1.1.1.1
 dig ab-event.pro +short @77.88.8.8
 ```
 
-Ждать, пока все три вернут `<NEW_TIMEWEB_SERVER_IP>`.
+Ждать, пока все три вернут `5.129.243.179`.
 
 ### 10.3 Перенос данных (backup → restore)
 
@@ -461,7 +461,7 @@ docker compose -f docker-compose.prod.yml exec -T postgres \
 Передать дамп на новый сервер:
 
 ```bash
-scp /srv/backups/migration-*.sql root@<NEW_TIMEWEB_SERVER_IP>:/srv/backups/
+scp /srv/backups/migration-*.sql root@5.129.243.179:/srv/backups/
 ```
 
 > Если старый сервер уже недоступен — восстановить из последнего резервного backup
@@ -481,7 +481,7 @@ scp /srv/backups/migration-*.sql root@<NEW_TIMEWEB_SERVER_IP>:/srv/backups/
 
 ```bash
 # Быстрая проверка с нового IP
-curl -s --resolve ab-event.pro:443:<NEW_TIMEWEB_SERVER_IP> https://ab-event.pro/api/health
+curl -s --resolve ab-event.pro:443:5.129.243.179 https://ab-event.pro/api/health
 ```
 
 Ожидается: `{"status":"ok","services":{"api":"ok","database":"ok"}}`
