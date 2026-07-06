@@ -20,7 +20,7 @@ FROM node:20-alpine AS runner
 RUN npm install -g pnpm@9.15.0
 WORKDIR /app
 
-COPY --from=build /app/package.json /app/pnpm-workspace.yaml ./
+COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
 COPY --from=build /app/packages/shared/package.json ./packages/shared/
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/bots/package.json ./apps/bots/

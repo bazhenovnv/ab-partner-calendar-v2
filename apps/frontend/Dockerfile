@@ -14,6 +14,7 @@ RUN pnpm --filter @ab-afisha/shared build
 
 FROM shared-build AS build
 COPY apps/frontend ./apps/frontend
+RUN mkdir -p /app/apps/frontend/public
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter frontend run build
 

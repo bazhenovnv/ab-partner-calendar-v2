@@ -14,13 +14,14 @@ RUN pnpm --filter @ab-afisha/shared build
 
 FROM shared-build AS build
 COPY apps/backend ./apps/backend
+RUN pnpm --filter backend exec prisma generate
 RUN pnpm --filter backend run build
 
 FROM node:20-alpine AS runner
 RUN npm install -g pnpm@9.15.0
 WORKDIR /app
 
-COPY --from=build /app/package.json /app/pnpm-workspace.yaml ./
+COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
 COPY --from=build /app/packages/shared/package.json ./packages/shared/
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/backend/package.json ./apps/backend/
