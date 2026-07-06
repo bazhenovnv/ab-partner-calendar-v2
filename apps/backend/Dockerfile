@@ -3,7 +3,7 @@ RUN npm install -g pnpm@9.15.0
 WORKDIR /app
 
 FROM base AS deps
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/backend/package.json ./apps/backend/
 RUN pnpm install --frozen-lockfile
@@ -14,7 +14,7 @@ RUN pnpm --filter @ab-afisha/shared build
 
 FROM shared-build AS build
 COPY apps/backend ./apps/backend
-RUN pnpm --filter backend exec prisma generate
+# prebuild script in apps/backend/package.json runs "prisma generate" first
 RUN pnpm --filter backend run build
 
 FROM node:20-alpine AS runner
@@ -28,9 +28,9 @@ COPY --from=build /app/apps/backend/package.json ./apps/backend/
 COPY --from=build /app/apps/backend/dist ./apps/backend/dist
 COPY --from=build /app/apps/backend/prisma ./apps/backend/prisma
 
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod
 # Generate Prisma Client in the production image after prod deps are installed
-RUN pnpm --filter backend exec prisma generate
+RUN pnpm --filter backend exec prisma generate --schema=apps/backend/prisma/schema.prisma
 
 WORKDIR /app/apps/backend
 
