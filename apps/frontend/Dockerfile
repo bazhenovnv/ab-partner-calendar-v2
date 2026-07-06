@@ -3,7 +3,7 @@ RUN npm install -g pnpm@9.15.0
 WORKDIR /app
 
 FROM base AS deps
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/frontend/package.json ./apps/frontend/
 RUN pnpm install --frozen-lockfile
@@ -14,6 +14,8 @@ RUN pnpm --filter @ab-afisha/shared build
 
 FROM shared-build AS build
 COPY apps/frontend ./apps/frontend
+# Ensure public dir exists even if empty (Docker COPY --from fails on missing source)
+RUN mkdir -p /app/apps/frontend/public
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter frontend run build
 
