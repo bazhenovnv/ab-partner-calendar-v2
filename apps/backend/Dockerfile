@@ -30,7 +30,7 @@ COPY --from=build /app/apps/backend/prisma ./apps/backend/prisma
 
 RUN pnpm install --prod
 # Generate Prisma Client in the production image after prod deps are installed
-RUN pnpm --filter backend exec prisma generate --schema=apps/backend/prisma/schema.prisma
+RUN pnpm --filter backend exec prisma generate --schema=prisma/schema.prisma
 
 WORKDIR /app/apps/backend
 
