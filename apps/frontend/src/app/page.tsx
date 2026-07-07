@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 import { PublicShell } from '@/components/layout/PublicShell';
 import { MainEventsBanner } from '@/components/events/MainEventsBanner';
 import { EventsSection } from '@/components/events/EventsSection';
-import { fetchMainEvents, fetchPublicEvents, fetchDirections } from '@/lib/api';
+import { HeroSection } from '@/components/HeroSection';
+import { HowItWorksBlock } from '@/components/HowItWorksBlock';
+import { RemindersBlock } from '@/components/RemindersBlock';
+import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
+import { fetchMainEvents, fetchPublicEvents, fetchDirections, fetchPublicQuotes } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,10 +31,11 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [mainEvents, initialEvents, directions] = await Promise.allSettled([
+  const [mainEvents, initialEvents, directions, quotes] = await Promise.allSettled([
     fetchMainEvents(),
     fetchPublicEvents({ page: 1, limit: 6 }),
     fetchDirections(),
+    fetchPublicQuotes(),
   ]);
 
   const main = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
@@ -39,11 +44,18 @@ export default async function HomePage() {
       ? initialEvents.value
       : { events: [], total: 0, isFallback: false };
   const dirs = directions.status === 'fulfilled' ? directions.value : [];
+  const qs = quotes.status === 'fulfilled' ? quotes.value : [];
 
   return (
     <PublicShell>
+      <HeroSection />
       {main.length > 0 && <MainEventsBanner events={main} />}
-      <EventsSection initialData={events} directions={dirs} />
+      <div id="events">
+        <EventsSection initialData={events} directions={dirs} />
+      </div>
+      <HowItWorksBlock />
+      <RemindersBlock />
+      {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
     </PublicShell>
   );
 }

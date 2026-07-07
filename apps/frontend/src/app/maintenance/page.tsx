@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ async function getSiteStatus(): Promise<SiteStatus> {
   return {
     maintenanceEnabled: true,
     title: 'Технические работы',
-    description: 'Сайт временно недоступен. Пожалуйста, зайдите позже.',
+    description: 'Мы проводим технические работы для улучшения сервиса. Совсем скоро всё снова будет доступно.',
     imageUrl: '',
   };
 }
@@ -32,13 +33,35 @@ export default async function MaintenancePage() {
   const status = await getSiteStatus();
 
   return (
-    <div className="maint-page">
-      {status.imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={status.imageUrl} alt="" className="maint-image" width={320} height={320} />
-      )}
-      <h1 className="maint-title">{status.title}</h1>
-      <p className="maint-description">{status.description}</p>
+    <div className="maint-root">
+      <div className="maint-card">
+        <div className="maint-img-wrap">
+          {status.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={status.imageUrl} alt="" className="maint-custom-img" width={200} height={200} />
+          ) : (
+            <Image
+              src="/maintenance.png"
+              alt=""
+              width={200}
+              height={200}
+              className="maint-default-img"
+              priority
+            />
+          )}
+        </div>
+        <div className="maint-badge">Технические работы</div>
+        <h1 className="maint-heading">{status.title}</h1>
+        <p className="maint-body">{status.description}</p>
+        <div className="maint-divider" aria-hidden="true" />
+        <p className="maint-hint">Спасибо за понимание! Мы делаем всё, чтобы сервис стал ещё удобнее для вас.</p>
+        <a href="https://t.me/ab_afisha_buh" target="_blank" rel="noopener noreferrer" className="maint-tg-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.1 13.771 4.16 12.87c-.635-.197-.648-.635.136-.937l11.083-4.274c.53-.194.994.13.515.562z" />
+          </svg>
+          Следить в Telegram
+        </a>
+      </div>
     </div>
   );
 }
