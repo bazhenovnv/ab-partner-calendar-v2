@@ -39,6 +39,7 @@ import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
         redis: {
           host: config.get('REDIS_HOST', 'redis'),
           port: config.get<number>('REDIS_PORT', 6379),
+          password: config.get<string>('REDIS_PASSWORD') || undefined,
         },
       }),
     }),
