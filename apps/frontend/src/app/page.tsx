@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 import { PublicShell } from '@/components/layout/PublicShell';
-import { MainEventsBanner } from '@/components/events/MainEventsBanner';
-import { EventsSection } from '@/components/events/EventsSection';
 import { HeroSection } from '@/components/HeroSection';
-import { HowItWorksBlock } from '@/components/HowItWorksBlock';
-import { RemindersBlock } from '@/components/RemindersBlock';
+import { EventsSection } from '@/components/events/EventsSection';
+import { MainEventsBanner } from '@/components/events/MainEventsBanner';
 import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
 import { fetchMainEvents, fetchPublicEvents, fetchDirections, fetchPublicQuotes } from '@/lib/api';
 
@@ -38,23 +36,18 @@ export default async function HomePage() {
     fetchPublicQuotes(),
   ]);
 
-  const main = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
-  const events =
-    initialEvents.status === 'fulfilled'
-      ? initialEvents.value
-      : { events: [], total: 0, isFallback: false };
-  const dirs = directions.status === 'fulfilled' ? directions.value : [];
-  const qs = quotes.status === 'fulfilled' ? quotes.value : [];
+  const main   = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
+  const events = initialEvents.status === 'fulfilled'
+    ? initialEvents.value
+    : { events: [], total: 0, isFallback: false };
+  const dirs   = directions.status === 'fulfilled' ? directions.value : [];
+  const qs     = quotes.status === 'fulfilled' ? quotes.value : [];
 
   return (
     <PublicShell>
       <HeroSection />
+      <EventsSection initialData={events} directions={dirs} />
       {main.length > 0 && <MainEventsBanner events={main} />}
-      <div id="events">
-        <EventsSection initialData={events} directions={dirs} />
-      </div>
-      <HowItWorksBlock />
-      <RemindersBlock />
       {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
     </PublicShell>
   );

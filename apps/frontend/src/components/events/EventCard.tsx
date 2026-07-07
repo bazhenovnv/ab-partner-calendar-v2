@@ -54,6 +54,8 @@ export function EventCard({ event, className }: EventCardProps) {
             <span className="text-primary/20 text-4xl font-bold">АБ</span>
           </div>
         )}
+
+        {/* Status badge — top left */}
         {status.label && (
           <span
             className={cn(
@@ -64,6 +66,14 @@ export function EventCard({ event, className }: EventCardProps) {
             {status.label}
           </span>
         )}
+
+        {/* Date badge — bottom left overlay */}
+        <div className="absolute bottom-3 left-3 bg-white rounded-lg px-2.5 py-1.5 shadow-sm flex flex-col items-start leading-tight">
+          <span className="text-xs font-bold text-primary">{dateStr}</span>
+          {event.startTime && (
+            <span className="text-xs text-primary/60">{event.startTime}</span>
+          )}
+        </div>
       </div>
 
       <div className="p-4 tablet:p-5 flex flex-col gap-2">
@@ -76,6 +86,17 @@ export function EventCard({ event, className }: EventCardProps) {
               {d.direction.name}
             </span>
           ))}
+          <span className={cn(
+            'px-2 py-0.5 rounded-full text-xs font-medium',
+            event.format === 'ONLINE'
+              ? 'bg-mint/10 text-selected-day'
+              : 'bg-primary/8 text-primary/70',
+          )}>
+            {formatFormat(event.format)}
+          </span>
+          {cityLabel && event.format === 'OFFLINE' && (
+            <span className="text-xs bg-primary/5 text-primary/60 px-2 py-0.5 rounded-full">{cityLabel}</span>
+          )}
         </div>
 
         <h3 className="font-montserrat font-semibold text-primary text-base tablet:text-lg leading-snug line-clamp-2 group-hover:text-selected-day transition-colors">
@@ -88,25 +109,15 @@ export function EventCard({ event, className }: EventCardProps) {
           </p>
         )}
 
-        <div className="mt-auto pt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-primary/70 border-t border-dropdown-border">
-          <span className="font-medium text-primary">{dateStr}</span>
-          {event.startTime && <span>{event.startTime}</span>}
+        <div className="mt-auto pt-2 flex items-center justify-between border-t border-dropdown-border">
           <span className={cn(
-            'px-2 py-0.5 rounded text-xs font-medium',
-            event.format === 'ONLINE'
-              ? 'bg-mint/10 text-selected-day'
-              : 'bg-primary/8 text-primary/70',
-          )}>
-            {formatFormat(event.format)}
-          </span>
-          {cityLabel && event.format === 'OFFLINE' && (
-            <span className="text-xs">{cityLabel}</span>
-          )}
-          <span className={cn(
-            'ml-auto text-xs font-semibold',
+            'text-xs font-semibold',
             event.priceType === 'FREE' ? 'text-selected-day' : 'text-primary/70',
           )}>
             {formatPrice(event.priceType, event.priceText)}
+          </span>
+          <span className="text-xs font-semibold text-selected-day group-hover:underline">
+            Подробнее →
           </span>
         </div>
       </div>

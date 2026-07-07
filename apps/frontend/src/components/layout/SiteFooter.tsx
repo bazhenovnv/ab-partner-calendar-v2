@@ -4,6 +4,9 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { LEGAL_LINKS } from '@/lib/legal';
 
+const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
+const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
+const PARTNER_URL = 'https://ab-buhpartner.ru/';
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'info-event@a-b.ru';
 
 export function SiteFooter() {
@@ -11,64 +14,104 @@ export function SiteFooter() {
 
   const handleEmailClick = useCallback(
     async (e: React.MouseEvent<HTMLAnchorElement>) => {
-      // Always open mailto; additionally try to copy
       try {
         await navigator.clipboard.writeText(CONTACT_EMAIL);
         setToast('copied');
       } catch {
-        // Clipboard blocked — mailto still opens via default href behavior
         setToast('fallback');
       }
       setTimeout(() => setToast(null), 2500);
-      // Let the default href="mailto:..." proceed so mail client opens
       void e;
     },
     [],
   );
 
   return (
-    <footer className="bg-[#071729] mt-auto" aria-label="Подвал сайта">
-      <div className="max-w-[1440px] mx-auto px-4 tablet:px-8 py-6 tablet:py-8">
-        <div className="flex flex-col tablet:flex-row tablet:items-center tablet:justify-between gap-4">
-          <nav
-            aria-label="Юридические документы"
-            className="flex flex-wrap gap-x-4 gap-y-2"
-          >
+    <footer className="pub-footer" aria-label="Подвал сайта">
+      <div className="pub-footer-inner">
+        <div className="pub-footer-top">
+          {/* Brand */}
+          <div className="pub-footer-brand">
+            <div className="pub-footer-logo">
+              <div className="pub-footer-logo-mark">АБ</div>
+              <span className="pub-footer-logo-text">
+                Афиша <span className="pub-footer-logo-accent">Бухгалтера</span>
+              </span>
+            </div>
+            <p className="pub-footer-desc">
+              Онлайн и офлайн события для профессионального роста, обмена опытом
+              и актуальной практики бухгалтеров по всей России.
+            </p>
+          </div>
+
+          {/* Projects */}
+          <div className="pub-footer-col">
+            <p className="pub-footer-col-title">Наши проекты</p>
+            <ul className="pub-footer-links">
+              <li>
+                <a href={PARTNER_URL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
+                  АБ Партнёр
+                </a>
+              </li>
+              <li>
+                <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
+                  Telegram-канал
+                </a>
+              </li>
+              <li>
+                <a href={MAX_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
+                  MAX-канал
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contacts */}
+          <div className="pub-footer-col">
+            <p className="pub-footer-col-title">Контакты</p>
+            <ul className="pub-footer-links">
+              <li className="relative">
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  onClick={handleEmailClick}
+                  aria-label={`Написать на ${CONTACT_EMAIL} (нажмите, чтобы скопировать)`}
+                  className="pub-footer-link"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+                {toast && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="absolute bottom-full left-0 mb-2 bg-selected-day text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-base whitespace-nowrap animate-fade-in"
+                  >
+                    {toast === 'copied' ? 'Email скопирован' : 'Почтовый клиент открыт'}
+                  </div>
+                )}
+              </li>
+              <li>
+                <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
+                  Telegram
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pub-footer-divider" />
+
+        <div className="pub-footer-bottom">
+          <nav aria-label="Юридические документы" className="pub-footer-legal">
             {LEGAL_LINKS.map((link) => (
-              <Link
-                key={link.type}
-                href={link.href}
-                className="text-mint/70 text-xs hover:text-mint transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mint rounded"
-              >
+              <Link key={link.type} href={link.href} className="pub-footer-legal-link">
                 {link.label}
               </Link>
             ))}
           </nav>
-
-          <div className="relative shrink-0">
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              onClick={handleEmailClick}
-              aria-label={`Написать на ${CONTACT_EMAIL} (нажмите, чтобы скопировать)`}
-              className="text-white/40 text-xs hover:text-white/70 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-mint rounded"
-            >
-              {CONTACT_EMAIL}
-            </a>
-
-            {toast && (
-              <div
-                role="status"
-                aria-live="polite"
-                className="absolute bottom-full right-0 mb-2 bg-selected-day text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-base whitespace-nowrap animate-fade-in"
-              >
-                {toast === 'copied' ? 'Email скопирован' : 'Почтовый клиент открыт'}
-              </div>
-            )}
-          </div>
+          <p className="pub-footer-copy">
+            © {new Date().getFullYear()} АБ Афиша Бухгалтера
+          </p>
         </div>
-        <p className="mt-4 text-white/25 text-xs">
-          © {new Date().getFullYear()} АБ Афиша Бухгалтера
-        </p>
       </div>
     </footer>
   );

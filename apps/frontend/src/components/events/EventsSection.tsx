@@ -94,10 +94,20 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
   const loading = isPending || isLoading;
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 tablet:px-8 py-8 tablet:py-12">
-      <div className="flex flex-col desktop:flex-row gap-8">
-        {/* Sidebar: calendar */}
-        <aside className="desktop:w-[320px] shrink-0">
+    <section id="events" className="max-w-[1440px] mx-auto px-4 tablet:px-8 py-8 tablet:py-12">
+      {/* Controls row: filters left, calendar right */}
+      <div className="pub-events-controls">
+        <div className="pub-events-filters-col">
+          <h2 className="font-montserrat font-bold text-primary text-2xl tablet:text-3xl mb-4">
+            Мероприятия
+          </h2>
+          <EventFilters
+            directions={directions}
+            filters={filters}
+            onChange={handleFilterChange}
+          />
+        </div>
+        <div className="pub-events-calendar-col">
           <EventCalendar
             selectedDate={selectedDate}
             onSelectDate={handleDateSelect}
@@ -107,69 +117,56 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
               Показаны мероприятия на {selectedDate}
             </p>
           )}
-        </aside>
-
-        {/* Main: filters + list */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col gap-6">
-            <div>
-              <h2 className="font-montserrat font-bold text-primary text-2xl tablet:text-3xl mb-4">
-                Мероприятия
-              </h2>
-              <EventFilters
-                directions={directions}
-                filters={filters}
-                onChange={handleFilterChange}
-              />
-            </div>
-
-            {isFallback && !loading && (
-              <div className="bg-primary/5 rounded-xl px-4 py-3 text-sm text-primary/70">
-                Актуальных мероприятий пока нет — показываем последние завершённые.
-              </div>
-            )}
-
-            {loading ? (
-              <EventGridSkeleton count={LIMIT} />
-            ) : events.length === 0 ? (
-              <EmptyState
-                hasFilters={
-                  !!selectedDate ||
-                  filters.format !== '' ||
-                  filters.priceType !== '' ||
-                  filters.autoStatus !== '' ||
-                  filters.directions.length > 0
-                }
-                onReset={() => {
-                  setSelectedDate(null);
-                  handleFilterChange({ directions: [], format: '', priceType: '', autoStatus: '' });
-                }}
-              />
-            ) : (
-              <>
-                <div className="grid grid-cols-1 tablet:grid-cols-2 wide:grid-cols-3 gap-6">
-                  {events.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-
-                {totalPages > 1 && (
-                  <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                  />
-                )}
-
-                <p className="text-xs text-primary/40 text-right">
-                  Найдено: {total} мероприятий
-                </p>
-              </>
-            )}
-          </div>
         </div>
       </div>
-    </div>
+
+      {/* Events grid — full width below controls */}
+      <div className="mt-8 flex flex-col gap-6">
+        {isFallback && !loading && (
+          <div className="bg-primary/5 rounded-xl px-4 py-3 text-sm text-primary/70">
+            Актуальных мероприятий пока нет — показываем последние завершённые.
+          </div>
+        )}
+
+        {loading ? (
+          <EventGridSkeleton count={LIMIT} />
+        ) : events.length === 0 ? (
+          <EmptyState
+            hasFilters={
+              !!selectedDate ||
+              filters.format !== '' ||
+              filters.priceType !== '' ||
+              filters.autoStatus !== '' ||
+              filters.directions.length > 0
+            }
+            onReset={() => {
+              setSelectedDate(null);
+              handleFilterChange({ directions: [], format: '', priceType: '', autoStatus: '' });
+            }}
+          />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 tablet:grid-cols-2 wide:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+
+            <p className="text-xs text-primary/40 text-right">
+              Найдено: {total} мероприятий
+            </p>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 
