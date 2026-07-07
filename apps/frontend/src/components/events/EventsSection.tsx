@@ -173,30 +173,74 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
   );
 }
 
+const TG_CHANNEL = 'https://t.me/ab_afisha_buh';
+const PARTNER_URL = 'https://ab-buhpartner.ru/';
+
 function EmptyState({ hasFilters, onReset }: { hasFilters: boolean; onReset?: () => void }) {
+  if (hasFilters) {
+    return (
+      <div className="flex flex-col items-center justify-center py-14 text-center">
+        <div className="w-14 h-14 rounded-full bg-primary/5 flex items-center justify-center mb-4">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <circle cx="13" cy="13" r="8" stroke="#0D2344" strokeWidth="1.4" strokeOpacity="0.35" />
+            <path d="M19 19l4 4" stroke="#0D2344" strokeWidth="1.4" strokeOpacity="0.35" strokeLinecap="round" />
+            <path d="M10 13h6M13 10v6" stroke="#0D2344" strokeWidth="1.4" strokeOpacity="0.3" strokeLinecap="round" />
+          </svg>
+        </div>
+        <p className="font-montserrat font-semibold text-primary text-lg mb-1">
+          По вашим фильтрам ничего не найдено
+        </p>
+        <p className="text-sm text-primary/50 mb-5">
+          Попробуйте изменить или сбросить параметры поиска
+        </p>
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-sm font-semibold text-selected-day hover:text-selected-day/80 active:text-selected-day/60 underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2 rounded"
+          >
+            Сбросить все фильтры
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-          <rect x="4" y="8" width="24" height="20" rx="3" stroke="#0D2344" strokeWidth="1.5" strokeOpacity="0.3" />
-          <path d="M10 4v8M22 4v8M4 16h24" stroke="#0D2344" strokeWidth="1.5" strokeOpacity="0.3" strokeLinecap="round" />
+    <div className="empty-state-card">
+      <div className="empty-state-icon" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect x="6" y="12" width="36" height="30" rx="4" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" />
+          <path d="M15 6v12M33 6v12M6 24h36" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" strokeLinecap="round" />
+          <path d="M16 34l4 4 8-8" stroke="#7CD8B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <p className="font-montserrat font-semibold text-primary/60 text-lg mb-1">
-        {hasFilters ? 'По вашим фильтрам ничего не найдено' : 'Мероприятий пока нет'}
+      <h3 className="empty-state-title">Мероприятия скоро появятся</h3>
+      <p className="empty-state-text">
+        Мы готовим календарь вебинаров, семинаров и важных событий для бухгалтеров.
+        Подпишитесь на канал, чтобы получить уведомление первым.
       </p>
-      <p className="text-sm text-primary/40 mb-4">
-        {hasFilters ? 'Попробуйте изменить или сбросить фильтры' : 'Загляните позже — скоро появятся новые события'}
-      </p>
-      {hasFilters && onReset && (
-        <button
-          type="button"
-          onClick={onReset}
-          className="text-sm font-medium text-selected-day hover:text-selected-day/80 active:text-selected-day/60 underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2 rounded"
+      <div className="empty-state-actions">
+        <a
+          href={TG_CHANNEL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="empty-state-btn-primary"
         >
-          Сбросить все фильтры
-        </button>
-      )}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.1 13.771 4.16 12.87c-.635-.197-.648-.635.136-.937l11.083-4.274c.53-.194.994.13.515.562z" />
+          </svg>
+          Перейти в Telegram
+        </a>
+        <a
+          href={PARTNER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="empty-state-btn-secondary"
+        >
+          Стать партнёром
+        </a>
+      </div>
     </div>
   );
 }

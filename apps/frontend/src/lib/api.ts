@@ -78,3 +78,13 @@ export async function fetchDirections(): Promise<DirectionOption[]> {
 export async function fetchCities(): Promise<CityOption[]> {
   return serverFetch<CityOption[]>('/filters/cities');
 }
+
+export type PublicQuote = { id: string; text: string; author: string };
+
+export async function fetchPublicQuotes(): Promise<PublicQuote[]> {
+  try {
+    return await serverFetch<PublicQuote[]>('/quotes/public');
+  } catch {
+    return [];
+  }
+}
