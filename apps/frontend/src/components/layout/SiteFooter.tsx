@@ -112,6 +112,9 @@ export function SiteFooter() {
             © {new Date().getFullYear()} АБ Афиша Бухгалтера
           </p>
         </div>
+        <p className="pub-footer-operator">
+          ООО «АБ ГРУПП» · ОГРН&nbsp;1212300074766 · ИНН&nbsp;2308283450
+        </p>
       </div>
     </footer>
   );

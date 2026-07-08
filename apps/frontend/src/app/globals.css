@@ -1199,3 +1199,9 @@ body {
   color: rgba(255,255,255,0.25);
   white-space: nowrap;
 }
+.pub-footer-operator {
+  font-size: 0.6875rem;
+  color: rgba(255,255,255,0.18);
+  margin-top: 0.5rem;
+  text-align: left;
+}
