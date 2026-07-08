@@ -58,14 +58,6 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
     [],
   );
 
-  // Refetch when filters/date/page change (skip initial mount — we have SSR data)
-  const isFirstMount = useCallback(() => false, []);
-  void isFirstMount;
-
-  useEffect(() => {
-    // Don't fetch on initial render since we have SSR data
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleFilterChange = (newFilters: ActiveFilters) => {
     setFilters(newFilters);
     setPage(1);

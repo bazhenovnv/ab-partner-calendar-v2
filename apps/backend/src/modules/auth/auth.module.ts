@@ -12,10 +12,14 @@ import { LocalStrategy } from './strategies/local.strategy';
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET', 'dev-secret-change-in-prod'),
-        signOptions: { expiresIn: config.get('JWT_EXPIRES_IN', '8h') },
-      }),
+      useFactory: (config: ConfigService) => {
+        const secret = config.get<string>('JWT_SECRET');
+        if (!secret) throw new Error('JWT_SECRET env variable is required');
+        return {
+          secret,
+          signOptions: { expiresIn: config.get('JWT_EXPIRES_IN', '8h') },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

@@ -372,4 +372,49 @@
 
 ---
 
+---
+
+## Stage 38 — Release Candidate Audit (добавлено 2026-07-08)
+
+Задачи выявлены при полном обходе кода в рамках Stage 38. Все HIGH-задачи приоритизированы перед релизом.
+
+### v1.0 Pre-Release (блокеры закрыты автоматически в аудите)
+
+| ID | Описание | Статус |
+|----|----------|--------|
+| RC-A1 | JWT_SECRET: убран fallback, throw при отсутствии | ✅ ИСПРАВЛЕНО |
+| RC-A2 | .env.example root: добавлены NEXT_PUBLIC_YANDEX_METRIKA_ID, NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_API_URL | ✅ ИСПРАВЛЕНО |
+| RC-A3 | frontend/.env.example: добавлен NEXT_PUBLIC_MAX_BOT_URL | ✅ ИСПРАВЛЕНО |
+| RC-A4 | backend/.env.example: добавлен REDIS_PASSWORD | ✅ ИСПРАВЛЕНО |
+| RC-A5 | main.ts: console.log → Logger.log | ✅ ИСПРАВЛЕНО |
+| RC-A6 | EventsSection.tsx: удалён мёртвый код (isFirstMount + пустой useEffect) | ✅ ИСПРАВЛЕНО |
+| RC-A7 | broadcasts/[id]/page.tsx: silent catch → обработка ошибок с отображением | ✅ ИСПРАВЛЕНО |
+| RC-A8 | package.json всех пакетов: добавлен test script | ✅ ИСПРАВЛЕНО |
+
+### v1.1 Backlog (перенесено из Stage 38)
+
+| ID | Приоритет | Описание |
+|----|-----------|----------|
+| RC-B1 | 🟠 HIGH | Broadcast N+1: isCooldownActive per-recipient → batch lookup |
+| RC-B2 | 🟠 HIGH | Prisma indexes: Reminder.botUserId, EventDirection.directionId, HashtagMapping.directionId, ApiSourceLog.sourceId |
+| RC-B3 | 🟡 MEDIUM | Bot DTOs (UpsertBotUserDto, AcceptLegalDto, SavePhoneDto) без class-validator декораторов |
+| RC-B4 | 🟡 MEDIUM | apiAcceptLegal/apiSavePhone return value ignored в ботах |
+| RC-B5 | 🟡 MEDIUM | max-import runManual() без try/catch |
+| RC-B6 | 🟡 MEDIUM | Admin error.tsx — отсутствует admin-styled error boundary |
+| RC-B7 | 🟢 LOW | assertBotToken дублируется в 3 контроллерах |
+| RC-B8 | 🟢 LOW | buildMessageText() deprecated — удалить |
+| RC-B9 | 🟢 LOW | ~45 as any в backend broadcasts/events |
+| RC-B10 | 🟢 LOW | Dockerfile: no USER instruction (запуск от root) |
+| RC-B11 | 🟢 LOW | Dev Redis: no password, 6379 открыт на host |
+| RC-B12 | 🟢 LOW | SiteConfigVersion: нет FK к SiteConfig |
+| RC-B13 | 🟢 LOW | Reminder: нет @@unique([botUserId, eventId]) |
+| RC-B14 | 🟢 LOW | Dead bots deps: @prisma/client, ioredis, node-fetch |
+| RC-B15 | 🟢 LOW | MAX Bot: нет /help, /cancel |
+| RC-B16 | 🟢 LOW | Telegram Bot: нет /cancel; in-memory state machine |
+| RC-B17 | 🟢 LOW | Backend tsconfig: strictFunctionTypes выключен |
+| RC-B18 | 🟢 LOW | Константы MAX_CHANNEL, PARTNER_URL дублируются в 4 файлах |
+| RC-B19 | 🟢 LOW | Нет unit/integration тестов |
+
+---
+
 *Документ создан автоматически по результатам аудита 2026-07-08. Обновлять при закрытии задач.*

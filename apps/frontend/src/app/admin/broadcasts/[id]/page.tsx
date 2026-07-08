@@ -32,6 +32,8 @@ export default function BroadcastDetailPage() {
   const [logs, setLogs] = useState<Paginated<BroadcastLog> | null>(null);
   const [recipPage, setRecipPage] = useState(1);
   const [logsPage, setLogsPage] = useState(1);
+  const [recipError, setRecipError] = useState('');
+  const [logsError, setLogsError] = useState('');
 
   // test-send chat id
   const [adminChatId, setAdminChatId] = useState('');
@@ -58,21 +60,27 @@ export default function BroadcastDetailPage() {
   }, [tab, recipPage, logsPage]);
 
   async function loadRecipients() {
+    setRecipError('');
     try {
       const res = await adminApi.get<Paginated<BroadcastRecipient>>(
         `/broadcasts/${id}/recipients?page=${recipPage}&limit=50`,
       );
       setRecipients(res);
-    } catch { /* silent */ }
+    } catch (err) {
+      setRecipError(err instanceof ApiError ? err.message : 'Ошибка загрузки получателей');
+    }
   }
 
   async function loadLogs() {
+    setLogsError('');
     try {
       const res = await adminApi.get<Paginated<BroadcastLog>>(
         `/broadcasts/${id}/logs?page=${logsPage}&limit=100`,
       );
       setLogs(res);
-    } catch { /* silent */ }
+    } catch (err) {
+      setLogsError(err instanceof ApiError ? err.message : 'Ошибка загрузки логов');
+    }
   }
 
   function flash(msg: string) {
@@ -248,7 +256,8 @@ export default function BroadcastDetailPage() {
 
       {tab === 'recipients' && (
         <div className="adm-tab-content">
-          {!recipients && <p className="adm-muted">Загрузка…</p>}
+          {recipError && <p className="adm-error">{recipError}</p>}
+          {!recipError && !recipients && <p className="adm-muted">Загрузка…</p>}
           {recipients && recipients.items.length === 0 && <p className="adm-muted">Получателей нет.</p>}
           {recipients && recipients.items.length > 0 && (
             <>
@@ -283,7 +292,8 @@ export default function BroadcastDetailPage() {
 
       {tab === 'logs' && (
         <div className="adm-tab-content">
-          {!logs && <p className="adm-muted">Загрузка…</p>}
+          {logsError && <p className="adm-error">{logsError}</p>}
+          {!logsError && !logs && <p className="adm-muted">Загрузка…</p>}
           {logs && logs.items.length === 0 && <p className="adm-muted">Логов нет.</p>}
           {logs && logs.items.length > 0 && (
             <>

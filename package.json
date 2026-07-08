@@ -16,6 +16,7 @@
     "db:migrate": "pnpm --filter backend exec prisma migrate dev",
     "db:deploy": "pnpm --filter backend exec prisma migrate deploy",
     "db:seed": "pnpm --filter backend exec prisma db seed",
+    "test": "pnpm --recursive test",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f"

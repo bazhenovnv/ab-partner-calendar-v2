@@ -7,6 +7,7 @@
     "prebuild": "prisma generate",
     "build": "nest build",
     "start": "node dist/main",
+    "test": "echo \"No tests yet — see RELEASE_BACKLOG.md\" && exit 0",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "prisma": "prisma",

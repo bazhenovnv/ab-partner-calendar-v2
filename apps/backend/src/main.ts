@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -44,7 +44,7 @@ async function bootstrap() {
   }
 
   await app.listen(port);
-  console.log(`Backend running on port ${port}`);
+  Logger.log(`Backend running on port ${port}`, 'Bootstrap');
 }
 
 bootstrap();
