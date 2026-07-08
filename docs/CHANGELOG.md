@@ -58,3 +58,24 @@
 - `apps/frontend/src/app/layout.tsx`
 - `apps/frontend/src/app/admin/events/page.tsx`
 - `apps/frontend/src/app/globals.css`
+
+---
+
+## [Unreleased] — MED-3
+
+### MED-3 — Подсистема справочников: Города и Направления
+
+**Backend:**
+- `apps/backend/src/modules/cities/cities.service.ts` — полный CRUD с поиском, пагинацией, сортировкой, проверкой уникальности, soft-delete при наличии мероприятий
+- `apps/backend/src/modules/cities/cities.controller.ts` — `GET/GET:id/POST/PUT/PATCH:toggle/DELETE /admin/cities`, гард `JwtAuthGuard + RolesGuard (ADMIN|EDITOR)`
+- `apps/backend/src/modules/directions/directions.service.ts` (создан) — аналогичный CRUD + валидация slug (`/^[a-z0-9-]+$/`)
+- `apps/backend/src/modules/directions/directions.controller.ts` (создан) — `GET/GET:id/POST/PUT/PATCH:toggle/DELETE /admin/directions`
+- `apps/backend/src/modules/directions/directions.module.ts` (создан) — регистрация модуля
+- `apps/backend/src/app.module.ts` — подключён `DirectionsModule`
+
+**Frontend:**
+- `apps/frontend/src/app/admin/cities/page.tsx` (создан) — страница Города: сортируемая таблица, поиск, фильтр по статусу, модальная форма, toggle, delete
+- `apps/frontend/src/app/admin/directions/page.tsx` (создан) — страница Направления: то же + slug-колонка и поле slug в форме
+- `apps/frontend/src/app/admin/AdminLayoutClient.tsx` — добавлен раздел «Справочники» в сайдбаре с ссылками Города и Направления
+- `apps/frontend/src/app/globals.css` — добавлены `.adm-sidebar__section-title`, `.adm-sidebar__link--sub`
+- `apps/frontend/src/lib/admin-api.ts` — добавлены типы `AdminCity`, `AdminCitiesResponse`, `AdminDirection`, `AdminDirectionsResponse`
