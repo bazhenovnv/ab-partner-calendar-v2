@@ -12,12 +12,12 @@
 
 | Раздел | Реализовано | Статус | Критические проблемы |
 |--------|------------|--------|----------------------|
-| Публичная главная страница | ~90% | ⚠️ Частично | Quotes API не реализован |
-| Страница события `/events/[id]` | ~95% | ✅ Хорошо | MAX bot deep-link отсутствует |
+| Публичная главная страница | 100% | ✅ Полностью | — |
+| Страница события `/events/[id]` | 100% | ✅ Полностью | — |
 | Юридические страницы `/legal/*` | 100% | ✅ Полностью | — |
 | Страница техобслуживания | 100% | ✅ Полностью | — |
 | Header | 100% | ✅ Полностью | — |
-| Footer | 95% | ✅ Хорошо | Отсутствует юрлицо в тексте |
+| Footer | 100% | ✅ Полностью | — |
 | CookieBanner | 100% | ✅ Полностью | — |
 | Яндекс.Метрика | 100% | ✅ Полностью | — |
 | Middleware (maintenance) | 100% | ✅ Полностью | — |
@@ -26,22 +26,22 @@
 | EventCard | 100% | ✅ Полностью | — |
 | EventFilters | 100% | ✅ Полностью | — |
 | MainEventsBanner | 100% | ✅ Полностью | — |
-| RotatingQuotesBlock | ~30% | 🔴 Не работает | Backend endpoint отсутствует |
-| Backend: EventsModule | ~95% | ✅ Хорошо | Нет admin UI для событий |
+| RotatingQuotesBlock | 100% | ✅ Полностью | — |
+| Backend: EventsModule | 100% | ✅ Полностью | — |
 | Backend: MaxImportModule | 100% | ✅ Полностью | — |
 | Backend: LegalModule | 100% | ✅ Полностью | — |
 | Backend: BroadcastsModule | ~90% | ✅ Хорошо | — |
 | Backend: RemindersModule | 100% | ✅ Полностью | — |
 | Backend: BotsModule | 100% | ✅ Полностью | — |
-| Backend: QuotesModule | ~5% | 🔴 Не реализован | Нет endpoint и сервисного слоя |
+| Backend: QuotesModule | 100% | ✅ Полностью | — |
 | Backend: AdminModule | 100% | ✅ Полностью | — |
 | Backend: FiltersModule | 100% | ✅ Полностью | — |
 | Backend: AnalyticsModule | ~20% | ⚠️ Частично | Модель есть, tracking не реализован |
 | Admin UI: Broadcasts | 100% | ✅ Полностью | — |
 | Admin UI: Legal | 100% | ✅ Полностью | — |
 | Admin UI: Settings | 100% | ✅ Полностью | — |
-| Admin UI: Events | 0% | 🔴 Отсутствует | Нет страниц и sidebar-ссылки |
-| Admin UI: Quotes | 0% | 🔴 Отсутствует | Нет страниц и sidebar-ссылки |
+| Admin UI: Events | 100% | ✅ Полностью | — |
+| Admin UI: Quotes | 100% | ✅ Полностью | — |
 | Telegram Bot | ~90% | ✅ Хорошо | — |
 | MAX Bot | ~85% | ⚠️ Частично | — |
 | SEO (robots, sitemap, OG) | 100% | ✅ Полностью | — |
@@ -406,56 +406,41 @@
 
 ### 🔴 CRITICAL (блокирует функциональность)
 
-#### CRIT-1: QuotesModule — backend endpoint отсутствует
+#### CRIT-1: QuotesModule — backend endpoint отсутствует ✅ RESOLVED
 - **Файл:** `apps/backend/src/modules/quotes/quotes.controller.ts`, `quotes.service.ts`
-- **Проблема:** `GET /quotes/public` не реализован. `QuotesService` — пустая заглушка. `QuotesController` — только health endpoint.
-- **Последствие:** `RotatingQuotesBlock` всегда пустой. Блок цитат никогда не показывается на сайте (условие `qs.length > 0`).
-- **Что нужно:** Добавить в `QuotesService` метод `getPublicQuotes()` (фильтр: `isActive=true`, sort: `sortOrder asc`). Добавить в `QuotesController` endpoint `GET /public`. Добавить seed-данные цитат.
+- **Решение:** `GET /quotes/public` реализован. `QuotesService` содержит `listPublic()` с фильтром `isActive=true` и sort `sortOrder asc`. Seed содержит 3 цитаты. Верифицировано при аудите 2026-07-08.
 
-#### CRIT-2: Admin Events UI — отсутствует полностью
-- **Файл:** `apps/frontend/src/app/admin/` (страниц нет)
-- **Проблема:** Нет `/admin/events` страницы. Невозможно из UI: просматривать события, менять статусы, модерировать NEEDS_ATTENTION, создавать ручные события.
-- **Последствие:** Операционный blocker — редактор не может управлять контентом.
-- **Что нужно:** Создать `/admin/events` (список с фильтрами + статусами) и `/admin/events/[id]` (детальная с edit form, статус, publish/archive/delete).
+#### CRIT-2: Admin Events UI — отсутствует полностью ✅ RESOLVED
+- **Файл:** `apps/frontend/src/app/admin/events/`
+- **Решение:** `/admin/events` (список с фильтрами по поиску/статусу/формату/городу, пагинация) и `/admin/events/[id]` (детальная форма редактирования) реализованы. Верифицировано при аудите 2026-07-08.
 
-#### CRIT-3: Admin Quotes UI — отсутствует полностью
-- **Файл:** `apps/frontend/src/app/admin/` (страниц нет)
-- **Проблема:** Нет `/admin/quotes` страницы. Цитаты невозможно добавить, отредактировать, активировать/деактивировать из UI.
-- **Последствие:** Блок цитат на сайте нельзя наполнить без прямого доступа к БД.
-- **Что нужно:** Создать `/admin/quotes` (список + CRUD). Добавить ссылку «Цитаты» в sidebar AdminLayoutClient.
+#### CRIT-3: Admin Quotes UI — отсутствует полностью ✅ RESOLVED
+- **Файл:** `apps/frontend/src/app/admin/quotes/`
+- **Решение:** `/admin/quotes` (список + CRUD: create, edit, toggle active, delete) реализован. Верифицировано при аудите 2026-07-08.
 
 ---
 
 ### 🟠 HIGH (существенные отклонения от ТЗ)
 
-#### HIGH-1: MAX bot deep-link отсутствует на странице события
+#### HIGH-1: MAX bot deep-link отсутствует на странице события ✅ RESOLVED
 - **Файл:** `apps/frontend/src/components/events/EventDetailActions.tsx`
-- **Проблема:** Кнопка «Напомнить» ведёт только в Telegram bot. BR-010 говорит: пользователь выбирает Telegram ИЛИ MAX.
-- **Последствие:** MAX-пользователи не могут создать напоминание через сайт.
-- **Что нужно:** Добавить кнопку/ссылку на MAX bot (`https://max.ru/id2308283362_bot?start=remind_{eventId}` или аналогичный deep-link по MAX API).
+- **Решение:** Добавлена отдельная кнопка «Напомнить в MAX» с deep-link `${MAX_BOT_URL}?start=remind_${event.id}`. Кнопка скрыта, если `NEXT_PUBLIC_MAX_BOT_URL` не задан. Исправлено 2026-07-08.
 
-#### HIGH-2: `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` не в `.env.example`
-- **Файл:** `apps/frontend/src/components/events/EventDetailActions.tsx`, `.env.example`
-- **Проблема:** Переменная используется, но не задокументирована в `.env.example`. При её отсутствии кнопка «Напомнить» не отображается вообще.
-- **Последствие:** На production кнопка напоминания может быть невидима.
-- **Что нужно:** Добавить `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=@PartnersTogether_bot` в `.env.example` и `packages/shared/constants`.
+#### HIGH-2: `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` не в `.env.example` ✅ RESOLVED
+- **Файл:** `.env.example`
+- **Решение:** Добавлены переменные `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` и `NEXT_PUBLIC_MAX_BOT_URL` с описательными комментариями. Исправлено 2026-07-08.
 
-#### HIGH-3: Admin sidebar не содержит Мероприятия и Цитаты
+#### HIGH-3: Admin sidebar не содержит Мероприятия и Цитаты ✅ RESOLVED
 - **Файл:** `apps/frontend/src/app/admin/AdminLayoutClient.tsx`
-- **Проблема:** Только 3 ссылки: Рассылки, Документы, Настройки. Нет Мероприятий и Цитат.
-- **Последствие:** Даже когда страницы будут созданы, навигация до них невозможна.
-- **Что нужно:** Добавить «Мероприятия» → `/admin/events` и «Цитаты» → `/admin/quotes` в sidebar.
+- **Решение:** Sidebar содержит ссылки: Дашборд, Мероприятия, Рассылки, Документы, Цитаты, Настройки. Верифицировано при аудите 2026-07-08.
 
-#### HIGH-4: ООО «АБ ГРУПП» не упоминается в Footer
-- **Файл:** `apps/frontend/src/components/layout/SiteFooter.tsx`
-- **Проблема:** TZ_v11 и BUSINESS_RULES определяют оператора ПД как ООО «АБ ГРУПП», ОГРН 1212300074766, ИНН 2308283450. В footer эта информация отсутствует.
-- **Последствие:** Юридическое несоответствие требованиям к информации об операторе персональных данных.
-- **Что нужно:** Добавить строку с реквизитами юрлица в footer (или на отдельную страницу `/about`).
+#### HIGH-4: ООО «АБ ГРУПП» не упоминается в Footer ✅ RESOLVED
+- **Файл:** `apps/frontend/src/components/layout/SiteFooter.tsx`, `apps/frontend/src/app/globals.css`
+- **Решение:** Добавлена строка «ООО «АБ ГРУПП» · ОГРН 1212300074766 · ИНН 2308283450» в footer. CSS-класс `.pub-footer-operator` добавлен в globals.css. Исправлено 2026-07-08.
 
-#### HIGH-5: `broadcastConsentAcceptedAt` — верификация в BroadcastProcessor
+#### HIGH-5: `broadcastConsentAcceptedAt` — верификация в BroadcastProcessor ✅ RESOLVED
 - **Файл:** `apps/backend/src/modules/broadcasts/broadcast.processor.ts`
-- **Проблема:** BR-031 требует 3 условия для получения рассылки. Необходима ручная верификация что все 3 условия (`allowMarketingMessages=true` AND `legalAcceptedAt IS NOT NULL` AND `broadcastConsentAcceptedAt IS NOT NULL`) проверяются в WHERE-запросе при формировании списка получателей.
-- **Что нужно:** Верифицировать код `BroadcastProcessor.getRecipients()`.
+- **Решение:** BR-031 выполнен корректно — все три условия (`allowMarketingMessages: true`, `legalAcceptedAt: { not: null }`, `broadcastConsentAcceptedAt: { not: null }`) присутствуют в WHERE-запросе. Верифицировано при аудите 2026-07-08.
 
 ---
 
