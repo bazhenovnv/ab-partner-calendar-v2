@@ -19,7 +19,7 @@
 | Header | 100% | ✅ Полностью | — |
 | Footer | 100% | ✅ Полностью | — |
 | CookieBanner | 100% | ✅ Полностью | — |
-| Яндекс.Метрика | 100% | ✅ Полностью | — |
+| Яндекс.Метрика | 100% | ✅ Полностью | SPA pageview + 5 кастомных целей |
 | Middleware (maintenance) | 100% | ✅ Полностью | — |
 | EventsSection (layout) | 100% | ✅ Полностью | — |
 | EventCalendar | 100% | ✅ Полностью | — |
@@ -36,11 +36,11 @@
 | Backend: QuotesModule | 100% | ✅ Полностью | — |
 | Backend: AdminModule | 100% | ✅ Полностью | — |
 | Backend: FiltersModule | 100% | ✅ Полностью | — |
-| Backend: AnalyticsModule | ~20% | ⚠️ Частично | Модель есть, tracking не реализован |
+| Backend: AnalyticsModule | ~20% | ⚠️ Частично | Модель есть, tracking не реализован (TASK-5.1) |
 | Admin UI: Broadcasts | 100% | ✅ Полностью | — |
 | Admin UI: Legal | 100% | ✅ Полностью | — |
 | Admin UI: Settings | 100% | ✅ Полностью | — |
-| Admin UI: Events | 100% | ✅ Полностью | — |
+| Admin UI: Events | 100% | ✅ Полностью | Вкладка «Требует внимания» добавлена |
 | Admin UI: Quotes | 100% | ✅ Полностью | — |
 | Telegram Bot | ~90% | ✅ Хорошо | — |
 | MAX Bot | ~85% | ⚠️ Частично | — |

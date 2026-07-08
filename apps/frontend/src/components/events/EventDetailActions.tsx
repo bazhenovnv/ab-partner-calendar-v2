@@ -1,6 +1,7 @@
 'use client';
 
 import { generateIcs, downloadIcs } from '@/lib/ics';
+import { ym } from '@/lib/metrika';
 import type { PublicEvent } from '@/types/event';
 
 const TG_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? '';
@@ -20,6 +21,7 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
     : null;
 
   const handleIcsDownload = () => {
+    ym.goal('ics_download', { event_id: event.id });
     const locationParts = [event.venue, event.address].filter(Boolean);
     const ics = generateIcs({
       id: event.id,
@@ -45,6 +47,7 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
           href={registrationUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => ym.goal(event.ticketSalesEnabled ? 'ticket_buy' : 'event_register', { event_id: event.id })}
           className="w-full tablet:w-auto inline-flex items-center justify-center gap-2 bg-mint text-primary font-semibold px-6 py-3.5 rounded-xl text-base hover:bg-mint/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2"
         >
           {event.ticketSalesEnabled ? 'Купить билет' : 'Зарегистрироваться'}
@@ -60,6 +63,7 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Напомнить через Telegram"
+          onClick={() => ym.goal('reminder_telegram', { event_id: event.id })}
           className="w-full tablet:w-auto inline-flex items-center justify-center gap-2 border-2 border-primary/20 text-primary font-semibold px-6 py-3.5 rounded-xl text-base hover:border-primary/40 hover:bg-primary/5 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -75,6 +79,7 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Напомнить через MAX"
+          onClick={() => ym.goal('reminder_max', { event_id: event.id })}
           className="w-full tablet:w-auto inline-flex items-center justify-center gap-2 border-2 border-primary/20 text-primary font-semibold px-6 py-3.5 rounded-xl text-base hover:border-primary/40 hover:bg-primary/5 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">

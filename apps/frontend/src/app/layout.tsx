@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Montserrat } from 'next/font/google';
 import './globals.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
+import { MetrikaPageview } from '@/components/MetrikaPageview';
 
 const montserrat = Montserrat({
   subsets: ['cyrillic', 'latin'],
@@ -64,6 +66,9 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
           </div>
         </noscript>
         {children}
+        <Suspense fallback={null}>
+          <MetrikaPageview />
+        </Suspense>
         <CookieBannerGate />
       </body>
     </html>

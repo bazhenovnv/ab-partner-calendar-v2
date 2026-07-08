@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { fetchEventById } from '@/lib/api';
 import { formatEventDate, formatFormat, formatPrice } from '@/lib/format';
 import { EventDetailActions } from '@/components/events/EventDetailActions';
+import { EventViewTracker } from '@/components/events/EventViewTracker';
 import { PublicShell } from '@/components/layout/PublicShell';
 
 const HERO_BLUR =
@@ -68,6 +69,7 @@ export default async function EventPage({ params }: Props) {
 
   return (
     <PublicShell>
+      <EventViewTracker eventId={id} />
       <article className="max-w-[900px] mx-auto px-4 tablet:px-8 py-6 tablet:py-12">
         <nav aria-label="Навигация" className="mb-4 tablet:mb-6">
           <Link
