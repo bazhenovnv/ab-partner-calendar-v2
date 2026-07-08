@@ -276,6 +276,8 @@ body {
 }
 .adm-sidebar__link:hover { background: rgba(255,255,255,.1); }
 .adm-sidebar__link--active { background: rgba(255,255,255,.15); color: #fff; font-weight: 600; }
+.adm-sidebar__section-title { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.35); padding: .75rem .75rem .25rem; }
+.adm-sidebar__link--sub { padding-left: 1.5rem; font-size: .8rem; }
 .adm-sidebar__logout {
   background: none;
   border: 1px solid rgba(255,255,255,.25);

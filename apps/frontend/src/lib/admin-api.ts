@@ -189,12 +189,42 @@ export interface AdminEventsResponse {
   total: number;
 }
 
+// ── Cities ──────────────────────────────────────────────────────────────────
+
+export interface AdminCity {
+  id: string;
+  name: string;
+  region: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  _count?: { events: number };
+}
+
+export interface AdminCitiesResponse {
+  total: number;
+  page: number;
+  limit: number;
+  cities: AdminCity[];
+}
+
 // ── Directions ──────────────────────────────────────────────────────────────
 
 export interface AdminDirection {
   id: string;
   name: string;
   slug: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  _count?: { events: number };
+}
+
+export interface AdminDirectionsResponse {
+  total: number;
+  page: number;
+  limit: number;
+  directions: AdminDirection[];
 }
 
 // ── Quotes ──────────────────────────────────────────────────────────────────

@@ -65,6 +65,19 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           >
             Цитаты
           </Link>
+          <div className="adm-sidebar__section-title">Справочники</div>
+          <Link
+            href="/admin/cities"
+            className={`adm-sidebar__link adm-sidebar__link--sub${pathname.startsWith('/admin/cities') ? ' adm-sidebar__link--active' : ''}`}
+          >
+            Города
+          </Link>
+          <Link
+            href="/admin/directions"
+            className={`adm-sidebar__link adm-sidebar__link--sub${pathname.startsWith('/admin/directions') ? ' adm-sidebar__link--active' : ''}`}
+          >
+            Направления
+          </Link>
           <Link
             href="/admin/settings"
             className={`adm-sidebar__link${pathname.startsWith('/admin/settings') ? ' adm-sidebar__link--active' : ''}`}
