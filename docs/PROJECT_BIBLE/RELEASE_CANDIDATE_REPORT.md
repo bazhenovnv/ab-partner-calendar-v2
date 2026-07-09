@@ -1,8 +1,9 @@
 # Release Candidate Report — АБ Афиша Бухгалтера v1.0
 
 **Дата подготовки:** 2026-07-09  
+**Дата Design Pass Closure:** 2026-07-09 (Stage 41.13)  
 **Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
-**Метод:** Полный обход кода (Stage 38) + Smoke-тесты (Stage 39) + Приёмка (Stage 40) + ACC-FIX (Stage 41)  
+**Метод:** Полный обход кода (Stage 38) + Smoke-тесты (Stage 39) + Приёмка (Stage 40) + ACC-FIX (Stage 41) + Design Pass (Stage 41.6–41.13)  
 **Build-статус:** ✅ Frontend build OK · ✅ Backend build OK  
 **Test-статус:** ✅ 74 smoke-теста пройдено (45 backend + 26 frontend + 3 bots)
 
@@ -12,24 +13,37 @@
 
 | Параметр | Значение |
 |----------|---------|
-| Общая готовность | **92 %** |
+| Общая готовность | **97 %** |
 | Статус | **✅ ГОТОВ К STAGING** |
 | Блокеров релиза | 0 |
-| Авто-исправлений применено | 8 (Stage 38) + 4 ACC-FIX (Stage 41) |
-| Задач в RELEASE_BACKLOG v1.1 | 20 (RC-B1..RC-B20) |
+| Авто-исправлений применено | 8 (Stage 38) + 4 ACC-FIX (Stage 41) + 8 Design Pass (Stage 41.6–41.12) |
+| Задач в RELEASE_BACKLOG v1.1 | 20+ (RC-B1..RC-B20 + D-10..D-17) |
 | TypeCheck | ✅ Пройден |
 | Build | ✅ Пройден |
 | Tests | ✅ 74 smoke-теста пройдено |
 | Приёмочное тестирование | ✅ ПРИНЯТО 47/47 (Stage 40+41) |
+| Design Pass | ✅ ЗАКРЫТ (Stage 41.13) — D-01..D-09 исправлены |
 
 ---
 
 ## 2. Что полностью готово
 
+### Design Pass (Stage 41.6–41.13) ✅ ЗАКРЫТ
+- ✅ **D-01** — EventCard заголовки UPPERCASE
+- ✅ **D-02** — MainEventsBanner горизонтальная карусель с thumbnail
+- ✅ **D-03** — Header: inline SVG монограмма «аб»
+- ✅ **D-05** — EventCard дата: крупная цифра (24pt) + месяц (11pt), white box
+- ✅ **D-06** — EventCard status badge: Gilroy Medium 13px
+- ✅ **D-07** — RotatingQuotes: Gilroy Regular
+- ✅ **D-08** — Footer: Gilroy (desc, links, legal, copy, operator)
+- ✅ **D-09** — Hero: декоративная композиция справа (утверждённый ассет)
+- ⬛ **D-04** — Maintenance page: намеренно минималистична (продуктовое решение)
+- 🟡 **D-10..D-17** — перенесены в v1.1 (не блокируют staging)
+
 ### Публичный сайт (Frontend)
 - ✅ **Главная страница** — Hero, EventsSection с фильтрами, HowItWorks, RotatingQuotes, RemindersBlock
-- ✅ **Header** — логотип, ссылки Telegram, MAX-канал, ab-buhpartner.ru, адаптивный
-- ✅ **Hero** — заголовок, подзаголовок, CTA-кнопка
+- ✅ **Header** — логотип SVG-монограмма, ссылки Telegram, MAX-канал, ab-buhpartner.ru, адаптивный
+- ✅ **Hero** — заголовок, подзаголовок, CTA-кнопка, декоративная композиция
 - ✅ **Фильтры** — город, направление, формат, цена, дата-пикер (EventCalendar)
 - ✅ **Календарь** — EventCalendar с LIVE-подсветкой текущего дня, навигация по месяцам
 - ✅ **Карточки мероприятий** — EventCard с форматом, ценой, городом, статусами LIVE/MAIN

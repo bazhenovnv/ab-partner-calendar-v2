@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 41.13: Design Pass ЗАКРЫТ
+
+### Документация закрытия Design Pass
+
+- **DESIGN_CONFORMANCE_REPORT.md:** обновлён заголовок (Stage 41.13, Design Pass COMPLETE); секция 6 — история исправлений; секция 7 — v1.1 backlog с приоритетами; «Итог аудита» обновлён (97%); добавлена секция 10 «Рекомендация к Stage 42».
+- **PROJECT_IMPLEMENTATION_STATUS.md:** готовность 92% → 97%; добавлены итоги Stage 41.6–41.13; статус «✅ ГОТОВ К STAGE 42».
+- **RELEASE_CANDIDATE_REPORT.md:** добавлен раздел Design Pass в «Что полностью готово»; параметры обновлены (97%, Design Pass ✅).
+- **CHANGELOG.md:** зафиксировано закрытие Design Pass.
+
+### Итоговый статус Design Pass
+
+| Расхождение | Этап | Статус |
+|-------------|------|--------|
+| D-01 EventCard UPPERCASE | 41.6 | ✅ |
+| D-02 MainEventsBanner карусель | 41.6 | ✅ |
+| D-03 Логотип SVG | 41.6 | ✅ |
+| D-04 Maintenance Page | — | ⬛ Намеренно |
+| D-05 EventCard дата | 41.6 | ✅ |
+| D-06 Gilroy badges | 41.12 | ✅ |
+| D-07 Gilroy quotes | 41.12 | ✅ |
+| D-08 Gilroy footer | 41.12 | ✅ |
+| D-09 Hero composition | 41.10 | ✅ |
+| D-10..D-17 | — | 🟡 v1.1 |
+
+**Готовность к staging: 97%. Блокеров: 0. Переход к Stage 42 разрешён.**
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 41.12: Gilroy font + Креативы (19/20)
 
 ### Шрифт Gilroy — D-06, D-07, D-08
