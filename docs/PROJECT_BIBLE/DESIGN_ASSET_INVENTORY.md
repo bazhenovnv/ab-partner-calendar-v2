@@ -20,7 +20,7 @@
 | Logo PNG variant | ✅ AVAILABLE | `Frame 60(1).png` | ✅ Как референс | `project-assets/03_logo_frames/Frame 60(1).png` | Вариант монограммы. |
 | Favicon | ⚠ PARTIAL | Нет дизайн-макета; генерируется программно | ✅ Да | `apps/frontend/src/app/icon.tsx` | Next.js ImageResponse 32×32px, navy/mint, текст «АБ». Не использует реальный вектор монограммы. |
 | OG Image | 🔵 OPTIONAL | Дизайн-макет не предусматривался; генерируется программно | ✅ Да | `apps/frontend/src/app/opengraph-image.tsx` | Программный 1200×630, navy фон (#0D2344), mint акцент. Пригоден для production. Иллюстрированный вариант — v1.1+ по запросу. |
-| Gilroy font files | ❌ MISSING | Нет в проекте | ❌ Нет | — | Используется в макете для бейджей, цитат, footer. Требуется лицензия + файлы. |
+| Gilroy font files | ✅ AVAILABLE | `project-assets/fonts/gilroy/font/` — полный семейство | ✅ Да | `apps/frontend/public/fonts/gilroy/` (Regular, Medium, Semibold woff2+woff) | Stage 41.12: @font-face подключён, применён к badge (D-06), quotes (D-07), footer (D-08). |
 
 ---
 
@@ -173,9 +173,9 @@
 
 | Статус | Кол-во | Позиции |
 |--------|--------|---------|
-| ✅ AVAILABLE | 30 | Logo PNG, maintenance.png, все inline SVG, все CSS-компоненты, Cookie Banner, 404, HowItWorks, Reminders, Legal, Admin icons |
-| ⚠ PARTIAL | 8 | Logo SVG (нет оригинала), Favicon, OG Image, Event images (runtime), Banner thumbnails (runtime), Maintenance layout, Quotes (нет Gilroy), Event detail image (runtime) |
-| ❌ MISSING | 1 | **Gilroy font** |
+| ✅ AVAILABLE | 31 | Logo PNG, maintenance.png, все inline SVG, все CSS-компоненты, Cookie Banner, 404, HowItWorks, Reminders, Legal, Admin icons, **Gilroy font** |
+| ⚠ PARTIAL | 7 | Logo SVG (нет оригинала), Favicon, OG Image, Event images (runtime), Banner thumbnails (runtime), Maintenance layout, Event detail image (runtime) |
+| ❌ MISSING | 0 | — |
 | 🔵 OPTIONAL | 1 | **OG Image** (программный вариант пригоден для production; иллюстрированный — по запросу) |
 | — N/A | 1 | **Admin дизайн-макеты** (не предусматривались; реализовано на общей дизайн-системе) |
 
@@ -185,11 +185,9 @@
 
 | Приоритет | Asset | Описание |
 |-----------|-------|----------|
-| 🟡 MEDIUM | **Logo SVG** | Векторный файл монограммы «аб» (SVG / AI / Figma export) |
-| 🟡 MEDIUM | **Gilroy font** | Файлы шрифта + лицензия (Regular, Medium) |
+| 🟡 MEDIUM | **Logo SVG** | Векторный файл монограммы «аб» (SVG / AI / Figma export) — Stage 41.12 получен PNG 118×143px (`Креативы АБ (20).zip`), SVG оригинала нет |
 | 🟢 LOW | **OG Image макет** | Если требуется branded OG, не программный |
 | 🟢 LOW | **Favicon с монограммой** | После получения SVG логотипа |
-| 🟢 LOW | **Logo SVG** | После получения SVG: обновить favicon и проверить точность аппроксимации в `SiteHeader.tsx` |
 
 ---
 

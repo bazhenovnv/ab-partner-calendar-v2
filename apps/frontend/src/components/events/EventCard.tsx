@@ -59,7 +59,7 @@ export function EventCard({ event, className }: EventCardProps) {
         {status.label && (
           <span
             className={cn(
-              'absolute top-3 left-3 text-xs font-semibold px-2 py-1 rounded-full',
+              'absolute top-3 left-3 text-xs font-gilroy font-medium px-2 py-1 rounded-full',
               status.className,
             )}
           >

@@ -89,7 +89,7 @@ Design Freeze v1.0. Все изменения публичной главной 
 | **EventCard — заголовок** | UPPERCASE (все буквы заглавные) | Sentence case (обычный регистр) |
 | **MainEventsBanner / «Главные события»** | Горизонтальная карусель с превью-thumbnails событий ниже EventCard-грида | Fullscreen-баннер (cinematic, занимает всю ширину, градиент поверх изображения) |
 | **Maintenance page — layout** | Полноценный SiteHeader + контент + полноценный SiteFooter с 4 колонками | Standalone-карточка без Header и Footer |
-| **Типографика — Gilroy** | Два шрифта: Montserrat (UI) + **Gilroy** (статусные бейджи, цитаты, footer) | Только Montserrat (Gilroy не используется) |
+| **Типографика — Gilroy** | Два шрифта: Montserrat (UI) + **Gilroy** (статусные бейджи, цитаты, footer) | ✅ Gilroy подключён (Stage 41.12): badges, quotes, footer |
 
 ---
 
@@ -111,9 +111,9 @@ Design Freeze v1.0. Все изменения публичной главной 
 
 | ID | Проблема | Обоснование переноса |
 |----|----------|----------------------|
-| **D-06** | Gilroy — статусные бейджи (text5, 13px Medium) | Платный шрифт; требует лицензии; визуальное отличие минимально |
-| **D-07** | Gilroy — цитаты (text9, 20px Regular) | То же; Montserrat смотрится приемлемо |
-| **D-08** | Gilroy — footer (подвал 1/2/3) | То же |
+| **D-06** | ~~Gilroy — статусные бейджи~~ | ✅ Исправлено Stage 41.12 |
+| **D-07** | ~~Gilroy — цитаты~~ | ✅ Исправлено Stage 41.12 |
+| **D-08** | ~~Gilroy — footer~~ | ✅ Исправлено Stage 41.12 |
 | **D-09** | Hero — декоративное изображение справа от H1 | ✅ Реализовано Stage 41.10 — получен утверждённый asset `project-assets/hero/hero-composition.png` |
 | **D-10** | Calendar — mint-заливка ячеек с событиями | Текущая точечная реализация функционально корректна |
 | **D-11** | Calendar — teal-фон колонок выходных | Декоративно; не влияет на функциональность |
@@ -135,9 +135,9 @@ Design Freeze v1.0. Все изменения публичной главной 
 | D-03 | Header — логотип | ✅ | ~~Текст «АБ» в box~~ → inline SVG монограмма «аб» по Frame 60.png | MEDIUM | `SiteHeader.tsx` | ✅ Исправлено Stage 41.6 |
 | D-04 | Maintenance page | ⬛ | Намеренно минималистична — Header/Footer не добавлять | HIGH | — | Не исправлять (решение зафиксировано) |
 | D-05 | EventCard — дата | ✅ | ~~Компактный текст~~ → крупная цифра (24pt) + месяц (11pt), white box, centered | MEDIUM | `EventCard.tsx`, `format.ts` | ✅ Исправлено Stage 41.6 |
-| D-06 | EventCard — статус badge font | 🟡 | Montserrat вместо Gilroy Medium 13px | LOW | `EventCard.tsx`, `globals.css` | v1.1: подключить Gilroy при наличии лицензии |
-| D-07 | RotatingQuotes — шрифт цитат | 🟡 | Montserrat вместо Gilroy Regular 20px | LOW | `RotatingQuotesBlock.tsx` | v1.1: Gilroy |
-| D-08 | Footer — шрифты | 🟡 | Montserrat вместо Gilroy (подвал 1/2/3) | LOW | `SiteFooter.tsx`, `globals.css` | v1.1: Gilroy |
+| D-06 | EventCard — статус badge font | ✅ | ~~Montserrat~~ → Gilroy Medium 13px | LOW | `EventCard.tsx` | ✅ Исправлено Stage 41.12 |
+| D-07 | RotatingQuotes — шрифт цитат | ✅ | ~~Montserrat~~ → Gilroy Regular | LOW | `globals.css` | ✅ Исправлено Stage 41.12 |
+| D-08 | Footer — шрифты | ✅ | ~~Montserrat~~ → Gilroy (desc, link, legal, copy, operator) | LOW | `globals.css` | ✅ Исправлено Stage 41.12 |
 | D-09 | Hero — декоративное изображение | ✅ | ~~Нет image-блока справа от H1~~ → декоративная композиция добавлена | MEDIUM | `HeroSection.tsx`, `globals.css` | ✅ Исправлено Stage 41.10 |
 | D-10 | Calendar — ячейки событий | 🟡 | Точки вместо mint-заливки всей ячейки | MEDIUM | `EventCalendar.tsx`, `globals.css` | v1.1: изменить стиль `.has-event` ячеек |
 | D-11 | Calendar — выходные | 🟡 | Нет teal-фона для Сб/Вс | LOW | `EventCalendar.tsx` | v1.1 |
@@ -178,7 +178,7 @@ Design Freeze v1.0. Все изменения публичной главной 
 | Asset | Где нужен | Что найдено | Действие |
 |-------|-----------|-------------|----------|
 | ~~**Hero composition**~~ | ✅ Реализовано — `project-assets/hero/hero-composition.png` → `HeroSection.tsx` (Stage 41.10) | — | — |
-| **Gilroy font** (Regular + Medium) | Статусные бейджи, цитаты, footer | Не найден нигде в проекте | Запросить у заказчика лицензию + файлы шрифта |
+| ~~**Gilroy font**~~ | ✅ Реализовано (Stage 41.12) — Regular/Medium/Semibold woff2+woff; `@font-face` в globals.css; применён к D-06/D-07/D-08 | — | — |
 
 ### ⚠ PARTIAL — вектор отсутствует, реализация функционально работает
 

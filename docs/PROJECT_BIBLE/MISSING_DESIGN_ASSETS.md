@@ -41,7 +41,7 @@
 
 ## GILROY FONT
 
-**Статус:** ❌ MISSING
+**Статус:** ✅ AVAILABLE — получен и реализован (Stage 41.12)
 
 **Описание:**  
 В утверждённом макете используется шрифт **Gilroy** для:
@@ -50,13 +50,18 @@
 - цитат (text9, 20px Regular) — D-07;
 - подвала сайта (footer текст 1/2/3) — D-08.
 
-**Что найдено:**  
-Файлов шрифта Gilroy (`.woff2`, `.woff`, `.ttf`, лицензия) в проекте нет.  
-Используется Montserrat как замена.
+**Что получено (Stage 41.12):**  
+Полный семейство Gilroy в `project-assets/fonts/gilroy/font/` — Regular, Medium, Semibold, Bold и другие начертания (woff2 + woff).  
+Использованы: Regular (400), Medium (500), Semibold (600).
 
-**Необходимое действие:**  
-Запросить у заказчика лицензию Gilroy и файлы шрифта (Regular, Medium минимум).  
-Реализацию запланировать в v1.1.
+**Реализация:**  
+- Файлы скопированы в `apps/frontend/public/fonts/gilroy/` (woff2 + woff для Regular, Medium, Semibold)  
+- `@font-face` объявления добавлены в `apps/frontend/src/app/globals.css`  
+- CSS-переменная `--font-gilroy` добавлена в `:root`  
+- Tailwind-утилита `font-gilroy` активирована (уже была в `tailwind.config.ts`)  
+- D-06: `.evt-card-badge` (EventCard.tsx) → `font-gilroy font-medium`  
+- D-07: `.quotes-text` → `font-family: var(--font-gilroy)`, `font-weight: 400`  
+- D-08: `.pub-footer-desc`, `.pub-footer-link`, `.pub-footer-legal-link`, `.pub-footer-copy`, `.pub-footer-operator` → `font-family: var(--font-gilroy)`
 
 ---
 

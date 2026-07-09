@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 41.12: Gilroy font + Креативы (19/20)
+
+### Шрифт Gilroy — D-06, D-07, D-08
+
+- **Получен:** полное семейство Gilroy в `project-assets/fonts/gilroy/font/` (Regular, Medium, Semibold и другие, woff2+woff).
+- **Скопировано:** `apps/frontend/public/fonts/gilroy/` — Regular, Medium, Semibold (woff2 + woff).
+- **@font-face:** добавлены объявления в `globals.css` для weight 400/500/600 с `font-display: swap`.
+- **--font-gilroy:** CSS-переменная добавлена в `:root`; Tailwind-утилита `font-gilroy` активирована.
+- **D-06 ✅:** EventCard статус-бейдж → `font-gilroy font-medium` (заменён `font-semibold`).
+- **D-07 ✅:** `.quotes-text` → `font-family: var(--font-gilroy)`, `font-weight: 400` (было Montserrat 500).
+- **D-08 ✅:** `.pub-footer-desc`, `.pub-footer-link`, `.pub-footer-legal-link`, `.pub-footer-copy`, `.pub-footer-operator` → `font-family: var(--font-gilroy)`.
+
+### Инвентаризация архивов
+
+- **Креативы АБ (19).zip** — 1 файл: `notebook_mint_transparent 1.png` (365×349px RGBA) — чёрный ноутбук, mint ручка, кофе, mint листья. Декоративная композиция, прозрачный фон. **Не применяется без утверждения.**
+- **Креативы АБ (20).zip** — 1 файл: `Logo.png` (118×143px RGBA) — монограмма «аб» в PNG. Улучшенный референс логотипа. **Не применяется без утверждения.** (⚠ SVG оригинала по-прежнему нет)
+
+### Обновлена документация
+
+- `docs/PROJECT_BIBLE/MISSING_DESIGN_ASSETS.md` — Gilroy: ❌ MISSING → ✅ AVAILABLE
+- `docs/PROJECT_BIBLE/DESIGN_ASSET_INVENTORY.md` — Gilroy → ✅, счётчики обновлены (✅31, ⚠7, ❌0)
+- `docs/PROJECT_BIBLE/DESIGN_CONFORMANCE_REPORT.md` — D-06/D-07/D-08 → ✅, раздел 9 обновлён
+
+### Проверки Stage 41.12
+
+- `pnpm typecheck` → ✅ 0 ошибок
+- `pnpm build` → ✅ все routes собраны
+- `node --test apps/frontend/test/smoke.test.mjs` → ✅ 26/26
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 41.6: Design Fix Pass
 
 ### Исправления дизайна (D-01, D-02, D-03, D-05)

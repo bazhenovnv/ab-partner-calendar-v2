@@ -2,7 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Gilroy font ────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Gilroy';
+  src: url('/fonts/gilroy/Gilroy-Regular.woff2') format('woff2'),
+       url('/fonts/gilroy/Gilroy-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gilroy';
+  src: url('/fonts/gilroy/Gilroy-Medium.woff2') format('woff2'),
+       url('/fonts/gilroy/Gilroy-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gilroy';
+  src: url('/fonts/gilroy/Gilroy-Semibold.woff2') format('woff2'),
+       url('/fonts/gilroy/Gilroy-Semibold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --font-gilroy: 'Gilroy', sans-serif;
   --color-primary: #0D2344;
   --color-mint: #7CD8B3;
   --color-selected-day: #367D67;
@@ -912,9 +939,9 @@ body {
   margin-bottom: -0.5rem;
 }
 .quotes-text {
-  font-family: var(--font-montserrat), sans-serif;
+  font-family: var(--font-gilroy), sans-serif;
   font-size: clamp(1.05rem, 2.5vw, 1.35rem);
-  font-weight: 500;
+  font-weight: 400;
   color: var(--color-primary);
   line-height: 1.65;
   margin: 0 0 1rem;
@@ -1170,6 +1197,7 @@ body {
 }
 .pub-footer-logo-accent { color: var(--color-mint); }
 .pub-footer-desc {
+  font-family: var(--font-gilroy), sans-serif;
   font-size: 0.8125rem;
   color: rgba(255,255,255,0.5);
   line-height: 1.6;
@@ -1194,6 +1222,7 @@ body {
   gap: 0.5rem;
 }
 .pub-footer-link {
+  font-family: var(--font-gilroy), sans-serif;
   font-size: 0.875rem;
   color: rgba(255,255,255,0.65);
   text-decoration: none;
@@ -1218,6 +1247,7 @@ body {
   gap: 0.75rem 1.25rem;
 }
 .pub-footer-legal-link {
+  font-family: var(--font-gilroy), sans-serif;
   font-size: 0.75rem;
   color: rgba(255,255,255,0.4);
   text-decoration: none;
@@ -1225,11 +1255,13 @@ body {
 }
 .pub-footer-legal-link:hover { color: rgba(255,255,255,0.75); }
 .pub-footer-copy {
+  font-family: var(--font-gilroy), sans-serif;
   font-size: 0.75rem;
   color: rgba(255,255,255,0.25);
   white-space: nowrap;
 }
 .pub-footer-operator {
+  font-family: var(--font-gilroy), sans-serif;
   font-size: 0.6875rem;
   color: rgba(255,255,255,0.18);
   margin-top: 0.5rem;
