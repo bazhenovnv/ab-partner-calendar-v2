@@ -15,11 +15,11 @@
 
 | Asset | Статус | Исходник | Используется | Путь | Комментарий |
 |-------|--------|----------|--------------|------|-------------|
-| Logo SVG (вектор) | ⚠ PARTIAL | Нет SVG-файла; есть PNG-референс | ✅ Да — inline SVG в коде | `project-assets/03_logo_frames/Frame 60.png` (694×575px PNG) | SVG-аппроксимация реализована в `SiteHeader.tsx`. Оригинальный SVG от дизайнера отсутствует. Запросить у дизайнера. |
+| Logo SVG (вектор) | ⚠ PARTIAL | `Frame 60.png` — PNG-референс; SVG-файла нет | ✅ Да — inline SVG-аппроксимация в коде | `project-assets/03_logo_frames/Frame 60.png` (694×575px PNG) | SVG построена вручную по PNG-референсу в `SiteHeader.tsx`. Оригинальный SVG / Figma export отсутствует. Запросить у дизайнера для точной доработки в v1.1. |
 | Logo PNG | ✅ AVAILABLE | `Frame 60.png` — 694×575 PNG, ч/б | ✅ Как референс | `project-assets/03_logo_frames/Frame 60.png` | Достаточно как визуальный референс для кода. Не подходит для прямого использования в интерфейсе (ч/б без адаптации цвета). |
 | Logo PNG variant | ✅ AVAILABLE | `Frame 60(1).png` | ✅ Как референс | `project-assets/03_logo_frames/Frame 60(1).png` | Вариант монограммы. |
 | Favicon | ⚠ PARTIAL | Нет дизайн-макета; генерируется программно | ✅ Да | `apps/frontend/src/app/icon.tsx` | Next.js ImageResponse 32×32px, navy/mint, текст «АБ». Не использует реальный вектор монограммы. |
-| OG Image | ⚠ PARTIAL | Нет дизайн-макета от дизайнера | ✅ Да | `apps/frontend/src/app/opengraph-image.tsx` | Программный 1200×630, navy фон, текст. Минимально брендирован. |
+| OG Image | 🔵 OPTIONAL | Дизайн-макет не предусматривался; генерируется программно | ✅ Да | `apps/frontend/src/app/opengraph-image.tsx` | Программный 1200×630, navy фон (#0D2344), mint акцент. Пригоден для production. Иллюстрированный вариант — v1.1+ по запросу. |
 | Gilroy font files | ❌ MISSING | Нет в проекте | ❌ Нет | — | Используется в макете для бейджей, цитат, footer. Требуется лицензия + файлы. |
 
 ---
@@ -163,7 +163,7 @@
 
 | Asset | Статус | Исходник | Используется | Путь | Комментарий |
 |-------|--------|----------|--------------|------|-------------|
-| Admin дизайн-макеты | ❌ MISSING | Дизайн-материалы для admin не предоставлены | ✅ Реализована собственная дизайн-система | — | Admin использует `adm-*` CSS design system. Аудит по Figma-макетам невозможен (макетов нет). |
+| Admin дизайн-макеты | — N/A | Отдельные дизайн-макеты не предусматривались | ✅ Да | — | Админка проектируется на основе общей дизайн-системы проекта (`adm-*` CSS). Figma-макеты для admin не планировались и не требуются. |
 | Admin icons (sidebar/actions) | ✅ AVAILABLE | Inline SVG | ✅ Да | `AdminLayoutClient.tsx`, страницы admin | Все иконки inline SVG. |
 | Broadcast illustrations | ✅ AVAILABLE | Inline SVG / CSS | ✅ Да | Admin broadcast pages | CSS-карточки. |
 
@@ -175,7 +175,9 @@
 |--------|--------|---------|
 | ✅ AVAILABLE | 30 | Logo PNG, maintenance.png, все inline SVG, все CSS-компоненты, Cookie Banner, 404, HowItWorks, Reminders, Legal, Admin icons |
 | ⚠ PARTIAL | 8 | Logo SVG (нет оригинала), Favicon, OG Image, Event images (runtime), Banner thumbnails (runtime), Maintenance layout, Quotes (нет Gilroy), Event detail image (runtime) |
-| ❌ MISSING | 3 | **Hero composition** (фото), **Gilroy font**, **Admin дизайн-макеты** |
+| ❌ MISSING | 2 | **Hero composition** (фото), **Gilroy font** |
+| 🔵 OPTIONAL | 1 | **OG Image** (программный вариант пригоден для production; иллюстрированный — по запросу) |
+| — N/A | 1 | **Admin дизайн-макеты** (не предусматривались; реализовано на общей дизайн-системе) |
 
 ---
 
@@ -188,7 +190,7 @@
 | 🟡 MEDIUM | **Gilroy font** | Файлы шрифта + лицензия (Regular, Medium) |
 | 🟢 LOW | **OG Image макет** | Если требуется branded OG, не программный |
 | 🟢 LOW | **Favicon с монограммой** | После получения SVG логотипа |
-| 🟢 LOW | **Admin дизайн-макеты** | Если планируется редизайн admin-панели в v1.1 |
+| 🟢 LOW | **Logo SVG** | После получения SVG: обновить favicon и проверить точность аппроксимации в `SiteHeader.tsx` |
 
 ---
 
