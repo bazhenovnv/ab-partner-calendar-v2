@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 42: Staging Preparation & Release Readiness
+
+### Аудит
+
+- Проверена вся инфраструктура: docker-compose.prod.yml, Dockerfiles, nginx prod.conf, backup.sh
+- ENV-аудит: 18 переменных; выявлена 1 отсутствующая в prod compose (`NEXT_PUBLIC_MAX_BOT_URL`)
+- Database: Prisma schema (25 моделей), 3 миграции, auto-deploy entrypoint ✅
+- Security: Helmet ✅, CORS ✅, JWT ✅, ValidationPipe ✅, ThrottlerGuard ✅
+- Public site: все компоненты, SEO, OG, robots, sitemap ✅
+- Admin: 9 разделов ✅
+- Performance: standalone build, next/image, font-display:swap; замечание: nginx gzip не настроен
+
+### Документы
+
+- Создан `docs/PROJECT_BIBLE/STAGE_42_CHECKLIST.md`
+- Создан `docs/PROJECT_BIBLE/STAGING_READINESS_REPORT.md`
+
+### Финальный статус Stage 42
+
+**✅ READY FOR STAGING**  
+Блокеров: 0. Общая готовность: 97%.  
+Следующий этап: Stage 43 — Deploy to Staging.
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 41.13: Design Pass ЗАКРЫТ
 
 ### Документация закрытия Design Pass
