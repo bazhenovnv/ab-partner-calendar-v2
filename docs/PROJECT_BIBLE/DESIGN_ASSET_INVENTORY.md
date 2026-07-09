@@ -40,7 +40,7 @@
 | Asset | Статус | Исходник | Используется | Путь | Комментарий |
 |-------|--------|----------|--------------|------|-------------|
 | Hero layout | ✅ AVAILABLE | Figma скриншот `{D2CF8AB4}` + PDF | ✅ Да (текстовая часть) | `HeroSection.tsx`, `globals.css` | Заголовок + подзаголовок + CTA реализованы. |
-| Hero composition (декоративное фото) | ❌ MISSING | Виден в Figma-скриншоте `{D2CF8AB4}`, standalone файла нет | ❌ Нет | — | Настольный календарь + белая ваза + книги + ручка. Только в embedded-виде в скриншоте ~680×280px. Для production недостаточно. Запросить у дизайнера. |
+| Hero composition (декоративное фото) | ✅ AVAILABLE | `project-assets/hero/hero-composition.png` (утверждённый дизайнерский материал) | ✅ Да | `apps/frontend/public/hero-composition.png` → `HeroSection.tsx` | 693×323px PNG RGBA. Реализован Stage 41.10: правая колонка Hero, скрыт на мобильных (≤767px). |
 | Hero calendar icon (CTA-кнопка) | ✅ AVAILABLE | Inline SVG в коде | ✅ Да | `HeroSection.tsx` | Маленький иконочный календарь в кнопке «Главные события». |
 
 ---
@@ -175,7 +175,7 @@
 |--------|--------|---------|
 | ✅ AVAILABLE | 30 | Logo PNG, maintenance.png, все inline SVG, все CSS-компоненты, Cookie Banner, 404, HowItWorks, Reminders, Legal, Admin icons |
 | ⚠ PARTIAL | 8 | Logo SVG (нет оригинала), Favicon, OG Image, Event images (runtime), Banner thumbnails (runtime), Maintenance layout, Quotes (нет Gilroy), Event detail image (runtime) |
-| ❌ MISSING | 2 | **Hero composition** (фото), **Gilroy font** |
+| ❌ MISSING | 1 | **Gilroy font** |
 | 🔵 OPTIONAL | 1 | **OG Image** (программный вариант пригоден для production; иллюстрированный — по запросу) |
 | — N/A | 1 | **Admin дизайн-макеты** (не предусматривались; реализовано на общей дизайн-системе) |
 
@@ -185,7 +185,6 @@
 
 | Приоритет | Asset | Описание |
 |-----------|-------|----------|
-| 🔴 HIGH | **Hero composition** | PNG с прозрачным фоном ≥800×400px: календарь + ваза + книги + ручка |
 | 🟡 MEDIUM | **Logo SVG** | Векторный файл монограммы «аб» (SVG / AI / Figma export) |
 | 🟡 MEDIUM | **Gilroy font** | Файлы шрифта + лицензия (Regular, Medium) |
 | 🟢 LOW | **OG Image макет** | Если требуется branded OG, не программный |

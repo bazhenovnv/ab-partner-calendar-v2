@@ -114,7 +114,7 @@ Design Freeze v1.0. Все изменения публичной главной 
 | **D-06** | Gilroy — статусные бейджи (text5, 13px Medium) | Платный шрифт; требует лицензии; визуальное отличие минимально |
 | **D-07** | Gilroy — цитаты (text9, 20px Regular) | То же; Montserrat смотрится приемлемо |
 | **D-08** | Gilroy — footer (подвал 1/2/3) | То же |
-| **D-09** | Hero — декоративное изображение справа от H1 | Требует подбора/создания asset; не критично для MVP |
+| **D-09** | Hero — декоративное изображение справа от H1 | ✅ Реализовано Stage 41.10 — получен утверждённый asset `project-assets/hero/hero-composition.png` |
 | **D-10** | Calendar — mint-заливка ячеек с событиями | Текущая точечная реализация функционально корректна |
 | **D-11** | Calendar — teal-фон колонок выходных | Декоративно; не влияет на функциональность |
 | **D-12** | Calendar — треугольные маркеры в углу | Декоративно |
@@ -138,7 +138,7 @@ Design Freeze v1.0. Все изменения публичной главной 
 | D-06 | EventCard — статус badge font | 🟡 | Montserrat вместо Gilroy Medium 13px | LOW | `EventCard.tsx`, `globals.css` | v1.1: подключить Gilroy при наличии лицензии |
 | D-07 | RotatingQuotes — шрифт цитат | 🟡 | Montserrat вместо Gilroy Regular 20px | LOW | `RotatingQuotesBlock.tsx` | v1.1: Gilroy |
 | D-08 | Footer — шрифты | 🟡 | Montserrat вместо Gilroy (подвал 1/2/3) | LOW | `SiteFooter.tsx`, `globals.css` | v1.1: Gilroy |
-| D-09 | Hero — декоративное изображение | 🟡 | Нет image-блока справа от H1 | MEDIUM | `HeroSection.tsx`, `globals.css` | v1.1: добавить декоративный asset |
+| D-09 | Hero — декоративное изображение | ✅ | ~~Нет image-блока справа от H1~~ → декоративная композиция добавлена | MEDIUM | `HeroSection.tsx`, `globals.css` | ✅ Исправлено Stage 41.10 |
 | D-10 | Calendar — ячейки событий | 🟡 | Точки вместо mint-заливки всей ячейки | MEDIUM | `EventCalendar.tsx`, `globals.css` | v1.1: изменить стиль `.has-event` ячеек |
 | D-11 | Calendar — выходные | 🟡 | Нет teal-фона для Сб/Вс | LOW | `EventCalendar.tsx` | v1.1 |
 | D-12 | Calendar — треугольники | 🟡 | Нет угловых маркеров | LOW | `EventCalendar.tsx` | v1.1 |
@@ -177,7 +177,7 @@ Design Freeze v1.0. Все изменения публичной главной 
 
 | Asset | Где нужен | Что найдено | Действие |
 |-------|-----------|-------------|----------|
-| **Hero composition** (фото: календарь + ваза + книги + ручка) | `HeroSection.tsx` — правая часть Hero-секции | Embedded в Figma-скриншоте `{D2CF8AB4}` (~680×280px, непригодно для production) | Запросить у дизайнера PNG ≥800×400px с прозрачным фоном |
+| ~~**Hero composition**~~ | ✅ Реализовано — `project-assets/hero/hero-composition.png` → `HeroSection.tsx` (Stage 41.10) | — | — |
 | **Gilroy font** (Regular + Medium) | Статусные бейджи, цитаты, footer | Не найден нигде в проекте | Запросить у заказчика лицензию + файлы шрифта |
 
 ### ⚠ PARTIAL — вектор отсутствует, реализация функционально работает
