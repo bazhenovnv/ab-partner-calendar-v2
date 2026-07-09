@@ -1,254 +1,510 @@
-# Release Candidate Report — АБ Афиша v1.0
+# Release Candidate Report — АБ Афиша Бухгалтера v1.0
 
-**Дата**: 2026-07-08  
-**Ветка**: `claude/ab-afisha-architecture-plan-805f5o`  
-**Аудитор**: Claude Code (Stage 38)  
-**Статус**: **НЕ ГОТОВ К РЕЛИЗУ** — требуется закрыть 4 блокера
+**Дата подготовки:** 2026-07-09  
+**Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
+**Метод:** Полный обход кода (Stage 38) — публичный сайт, admin, боты, backend, инфраструктура  
+**Build-статус:** ✅ Frontend build OK · ✅ Backend build OK
 
 ---
 
-## 1. Что полностью готово
+## 1. Общий статус проекта
 
-### Публичный сайт
-- ✅ Главная страница: Hero, EventsSection, HowItWorks, RotatingQuotes, RemindersBlock, SiteFooter
-- ✅ Страница мероприятия (`/events/[id]`): детали, кнопки действий, ICS-скачивание, скелетон-загрузка, not-found
-- ✅ Фильтрация событий: по городу, направлению, формату, цене, дате
-- ✅ Правовые документы (`/legal/[slug]`): Privacy Policy, User Agreement, Consent, Cookie Policy, Broadcast Consent
-- ✅ Maintenance page: динамический контент из backend + fallback PNG
-- ✅ Robots.txt, sitemap.xml (с динамическими событиями)
-- ✅ Error boundary (`error.tsx`, `global-error.tsx`)
-- ✅ Loading skeleton (root `loading.tsx`, events `loading.tsx`)
-- ✅ SEO meta tags (og:image, twitter:card, canonical)
-- ✅ Cookie Banner с согласием и интеграцией с legal docs
-- ✅ Адаптивная вёрстка (mobile / tablet / desktop)
-- ✅ Dark mode поддержка в компонентах
+| Параметр | Значение |
+|----------|---------|
+| Общая готовность | **82 %** |
+| Статус | **⚠️ НЕ ГОТОВ К РЕЛИЗУ** |
+| Блокеров релиза | 2 (осталось после авто-исправлений) |
+| Авто-исправлений применено | 8 |
+| Задач добавлено в RELEASE_BACKLOG | 19 (RC-B1..RC-B19) |
+| TypeCheck | ✅ Пройден |
+| Build | ✅ Пройден |
+| Tests | ❌ Тестов нет |
+
+---
+
+## 2. Что полностью готово
+
+### Публичный сайт (Frontend)
+- ✅ **Главная страница** — Hero, EventsSection с фильтрами, HowItWorks, RotatingQuotes, RemindersBlock
+- ✅ **Header** — логотип, ссылки Telegram, MAX-канал, ab-buhpartner.ru, адаптивный
+- ✅ **Hero** — заголовок, подзаголовок, CTA-кнопка
+- ✅ **Фильтры** — город, направление, формат, цена, дата-пикер (EventCalendar)
+- ✅ **Календарь** — EventCalendar с LIVE-подсветкой текущего дня, навигация по месяцам
+- ✅ **Карточки мероприятий** — EventCard с форматом, ценой, городом, статусами LIVE/MAIN
+- ✅ **Skeleton-загрузка** — EventCardSkeleton, loading.tsx
+- ✅ **Страница мероприятия** (`/events/[id]`) — полное описание, кнопки действий, ICS-скачивание, OG-теги, not-found
+- ✅ **Напоминания** — кнопки "Напомнить в Telegram" (deep-link) и "Напомнить в MAX" (deep-link), скрываются без env-переменной
+- ✅ **ICS-экспорт** — правильный формат, аналитика event ics_download
+- ✅ **Footer** — бренд, социальные ссылки, юридические ссылки, оператор ООО «АБ ГРУПП»
+- ✅ **Юридические страницы** (`/legal/[slug]`) — 5 типов документов, версии, дата публикации
+- ✅ **Cookie Banner** — принятие, localStorage, ссылки на Политику и Cookie-политику
+- ✅ **Maintenance Mode** — middleware редирект, динамический контент из backend, fallback PNG
+- ✅ **robots.txt** — запрет /admin, /api
+- ✅ **sitemap.xml** — динамические события, SSG для legal-страниц
+- ✅ **Error boundary** — `error.tsx` (публичный), `global-error.tsx`
+- ✅ **SEO** — meta title/description, og:image, twitter:card, canonical
 
 ### Admin панель
-- ✅ Аутентификация: JWT login, logout, 8h токен
-- ✅ Dashboard: stats, needs-attention, upcoming events, recent broadcasts
-- ✅ Events: список с фильтрами (status, city, direction, format, price, mainEvent), pagination, search
-- ✅ Events: вкладка NEEDS_ATTENTION с badge-счётчиком
-- ✅ Events: создание/редактирование формы с полным набором полей
-- ✅ Events: публикация, архивирование, ручные статусы, версионирование
-- ✅ Broadcasts: список, создание/редактирование, тест-отправка, schedule, pause/resume/cancel
-- ✅ Broadcasts: вкладки Получатели и Логи с пагинацией и обработкой ошибок
-- ✅ Legal docs: просмотр/редактирование по типу, publish, история версий
-- ✅ Quotes: список, создание/редактирование, toggle, sort, delete
-- ✅ Settings: SiteConfig key-value управление по группам
-- ✅ Cities: полный CRUD + search + sort + pagination + toggle + soft-delete
-- ✅ Directions: полный CRUD + search + sort + slug validation + toggle + soft-delete
-- ✅ Sidebar: все разделы, включая "Справочники" с подменю
+- ✅ **Авторизация** — JWT login/logout, redirect при отсутствии токена, 8h сессия
+- ✅ **Dashboard** — stats (события, рассылки, пользователи, напоминания, черновики legal), needs-attention список, upcoming events, recent broadcasts
+- ✅ **Мероприятия** — список с 7 фильтрами, pagination, поиск, вкладка NEEDS_ATTENTION с badge
+- ✅ **Форма мероприятия** — создание/редактирование: все поля по ТЗ, status, format, price, city, directions, tags, URLs, ticketSalesEnabled
+- ✅ **Публикация/архивирование** — ручные статусы, версионирование, restore version
+- ✅ **Цитаты** — CRUD, sortOrder, toggle, delete
+- ✅ **Города** — CRUD, search, sort, pagination, toggle, soft-delete
+- ✅ **Направления** — CRUD, slug-validation, search, sort, pagination, toggle, soft-delete
+- ✅ **Настройки** — SiteConfig key-value по 5 группам, редактирование inline
+- ✅ **Рассылки** — список, создание/редактирование, test-send, schedule, pause/resume/cancel, статистика (total/sent/failed/skipped)
+- ✅ **Рассылки — детальная** — вкладки Детали / Получатели (с пагинацией) / Логи (с обработкой ошибок)
+- ✅ **Юридические документы** — просмотр/редактирование по 5 типам, publish, история версий с preview
+- ✅ **Sidebar** — все разделы включая "Справочники" (Города, Направления), активные ссылки
 
 ### Backend API
-- ✅ Auth: login, profile, changePassword
-- ✅ Events CRUD: создание, редактирование, публикация, архивирование, версионирование
-- ✅ Events: public endpoint для сайта с фильтрацией
-- ✅ Events: cron auto-status (PLANNED→LIVE→COMPLETED)
-- ✅ Events: NEEDS_ATTENTION очередь
-- ✅ Cities CRUD: `/admin/cities` с полной валидацией
-- ✅ Directions CRUD: `/admin/directions` с slug-валидацией
-- ✅ Broadcasts: CRUD, scheduling, test-send, pause/resume/cancel, recipients, logs
-- ✅ BullMQ queue: broadcast processor с retry, cooldown, статистикой
-- ✅ Bots: upsert, legal acceptance, phone save, reminders
-- ✅ Reminders: создание, список, отмена, cron-рассылка за 30/15/5 мин
-- ✅ Legal: CRUD по 5 типам документов, версионирование, публикация
-- ✅ Quotes: public и admin endpoints
-- ✅ Filters: public endpoint городов и направлений для фильтра
-- ✅ SiteConfig: admin CRUD для конфигурации сайта
-- ✅ Analytics: EventView, SiteVisit трекинг
-- ✅ MAX Import: cron + ручной запуск, hashtag mapping
-- ✅ Health endpoint: `/api/health`
-- ✅ Swagger UI: `/api/docs` (только dev)
-- ✅ Rate limiting: ThrottlerGuard (100 rps)
-- ✅ Helmet: security headers
-- ✅ JWT guard на всех admin endpoints
+- ✅ **Auth** — login (local strategy), JWT, changePassword
+- ✅ **Events** — полный CRUD, публичный endpoint с фильтрами, cron auto-status (PLANNED→LIVE→COMPLETED), NEEDS_ATTENTION queue
+- ✅ **Cities** — `/admin/cities` CRUD с валидацией уникальности
+- ✅ **Directions** — `/admin/directions` CRUD с slug-валидацией `/^[a-z0-9-]+$/`
+- ✅ **Broadcasts** — CRUD, scheduling (cron), test-send, pause/resume/cancel, BullMQ queue, cooldown BR-031
+- ✅ **Reminders** — создание, список, отмена, cron 30/15/5 мин, BR-010/BR-011/BR-021
+- ✅ **Legal** — CRUD по 5 типам, версионирование, публикация, public endpoint
+- ✅ **Quotes** — public + admin CRUD
+- ✅ **Filters** — public endpoint городов и направлений
+- ✅ **SiteConfig** — admin CRUD, maintenance flag
+- ✅ **Analytics** — EventView и SiteVisit трекинг (запись в БД)
+- ✅ **MAX Import** — cron + ручной запуск, hashtag mapping, `ApiSource` → `ApiSourceLog`
+- ✅ **Bots** — upsert, legal acceptance, phone save, internal token auth
+- ✅ **Admin** — dashboard stats endpoint
+- ✅ **Health** — `/api/health`
+- ✅ **Rate limiting** — ThrottlerGuard 100 rps
+- ✅ **Security headers** — Helmet
+- ✅ **Swagger** — `/api/docs` (dev only)
 
-### Боты
-- ✅ Telegram Bot: /start, /help, /unsubscribe, напоминания, legal consent, phone verification
-- ✅ MAX Bot: /start, /unsubscribe, HTTP polling, напоминания, legal consent, phone verification
-- ✅ Internal token authentication для bot→backend вызовов
-- ✅ Error handler (`bot.catch`) для grammY
+### Telegram Bot
+- ✅ `/start` — upsert пользователя, legal consent flow, phone verification
+- ✅ Deep-link `?start=remind_<eventId>` — создание напоминания через deep-link
+- ✅ Выбор даты и времени — интерактивное меню с кнопками
+- ✅ Подтверждение напоминания — сводное сообщение с датой и временем
+- ✅ `/help` — список доступных команд
+- ✅ `/unsubscribe` — отписка от маркетинговых рассылок
+- ✅ `bot.catch()` — глобальная обработка ошибок
+
+### MAX Bot
+- ✅ `/start` — upsert пользователя, legal consent flow, phone verification (текстовый ввод)
+- ✅ Deep-link — создание напоминания
+- ✅ `/unsubscribe` — отписка
+- ✅ HTTP polling с retry, cooldown 3s
+- ✅ `catch` в poll-loop
 
 ### Аналитика
-- ✅ Яндекс.Метрика: SPA pageview hit при навигации
-- ✅ Custom goals: event_view, event_register, ticket_buy, reminder_telegram, reminder_max, ics_download
+- ✅ Яндекс.Метрика — Счётчик в layout, SPA pageview hit через usePathname
+- ✅ Custom goals: `event_view`, `event_register`, `ticket_buy`, `reminder_telegram`, `reminder_max`, `ics_download`
+- ✅ Backend: EventView трекинг, SiteVisit трекинг (записи в БД)
 
 ### Инфраструктура
-- ✅ docker-compose.yml: postgres, redis, backend, frontend, bots, nginx
-- ✅ docker-compose.prod.yml: prod-конфиг с volume mounts
-- ✅ Nginx reverse proxy: frontend (:3000), backend (:3001)
-- ✅ PostgreSQL healthcheck
-- ✅ Redis healthcheck
-- ✅ Backend healthcheck
-- ✅ env.example для root, frontend, backend, bots
-- ✅ Prisma schema: 25 моделей с миграциями
+- ✅ docker-compose.yml — postgres, redis, backend, frontend, bots, nginx
+- ✅ docker-compose.prod.yml — production конфигурация
+- ✅ Healthcheck: postgres, redis, backend
+- ✅ env.example: root, frontend, backend, bots
+- ✅ Prisma schema — 25 моделей
+- ✅ Prisma migrations
+- ✅ Seed — admin user, quote records
 
 ---
 
-## 2. Что требует доработки (не блокирует релиз, но нужно до RC)
+## 3. Что требует доработки
 
-### Безопасность (HIGH)
-- **S-1** `JWT_SECRET` — устранено в этом аудите: убран fallback 'dev-secret-change-in-prod', добавлен throw при отсутствии переменной. ✅ ИСПРАВЛЕНО
-- **S-2** Dev Redis (`docker-compose.yml`) не требует пароль и открыт на host:6379. На production используется docker-compose.prod.yml с паролем — OK, но dev-конфиг рискован на облачных ВМ.
-- **S-3** Real Yandex Metrika ID (`110270689`) и MAX bot URL в `.env.example`. Не секрет, но публично идентифицирует продукт. При публикации репозитория рекомендуется заменить на placeholder.
-- **S-4** `NEXT_PUBLIC_MAX_BOT_URL` отсутствует в `apps/frontend/.env.example` — кнопка "Напомнить в MAX" не будет работать без ручного добавления при деплое.
+### Критические (до релиза)
 
-### Валидация и обработка ошибок (MEDIUM)
-- **V-1** `UpsertBotUserDto`, `AcceptLegalDto`, `SavePhoneDto` — нет `class-validator` декораторов; глобальный ValidationPipe не проверяет их поля.
-- **V-2** `changePassword` — поля `currentPassword`/`newPassword` без ограничений длины.
-- **V-3** `apiAcceptLegal()` и `apiSavePhone()` в Telegram/MAX ботах — return value игнорируется; ошибка сохранения не блокирует прогресс state machine.
-- **V-4** `max-import.service.ts::runManual()` — нет try/catch вокруг `fetchPosts()`.
+**C-1 — Пользователи (подписчики ботов) в Admin** *(TASK-1.3)*  
+Нет страницы `/admin/users` для просмотра подписчиков ботов. Dashboard показывает только счётчик `totalBotUsers`. Нет возможности найти пользователя, просмотреть его напоминания, ручного управления. Занесено в RELEASE_BACKLOG как RC-B20.
 
-### Производительность (MEDIUM)
-- **P-1** Broadcast processor: N+1 — `isCooldownActive()` вызывается per-recipient в цикле (50 DB-запросов на батч). Для крупных рассылок критично.
-- **P-2** Отсутствующие индексы в Prisma (требуют миграцию): `Reminder.botUserId`, `EventDirection.directionId`, `HashtagMapping.directionId`, `ApiSourceLog.sourceId`.
+**C-2 — Cookie Banner не связан с backend настройками** *(TASK-3.1)*  
+`CookieBanner.tsx` использует только `localStorage`. Флаги `cookieConsentEnabled` / `cookiePolicyUrl` из SiteConfig не читаются. Занесено в RELEASE_BACKLOG.
 
-### Admin UX (LOW)
-- **U-1** Admin секция не имеет своего `error.tsx` — при ошибке показывается публичный error UI вместо admin-styled.
-- **U-2** `admin/settings/page.tsx` — нет отдельного error state для загрузки (renderает null при fail).
+**C-3 — Нет загрузки изображений для мероприятий** *(TASK-4.1)*  
+`ImagesModule` — заглушка (только `/images/health`). Поле `imageUrl` в форме события принимает только URL. Загрузка файлов не реализована.
 
-### Качество кода (LOW)
-- **Q-1** `assertBotToken()` дублируется в 3 контроллерах — нужен общий guard.
-- **Q-2** `buildMessageText()` в broadcasts.service.ts — deprecated wrapper, нет вызовов, нужно удалить.
-- **Q-3** ~45 `as any` cast в backend (mainly Prisma enum workarounds) — fixable импортом Prisma enum types.
-- **Q-4** `backend tsconfig.json` — неполный strict mode (strictFunctionTypes, strictPropertyInitialization выключены).
-- **Q-5** `forceConsistentCasingInFileNames: false` в backend tsconfig.
-- **Q-6** Dead dependencies в bots: `@prisma/client`, `ioredis`, `node-fetch` не используются.
+### Средние (желательно до релиза)
 
-### Инфраструктура (LOW)
-- **I-1** `SESSION_SECRET` отсутствует в docker-compose (dev и prod) — переменная определена в env.example но не передаётся сервисам.
-- **I-2** bots/Dockerfile, backend/Dockerfile — контейнеры запускаются от root; нет `USER` инструкции.
-- **I-3** frontend, nginx, bots сервисы без `healthcheck` в docker-compose.
-- **I-4** Нет тестов (unit/integration) ни в одном пакете. `@nestjs/testing` установлен в devDeps но не используется.
-- **I-5** `REDIS_PASSWORD` отсутствует в `apps/backend/.env.example`.
-- **I-6** `NEXT_PUBLIC_API_URL` отсутствует в production docker-compose.prod.yml для frontend сервиса.
+**M-1 — Dev Redis открыт без пароля на host:6379**  
+`docker-compose.yml`: Redis без `--requirepass`, порт проброшен на хост. Риск при запуске на облачной ВМ.
 
----
+**M-2 — Bot state machine в памяти**  
+`userState = new Map()` в Telegram и MAX bot. При перезапуске состояние теряется — пользователи в середине flow застревают. Нет `/cancel` команды для сброса.
 
-## 3. Что можно перенести в v1.1
+**M-3 — apiAcceptLegal / apiSavePhone return value игнорируется**  
+В обоих ботах ошибка сохранения не блокирует прогресс state machine. Пользователь продолжает flow даже если legal acceptance не записалась в БД.
 
-- **1.1-1** Тесты: unit tests для services, e2e для критических API endpoints
-- **1.1-2** Broadcast processor N+1 оптимизация (batch cooldown check)
-- **1.1-3** Prisma missing indexes — требует миграцию, не критично для первого деплоя при текущих объёмах
-- **1.1-4** Извлечение `assertBotToken` в общий guard
-- **1.1-5** Admin `error.tsx` страница
-- **1.1-6** `SiteConfigVersion.key` — добавить FK к `SiteConfig`; `Reminder` — добавить `@@unique([botUserId, eventId])`
-- **1.1-7** Dockerfile security hardening (non-root USER, HEALTHCHECK)
-- **1.1-8** Выделение повторяющихся констант (MAX_CHANNEL, PARTNER_URL) в `lib/constants.ts`
-- **1.1-9** Исправление `any` типов в backend через импорт Prisma enums
-- **1.1-10** `/help` команда в MAX Bot
-- **1.1-11** `/cancel` команда в обоих ботах для сброса state machine
-- **1.1-12** ApiSource/ApiSourceLog, Builder, Images, Analytics — заглушки без реализации
-- **1.1-13** Images upload для мероприятий (TASK-4.1 из RELEASE_BACKLOG)
-- **1.1-14** HTML sanitization для fullDescription (TASK-8.1)
-- **1.1-15** CookieBanner настраивается из SiteConfig (TASK-3.1)
+**M-4 — Broadcast N+1 query**  
+`broadcast.processor.ts`: `isCooldownActive()` вызывается per-recipient в цикле. 50 DB-запросов на батч. Критично для больших рассылок.
+
+**M-5 — Отсутствуют Prisma индексы** (требует миграцию)  
+`Reminder.botUserId`, `EventDirection.directionId`, `HashtagMapping.directionId`, `ApiSourceLog.sourceId` — нет `@@index`. Медленные запросы при росте данных.
+
+### Низкие (можно в 1.1)
+
+**L-1 — Admin секция без `error.tsx`**  
+Ошибки в admin показывают публичный error UI вместо admin-styled.
+
+**L-2 — HTML sanitization fullDescription** *(TASK-8.1)*  
+`dangerouslySetInnerHTML` в admin legal preview без sanitization (low risk — admin only, но следует добавить).
+
+**L-3 — `assertBotToken()` дублируется в 3 контроллерах**  
+`bots.controller.ts`, `reminders.controller.ts`, `broadcasts.controller.ts` — одинаковая функция.
+
+**L-4 — Заглушки модулей**  
+`Analytics`, `Images`, `Builder`, `ApiSources` — только health endpoint, без реализации.
+
+**L-5 — ~45 `as any` cast в backend**  
+В основном в `broadcasts.service.ts` и `broadcast.processor.ts` — Prisma enum workaround.
 
 ---
 
 ## 4. Что блокирует релиз
 
-### BLOCKER-1: NEXT_PUBLIC_MAX_BOT_URL отсутствует в frontend .env
-**Файл**: `apps/frontend/.env.example`  
-**Проблема**: Переменная `NEXT_PUBLIC_MAX_BOT_URL` определена в root `.env.example` и используется в `EventDetailActions.tsx`, но отсутствует в `apps/frontend/.env.example`. Оператор деплоя, следующий только по frontend-конфигу, не поставит её — кнопка "Напомнить в MAX" будет использовать хардкод-URL или не отображаться.  
-**Действие**: добавить переменную в `apps/frontend/.env.example`.
+### BLOCKER-1 — Нет тестов, CI pipeline упадёт
 
-### BLOCKER-2: SESSION_SECRET не передаётся в docker-compose
-**Файл**: `docker-compose.yml`, `docker-compose.prod.yml`  
-**Проблема**: `SESSION_SECRET` определён в `.env.example` и `apps/backend/.env.example`, но ни dev, ни prod docker-compose не передают его в backend сервис через `environment:`. Если passport sessions используют этот секрет — они не работают в Docker-деплое.  
-**Действие**: проверить, используется ли SESSION_SECRET в backend коде, и если да — добавить в docker-compose.
+**Статус:** ⚠️ Частично исправлено (добавлен `"test": "echo ..."`)  
+**Проблема:** Отсутствие smoke-тестов означает невозможность автоматической проверки регрессий при деплое. Перед релизом нужно минимум: health-check тест (`GET /api/health` → 200), auth test (login → token), 1-2 public endpoint теста.  
+**Действие до релиза:** Добавить хотя бы 3-5 e2e smoke-тестов для критических путей.
 
-### BLOCKER-3: REDIS_PASSWORD не в apps/backend/.env.example и prod docker-compose
-**Файл**: `apps/backend/.env.example`  
-**Проблема**: Production docker-compose.prod.yml передаёт `REDIS_PASSWORD` в backend, но `apps/backend/.env.example` не документирует эту переменную. При локальном запуске без docker-compose backend не сможет подключиться к Redis с паролем.  
-**Действие**: добавить `REDIS_PASSWORD=` в `apps/backend/.env.example`.
+### BLOCKER-2 — Страница Admin Users отсутствует
 
-### BLOCKER-4: Нет автоматических тестов + нет CI pipeline
-**Проблема**: `pnpm test` завершится с ошибкой во всех пакетах — скрипт `test` отсутствует. При настройке CI/CD любой pipeline, вызывающий `pnpm test`, немедленно упадёт. Отсутствие тестов означает невозможность автоматической проверки регрессий.  
-**Минимальное действие для RC**: добавить `"test": "echo 'no tests yet'"` в каждый package.json чтобы pipeline не падал; добавить хотя бы 2-3 smoke-теста для auth и health endpoint.
+**Статус:** ❌ Не реализовано  
+**Проблема:** В ТЗ и EPIC-1 (TASK-1.3) указана страница управления подписчиками ботов. Sidebar содержит заглушку. Без неё нет возможности управлять пользователями (просмотр, деактивация).  
+**Действие:** Реализовать `/admin/users` с таблицей BotUser, поиском, фильтром по каналу, пагинацией — или согласовать перенос в 1.1.
+
+> **Примечание:** Если пользователь явно подтвердит перенос TASK-1.3 в v1.1, BLOCKER-2 снимается.
 
 ---
 
-## 5. Общий процент готовности
+## 5. Что можно перенести в v1.1
 
-| Компонент | Готовность | Комментарий |
-|-----------|-----------|-------------|
-| Публичный сайт | 90% | Нет image upload, некоторые CSS-детали |
-| Admin панель | 88% | Нет admin error.tsx, image upload |
-| Backend API | 85% | Заглушки (analytics, builder, images), N+1 в broadcast |
-| Telegram Bot | 80% | Нет /cancel, state machine хранится в памяти |
-| MAX Bot | 75% | Нет /help, /cancel; any typing; sendMaxMessage не проверяет HTTP status |
-| Инфраструктура | 70% | Нет тестов, неполные healthchecks, docker-compose пробелы |
-| Документация | 85% | env.example есть, API docs через Swagger |
-| **Итого** | **82%** | |
+| # | Задача | Обоснование |
+|---|--------|-------------|
+| 1.1-1 | Unit + e2e тесты для всех модулей | Не влияет на функциональность первого деплоя |
+| 1.1-2 | Admin `/users` (подписчики ботов) | Если согласован перенос |
+| 1.1-3 | Broadcast N+1 оптимизация | Не критично при малых объёмах (< 1000 рассылок) |
+| 1.1-4 | Prisma DB indexes (4 поля) | Требует миграцию; не критично при текущих объёмах |
+| 1.1-5 | Image upload для мероприятий | Пока достаточно URL |
+| 1.1-6 | Cookie Banner ← SiteConfig | Текущий вариант функционален |
+| 1.1-7 | HTML sanitization в admin | Admin-only риск, низкий |
+| 1.1-8 | `/cancel` в Telegram/MAX bot | Состояние можно сбросить через `/start` |
+| 1.1-9 | Admin `error.tsx` | Публичный fallback работает |
+| 1.1-10 | `assertBotToken` refactor | Tech debt, не ломает |
+| 1.1-11 | Удалить `buildMessageText()` deprecated | Не мешает компиляции |
+| 1.1-12 | Исправить `as any` → Prisma enum imports | Tech debt |
+| 1.1-13 | Backend tsconfig strict mode | Не ломает |
+| 1.1-14 | Dockerfile USER (non-root) | Security hardening |
+| 1.1-15 | Frontend/nginx healthcheck в docker-compose | Monitoring improvement |
+| 1.1-16 | Константы MAX_CHANNEL/PARTNER_URL → `lib/constants.ts` | DRY |
+| 1.1-17 | `/help` в MAX Bot | Telegram-bot имеет |
+| 1.1-18 | Удалить dead bots deps (@prisma/client, ioredis, node-fetch) | Image size |
+| 1.1-19 | Analytics admin UI (просмотр EventView, SiteVisit) | Данные пишутся, UI нет |
 
 ---
 
-## 6. Рекомендация
+## 6. Общий процент готовности
+
+**82 %** — проект функционально завершён по основным пользовательским путям. Оставшиеся 18% — tech debt, отсутствие тестов, 2 незакрытых блокера, и несколько модулей-заглушек без реализации.
+
+---
+
+## 7. Готовность по разделам
+
+### 7.1 Frontend — 88 %
+
+| Компонент | Статус | % |
+|-----------|--------|---|
+| Главная (Hero, EventsSection, фильтры) | ✅ Готов | 100 |
+| EventCalendar | ✅ Готов | 100 |
+| EventCard + Skeleton | ✅ Готов | 100 |
+| Страница события `/events/[id]` | ✅ Готов | 100 |
+| Юридические страницы `/legal/*` | ✅ Готов | 100 |
+| Header / Footer | ✅ Готов | 100 |
+| Cookie Banner | ⚠️ Частично | 75 (нет связи с SiteConfig) |
+| Maintenance page | ✅ Готов | 100 |
+| Error pages | ⚠️ Частично | 85 (нет admin-styled error.tsx) |
+| Loading / Empty states | ✅ Готов | 100 |
+| Адаптивность | ✅ Хорошо | 90 |
+| Accessibility (a11y) | ⚠️ Частично | 80 (alt="" на maintenance img) |
+| SEO (robots, sitemap, OG) | ✅ Готов | 100 |
+| Analytics (Метрика) | ✅ Готов | 100 |
+
+**Средняя: 88 %**
+
+### 7.2 Backend — 85 %
+
+| Модуль | Статус | % |
+|--------|--------|---|
+| Auth (JWT, local strategy) | ✅ Готов | 100 |
+| Events CRUD | ✅ Готов | 100 |
+| Cities CRUD | ✅ Готов | 100 |
+| Directions CRUD | ✅ Готов | 100 |
+| Broadcasts | ✅ Готов | 95 (N+1 issue) |
+| Reminders | ✅ Готов | 100 |
+| Legal | ✅ Готов | 100 |
+| Quotes | ✅ Готов | 100 |
+| Filters (public) | ✅ Готов | 100 |
+| SiteConfig | ✅ Готов | 100 |
+| Analytics (запись EventView/SiteVisit) | ✅ Готов | 100 |
+| MAX Import | ✅ Готов | 100 |
+| Bots (upsert, legal, phone) | ✅ Готов | 95 |
+| Admin (dashboard stats) | ✅ Готов | 100 |
+| Images module | ❌ Заглушка | 0 |
+| Builder module | ❌ Заглушка | 0 |
+| Analytics admin UI | ❌ Заглушка | 0 |
+| ApiSources admin UI | ❌ Заглушка | 0 |
+
+**Средняя: 85 %**
+
+### 7.3 Database — 87 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| Schema (25 моделей) | ✅ Готов | 100 |
+| Migrations | ✅ Готов | 100 |
+| Seed | ✅ Готов | 100 |
+| Индексы на критических полях Event | ✅ | 100 |
+| Индексы FK (Reminder.botUserId и др.) | ⚠️ Частично | 60 |
+| Unique constraints | ⚠️ Частично | 85 (нет Reminder @@unique([botUserId,eventId])) |
+| Referential integrity | ⚠️ Частично | 90 (SiteConfigVersion → SiteConfig нет FK) |
+| Enum типы | ✅ Корректны | 100 |
+
+**Средняя: 87 %**
+
+### 7.4 API — 92 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| REST endpoints (coverage) | ✅ | 95 |
+| Auth guards (JwtAuthGuard + RolesGuard) | ✅ | 100 |
+| Rate limiting | ✅ | 100 |
+| Input validation (ValidationPipe) | ⚠️ Частично | 85 (3 Bot DTO без декораторов) |
+| Error responses (ApiError) | ✅ | 95 |
+| Swagger документация | ✅ | 100 |
+| CORS | ✅ | 100 |
+| Helmet | ✅ | 100 |
+
+**Средняя: 92 %**
+
+### 7.5 Admin — 80 %
+
+| Раздел | Статус | % |
+|--------|--------|---|
+| Авторизация | ✅ | 100 |
+| Dashboard | ✅ | 100 |
+| События | ✅ | 100 |
+| Цитаты | ✅ | 100 |
+| Города | ✅ | 100 |
+| Направления | ✅ | 100 |
+| Пользователи (подписчики) | ❌ | 0 |
+| Настройки | ✅ | 100 |
+| Рассылки | ✅ | 98 |
+| Юридические документы | ✅ | 100 |
+| Error handling (admin error.tsx) | ⚠️ | 50 |
+
+**Средняя: 80 %**
+
+### 7.6 Telegram Bot — 85 %
+
+| Функция | Статус | % |
+|---------|--------|---|
+| /start + onboarding | ✅ | 100 |
+| Legal consent flow | ✅ | 95 (result не проверяется) |
+| Phone verification | ✅ | 95 (result не проверяется) |
+| Deep-link remind | ✅ | 100 |
+| Выбор даты/времени | ✅ | 100 |
+| Подтверждение | ✅ | 100 |
+| /unsubscribe | ✅ | 100 |
+| /help | ✅ | 100 |
+| /cancel | ❌ | 0 |
+| State persistence (restart) | ❌ | 0 (in-memory Map) |
+| Error handling (bot.catch) | ✅ | 100 |
+
+**Средняя: 85 %**
+
+### 7.7 MAX Bot — 75 %
+
+| Функция | Статус | % |
+|---------|--------|---|
+| /start + onboarding | ✅ | 100 |
+| Legal consent | ✅ | 90 |
+| Phone verification (text) | ✅ | 90 |
+| Deep-link remind | ✅ | 100 |
+| /unsubscribe | ✅ | 100 |
+| /help | ❌ | 0 |
+| /cancel | ❌ | 0 |
+| HTTP polling error handling | ✅ | 90 |
+| Type safety (any update object) | ⚠️ | 30 |
+| sendMaxMessage HTTP status check | ⚠️ | 50 |
+| State persistence | ❌ | 0 |
+
+**Средняя: 75 %**
+
+### 7.8 Reminder Engine — 95 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| Создание напоминания | ✅ | 100 |
+| Cron dispatch (30/15/5 мин) | ✅ | 100 |
+| BR-010 (30 мин, одно напоминание) | ✅ | 100 |
+| BR-011 (cancel при отписке) | ✅ | 100 |
+| BR-021 (service notifications) | ✅ | 100 |
+| Отмена напоминания | ✅ | 100 |
+| @@index([remindAt]) | ✅ | 100 |
+| @@unique([botUserId, eventId]) | ❌ | 0 (TOCTOU риск) |
+
+**Средняя: 95 %**
+
+### 7.9 Broadcast — 88 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| CRUD broadcasts | ✅ | 100 |
+| BullMQ queue | ✅ | 100 |
+| Scheduling (scheduledAt) | ✅ | 100 |
+| BR-031 (3 условия cooldown) | ✅ | 100 |
+| test-send | ✅ | 100 |
+| Pause / Resume / Cancel | ✅ | 100 |
+| Stats (total/sent/failed/skipped) | ✅ | 100 |
+| N+1 cooldown check | ⚠️ | 0 (в backlog) |
+| Retry при ошибке отправки | ✅ | 90 |
+
+**Средняя: 88 %**
+
+### 7.10 Legal — 97 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| 5 типов документов в БД | ✅ | 100 |
+| Версионирование | ✅ | 100 |
+| Публикация | ✅ | 100 |
+| Public endpoint `/legal/[slug]` | ✅ | 100 |
+| Admin CRUD | ✅ | 100 |
+| Legal consent в ботах | ✅ | 100 |
+| HTML рендеринг в admin preview | ⚠️ | 85 (нет sanitize, admin-only) |
+
+**Средняя: 97 %**
+
+### 7.11 Cookie — 75 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| Cookie Banner UI | ✅ | 100 |
+| Принятие и localStorage | ✅ | 100 |
+| Ссылки на /legal/privacy, /legal/cookies | ✅ | 100 |
+| Связь с SiteConfig (backend) | ❌ | 0 |
+| Управление из admin | ❌ | 0 |
+
+**Средняя: 75 %**
+
+### 7.12 Maintenance — 98 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| Middleware redirect | ✅ | 100 |
+| Backend flag `maintenanceEnabled` | ✅ | 100 |
+| Admin toggle через SiteConfig | ✅ | 100 |
+| Динамический контент (imageUrl, message) | ✅ | 100 |
+| Fallback PNG | ✅ | 100 |
+| Bypass для /admin, /maintenance | ✅ | 100 |
+| onError для dynamic imageUrl | ⚠️ | 50 (нет fallback) |
+
+**Средняя: 98 %**
+
+### 7.13 Analytics — 65 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| Яндекс.Метрика счётчик | ✅ | 100 |
+| SPA pageview tracking | ✅ | 100 |
+| Custom goals (6 целей) | ✅ | 100 |
+| Backend EventView запись | ✅ | 100 |
+| Backend SiteVisit запись | ✅ | 100 |
+| Admin аналитика UI | ❌ | 0 (заглушка) |
+| AnalyticsService реализация | ❌ | 0 (заглушка) |
+
+**Средняя: 65 %**
+
+### 7.14 Deployment — 78 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| docker-compose.yml (dev) | ✅ | 95 |
+| docker-compose.prod.yml | ✅ | 90 |
+| Nginx reverse proxy | ✅ | 100 |
+| Postgres healthcheck | ✅ | 100 |
+| Redis healthcheck | ✅ | 100 |
+| Backend healthcheck | ✅ | 100 |
+| Frontend healthcheck | ❌ | 0 |
+| Nginx healthcheck | ❌ | 0 |
+| Bots healthcheck | ❌ | 0 |
+| env.example (все пакеты) | ✅ | 95 |
+| Dockerfile backend | ⚠️ | 70 (root user) |
+| Dockerfile bots | ⚠️ | 70 (root user) |
+| SESSION_SECRET в docker-compose | ✅ | 100 (не используется в коде) |
+| NEXT_PUBLIC_API_URL в prod compose | ⚠️ | 60 |
+
+**Средняя: 78 %**
+
+### 7.15 Testing — 5 %
+
+| Аспект | Статус | % |
+|--------|--------|---|
+| Unit тесты | ❌ | 0 |
+| Integration тесты | ❌ | 0 |
+| E2E тесты | ❌ | 0 |
+| `pnpm test` не падает | ✅ | 100 (добавлен echo-скрипт) |
+| TypeCheck (tsc --noEmit) | ✅ | 100 |
+| Build (next build, nest build) | ✅ | 100 |
+| Lint | ✅ | 100 |
+
+**Средняя: 5 %** *(критическая зона)*
+
+### 7.16 Documentation — 90 %
+
+| Документ | Статус | % |
+|----------|--------|---|
+| PROJECT_BIBLE/PROJECT_IMPLEMENTATION_STATUS.md | ✅ | 100 |
+| PROJECT_BIBLE/RELEASE_BACKLOG.md | ✅ | 100 |
+| PROJECT_BIBLE/RELEASE_CANDIDATE_REPORT.md | ✅ | 100 |
+| docs/CHANGELOG.md | ✅ | 100 |
+| API (Swagger /api/docs) | ✅ | 100 |
+| .env.example (все пакеты) | ✅ | 95 |
+| README.md | ⚠️ | 50 (базовый, без setup guide) |
+| Архитектурные ADR | ⚠️ | 60 (не оформлены формально) |
+
+**Средняя: 90 %**
+
+---
+
+## 8. Итоговая рекомендация
 
 ### ⚠️ НЕ ГОТОВ К РЕЛИЗУ
 
 **Причины:**
 
-1. **4 блокера** требуют исправления перед деплоем:
-   - Недостающие env переменные в конфигурационных файлах
-   - Отсутствие тестовых скриптов (CI будет падать)
+**Блокер 1 — Нет тестов (BLOCKER-1)**  
+Перед production-деплоем необходимо минимум 3-5 smoke-тестов для критических путей: auth, health, public events. Без них любой деплой — «вслепую». Текущий `"test": "echo ..."` не подходит как финальное решение.
 
-2. **Критические безопасные проблемы** — частично устранены в этом аудите:
-   - ~~JWT fallback secret~~ → **ИСПРАВЛЕНО** (throw при отсутствии JWT_SECRET)
-   - Dev Redis без пароля остаётся риском на облачных серверах
+**Блокер 2 — Admin Users (BLOCKER-2)**  
+Страница `/admin/users` (подписчики ботов) упомянута в ТЗ. Если пользователь явно подтвердит перенос в v1.1 — блокер снимается и проект может выйти на staging.
 
-3. **Функциональные пробелы** для v1.0:
-   - Кнопка "Напомнить в MAX" может не работать на production без ручной настройки env
-   - Боты теряют состояние при перезапуске (in-memory Map) — пользователи в середине flow зависнут
+**Что сделать перед релизом (оценка: 2-3 дня):**
 
-**Что нужно сделать перед релизом (оценка: 1–2 дня):**
+```
+□ Согласовать: переносится ли /admin/users в v1.1?
+□ Добавить 3-5 smoke-тестов (health + auth + public events)
+□ Провести ручное smoke-тестирование полного flow
+□ Проверить production env vars на реальном сервере
+□ Убедиться что JWT_SECRET, BOT_INTERNAL_TOKEN, TELEGRAM_BOT_TOKEN установлены в prod
+```
 
-- [ ] BLOCKER-1: добавить `NEXT_PUBLIC_MAX_BOT_URL` в `apps/frontend/.env.example`
-- [ ] BLOCKER-2: проверить/добавить `SESSION_SECRET` в docker-compose
-- [ ] BLOCKER-3: добавить `REDIS_PASSWORD` в `apps/backend/.env.example`
-- [ ] BLOCKER-4: добавить `"test": "echo 'no tests yet'"` в package.json всех пакетов
-- [ ] Провести ручное smoke-тестирование полного flow: регистрация → напоминание → рассылка → публикация мероприятия
+**После устранения блокеров** проект готов к **staging-деплою** для финальной приёмки заказчиком.
 
-**После устранения блокеров** проект будет готов к деплою в staging для финальной приёмки.
+**При положительном результате staging-теста:** рекомендация изменится на **ГОТОВ К РЕЛИЗУ**.
 
 ---
 
-## Приложение: Полный список найденных проблем
-
-### Автоматически исправлено в этом аудите
-
-| # | Файл | Исправление |
-|---|------|-------------|
-| A-1 | `.env.example` | Добавлены `NEXT_PUBLIC_YANDEX_METRIKA_ID`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL` |
-| A-2 | `apps/backend/src/main.ts` | `console.log` заменён на `Logger.log` |
-| A-3 | `apps/backend/src/modules/auth/auth.module.ts` | JWT_SECRET: убран fallback, добавлен throw при отсутствии |
-| A-4 | `apps/backend/src/modules/auth/strategies/jwt.strategy.ts` | То же — throw при отсутствии JWT_SECRET |
-| A-5 | `apps/frontend/src/components/events/EventsSection.tsx` | Удалены мёртвый код: unused `isFirstMount` callback + пустой `useEffect` |
-| A-6 | `apps/frontend/src/app/admin/broadcasts/[id]/page.tsx` | Silent catch → полноценная обработка с отображением ошибки для вкладок Получатели/Логи |
-
-### Занесено в RELEASE_BACKLOG для v1.1
-
-| # | Severity | Описание |
-|---|----------|---------|
-| B-1 | HIGH | Broadcast N+1: `isCooldownActive` per-recipient |
-| B-2 | HIGH | Prisma missing indexes: Reminder.botUserId, EventDirection.directionId, HashtagMapping.directionId, ApiSourceLog.sourceId |
-| B-3 | MEDIUM | Bot class-validator: UpsertBotUserDto, AcceptLegalDto, SavePhoneDto без декораторов |
-| B-4 | MEDIUM | `apiAcceptLegal`/`apiSavePhone` return value ignored в Telegram/MAX bot |
-| B-5 | MEDIUM | `runManual()` max-import без try/catch |
-| B-6 | MEDIUM | Admin `error.tsx` — нет admin-styled error boundary |
-| B-7 | LOW | `assertBotToken` — дублируется в 3 контроллерах |
-| B-8 | LOW | `buildMessageText()` deprecated без вызовов — удалить |
-| B-9 | LOW | ~45 `as any` в backend broadcasts/events (Prisma enum workaround) |
-| B-10 | LOW | bots/Dockerfile: no USER, no HEALTHCHECK |
-| B-11 | LOW | backend/Dockerfile: no USER |
-| B-12 | LOW | Dev Redis: no password, exposed 6379 on host |
-| B-13 | LOW | `SiteConfigVersion` нет FK к `SiteConfig` |
-| B-14 | LOW | `Reminder` нет `@@unique([botUserId, eventId])` |
-| B-15 | LOW | Dead bots dependencies: @prisma/client, ioredis, node-fetch |
-| B-16 | LOW | MAX Bot: нет `/help`, `/cancel`; sendMaxMessage не проверяет HTTP status |
-| B-17 | LOW | Telegram Bot: нет `/cancel`; in-memory state machine |
-| B-18 | LOW | Backend tsconfig: strictFunctionTypes, strictPropertyInitialization выключены |
-| B-19 | LOW | Image upload для мероприятий (TASK-4.1) |
-| B-20 | LOW | HTML sanitization fullDescription (TASK-8.1) |
-| B-21 | LOW | Константы MAX_CHANNEL, PARTNER_URL дублируются в 4 файлах |
-| B-22 | LOW | Нет тестов ни в одном пакете |
+*Создан: 2026-07-09 | Stage 38 | Следующее обновление: после устранения блокеров*

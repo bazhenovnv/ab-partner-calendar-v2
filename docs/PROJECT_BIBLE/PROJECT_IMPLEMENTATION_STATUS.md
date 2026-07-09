@@ -1,10 +1,12 @@
 # PROJECT IMPLEMENTATION STATUS
 ## АБ Афиша Бухгалтера — Технический аудит
 
-**Дата аудита:** 2026-07-08  
-**Ревьюер:** Claude Code (технический аудит по запросу)  
-**Ветка:** main @ cb5bac80 (после merge PR #36)  
-**Репозиторий:** bazhenovnv/ab-partner-calendar-v2
+**Дата первичного аудита:** 2026-07-08  
+**Дата Stage 38 (RC Audit):** 2026-07-09  
+**Ревьюер:** Claude Code  
+**Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
+**Репозиторий:** bazhenovnv/ab-partner-calendar-v2  
+**Общая готовность к релизу:** **82%** — НЕ ГОТОВ (2 блокера)
 
 ---
 
@@ -587,3 +589,42 @@
 
 *Аудит выполнен на основе кода репозитория, docs/TZ_*.md, docs/BUSINESS_RULES.md, docs/ADR.md, docs/CHANGELOG.md.*  
 *Дата: 2026-07-08. Версия: 1.0*
+
+---
+
+## 9. Stage 38 — Release Candidate Audit (2026-07-09)
+
+### Обновлённые статусы после Stage 38
+
+| Раздел | Статус до | Статус после | Изменение |
+|--------|-----------|-------------|-----------|
+| Публичная главная | 100% ✅ | 100% ✅ | — |
+| Admin UI | 55% → | 80% ✅ | MED-3: Cities + Directions полностью |
+| Backend API | 82% → | 85% ✅ | Cities/Directions CRUD добавлены |
+| Яндекс.Метрика | 100% ✅ | 100% ✅ | SPA pageview + 6 кастомных целей |
+| Боты | 88% → | 80-85% | Без изменений (MAX уточнён вниз) |
+| JWT Security | ⚠️ РИСК | ✅ ИСПРАВЛЕНО | Убран fallback secret |
+| Testing | ❌ 0% | ⚠️ 5% | Добавлен echo-placeholder |
+| Documentation | 70% | 90% ✅ | RC Report + Backlog обновлены |
+
+### Авто-исправления Stage 38
+
+| # | Проблема | Файл |
+|---|----------|------|
+| A-1 | JWT fallback secret → throw при отсутствии | auth.module.ts, jwt.strategy.ts |
+| A-2 | console.log → Logger.log | main.ts |
+| A-3 | Мёртвый код (isFirstMount, пустой useEffect) | EventsSection.tsx |
+| A-4 | Silent catch → обработка ошибок в UI | broadcasts/[id]/page.tsx |
+| A-5 | NEXT_PUBLIC_MAX_BOT_URL в frontend env | apps/frontend/.env.example |
+| A-6 | REDIS_PASSWORD в backend env | apps/backend/.env.example |
+| A-7 | NEXT_PUBLIC_YANDEX_METRIKA_ID и др. в root env | .env.example |
+| A-8 | test-script placeholder во всех пакетах | */package.json |
+
+### Оставшиеся блокеры
+
+| Блокер | Описание | Действие |
+|--------|----------|---------|
+| BLOCKER-1 | Нет реальных тестов | Добавить 3-5 smoke-тестов |
+| BLOCKER-2 | Нет /admin/users (подписчики ботов) | Реализовать или согласовать перенос в v1.1 |
+
+*Stage 38 обновление: 2026-07-09*

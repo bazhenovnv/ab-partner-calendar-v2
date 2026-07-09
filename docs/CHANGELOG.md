@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 38: Release Candidate Audit
+
+### Безопасность
+
+- **SECURITY** — `auth.module.ts`, `jwt.strategy.ts`: убран fallback `'dev-secret-change-in-prod'` для `JWT_SECRET`; добавлен throw при отсутствии переменной. Приложение теперь не запустится без явного JWT_SECRET в env.
+
+### Исправлено
+
+- **main.ts**: `console.log` заменён на `Logger.log` (NestJS structured logging)
+- **EventsSection.tsx**: удалён мёртвый код — `isFirstMount` callback и пустой `useEffect` с eslint-disable комментарием
+- **broadcasts/[id]/page.tsx**: silent catch в вкладках Получатели/Логи заменён на полноценную обработку с отображением ошибки в UI (`recipError`, `logsError` state)
+- **package.json** (все пакеты): добавлен скрипт `"test"` — CI pipeline больше не упадёт с ошибкой `script not found`
+
+### Конфигурация
+
+- **`.env.example`** (root): добавлены `NEXT_PUBLIC_YANDEX_METRIKA_ID`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_API_URL`
+- **`apps/frontend/.env.example`**: добавлен `NEXT_PUBLIC_MAX_BOT_URL` — документирует переменную для кнопки «Напомнить в MAX»
+- **`apps/backend/.env.example`**: добавлен `REDIS_PASSWORD` — документирует переменную для Redis auth
+
+### Документация
+
+- Создан (перезаписан) `docs/PROJECT_BIBLE/RELEASE_CANDIDATE_REPORT.md` — полный RC-отчёт по структуре: 8 разделов, 16 компонентов с % готовности, 2 блокера, v1.1 backlog
+- Обновлён `docs/PROJECT_BIBLE/PROJECT_IMPLEMENTATION_STATUS.md` — добавлен раздел Stage 38 с авто-исправлениями и оставшимися блокерами
+- Обновлён `docs/PROJECT_BIBLE/RELEASE_BACKLOG.md` — добавлены RC-A* (исправлено) и RC-B* (backlog v1.1)
+
+### Итог аудита Stage 38
+
+- Найдено проблем: 30+ (frontend, backend, bots, infra)
+- Авто-исправлено: 8 проблем
+- Добавлено в backlog v1.1: 19 задач (RC-B1..RC-B19)
+- Общая готовность: 82%
+- Статус: **НЕ ГОТОВ** (2 блокера: тесты + /admin/users)
+
+---
+
 ## [Unreleased] — 2026-07-08
 
 ### Исправлено (CRITICAL / HIGH issues)
