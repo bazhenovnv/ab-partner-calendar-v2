@@ -165,4 +165,34 @@ Design Freeze v1.0. Все изменения публичной главной 
 
 ---
 
-*Отчёт составлен на основе: `АБ Афиша main(4).pdf` (Design Freeze v1.0) + анализа кода фронтенда (Stage 41.5).*
+---
+
+## 9. Отсутствующие дизайн-ассеты
+
+> Раздел добавлен: Stage 41.8 — Design Assets Inventory (2026-07-09).  
+> Полная инвентаризация: `docs/PROJECT_BIBLE/DESIGN_ASSET_INVENTORY.md`  
+> Детали по каждому MISSING: `docs/PROJECT_BIBLE/MISSING_DESIGN_ASSETS.md`
+
+### ❌ MISSING — отсутствуют полностью
+
+| Asset | Где нужен | Что найдено | Действие |
+|-------|-----------|-------------|----------|
+| **Hero composition** (фото: календарь + ваза + книги + ручка) | `HeroSection.tsx` — правая часть Hero-секции | Embedded в Figma-скриншоте `{D2CF8AB4}` (~680×280px, непригодно для production) | Запросить у дизайнера PNG ≥800×400px с прозрачным фоном |
+| **Gilroy font** (Regular + Medium) | Статусные бейджи, цитаты, footer | Не найден нигде в проекте | Запросить у заказчика лицензию + файлы шрифта |
+| **Admin дизайн-макеты** | Admin-панель | Не предоставлялись | Запросить у дизайнера при планировании v1.1 |
+
+### ⚠ PARTIAL — присутствуют только как скриншоты или генерируются программно
+
+| Asset | Что есть | Чего не хватает |
+|-------|----------|-----------------|
+| **Logo SVG** | `Frame 60.png` (694×575 PNG, ч/б); SVG-аппроксимация в `SiteHeader.tsx` | Оригинальный SVG / Figma export с правильными узлами |
+| **Favicon** | Генерируется через `icon.tsx` (текст «АБ», navy/mint) | Favicon на основе реального SVG монограммы |
+| **OG Image** | Генерируется через `opengraph-image.tsx` (программный, navy фон) | Дизайнерский макет OG-изображения (если требуется) |
+
+### ✅ Полностью готовы к production
+
+Все прочие ассеты (30 позиций): Header, EventCards, MainEventsBanner, Calendar, Footer, Cookie Banner, 404, Reminders, HowItWorks, Maintenance illustration, Legal pages, Admin icons, все inline SVG иконки. Полный список: `docs/PROJECT_BIBLE/DESIGN_ASSET_INVENTORY.md`.
+
+---
+
+*Отчёт составлен на основе: `АБ Афиша main(4).pdf` (Design Freeze v1.0) + анализа кода фронтенда (Stage 41.5–41.8).*
