@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { formatEventDate, formatFormat, formatPrice } from '@/lib/format';
+import { formatEventDateParts, formatFormat, formatPrice } from '@/lib/format';
 import type { PublicEvent } from '@/types/event';
 
 const CARD_BLUR_PLACEHOLDER =
@@ -22,7 +22,7 @@ export function EventCard({ event, className }: EventCardProps) {
   const image = event.images?.[0];
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
   const cityLabel = event.city?.name ?? event.cityName;
-  const dateStr = formatEventDate(event.startDate, event.endDate);
+  const dateParts = formatEventDateParts(event.startDate);
   const status = STATUS_LABEL[event.autoStatus];
 
   return (
@@ -68,11 +68,9 @@ export function EventCard({ event, className }: EventCardProps) {
         )}
 
         {/* Date badge — bottom left overlay */}
-        <div className="absolute bottom-3 left-3 bg-white rounded-lg px-2.5 py-1.5 shadow-sm flex flex-col items-start leading-tight">
-          <span className="text-xs font-bold text-primary">{dateStr}</span>
-          {event.startTime && (
-            <span className="text-xs text-primary/60">{event.startTime}</span>
-          )}
+        <div className="absolute bottom-3 left-3 bg-white rounded-xl shadow-sm flex flex-col items-center justify-center w-[56px] py-1.5 leading-none">
+          <span className="font-montserrat font-bold text-primary text-2xl leading-none">{dateParts.day}</span>
+          <span className="font-montserrat font-bold text-primary text-[11px] leading-none mt-0.5 lowercase">{dateParts.month}</span>
         </div>
       </div>
 
@@ -99,7 +97,7 @@ export function EventCard({ event, className }: EventCardProps) {
           )}
         </div>
 
-        <h3 className="font-montserrat font-semibold text-primary text-base tablet:text-lg leading-snug line-clamp-2 group-hover:text-selected-day transition-colors">
+        <h3 className="font-montserrat font-semibold text-primary text-sm tablet:text-base leading-snug line-clamp-2 uppercase group-hover:text-selected-day transition-colors">
           {event.title}
         </h3>
 

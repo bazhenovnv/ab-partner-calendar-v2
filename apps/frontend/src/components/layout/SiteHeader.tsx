@@ -13,9 +13,27 @@ export function SiteHeader() {
           className="flex items-center gap-2.5 group shrink-0"
           aria-label="АБ Афиша Бухгалтера — на главную"
         >
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="text-mint font-montserrat font-bold text-xs leading-none">АБ</span>
-          </div>
+          <svg
+            width="38"
+            height="32"
+            viewBox="0 0 88 72"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-primary shrink-0"
+            aria-hidden="true"
+          >
+            {/* "а" — open bowl with descending stem */}
+            <path
+              d="M35 22 A19 19 0 1 0 35 52 L35 64"
+              stroke="currentColor"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+            {/* "б" — two diagonal slashes + bottom circle */}
+            <line x1="44" y1="46" x2="68" y2="6"  stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+            <line x1="57" y1="46" x2="81" y2="6"  stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+            <circle cx="64" cy="55" r="14" stroke="currentColor" strokeWidth="8" />
+          </svg>
           <span className="font-montserrat font-bold text-primary text-base leading-tight">
             Афиша <span className="text-selected-day">Бухгалтера</span>
           </span>

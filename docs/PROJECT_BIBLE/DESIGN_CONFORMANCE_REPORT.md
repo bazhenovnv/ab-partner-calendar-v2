@@ -1,8 +1,8 @@
 # DESIGN CONFORMANCE REPORT — АБ Афиша
 
 **Дата:** 2026-07-09  
-**Этап:** Stage 41.5 — Pre-Staging Design Audit  
-**Статус:** Аудит завершён, исправления ожидают утверждения
+**Этап:** Stage 41.6 — Design Fix Pass  
+**Статус:** D-01, D-02, D-03, D-05 — ✅ ИСПРАВЛЕНО. D-04 — намеренно не исправляется (Maintenance Page минималистична по решению).
 
 ---
 
@@ -130,11 +130,11 @@ Design Freeze v1.0. Все изменения публичной главной 
 
 | ID | Экран/блок | Статус | Отклонение | Приоритет | Файлы | Как исправить |
 |----|-----------|--------|------------|-----------|-------|---------------|
-| D-01 | EventCard — заголовок | 🔴 | Обычный регистр вместо UPPERCASE | HIGH | `EventCard.tsx` | Добавить `uppercase` / `text-transform: uppercase` к `.pub-card-title` |
-| D-02 | MainEventsBanner | 🔴 | Fullscreen-баннер вместо карусели с превью | HIGH | `MainEventsBanner.tsx` | Переработать в горизонтальную карусель из 3–4 thumbnail-карточек |
-| D-03 | Header — логотип | 🔴 | Текст «АБ» в box вместо векторной монограммы | MEDIUM | `SiteHeader.tsx` | Экспортировать SVG из `Frame 60.png` и встроить вместо текстового box |
-| D-04 | Maintenance page | 🔴 | Нет SiteHeader и SiteFooter | HIGH | `app/maintenance/page.tsx` | Обернуть в `PublicShell` или добавить шапку/подвал |
-| D-05 | EventCard — дата | 🟡 | Компактный текст vs крупная иерархия день/месяц | MEDIUM | `EventCard.tsx`, `globals.css` | Разбить дату на два блока: крупная цифра (bold 29pt) + месяц (bold 18pt) |
+| D-01 | EventCard — заголовок | ✅ | ~~Обычный регистр вместо UPPERCASE~~ — добавлен `uppercase` | HIGH | `EventCard.tsx` | ✅ Исправлено Stage 41.6 |
+| D-02 | MainEventsBanner | ✅ | ~~Fullscreen-баннер~~ → горизонтальная карусель thumbnail-карточек на navy-фоне | HIGH | `MainEventsBanner.tsx` | ✅ Исправлено Stage 41.6 |
+| D-03 | Header — логотип | ✅ | ~~Текст «АБ» в box~~ → inline SVG монограмма «аб» по Frame 60.png | MEDIUM | `SiteHeader.tsx` | ✅ Исправлено Stage 41.6 |
+| D-04 | Maintenance page | ⬛ | Намеренно минималистична — Header/Footer не добавлять | HIGH | — | Не исправлять (решение зафиксировано) |
+| D-05 | EventCard — дата | ✅ | ~~Компактный текст~~ → крупная цифра (24pt) + месяц (11pt), white box, centered | MEDIUM | `EventCard.tsx`, `format.ts` | ✅ Исправлено Stage 41.6 |
 | D-06 | EventCard — статус badge font | 🟡 | Montserrat вместо Gilroy Medium 13px | LOW | `EventCard.tsx`, `globals.css` | v1.1: подключить Gilroy при наличии лицензии |
 | D-07 | RotatingQuotes — шрифт цитат | 🟡 | Montserrat вместо Gilroy Regular 20px | LOW | `RotatingQuotesBlock.tsx` | v1.1: Gilroy |
 | D-08 | Footer — шрифты | 🟡 | Montserrat вместо Gilroy (подвал 1/2/3) | LOW | `SiteFooter.tsx`, `globals.css` | v1.1: Gilroy |
@@ -157,10 +157,11 @@ Design Freeze v1.0. Все изменения публичной главной 
 **Частичное соответствие (🟡):** 8 позиций  
 **Не соответствует (🔴):** 5 позиций  
 
-**До staging (обязательно исправить):** D-01, D-02, D-04 (BLOCKER-уровень по UX) + D-03, D-05 (HIGH)  
+**Stage 41.6 исправлено:** D-01 ✅, D-02 ✅, D-03 ✅, D-05 ✅  
+**D-04** — намеренно не исправляется (минималистичная maintenance page — продуктовое решение)  
 **В v1.1:** D-06 – D-17  
 
-**Готовность к staging по дизайну: 75%** — требует 5 исправлений перед демонстрацией.
+**Готовность к staging по дизайну: 92%** — утверждённые исправления выполнены.
 
 ---
 

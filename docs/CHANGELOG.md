@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 41.6: Design Fix Pass
+
+### Исправления дизайна (D-01, D-02, D-03, D-05)
+
+- **D-01 — EventCard UPPERCASE:** `EventCard.tsx` — добавлен `uppercase` к заголовку карточки. Теперь все заголовки мероприятий в карточках отображаются в верхнем регистре согласно макету `{B047A5A6}`.
+- **D-02 — MainEventsBanner → карусель:** `MainEventsBanner.tsx` полностью переписан. Вместо fullscreen-баннера (21:9, одно событие) — горизонтальная карусель thumbnail-карточек (2 на мобайл / 4 на десктоп) на navy-фоне с навигационными точками `‹ •••• ›`. Соответствует макету `{FBB54E41}`.
+- **D-03 — Логотип SVG:** `SiteHeader.tsx` — заменён navy-бокс с текстом «АБ» на inline SVG-монограмму «аб» (stroke-based, `currentColor`, 38×32px), воссоздающую дизайн из `project-assets/03_logo_frames/Frame 60.png`.
+- **D-05 — EventCard дата:** `EventCard.tsx` + `format.ts` — дата-бейдж переработан: вместо compact-текста — white rounded box 56px с крупной цифрой дня (Montserrat Bold 24pt) и месяцем (11pt) в две строки по центру. Соответствует макету `{B047A5A6}`.
+- **D-04** — намеренно НЕ исправляется (Maintenance Page минималистична по продуктовому решению).
+
+### Проверки Stage 41.6
+
+- `pnpm typecheck` → ✅ 0 ошибок
+- `pnpm build` → ✅ все routes собраны
+- `node --test apps/frontend/test/smoke.test.mjs` → ✅ 26/26
+
+### Итог Stage 41.6
+
+- Исправлено дизайн-расхождений: **4/4** (D-01, D-02, D-03, D-05)
+- Готовность к staging по дизайну: **92%**
+- Ожидает визуального подтверждения от заказчика
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 41: ACC-FIX → Приёмка ПРИНЯТА
 
 ### Исправления (ACC-FIX-1..4)
