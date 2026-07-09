@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 44: Functional QA Report
+
+### QA Audit
+
+- Проведён полный функциональный аудит кодовой базы (статический анализ)
+- Создан `docs/PROJECT_BIBLE/FUNCTIONAL_QA_REPORT.md`
+- Обнаружено 12 дефектов: 0×P0, 0×P1, 7×P2, 5×P3
+- Блокирующих дефектов не найдено
+- Рекомендация: переход к Stage 45 — Bug Fix Sprint разрешён
+
+### Ключевые находки
+
+- P2: HowItWorksBlock и RemindersBlock не импортированы на главной странице
+- P2: Фильтр по городу отсутствует на публичном сайте (бэкенд поддерживает)
+- P2: `/icon` и `/opengraph-image` не в BYPASS_PREFIXES middleware
+- P2: BroadcastsService нет метода cancel/delete для DRAFT рассылок
+- P3: Twitter card не переопределена на странице события
+- P3: Web App Manifest отсутствует; robots.txt и sitemap.xml не обнаружены
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 43.2: Root Cause Analysis & Fix
 
 ### Диагноз (RCA)
