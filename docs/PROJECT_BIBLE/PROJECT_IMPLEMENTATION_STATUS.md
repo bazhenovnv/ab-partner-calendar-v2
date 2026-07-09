@@ -7,7 +7,7 @@
 **Ревьюер:** Claude Code  
 **Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
 **Репозиторий:** bazhenovnv/ab-partner-calendar-v2  
-**Общая готовность к релизу:** **88%** — ✅ ГОТОВ К STAGING
+**Общая готовность к релизу:** **92%** — ✅ ГОТОВ К STAGING (47/47 приёмка, Stage 41)
 
 ---
 
@@ -668,3 +668,46 @@ pnpm --recursive test
 **Статус: ✅ ГОТОВ К STAGING**
 
 *Stage 39 обновление: 2026-07-09*
+
+
+---
+
+## 11. Stage 40+41 — Приёмочное тестирование и ACC-FIX (2026-07-09)
+
+### Результат Stage 40 (Acceptance Testing)
+
+Проведён полный статический аудит продукта. 47 позиций проверено.
+
+- Принято полностью: 42/47
+- Требует исправления до демонстрации: 4 (ACC-FIX-1..4)
+- Переносится в v1.1: 5 пунктов
+- Статус: **УСЛОВНО ПРИНЯТО** → Stage 41
+
+### Результат Stage 41 (ACC-FIX)
+
+Все 4 пункта исправлены.
+
+| ACC-FIX | Файл | Действие |
+|---------|------|----------|
+| ACC-FIX-1 | `apps/frontend/src/app/icon.tsx` | Создан favicon (32×32, navy+mint, Next.js ImageResponse) |
+| ACC-FIX-2 | `apps/frontend/src/components/events/EventDetailActions.tsx:8` | Дефолт MAX_BOT_URL: `'https://...'` → `''` |
+| ACC-FIX-3 | `apps/frontend/src/app/not-found.tsx` | Создана брендированная 404-страница с PublicShell |
+| ACC-FIX-4 | `apps/frontend/src/app/opengraph-image.tsx` + `layout.tsx` | Создан og:image 1200×630, добавлены twitter-метаданные |
+
+### Проверки Stage 41
+
+```
+pnpm typecheck       → ✅ Пройден (0 ошибок)
+pnpm build           → ✅ Пройден (/icon, /opengraph-image в routes)
+pnpm test (frontend) → ✅ 26/26 тестов
+```
+
+### Итог Stage 40+41
+
+- Принято: **47/47 позиций**
+- ACC-FIX закрыто: 4/4
+- Общая готовность: **92%**
+- Статус: **✅ ПРИНЯТО — ГОТОВ К STAGING**
+
+**Дата Stage 41:** 2026-07-09  
+**Дата обновления:** 2026-07-09

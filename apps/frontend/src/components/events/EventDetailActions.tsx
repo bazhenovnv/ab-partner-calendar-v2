@@ -5,7 +5,7 @@ import { ym } from '@/lib/metrika';
 import type { PublicEvent } from '@/types/event';
 
 const TG_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? '';
-const MAX_BOT_URL = process.env.NEXT_PUBLIC_MAX_BOT_URL ?? 'https://max.ru/id2308283362_bot';
+const MAX_BOT_URL = process.env.NEXT_PUBLIC_MAX_BOT_URL ?? '';
 
 interface EventDetailActionsProps {
   event: PublicEvent;

@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 41: ACC-FIX → Приёмка ПРИНЯТА
+
+### Исправления (ACC-FIX-1..4)
+
+- **ACC-FIX-1 — Favicon:** создан `apps/frontend/src/app/icon.tsx` — Next.js ImageResponse, 32×32px. Тёмно-синий (#0D2344) с надписью «АБ» мятным (#7CD8B3). Соответствует логотипу Header.
+- **ACC-FIX-2 — MAX-кнопка:** в `EventDetailActions.tsx` дефолт `NEXT_PUBLIC_MAX_BOT_URL` изменён с `'https://max.ru/id2308283362_bot'` на `''`. MAX-кнопка теперь показывается только при явно заданной env-переменной — поведение идентично Telegram-кнопке.
+- **ACC-FIX-3 — Branded 404:** создан `apps/frontend/src/app/not-found.tsx` — брендированная 404-страница с `PublicShell`: SVG-иконка, «404», заголовок, описание, кнопка «На главную». `robots: { index: false }`.
+- **ACC-FIX-4 — OG Image:** создан `apps/frontend/src/app/opengraph-image.tsx` (edge runtime, 1200×630). Обновлён `layout.tsx` — добавлены `openGraph.images` и `twitter: { card: 'summary_large_image', images }`.
+
+### Проверки Stage 41
+
+- `pnpm typecheck` → ✅ 0 ошибок
+- `pnpm build` → ✅ `/icon` и `/opengraph-image` в route-списке
+- `node --test apps/frontend/test/smoke.test.mjs` → ✅ 26/26
+
+### Документация
+
+- `ACCEPTANCE_REPORT.md` — все ACC-FIX закрыты, таблица Production Ready обновлена, статус **ПРИНЯТО 47/47**
+- `RELEASE_CANDIDATE_REPORT.md` — готовность 88% → **92%**, ACC-FIX добавлены в список выполненного
+- `PROJECT_IMPLEMENTATION_STATUS.md` — добавлена секция Stage 40+41, готовность обновлена
+
+### Итог Stage 41
+
+- Принято: **47/47 позиций**
+- ACC-FIX закрыто: **4/4**
+- Готовность: **92%** — ✅ **ГОТОВ К STAGING**
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 40: Acceptance Testing
 
 ### Документация

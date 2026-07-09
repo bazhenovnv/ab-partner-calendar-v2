@@ -27,6 +27,21 @@ export const metadata: Metadata = {
     locale: 'ru_RU',
     url: SITE_URL,
     siteName: 'АБ Афиша Бухгалтера',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'АБ Афиша Бухгалтера — Главные мероприятия для бухгалтеров',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'АБ Афиша Бухгалтера',
+    description:
+      'Онлайн и офлайн события для профессионального роста бухгалтеров по всей России.',
+    images: ['/opengraph-image'],
   },
   robots: { index: true, follow: true },
 };

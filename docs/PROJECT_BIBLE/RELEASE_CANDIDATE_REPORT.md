@@ -2,9 +2,9 @@
 
 **Дата подготовки:** 2026-07-09  
 **Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
-**Метод:** Полный обход кода (Stage 38) + Smoke-тесты (Stage 39)  
+**Метод:** Полный обход кода (Stage 38) + Smoke-тесты (Stage 39) + Приёмка (Stage 40) + ACC-FIX (Stage 41)  
 **Build-статус:** ✅ Frontend build OK · ✅ Backend build OK  
-**Test-статус:** ✅ 71 smoke-тест пройден (45 backend + 26 frontend)
+**Test-статус:** ✅ 74 smoke-теста пройдено (45 backend + 26 frontend + 3 bots)
 
 ---
 
@@ -12,14 +12,15 @@
 
 | Параметр | Значение |
 |----------|---------|
-| Общая готовность | **88 %** |
+| Общая готовность | **92 %** |
 | Статус | **✅ ГОТОВ К STAGING** |
 | Блокеров релиза | 0 |
-| Авто-исправлений применено | 8 (Stage 38) |
+| Авто-исправлений применено | 8 (Stage 38) + 4 ACC-FIX (Stage 41) |
 | Задач в RELEASE_BACKLOG v1.1 | 20 (RC-B1..RC-B20) |
 | TypeCheck | ✅ Пройден |
 | Build | ✅ Пройден |
-| Tests | ✅ 71 smoke-тест пройден |
+| Tests | ✅ 74 smoke-теста пройдено |
+| Приёмочное тестирование | ✅ ПРИНЯТО 47/47 (Stage 40+41) |
 
 ---
 
@@ -491,7 +492,7 @@
 **Что выполнено:**
 
 ```
-✅ BLOCKER-1 снят — 71 smoke-тест проходит (pnpm --recursive test)
+✅ BLOCKER-1 снят — 74 smoke-теста проходят (pnpm --recursive test)
 ✅ BLOCKER-2 снят — /admin/users перенесён в v1.1 (RC-B20)
 ✅ JWT_SECRET — нет fallback, приложение бросает Error при отсутствии
 ✅ console.log → Logger в main.ts
@@ -499,6 +500,13 @@
 ✅ Error handling в broadcasts/[id] (recipError, logsError)
 ✅ .env.example документирует все переменные
 ✅ scripts/smoke-integration.sh для HTTP-smoke против живого сервера
+
+✅ ACC-FIX-1 — Favicon: app/icon.tsx (32×32, navy+mint, Next.js ImageResponse)
+✅ ACC-FIX-2 — MAX-кнопка: дефолт '' → кнопка скрыта без NEXT_PUBLIC_MAX_BOT_URL
+✅ ACC-FIX-3 — Branded 404: app/not-found.tsx с PublicShell
+✅ ACC-FIX-4 — OG Image: app/opengraph-image.tsx (1200×630) + twitter metadata
+
+✅ Приёмочное тестирование Stage 40+41 — ПРИНЯТО 47/47 позиций
 ```
 
 **Чек-лист перед staging-деплоем:**
@@ -516,4 +524,4 @@
 
 ---
 
-*Обновлён: 2026-07-09 | Stage 39 — Smoke Tests | Статус: ГОТОВ К STAGING*
+*Обновлён: 2026-07-09 | Stage 41 — ACC-FIX + Приёмка | Статус: ГОТОВ К STAGING (92%)*

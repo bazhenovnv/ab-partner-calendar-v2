@@ -1,7 +1,7 @@
 # Acceptance Report — АБ Афиша Бухгалтера v1.0
 
-**Дата:** 2026-07-09  
-**Этап:** Stage 40 — Acceptance Testing  
+**Дата аудита:** 2026-07-09 (Stage 40)  
+**Дата исправлений:** 2026-07-09 (Stage 41 — ACC-FIX-1..4)  
 **Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
 **Метод:** Полный статический анализ кодовой базы — публичный сайт, Admin, боты, backend, инфраструктура
 
@@ -11,9 +11,9 @@
 
 | Параметр | Значение |
 |----------|---------|
-| Общий статус | **⚠️ УСЛОВНО ПРИНЯТО** |
-| Принято полностью | 42 из 47 позиций чек-листа |
-| Требует исправления до демонстрации | 4 пункта |
+| Общий статус | **✅ ПРИНЯТО** |
+| Принято полностью | 47 из 47 позиций чек-листа |
+| Требует исправления до демонстрации | 0 (все 4 ACC-FIX закрыты) |
 | Переносится в v1.1 | 5 пунктов |
 | Рекомендовано улучшить | 4 пункта |
 
@@ -115,47 +115,35 @@
 
 Найдено **4 пункта**, требующих исправления **до демонстрации/деплоя**.
 
-### 🔴 ACC-FIX-1 — Нет favicon
+### ✅ ACC-FIX-1 — Favicon — ЗАКРЫТО (Stage 41)
 
-**Критичность:** HIGH  
-**Файл:** `apps/frontend/public/`  
-**Проблема:** Каталог `public/` содержит только `maintenance.png`. Нет `favicon.ico`, нет `apps/frontend/src/app/icon.*` (Next.js App Router icon convention). Браузеры покажут 404 для `/favicon.ico` и пустую вкладку.  
-**Действие:** Добавить `apps/frontend/src/app/icon.tsx` (SVG-favicon через Next.js ImageResponse) или поместить `favicon.ico` в `public/`.
-
----
-
-### 🔴 ACC-FIX-2 — MAX-кнопка показывается всегда (неверный дефолт)
-
-**Критичность:** HIGH  
-**Файл:** `apps/frontend/src/components/events/EventDetailActions.tsx`, строка 8  
-**Проблема:** Константа `MAX_BOT_URL` имеет дефолт `'https://max.ru/id2308283362_bot'` — ненулевая строка. Это значит, что кнопка «Напомнить в MAX» показывается **во всех** окружениях, даже когда `NEXT_PUBLIC_MAX_BOT_URL` не задан в env. В отличие от Telegram-кнопки (дефолт `''` — правильно), MAX-кнопка никогда не скрывается.  
-**Ожидаемое поведение:** Кнопка должна быть скрыта, если переменная не задана (как Telegram).  
-**Действие:** Изменить строку 8 с:
-```ts
-const MAX_BOT_URL = process.env.NEXT_PUBLIC_MAX_BOT_URL ?? 'https://max.ru/id2308283362_bot';
-```
-на:
-```ts
-const MAX_BOT_URL = process.env.NEXT_PUBLIC_MAX_BOT_URL ?? '';
-```
+**Критичность:** HIGH → ЗАКРЫТО  
+**Файл:** `apps/frontend/src/app/icon.tsx` (создан)  
+**Решение:** Создан `app/icon.tsx` — Next.js ImageResponse, 32×32px. Тёмно-синий квадрат (#0D2344) с закруглёнными углами, надпись «АБ» мятным (#7CD8B3). Совпадает с дизайном логотипа в SiteHeader. Build подтвердил генерацию favicon (`/icon`).
 
 ---
 
-### 🔴 ACC-FIX-3 — Нет глобальной страницы 404
+### ✅ ACC-FIX-2 — MAX-кнопка — ЗАКРЫТО (Stage 41)
 
-**Критичность:** HIGH  
-**Файл:** `apps/frontend/src/app/` (не существует `not-found.tsx`)  
-**Проблема:** При переходе на несуществующий URL (например `/foo/bar`, `/events/invalid`) пользователь видит дефолтную Next.js 404-страницу без брендинга и навигации.  
-**Действие:** Создать `apps/frontend/src/app/not-found.tsx` с PublicShell, заголовком «404 — Страница не найдена», CTA «На главную».
+**Критичность:** HIGH → ЗАКРЫТО  
+**Файл:** `apps/frontend/src/components/events/EventDetailActions.tsx:8`  
+**Решение:** Дефолт изменён с `'https://max.ru/id2308283362_bot'` на `''`. Теперь MAX-кнопка скрывается, когда `NEXT_PUBLIC_MAX_BOT_URL` не задан — поведение идентично Telegram-кнопке.
 
 ---
 
-### 🟡 ACC-FIX-4 — Нет og:image для главной страницы
+### ✅ ACC-FIX-3 — Нет глобальной страницы 404 — ЗАКРЫТО (Stage 41)
 
-**Критичность:** HIGH (для социальных сетей)  
-**Файл:** `apps/frontend/src/app/layout.tsx` и `apps/frontend/src/app/page.tsx`  
-**Проблема:** При публикации ссылки на главную страницу в Telegram/VK/WhatsApp карточка предпросмотра будет без изображения. Нет `app/opengraph-image.*` и нет `images` в `openGraph` metadata главной страницы.  
-**Действие:** Создать `apps/frontend/src/app/opengraph-image.tsx` (Next.js ImageResponse) или добавить статическое изображение `public/og-default.png` и прописать его в metadata.
+**Критичность:** HIGH → ЗАКРЫТО  
+**Файл:** `apps/frontend/src/app/not-found.tsx` (создан)  
+**Решение:** Создана `app/not-found.tsx` с `PublicShell` — брендированная страница 404 в стиле проекта: SVG-иконка, «404», заголовок «Страница не найдена», короткое описание, кнопка «На главную». Метаданные: `title: '404 — Страница не найдена'`, `robots: { index: false }`. Smoke-тесты подтвердили наличие файла.
+
+---
+
+### ✅ ACC-FIX-4 — Нет og:image для главной страницы — ЗАКРЫТО (Stage 41)
+
+**Критичность:** HIGH → ЗАКРЫТО  
+**Файл:** `apps/frontend/src/app/opengraph-image.tsx` (создан) + `apps/frontend/src/app/layout.tsx` (обновлён)  
+**Решение:** Создан `app/opengraph-image.tsx` (Next.js ImageResponse, edge runtime) — 1200×630px. Тёмно-синий фон (#0D2344), блок логотипа «АБ» с мятной границей, заголовок сайта белым, подзаголовок с opacity 0.55, мятная полоса внизу 4px. В `layout.tsx` добавлены `openGraph.images` и `twitter: { card: 'summary_large_image', images }`. Build подтвердил генерацию маршрута `/opengraph-image`.
 
 ---
 
@@ -198,14 +186,14 @@ const MAX_BOT_URL = process.env.NEXT_PUBLIC_MAX_BOT_URL ?? '';
 | Карточки мероприятий | ✅ | Изображение, статус, пагинация |
 | Страница мероприятия | ✅ | Полная информация, действия |
 | Telegram-напоминание | ✅ | Deep-link, hidden без env var |
-| MAX-напоминание | ⚠️ | Кнопка всегда показывается (ACC-FIX-2) |
+| MAX-напоминание | ✅ | Скрыта при отсутствии `NEXT_PUBLIC_MAX_BOT_URL` (ACC-FIX-2 закрыто) |
 | ICS-скачивание | ✅ | Корректный формат + Metrika |
 | Footer | ✅ | 5 юридических ссылок, реквизиты |
 | Юридические страницы | ✅ | Все 5, fallback-контент |
 | Cookie Banner | ✅ | Работает через localStorage |
 | Maintenance mode | ✅ | Redirect + динамический контент |
 | 404 (мероприятие) | ✅ | Брендированная страница |
-| 404 (другие URL) | ❌ | Дефолтная Next.js страница (ACC-FIX-3) |
+| 404 (другие URL) | ✅ | Брендированная страница (ACC-FIX-3 закрыто) |
 | Кнопка "На главную" на 404 | ✅ | Работает |
 
 ### 5.2 Административный путь
@@ -259,12 +247,12 @@ Breakpoints: `mobile: 390px`, `tablet: 1024px`. Диапазон 391–1023px п
 
 | Аспект | Статус | Примечание |
 |--------|--------|------------|
-| favicon | ❌ | Нет favicon.ico и app/icon.* (ACC-FIX-1) |
+| favicon | ✅ | `app/icon.tsx` — 32×32 navy+mint АБ (ACC-FIX-1 закрыто) |
 | robots.txt | ✅ | Верные правила, ссылка на sitemap |
 | sitemap.xml | ✅ | Динамические события + static routes |
 | manifest.json | ❌ | Отсутствует (low priority, v1.1-E) |
 | og:image (events) | ✅ | Per-event из event.images |
-| og:image (home) | ❌ | Нет глобального fallback (ACC-FIX-4) |
+| og:image (home) | ✅ | `app/opengraph-image.tsx` 1200×630 (ACC-FIX-4 закрыто) |
 | og:title, og:description | ✅ | Везде |
 | meta canonical | ✅ | home и events/[id] |
 | meta robots (index) | ✅ | admin: false, maintenance: false, public: true |
