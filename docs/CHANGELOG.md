@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 43.1: Staging Hotfix
+
+### Исправления по результатам staging deploy
+
+**Hotfix 1 — favicon.ico 404:**
+- Добавлен `apps/frontend/public/favicon.ico` (16×16, navy #0D2344, формат ICO 32bpp)
+- Причина: `icon.tsx` генерирует `/icon` (PNG), браузеры запрашивают `/favicon.ico` как отдельный маршрут
+
+**Hotfix 2 — MAX bot poll spam:**
+- `apps/bots/src/max/bot.ts`: graceful degradation при 404 от `api.max.ru/v1/bots/updates`
+- При 404: одно предупреждение в лог, polling прекращается (не перезапускается)
+- При прочих ошибках: backoff 60 секунд вместо прежних 3 секунд
+- Telegram bot, Reminder bot, frontend, backend — не затронуты
+
+### Проверки
+
+- `pnpm --filter frontend build` ✅
+- `pnpm --filter bots build` ✅
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 42.6: Release Freeze Completion
 
 ### Инфраструктура

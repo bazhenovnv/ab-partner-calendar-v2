@@ -1,7 +1,7 @@
 # Staging Readiness Report — АБ Афиша Бухгалтера v1.0
 
-**Дата:** 2026-07-09  
-**Этап:** Stage 42 — Staging Preparation & Release Readiness  
+**Дата:** 2026-07-09 (обновлено: Stage 43.1)  
+**Этап:** Stage 42 → Stage 43.1 — Staging Hotfix  
 **Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
 **Репозиторий:** `bazhenovnv/ab-partner-calendar-v2`  
 **Аудитор:** Claude Code
@@ -242,5 +242,27 @@ Design Pass закрыт (Stage 41.13).
 
 ---
 
+---
+
+## Stage 43.1 — Staging Hotfixes (2026-07-09)
+
+Исправления по результатам первого деплоя на staging.
+
+### Hotfix 1: favicon.ico — 404
+
+**Причина:** `apps/frontend/src/app/icon.tsx` генерирует маршрут `/icon` (PNG), но браузеры запрашивают `/favicon.ico` напрямую. Статического файла в `public/` не было.  
+**Исправление:** Добавлен `apps/frontend/public/favicon.ico` (16×16, navy #0D2344, формат ICO/32bpp).  
+**Проверка:** `pnpm --filter frontend build` ✅
+
+### Hotfix 2: MAX bot — Poll error 404 (log spam)
+
+**Причина:** `https://api.max.ru/v1/bots/updates` возвращает 404. Endpoint недоступен или изменился на стороне MAX API. Старый код повторял попытку каждые 3 сек → непрерывный спам в логах.  
+**Исправление:** Graceful degradation — при получении 404 логируется одно предупреждение и polling прекращается. На прочих ошибках (сеть, 5xx) — backoff 60 секунд вместо 3.  
+**Эффект:** Telegram bot и Reminder bot продолжают работать. Frontend/backend не затронуты.  
+**Проверка:** `pnpm --filter bots build` ✅
+
+---
+
 *Отчёт подготовлен: Stage 42, 2026-07-09*  
+*Обновлён: Stage 43.1, 2026-07-09*  
 *Основан на: PROJECT_IMPLEMENTATION_STATUS.md · RELEASE_CANDIDATE_REPORT.md · ACCEPTANCE_REPORT.md · DESIGN_CONFORMANCE_REPORT.md · DESIGN_ASSET_INVENTORY.md · MISSING_DESIGN_ASSETS.md · STAGE_42_CHECKLIST.md*
