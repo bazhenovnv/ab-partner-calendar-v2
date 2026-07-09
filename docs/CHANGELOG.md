@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 43.2: Root Cause Analysis & Fix
+
+### Диагноз (RCA)
+
+**Общая причина обеих проблем:** сервер запускал старый Docker image (до commit 51d71ff Stage 43.1).
+Это подтверждено: логи bots показывали `[max-bot] Poll error: 404 Not Found` — это OLD-формат, тогда как новый код выводит `[max-bot] Poll returned 404 — MAX polling API unavailable`.
+
+**Favicon архитектурная причина (B):** `public/favicon.ico` в standalone работает, но Next.js 14 App Router имеет более надёжный механизм: статический metadata-файл `app/favicon.ico` компилируется в build, попадает в standalone и служится как полноценный route `/favicon.ico`. `public/` serving — optional static-serving, может не работать в ряде reverse-proxy конфигураций.
+
+**Доказательство:** после добавления `src/app/favicon.ico`, маршрут `/favicon.ico` появился в `routes-manifest.json` и `standalone/.next/server/app/favicon.ico` — чего не было при `public/favicon.ico`.
+
+### Исправления
+
+- `apps/frontend/src/app/favicon.ico` добавлен (App Router metadata-file convention)
+- `apps/frontend/public/favicon.ico` оставлен как резерв
+- `apps/bots/src/max/bot.ts` — код уже правильный (Stage 43.1); dist пересобирается при docker build
+- `pnpm --filter frontend build` → favicon.ico теперь в routes-manifest ✅ и в standalone ✅
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 43.1: Staging Hotfix
 
 ### Исправления по результатам staging deploy
