@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 40: Acceptance Testing
+
+### Документация
+
+- Создан `docs/PROJECT_BIBLE/ACCEPTANCE_REPORT.md` — полный отчёт по приёмке Stage 40:
+  - 47 позиций чек-листа, 42 принято, 4 требуют исправления
+  - ACC-FIX-1: нет favicon
+  - ACC-FIX-2: MAX-кнопка показывается всегда (неверный default `''` → `'https://...'`)
+  - ACC-FIX-3: нет global `not-found.tsx`
+  - ACC-FIX-4: нет og:image для главной страницы
+  - 5 пунктов перенесено в v1.1 (v1.1-A..E)
+  - 4 рекомендации (R-1..R-4)
+
+### Итог Stage 40
+
+- Принято: 42/47 позиций
+- Требует исправления до демонстрации: 4 (ACC-FIX-1..4)
+- Статус: **УСЛОВНО ПРИНЯТО** → ожидает ACC-FIX → Stage 41 Release Preparation
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 39: Smoke Tests → ГОТОВ К STAGING
 
 ### Тестирование
