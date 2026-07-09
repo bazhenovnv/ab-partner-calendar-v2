@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 42.5: Staging Environment Freeze
+
+### Документация
+
+- Создан `docs/PROJECT_BIBLE/STAGING_ENVIRONMENT.md` — эталонная документация окружения staging
+- Зафиксированы: сервер (Timeweb Cloud, IP 5.129.243.179, Ubuntu 22.04 LTS, /srv/ab-afisha), домены (ab-event.pro HTTPS ✅, test.ab-event.pro HTTP ⚠), 6 контейнеров, 22 ENV-переменные, БД (Prisma 25 моделей), боты (Telegram polling, MAX polling, Reminder cron)
+- ENV-аудит: 1 missing (NEXT_PUBLIC_MAX_BOT_URL в prod compose), 1 unused (SESSION_SECRET)
+- Security Freeze, Design Freeze, Release Freeze зафиксированы в документе
+
+### Финальный статус Stage 42.5
+
+**✅ STAGING ENVIRONMENT FROZEN**  
+Все параметры staging-окружения задокументированы и заморожены.  
+Изменения конфигурации, ENV или деплой-конфигурации требуют отдельного согласования.
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 42: Staging Preparation & Release Readiness
 
 ### Аудит
