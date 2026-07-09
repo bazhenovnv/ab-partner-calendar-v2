@@ -113,7 +113,7 @@ bots → backend (service_healthy)
 | `ADMIN_TELEGRAM_CHAT_ID` | ❌ Нет | ✅ | ✅ | Backend admin notify | Chat ID для уведомлений |
 | `BOT_INTERNAL_TOKEN` | ✅ Да | ✅ | ✅ | Backend + bots (внутренний auth) | Мин. 32 символа |
 | `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | ❌ Нет | ✅ | ✅ | Frontend (TG кнопка) | Без `@`; скрывает кнопку если пусто |
-| `NEXT_PUBLIC_MAX_BOT_URL` | ❌ Нет | ✅ | ⚠️ **ОТСУТСТВУЕТ** | Frontend (MAX кнопка) | Скрывает MAX-кнопку если не задан |
+| `NEXT_PUBLIC_MAX_BOT_URL` | ❌ Нет | ✅ | ✅ **(добавлен Stage 42.6)** | Frontend (MAX кнопка) | `${NEXT_PUBLIC_MAX_BOT_URL:-}`; кнопка скрыта если пусто |
 | `YANDEX_METRIKA_ID` | ❌ Нет | ✅ | ✅ (default: 110270689) | Backend (не используется) | Артефакт; реально не читается backend |
 | `NEXT_PUBLIC_YANDEX_METRIKA_ID` | ❌ Нет | ✅ | ✅ (default: 110270689) | Frontend Metrika счётчик | Рабочий default |
 | `NEXT_PUBLIC_SITE_URL` | ✅ Да | ✅ | Hardcoded: `https://ab-event.pro` | Frontend canonical, OG | Зафиксировано в compose |
@@ -126,8 +126,8 @@ bots → backend (service_healthy)
 | `SEED_ADMIN_EMAIL` | ✅ При первом деплое | ✅ | ❌ (не в compose) | Prisma seed | Только при `pnpm seed` |
 | `SEED_ADMIN_PASSWORD` | ✅ При первом деплое | ✅ | ❌ (не в compose) | Prisma seed | Только при `pnpm seed` |
 
-**Итого недостающих ENV в prod compose:** 1 (`NEXT_PUBLIC_MAX_BOT_URL`)  
-**Неиспользуемых ENV:** 1 (`SESSION_SECRET`)
+**Итого недостающих ENV в prod compose:** 0 — замечание по `NEXT_PUBLIC_MAX_BOT_URL` устранено в Stage 42.6  
+**Неиспользуемых ENV:** 1 (`SESSION_SECRET`) — артефакт, v1.1
 
 ---
 

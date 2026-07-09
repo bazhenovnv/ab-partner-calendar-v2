@@ -73,16 +73,11 @@
 
 ---
 
-### ⚠ MEDIUM — NEXT_PUBLIC_MAX_BOT_URL отсутствует в docker-compose.prod.yml
+### ✅ УСТРАНЕНО (Stage 42.6) — NEXT_PUBLIC_MAX_BOT_URL добавлен в docker-compose.prod.yml
 
 **Файл:** `docker-compose.prod.yml`  
-**Описание:** Переменная `NEXT_PUBLIC_MAX_BOT_URL` используется в `EventDetailActions.tsx` для формирования deep-link «Напомнить в MAX». В `docker-compose.prod.yml` она не объявлена. При деплое кнопка «Напомнить в MAX» будет скрыта.  
-**Влияние:** MAX-напоминания недоступны на production без ручного добавления в `.env`.  
-**Решение:** Добавить в `docker-compose.prod.yml` → `frontend.environment`:
-```yaml
-NEXT_PUBLIC_MAX_BOT_URL: ${NEXT_PUBLIC_MAX_BOT_URL:-https://max.ru/id2308283362_bot}
-```
-**Блокирует staging:** ❌ Нет (функция опциональная)
+**Описание:** Переменная `NEXT_PUBLIC_MAX_BOT_URL` добавлена в `frontend.environment` как `${NEXT_PUBLIC_MAX_BOT_URL:-}`. При пустом значении кнопка MAX корректно скрывается (логика в `EventDetailActions.tsx` без изменений). Значение по умолчанию из `.env.example`: `https://max.ru/id2308283362_bot`.  
+**Статус:** ✅ Устранено в Stage 42.6
 
 ---
 
@@ -155,7 +150,7 @@ NEXT_PUBLIC_MAX_BOT_URL: ${NEXT_PUBLIC_MAX_BOT_URL:-https://max.ru/id2308283362_
 | `ADMIN_TELEGRAM_CHAT_ID` | ✅ | ✅ | Backend notify | Опционален |
 | `BOT_INTERNAL_TOKEN` | ✅ | ✅ | Backend + bots auth | Обязателен |
 | `NEXT_PUBLIC_TELEGRAM_BOT_USERNAME` | ✅ | ✅ | Frontend TG button | Опционален (скрывает кнопку) |
-| `NEXT_PUBLIC_MAX_BOT_URL` | ⚠️ | ❌ **MISSING** | Frontend MAX button | Опционален — кнопка MAX скрыта без него |
+| `NEXT_PUBLIC_MAX_BOT_URL` | ✅ | ✅ **(Stage 42.6)** | Frontend MAX button | Добавлен в prod compose; кнопка MAX отображается при наличии значения |
 | `YANDEX_METRIKA_ID` | ✅ | ✅ (default) | Backend (не используется) | Дефолт 110270689 |
 | `NEXT_PUBLIC_YANDEX_METRIKA_ID` | ✅ | ✅ (default) | Frontend Metrika | Дефолт 110270689 |
 | `APP_VERSION` | ✅ | ✅ (default: latest) | Image tags | Дефолт 'latest' |
@@ -166,7 +161,7 @@ NEXT_PUBLIC_MAX_BOT_URL: ${NEXT_PUBLIC_MAX_BOT_URL:-https://max.ru/id2308283362_
 | `SEED_ADMIN_EMAIL` | ✅ | ❌ (only seed) | Только при первом деплое | Указать перед seed |
 | `SEED_ADMIN_PASSWORD` | ✅ | ❌ (only seed) | Только при первом деплое | Указать перед seed |
 
-**Итого: 1 отсутствующий ENV** (`NEXT_PUBLIC_MAX_BOT_URL` в prod compose) — не блокирует, опциональная функция.
+**Итого: 0 отсутствующих ENV** — `NEXT_PUBLIC_MAX_BOT_URL` добавлен в prod compose в Stage 42.6.
 
 ---
 

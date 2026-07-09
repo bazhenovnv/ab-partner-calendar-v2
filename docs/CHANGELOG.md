@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 42.6: Release Freeze Completion
+
+### Инфраструктура
+
+- `docker-compose.prod.yml` → `frontend.environment`: добавлена `NEXT_PUBLIC_MAX_BOT_URL: ${NEXT_PUBLIC_MAX_BOT_URL:-}` — устранено единственное замечание по ENV из Stage 42
+- Кнопка «Напомнить в MAX» теперь получает переменную из compose; при пустом значении корректно скрывается (логика без изменений)
+- Build (`pnpm --filter frontend build`): ✅ успешен после изменения
+
+### Документация
+
+- `STAGING_READINESS_REPORT.md`: замечание NEXT_PUBLIC_MAX_BOT_URL → ✅ УСТРАНЕНО; ENV-таблица обновлена; итог: 0 отсутствующих ENV
+- `STAGING_ENVIRONMENT.md`: строка NEXT_PUBLIC_MAX_BOT_URL → ✅; итог недостающих ENV: 0
+
+### Финальный статус Stage 42.6
+
+**✅ RELEASE FREEZE COMPLETE**  
+0 блокеров. 0 отсутствующих ENV. Build ✅. Рабочее дерево Git чистое.  
+Следующий этап: Stage 43 — Deploy to Staging.
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 42.5: Staging Environment Freeze
 
 ### Документация
