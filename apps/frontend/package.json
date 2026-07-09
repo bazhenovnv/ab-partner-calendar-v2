@@ -6,7 +6,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "test": "echo \"No tests yet — see RELEASE_BACKLOG.md\" && exit 0",
+    "test": "node --test test/smoke.test.mjs",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

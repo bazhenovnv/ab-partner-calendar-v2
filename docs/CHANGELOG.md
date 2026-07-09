@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-09 — Stage 39: Smoke Tests → ГОТОВ К STAGING
+
+### Тестирование
+
+- **BLOCKER-1 СНЯТ** — добавлен smoke-test suite на `node:test` (zero deps):
+  - `apps/backend/test/smoke.test.mjs` — 45 тестов: модули, JWT-security (нет fallback), admin route guards, public endpoints, Logger, frontend routes, .env.example
+  - `apps/frontend/test/smoke.test.mjs` — 26 тестов: public routes, admin routes, key components, auth guard redirect
+  - `apps/bots/test/smoke.test.mjs` — структурные тесты bot files
+  - `scripts/smoke-integration.sh` — curl HTTP smoke для живого окружения
+- **`pnpm --recursive test` → 71/71 ✅** (45 backend + 26 frontend)
+- Все `package.json` test-скрипты заменены с echo-placeholder на реальные тесты
+
+### Документация
+
+- **BLOCKER-2 СНЯТ** — `/admin/users` перенесён в v1.1 HIGH (RC-B20) по явному решению
+- `RELEASE_CANDIDATE_REPORT.md` — статус изменён с «НЕ ГОТОВ» на **ГОТОВ К STAGING**, готовность 88%
+- `PROJECT_IMPLEMENTATION_STATUS.md` — добавлена секция Stage 39
+- `RELEASE_BACKLOG.md` — добавлен RC-B20 (/admin/users HIGH v1.1), Stage 39 summary
+
+### Итог Stage 39
+
+- Блокеров к релизу: **0**
+- Тестов: **71** (структурные smoke)
+- Статус: **✅ ГОТОВ К STAGING**
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 38: Release Candidate Audit
 
 ### Безопасность

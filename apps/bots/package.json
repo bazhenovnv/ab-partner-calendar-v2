@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"No tests yet — see RELEASE_BACKLOG.md\" && exit 0"
+    "test": "node --test test/smoke.test.mjs"
   },
   "dependencies": {
     "@ab-afisha/shared": "workspace:*",
