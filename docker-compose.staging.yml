@@ -1,0 +1,13 @@
+# Staging SSL overlay — test.ab-event.pro
+#
+# Use ONLY after certbot has issued /etc/letsencrypt/live/test.ab-event.pro/
+# See: docs/PROJECT_BIBLE/STAGING_SSL_SETUP.md
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.staging.yml up -d --no-deps nginx
+version: '3.9'
+
+services:
+  nginx:
+    volumes:
+      - ./infra/nginx/conf.d/staging-ssl.conf:/etc/nginx/conf.d/staging-ssl.conf:ro

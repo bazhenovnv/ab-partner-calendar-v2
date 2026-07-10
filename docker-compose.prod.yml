@@ -102,16 +102,12 @@ services:
   nginx:
     image: nginx:1.25-alpine
     restart: always
-    # init-certs.sh creates a temporary self-signed cert for test.ab-event.pro
-    # on first boot so nginx can start before the real Let's Encrypt cert exists.
-    command: ["/bin/sh", "/etc/nginx/init-certs.sh"]
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./infra/nginx/conf.d/prod.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./infra/nginx/init-certs.sh:/etc/nginx/init-certs.sh:ro
-      - /etc/letsencrypt:/etc/letsencrypt
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot:ro
       - uploads:/app/uploads:ro
     depends_on:
