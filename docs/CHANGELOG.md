@@ -1,5 +1,75 @@
 # CHANGELOG
 
+## [Unreleased] — 2026-07-10 — Stage 43.3: Maintenance Mode Disabled
+
+### Анализ
+
+- Установлено: Maintenance Mode хранится в БД — таблица `SiteConfig`, ключ `maintenance.enabled`, тип boolean
+- Middleware (`apps/frontend/src/middleware.ts`) опрашивает `/api/admin/site-status` на каждом запросе
+- При `maintenanceEnabled: true` → redirect на `/maintenance`; при `false` → сайт работает в штатном режиме
+- `/admin` включён в `BYPASS_PREFIXES` — панель администратора доступна независимо от состояния maintenance
+- Seed-значение по умолчанию: `maintenance.enabled = false`
+
+### Механизм отключения (существующий функционал проекта)
+
+**Способ 1 — Admin UI (основной, не требует технических знаний):**
+1. Открыть `https://test.ab-event.pro/admin/settings`
+2. Войти под учётными данными администратора
+3. Секция "Техобслуживание" → "Режим техобслуживания" → выбрать **"Выключено"**
+4. Нажать **"Сохранить"**
+5. Изменение применяется немедленно — редирект на `/maintenance` прекращается
+
+**Способ 2 — API (прямой вызов):**
+```bash
+# 1. Получить JWT-токен
+TOKEN=$(curl -s -X POST https://test.ab-event.pro/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@ab-event.pro","password":"<ADMIN_PASSWORD>"}' \
+  | jq -r '.access_token')
+
+# 2. Отключить Maintenance Mode
+curl -X PATCH https://test.ab-event.pro/api/admin/settings/maintenance.enabled \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"value": false}'
+```
+
+**Способ 3 — Прямой SQL (если доступен psql):**
+```sql
+UPDATE "SiteConfig" SET value = 'false'::jsonb WHERE key = 'maintenance.enabled';
+```
+
+### Проверка после отключения
+
+```bash
+# Должен вернуть: {"maintenanceEnabled":false,...}
+curl https://test.ab-event.pro/api/admin/site-status
+
+# Главная страница должна открываться с кодом 200
+curl -I https://test.ab-event.pro/
+
+# Страница /maintenance доступна напрямую, но без редиректа
+curl -I https://test.ab-event.pro/maintenance
+```
+
+### Маршруты для ручной проверки после отключения
+
+| URL | Ожидаемый результат |
+|-----|---------------------|
+| `https://test.ab-event.pro/` | 200 — Главная страница |
+| `https://test.ab-event.pro/calendar` | 200 — Календарь |
+| `https://test.ab-event.pro/events/<id>` | 200 — Карточка мероприятия |
+| `https://test.ab-event.pro/admin` | 200 — Панель администратора |
+| `https://test.ab-event.pro/api/health` | 200 — `{"status":"ok"}` |
+| `https://test.ab-event.pro/api/admin/site-status` | `{"maintenanceEnabled":false}` |
+| `https://test.ab-event.pro/maintenance` | 200 — страница доступна напрямую (без авто-редиректа) |
+
+### Примечание
+
+Код приложения не изменялся. Изменение производится исключительно через существующий механизм управления настройками (AdminService.updateSetting → SiteConfig в БД).
+
+---
+
 ## [Unreleased] — 2026-07-09 — Stage 44: Functional QA Report
 
 ### QA Audit
