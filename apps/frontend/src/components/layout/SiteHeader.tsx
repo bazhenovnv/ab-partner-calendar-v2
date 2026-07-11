@@ -28,12 +28,13 @@ export function SiteHeader() {
         >
           {/* Logo: Frame 60.png from project-assets/03_logo_frames/ — "аб" monogram */}
           {/* mix-blend-mode:multiply makes white bg transparent on white header */}
+          {/* Figma: 61.6×66.7px → rounded to 62×67px */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/ab-logo-mark.png"
             alt=""
-            width={40}
-            height={40}
+            width={62}
+            height={67}
             className="shrink-0"
             style={{ mixBlendMode: 'multiply', objectFit: 'contain' }}
             aria-hidden="true"
