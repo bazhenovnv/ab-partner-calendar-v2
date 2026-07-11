@@ -68,7 +68,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   const todayStr = toDateString(now.getFullYear(), now.getMonth(), now.getDate());
 
   return (
-    <div className="bg-white rounded-2xl shadow-base border border-dropdown-border p-4 tablet:p-5 select-none">
+    <div className="select-none">
       <CalendarHeader
         year={year}
         month={month}
@@ -129,17 +129,20 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
             >
               {day}
               {hasEvents && !isSelected && (
-                <span className="absolute bottom-1 flex gap-0.5" aria-hidden="true">
-                  {marker!.live > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-live-status" />
-                  )}
-                  {marker!.planned > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-green-marker" />
-                  )}
-                  {marker!.completed > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-completed-marker" />
-                  )}
-                </span>
+                <span
+                  className="absolute top-0 right-0 w-0 h-0"
+                  aria-hidden="true"
+                  style={{
+                    borderTop: `10px solid ${
+                      marker!.live > 0
+                        ? 'var(--color-live-status)'
+                        : marker!.planned > 0
+                        ? 'var(--color-green-marker)'
+                        : 'var(--color-completed-marker)'
+                    }`,
+                    borderLeft: '10px solid transparent',
+                  }}
+                />
               )}
             </button>
           );

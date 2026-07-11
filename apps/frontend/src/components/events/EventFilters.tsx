@@ -1,9 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
-import { cn } from '@/lib/utils';
-import { FilterDropdown } from '@/components/ui/FilterDropdown';
-import { useDropdown } from '@/hooks/useDropdown';
+import { useState, useEffect } from 'react';
 import type { DirectionOption, EventAutoStatus, EventFormat, PriceType } from '@/types/event';
 
 export interface ActiveFilters {
@@ -19,194 +16,146 @@ interface EventFiltersProps {
   onChange: (filters: ActiveFilters) => void;
 }
 
-const STATUS_OPTIONS: { value: EventAutoStatus | ''; label: string }[] = [
-  { value: '', label: 'Все мероприятия' },
-  { value: 'PLANNED', label: 'Предстоящие' },
-  { value: 'LIVE', label: 'Идут сейчас' },
-  { value: 'COMPLETED', label: 'Прошедшие' },
+const STATUS_OPTIONS: { value: EventAutoStatus; label: string; dotClass: string }[] = [
+  { value: 'PLANNED', label: 'Запланировано', dotClass: 'bg-green-marker' },
+  { value: 'LIVE', label: 'Идёт сейчас', dotClass: 'bg-live-status' },
+  { value: 'COMPLETED', label: 'Завершено', dotClass: 'bg-completed-marker' },
 ];
 
-const FORMAT_OPTIONS: { value: EventFormat | ''; label: string }[] = [
-  { value: '', label: 'Все форматы' },
+const FORMAT_OPTIONS: { value: EventFormat; label: string }[] = [
   { value: 'ONLINE', label: 'Онлайн' },
   { value: 'OFFLINE', label: 'Офлайн' },
 ];
 
-const PRICE_OPTIONS: { value: PriceType | ''; label: string }[] = [
-  { value: '', label: 'Любая цена' },
+const PRICE_OPTIONS: { value: PriceType; label: string }[] = [
   { value: 'FREE', label: 'Бесплатно' },
   { value: 'PAID', label: 'Платно' },
 ];
 
+const EMPTY: ActiveFilters = { directions: [], format: '', priceType: '', autoStatus: '' };
+
 export function EventFilters({ directions, filters, onChange }: EventFiltersProps) {
-  const statusDropdown = useDropdown();
-  const formatDropdown = useDropdown();
-  const priceDropdown = useDropdown();
-  const dirDropdown = useDropdown();
+  const [pending, setPending] = useState<ActiveFilters>(filters);
 
-  const update = useCallback(
-    (partial: Partial<ActiveFilters>) => onChange({ ...filters, ...partial }),
-    [filters, onChange],
-  );
+  useEffect(() => {
+    setPending(filters);
+  }, [filters]);
 
-  const toggleDirection = useCallback(
-    (slug: string) => {
-      const next = filters.directions.includes(slug)
-        ? filters.directions.filter((s) => s !== slug)
-        : [...filters.directions, slug];
-      update({ directions: next });
-    },
-    [filters.directions, update],
-  );
+  const hasFilters =
+    pending.directions.length > 0 ||
+    pending.format !== '' ||
+    pending.priceType !== '' ||
+    pending.autoStatus !== '';
 
-  const hasActiveFilters =
-    filters.autoStatus !== '' ||
-    filters.format !== '' ||
-    filters.priceType !== '' ||
-    filters.directions.length > 0;
+  const toggleFormat = (val: EventFormat) =>
+    setPending((p) => ({ ...p, format: p.format === val ? '' : val }));
 
-  const statusLabel =
-    STATUS_OPTIONS.find((o) => o.value === filters.autoStatus)?.label ?? 'Статус';
-  const formatLabel =
-    FORMAT_OPTIONS.find((o) => o.value === filters.format)?.label ?? 'Формат';
-  const priceLabel =
-    PRICE_OPTIONS.find((o) => o.value === filters.priceType)?.label ?? 'Цена';
-  const dirLabel =
-    filters.directions.length > 0
-      ? `Направления (${filters.directions.length})`
-      : 'Направление';
+  const toggleStatus = (val: EventAutoStatus) =>
+    setPending((p) => ({ ...p, autoStatus: p.autoStatus === val ? '' : val }));
+
+  const togglePrice = (val: PriceType) =>
+    setPending((p) => ({ ...p, priceType: p.priceType === val ? '' : val }));
 
   return (
-    <div className="flex flex-wrap gap-2 items-center" role="search" aria-label="Фильтры мероприятий">
-      <FilterDropdown
-        label={statusLabel}
-        isOpen={statusDropdown.isOpen}
-        onToggle={statusDropdown.toggle}
-        onClose={statusDropdown.close}
-        className="w-full mobile:w-auto"
-      >
-        {STATUS_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            role="option"
-            aria-selected={filters.autoStatus === opt.value}
-            onClick={() => { update({ autoStatus: opt.value as EventAutoStatus | '' }); statusDropdown.close(); }}
-            className={cn(
-              'w-full text-left px-4 py-2 text-sm transition-colors',
-              filters.autoStatus === opt.value
-                ? 'bg-primary/5 text-primary font-semibold'
-                : 'text-primary hover:bg-date-hover',
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </FilterDropdown>
+    <div role="search" aria-label="Фильтры мероприятий">
+      <h3 className="pub-filter-title">Фильтр мероприятий</h3>
 
-      <FilterDropdown
-        label={formatLabel}
-        isOpen={formatDropdown.isOpen}
-        onToggle={formatDropdown.toggle}
-        onClose={formatDropdown.close}
-        className="w-full mobile:w-auto"
-      >
-        {FORMAT_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            role="option"
-            aria-selected={filters.format === opt.value}
-            onClick={() => { update({ format: opt.value as EventFormat | '' }); formatDropdown.close(); }}
-            className={cn(
-              'w-full text-left px-4 py-2 text-sm transition-colors',
-              filters.format === opt.value
-                ? 'bg-primary/5 text-primary font-semibold'
-                : 'text-primary hover:bg-date-hover',
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </FilterDropdown>
-
-      <FilterDropdown
-        label={priceLabel}
-        isOpen={priceDropdown.isOpen}
-        onToggle={priceDropdown.toggle}
-        onClose={priceDropdown.close}
-        className="w-full mobile:w-auto"
-      >
-        {PRICE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            role="option"
-            aria-selected={filters.priceType === opt.value}
-            onClick={() => { update({ priceType: opt.value as PriceType | '' }); priceDropdown.close(); }}
-            className={cn(
-              'w-full text-left px-4 py-2 text-sm transition-colors',
-              filters.priceType === opt.value
-                ? 'bg-primary/5 text-primary font-semibold'
-                : 'text-primary hover:bg-date-hover',
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </FilterDropdown>
-
-      {directions.length > 0 && (
-        <FilterDropdown
-          label={dirLabel}
-          isOpen={dirDropdown.isOpen}
-          onToggle={dirDropdown.toggle}
-          onClose={dirDropdown.close}
-          className="w-full mobile:w-auto"
+      {/* Направление */}
+      <div className="pub-filter-section">
+        <label className="pub-filter-label" htmlFor="filter-direction">
+          Направление
+        </label>
+        <select
+          id="filter-direction"
+          className="pub-filter-select"
+          value={pending.directions[0] ?? ''}
+          onChange={(e) => {
+            const v = e.target.value;
+            setPending((p) => ({ ...p, directions: v ? [v] : [] }));
+          }}
         >
-          {directions.map((dir) => {
-            const selected = filters.directions.includes(dir.slug);
-            return (
-              <button
-                key={dir.id}
-                type="button"
-                role="option"
-                aria-selected={selected}
-                onClick={() => toggleDirection(dir.slug)}
-                className={cn(
-                  'w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2',
-                  selected
-                    ? 'bg-primary/5 text-primary font-semibold'
-                    : 'text-primary hover:bg-date-hover',
-                )}
-              >
-                <span
-                  className={cn(
-                    'w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors',
-                    selected ? 'bg-selected-day border-selected-day' : 'border-primary/30',
-                  )}
-                  aria-hidden="true"
-                >
-                  {selected && (
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </span>
-                {dir.name}
-              </button>
-            );
-          })}
-        </FilterDropdown>
-      )}
+          <option value="">Все направления</option>
+          {directions.map((d) => (
+            <option key={d.id} value={d.slug}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {hasActiveFilters && (
+      {/* Нижняя сетка: Формат | Статус + Стоимость */}
+      <div className="pub-filter-grid">
+        {/* Левая колонка: Формат */}
+        <div>
+          <p className="pub-filter-label">Формат</p>
+          <div>
+            {FORMAT_OPTIONS.map((opt) => (
+              <label key={opt.value} className="pub-filter-check-row">
+                <input
+                  type="checkbox"
+                  className="pub-filter-checkbox"
+                  checked={pending.format === opt.value}
+                  onChange={() => toggleFormat(opt.value)}
+                />
+                <span className="pub-filter-check-text">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Правая колонка: Статус + Стоимость */}
+        <div>
+          <p className="pub-filter-label">Статус</p>
+          <div>
+            {STATUS_OPTIONS.map((opt) => (
+              <label key={opt.value} className="pub-filter-check-row">
+                <input
+                  type="checkbox"
+                  className="pub-filter-checkbox"
+                  checked={pending.autoStatus === opt.value}
+                  onChange={() => toggleStatus(opt.value)}
+                />
+                <span className="pub-filter-check-text">{opt.label}</span>
+                <span className={`pub-filter-dot ${opt.dotClass}`} aria-hidden="true" />
+              </label>
+            ))}
+          </div>
+
+          <p className="pub-filter-label pub-filter-label--mt">Стоимость</p>
+          <div>
+            {PRICE_OPTIONS.map((opt) => (
+              <label key={opt.value} className="pub-filter-check-row">
+                <input
+                  type="checkbox"
+                  className="pub-filter-checkbox"
+                  checked={pending.priceType === opt.value}
+                  onChange={() => togglePrice(opt.value)}
+                />
+                <span className="pub-filter-check-text">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="pub-filter-apply-btn"
+        onClick={() => onChange(pending)}
+      >
+        Применить
+      </button>
+
+      {hasFilters && (
         <button
           type="button"
-          onClick={() => onChange({ directions: [], format: '', priceType: '', autoStatus: '' })}
-          className="text-sm text-primary/50 hover:text-primary transition-colors px-2 py-1 underline underline-offset-2"
+          className="pub-filter-reset-link"
+          onClick={() => {
+            setPending(EMPTY);
+            onChange(EMPTY);
+          }}
         >
-          Сбросить
+          Сбросить фильтр
         </button>
       )}
     </div>
