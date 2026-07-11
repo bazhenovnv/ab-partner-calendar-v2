@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Gilroy font ──────────────────────────────────────────────── */
+/* ─── Gilroy font ──────────────────────────────────────────── */
 @font-face {
   font-family: 'Gilroy';
   src: url('/fonts/gilroy/Gilroy-Regular.woff2') format('woff2'),
@@ -46,7 +46,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ─── Skip-to-content ────────────────────────────────────────── */
+/* ─── Skip-to-content ──────────────────────────────────────────── */
 .skip-to-content {
   position: absolute;
   left: -9999px;
@@ -72,7 +72,7 @@ html {
   outline-offset: 2px;
 }
 
-/* ─── Utility animations ────────────────────────────────────────── */
+/* ─── Utility animations ──────────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -81,7 +81,7 @@ html {
   animation: fade-in 0.2s ease-out forwards;
 }
 
-/* ─── Legal pages ─────────────────────────────────────────────────── */
+/* ─── Legal pages ───────────────────────────────────────────────────── */
 .legal-page {
   min-height: 100vh;
   display: flex;
@@ -183,10 +183,10 @@ html {
 body {
   font-family: var(--font-montserrat), sans-serif;
   color: var(--color-primary);
-  background: #ffffff;
+  background: #f5f5f5;
 }
 
-/* ─── Cookie banner ───────────────────────────────────────────────── */
+/* ─── Cookie banner ───────────────────────────────────────────────────── */
 .cookie-banner {
   position: fixed;
   bottom: 0;
@@ -255,7 +255,7 @@ body {
   }
 }
 
-/* ─── Admin UI ────────────────────────────────────────────────────── */
+/* ─── Admin UI ─────────────────────────────────────────────────────────── */
 
 /* Login */
 .adm-login-wrap {
@@ -564,7 +564,7 @@ body {
 }
 .maint-tg-btn:hover { background: rgba(124,216,179,0.22); border-color: rgba(124,216,179,0.5); }
 
-/* ─── Hero Section ────────────────────────────────────────────────────── */
+/* ─── Hero Section ───────────────────────────────────────────────────── */
 .hero-section {
   position: relative;
   background: var(--color-primary);
@@ -710,7 +710,7 @@ body {
   .hero-stat-divider { display: none; }
 }
 
-/* ─── How It Works ────────────────────────────────────────────────────── */
+/* ─── How It Works ───────────────────────────────────────────────────── */
 .how-section {
   background: #f8f9fc;
   padding: 4rem 1.5rem;
@@ -792,7 +792,7 @@ body {
   .how-step-card { padding: 1.5rem 1.125rem; }
 }
 
-/* ─── Reminders Block ────────────────────────────────────────────────── */
+/* ─── Reminders Block ──────────────────────────────────────────────────── */
 .reminders-section {
   background: var(--color-primary);
   padding: 4rem 1.5rem;
@@ -898,7 +898,7 @@ body {
   .reminders-btn { justify-content: center; width: 100%; }
 }
 
-/* ─── Rotating Quotes ────────────────────────────────────────────────── */
+/* ─── Rotating Quotes ──────────────────────────────────────────────────── */
 .quotes-section {
   background: #f8f9fc;
   padding: 3.5rem 1.5rem;
@@ -979,7 +979,7 @@ body {
   .quotes-text { font-size: 1rem; }
 }
 
-/* ─── Empty State (no events) ──────────────────────────────────────────────── */
+/* ─── Empty State (no events) ────────────────────────────────────────────── */
 .empty-state-card {
   display: flex;
   flex-direction: column;
@@ -1055,7 +1055,7 @@ body {
 body {
   font-family: var(--font-montserrat), sans-serif;
   color: var(--color-primary);
-  background: #ffffff;
+  background: #f5f5f5;
 }
 
 /* ─── Hero ─── */
@@ -1157,6 +1157,22 @@ body {
   .pub-hero-visual { display: none; }
   .pub-hero-content { flex: none; width: auto; padding: 28px 24px; }
   .pub-hero-title { font-size: clamp(1.5rem, 5.5vw, 2.75rem); }
+}
+
+/* Events section outer wrapper */
+/* BACC095C: W=1496, H=945, radius=20, stroke 000000 Inside 1px, shadow 0/4/4/0 25%, fill #fff */
+.pub-events-section {
+  padding: 16px;
+}
+.pub-events-outer {
+  max-width: 1496px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 20px;
+  /* TEMP-UNRESOLVED: Figma shows stroke 000000 100% — using rgba(0,0,0,0.12) for visual softness */
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  padding: 32px 24px;
 }
 
 /* Events section controls */
