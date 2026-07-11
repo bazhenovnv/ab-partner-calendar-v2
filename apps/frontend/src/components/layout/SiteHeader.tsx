@@ -26,31 +26,18 @@ export function SiteHeader() {
           className="flex items-center gap-3 group shrink-0"
           aria-label="АБ Афиша Бухгалтера — на главную"
         >
-          {/*
-            Monogram "аб" — geometry from project-assets/03_logo_frames/Frame 60.png
-            viewBox 0 0 130 100, strokeWidth 9
-          */}
-          <svg
-            width="52"
-            height="40"
-            viewBox="0 0 130 100"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary shrink-0"
+          {/* Logo: Frame 60.png from project-assets/03_logo_frames/ — "аб" monogram */}
+          {/* mix-blend-mode:multiply makes white bg transparent on white header */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/ab-logo-mark.png"
+            alt=""
+            width={40}
+            height={40}
+            className="shrink-0"
+            style={{ mixBlendMode: 'multiply' }}
             aria-hidden="true"
-          >
-            <path
-              d="M 16 93 L 16 27 A 21 21 0 0 1 58 27 L 58 54"
-              stroke="currentColor"
-              strokeWidth="9"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <circle cx="37" cy="70" r="12" stroke="currentColor" strokeWidth="9" fill="none" />
-            <line x1="63" y1="84" x2="98"  y2="10" stroke="currentColor" strokeWidth="9" strokeLinecap="butt" />
-            <line x1="74" y1="84" x2="109" y2="10" stroke="currentColor" strokeWidth="9" strokeLinecap="butt" />
-            <circle cx="106" cy="76" r="14" stroke="currentColor" strokeWidth="9" fill="none" />
-          </svg>
+          />
 
           <span className="font-gilroy font-semibold text-primary text-xl leading-tight">
             Афиша Бухгалтера

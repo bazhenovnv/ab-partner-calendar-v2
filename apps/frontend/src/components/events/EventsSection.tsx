@@ -86,7 +86,8 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
   const loading = isPending || isLoading;
 
   return (
-    <section id="events" className="max-w-[1440px] mx-auto px-4 tablet:px-8 py-8 tablet:py-12">
+    <section id="events" className="pub-events-section">
+      <div className="pub-events-outer">
       {/* Controls row: filters left, calendar right */}
       <div className="pub-events-controls">
         <div className="pub-events-filters-col">
@@ -157,6 +158,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
             </p>
           </>
         )}
+      </div>
       </div>
     </section>
   );
