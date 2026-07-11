@@ -1165,73 +1165,98 @@ body {
 .pub-events-section {
   padding: 0 16px 16px;
 }
+/* Figma 5913:4752 — W:1497 H:1428 radius:35.604 shadow:0 0 9.129px rgba(0,0,0,0.3) pad:40px 54px */
 .pub-events-outer {
-  max-width: 1496px;
-  min-height: 945px;
+  max-width: 1497px;
+  min-height: 1428px;
   margin: 0 auto;
   background: #ffffff;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
-  padding: 32px 54px;
+  border-radius: 35.604px;
+  box-shadow: 0 0 9.129px rgba(0, 0, 0, 0.3);
+  padding: 40px 54px;
 }
 
-/* Events section controls — filter left (380px fixed) | 41px gap | calendar flex:1 */
+/* Controls row: Figma gap=41.36px */
 .pub-events-controls {
   display: flex;
-  gap: 41px;
+  gap: 41.36px;
   align-items: flex-start;
 }
+
+/* Figma 5913:4888 — Filter card W:588 H:632 radius:40.23 shadow:0 0 9.549px rgba(0,0,0,0.3) pad-top:39px pad-sides:24.86px */
 .pub-events-filters-col {
   flex-shrink: 0;
-  width: 380px;
+  width: 588px;
+  height: 632px;
+  background: #ffffff;
+  border-radius: 40.23px;
+  box-shadow: 0 0 9.549px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  padding: 39px 24.86px 24px;
+  display: flex;
+  flex-direction: column;
 }
+
+/* Figma 5913:4757 — Calendar card W:760.866 H:631.824 radius:40.228 shadow:0 0 9.355px rgba(0,0,0,0.3)
+   bg:rgba(255,255,255,0.21) pad:28.066px 26.764px 28.066px 41.102px */
 .pub-events-calendar-col {
-  flex: 1;
-  min-width: 0;
+  flex-shrink: 0;
+  width: 760.866px;
+  height: 631.824px;
+  background: rgba(255, 255, 255, 0.21);
+  border-radius: 40.228px;
+  box-shadow: 0 0 9.355px rgba(0, 0, 0, 0.3);
+  padding: 28.066px 26.764px 28.066px 41.102px;
+  overflow: hidden;
 }
-@media (max-width: 1023px) {
+
+@media (max-width: 1399px) {
   .pub-events-controls {
     flex-direction: column;
     gap: 24px;
   }
   .pub-events-filters-col {
     width: 100%;
+    height: auto;
+  }
+  .pub-events-calendar-col {
+    width: 100%;
+    height: auto;
   }
 }
 
-/* ─── Filter panel sidebar (44D) ─────────────────────────────────── */
+/* ─── Filter panel sidebar (44D → 44E) ───────────────────────────── */
 .pub-filter-title {
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 700;
   color: #0D2344;
-  margin: 0 0 43px;
+  margin: 0 0 20px;
 }
 .pub-filter-label {
   display: block;
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 13px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 17px;
   font-weight: 600;
   color: rgba(13, 35, 68, 0.55);
-  margin-bottom: 19px;
+  margin-bottom: 10px;
 }
 .pub-filter-label--mt {
-  margin-top: 22px;
+  margin-top: 16px;
 }
 .pub-filter-section {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 .pub-filter-select {
   width: 100%;
-  height: 38px;
-  border: 1px solid rgba(13, 35, 68, 0.2);
-  border-radius: 8px;
-  padding: 0 32px 0 12px;
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 13px;
+  height: auto;
+  border: 1px solid #e8e3dc;
+  border-radius: 9.233px;
+  padding: 17px 36px 17px 18px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 14px;
   color: #0D2344;
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%230D2344' stroke-opacity='0.45' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%230D2344' stroke-opacity='0.45' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
@@ -1246,6 +1271,19 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 37px;
+}
+/* Figma two-col: LEFT=236px (Регион/Направление/Формат), gap=96px, RIGHT=Статус+Стоимость */
+.pub-filter-two-col {
+  display: grid;
+  grid-template-columns: 236px 1fr;
+  column-gap: 96px;
+  flex: 1;
+}
+@media (max-width: 1399px) {
+  .pub-filter-two-col {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+  }
 }
 .pub-filter-check-row {
   display: flex;
@@ -1268,8 +1306,9 @@ body {
   accent-color: #367D67;
 }
 .pub-filter-check-text {
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 13px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 16px;
+  font-weight: 400;
   color: #0D2344;
   line-height: 1;
   flex: 1;
