@@ -91,9 +91,6 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
       {/* Controls row: filters left, calendar right */}
       <div className="pub-events-controls">
         <div className="pub-events-filters-col">
-          <h2 className="font-montserrat font-bold text-primary text-2xl tablet:text-3xl mb-4">
-            Мероприятия
-          </h2>
           <EventFilters
             directions={directions}
             filters={filters}
@@ -105,20 +102,21 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
             selectedDate={selectedDate}
             onSelectDate={handleDateSelect}
           />
-          {selectedDate && (
-            <p className="mt-3 text-sm text-primary/60 text-center">
-              Показаны мероприятия на {selectedDate}
-            </p>
-          )}
         </div>
       </div>
 
       {/* Events grid — full width below controls */}
-      <div className="mt-8 flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         {isFallback && !loading && (
           <div className="bg-primary/5 rounded-xl px-4 py-3 text-sm text-primary/70">
             Актуальных мероприятий пока нет — показываем последние завершённые.
           </div>
+        )}
+
+        {selectedDate && !loading && events.length > 0 && (
+          <h2 className="pub-events-date-heading">
+            События на {formatDateRu(selectedDate)}
+          </h2>
         )}
 
         {loading ? (
@@ -139,7 +137,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
           />
         ) : (
           <>
-            <div className="grid grid-cols-1 tablet:grid-cols-2 wide:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 tablet:grid-cols-2 wide:grid-cols-3 gap-[53px]">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
@@ -162,6 +160,12 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
       </div>
     </section>
   );
+}
+
+const MONTHS_RU = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+function formatDateRu(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${d} ${MONTHS_RU[m - 1]} ${y}`;
 }
 
 const TG_CHANNEL = 'https://t.me/ab_afisha_buh';
