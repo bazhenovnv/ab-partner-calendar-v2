@@ -1,152 +1,178 @@
-# CALENDAR + CAROUSEL — FIGMA AUDIT (Stage 44D)
+# CALENDAR + CAROUSEL — FIGMA AUDIT (Stage 44E.2)
 
-**Дата аудита:** 2026-07-11
-**Аудитор:** Claude — статический анализ ~145 Figma-скриншотов из `project-assets/06_uploaded_images/`
-**Ветка:** `claude/ab-afisha-architecture-plan-805f5o`
-**Статус:** ✅ РЕАЛИЗОВАНО — Stage 44D
+**Дата аудита:** 2026-07-11  
+**Аудитор:** Claude — точные значения из Figma node `5913:4745`, file key `t7Vg797xBk263TgvZRrO12`  
+**Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
+**Статус:** ✅ РЕАЛИЗОВАНО — Stage 44E.2
 
 ---
 
 ## Источники измерений
 
-| Файл | Что зафиксировано |
-|------|-------------------|
-| `{BACC095C}` | Outer events panel: W=1496, H=945, radius=20, shadow X0/Y4/B4/25%, border 1px |
-| `{566A9221}` | Carousel gallery: W=1388, H=428, fill #FFFFFF; выбранная секция W=1388, H=428 |
-| `{5B65A8D3}` | Carousel outer section: radius=20, fill white, stroke 000000 1px Inside |
-| `{E539CD30}` | Event card: W=428, H=300, shadow X0/Y4/B4/25%, corner radius=Mixed |
-| `{FBB54E41}` | Event card W=428, H=300 — повторное подтверждение |
-| `{5BE027B5}` | Status badge "Завершено": **94×27px** |
-| `{55B0883C}` | "Подробнее →" button: **98.96×26**, padding=5×5, radius=1.5, gap=4 |
-| `{585CCF5D}` | Filter panel: "Применить" **230.51×47.65**, все gap-values |
-| `{0049377A}` | Status checkbox row "Запланировано": **192×24**, gap=23 между строками |
-| `{5E0D2D7C}` | Hero button "Важные события →": **212×47** |
-| `{5B059CE1}` | Full desktop 56%: filter panel ~380px, calendar занимает flex:1 |
-| `{6CCE146D}` | 1920×3565 full-page frame: inner padding = **54px** per side (derive: 1496-2×54=1388) |
-| `{FBB54E41}` | Inner content width: **1388px** ✓ (совпадает с gallery W) |
-| `{57045E90}` | MAX header button: 118×38, gap=8 на обе стороны |
+| Источник | Что зафиксировано |
+|----------|-------------------|
+| Figma node `5913:4752` | Outer events panel: W=1497, H=1428, radius=35.604, shadow, padding |
+| Figma node `5913:4888` | Filter card: W=588, H=632, radius=40.23, shadow, padding |
+| Figma node `5913:4757` | Calendar card: W=760.866, H=631.824, radius=40.228, shadow, padding |
+| Figma node `5913:4745` | Desktop / 1920 / АБ Афиша main — полный фрейм |
+| Stage 44D скриншоты | Event cards, Carousel (не изменены в 44E.2) |
 
 ---
 
 ## ЧАСТЬ 1 — OUTER EVENTS PANEL
 
-Подтверждено из `{BACC095C}`, `{6CCE146D}`:
+Фигма node `5913:4752` — Stage 44E.2 (финальные значения):
 
-| # | Параметр | Figma | Stage 44D код | Статус |
-|---|----------|-------|---------------|--------|
-| P-1 | max-width | **1496px** | `max-width: 1496px` | ✅ |
-| P-2 | min-height | **945px** | `min-height: 945px` | ✅ |
-| P-3 | border-radius | **20px** | `border-radius: 20px` | ✅ |
-| P-4 | border | 1px solid (inside) | `border: 1px solid rgba(0,0,0,0.15)` | ✅ |
-| P-5 | box-shadow | X=0, Y=4, Blur=4, Spread=0, 25% | `box-shadow: 0 4px 4px 0 rgba(0,0,0,0.25)` | ✅ |
-| P-6 | background | #FFFFFF | `background: #ffffff` | ✅ |
-| P-7 | inner padding sides | **54px** (вычислено: (1496-1388)/2=54) | `padding: 32px 54px` | ✅ ИСПРАВЛЕНО |
-| P-8 | gap filter→calendar | **41px** (из `{585CCF5D}`) | `gap: 41px` | ✅ ИСПРАВЛЕНО |
+| # | Параметр | Figma | Применено | Selector |
+|---|----------|-------|-----------|----------|
+| P-1 | max-width | **1497px** | `max-width: 1497px` | `.pub-events-outer` |
+| P-2 | min-height | **1428px** | `min-height: 1428px` | `.pub-events-outer` |
+| P-3 | border-radius | **35.604px** | `border-radius: 35.604px` | `.pub-events-outer` |
+| P-4 | border | **отсутствует** | удалён | `.pub-events-outer` |
+| P-5 | box-shadow | `0 0 9.129px rgba(0,0,0,0.3)` | `box-shadow: 0 0 9.129px rgba(0,0,0,0.3)` | `.pub-events-outer` |
+| P-6 | background | **#FFFFFF** | `background: #ffffff` | `.pub-events-outer` |
+| P-7 | padding | **40px top, 54px sides** | `padding: 40px 54px` | `.pub-events-outer` |
+| P-8 | gap filter→calendar | **41.36px** | `gap: 41.36px` | `.pub-events-controls` |
 
----
-
-## ЧАСТЬ 2 — FILTER PANEL
-
-Подтверждено из `{585CCF5D}`, `{0049377A}`, `{5B059CE1}`:
-
-| # | Параметр | Figma | Stage 44D код | Статус |
-|---|----------|-------|---------------|--------|
-| F-1 | Ширина | **TEMP ~380px** (визуальная оценка из {5B059CE1}) | `width: 380px` | ⚠️ TEMP |
-| F-2 | Заголовок | "Фильтр мероприятий" (Montserrat Bold) | `.pub-filter-title` | ✅ |
-| F-3 | Gap title → первый label | **43px** | `margin-bottom: 43px` | ✅ |
-| F-4 | Dropdown "Направление" | полная ширина, "Все направления" | full-width `<select>` | ✅ |
-| F-5 | Gap label → control | **19px** | `margin-bottom: 19px` | ✅ |
-| F-6 | Gap dropdown → следующий label | **22px** | `margin-bottom: 22px` | ✅ |
-| F-7 | Gap dropdowns → checkbox grid | **37px** | `margin-top: 37px` | ✅ |
-| F-8 | Checkbox row size | 192×24px | `height: 24px`, `gap: 8px` | ✅ |
-| F-9 | Gap между checkbox-строками | **23px** | `margin-bottom: 23px` | ✅ |
-| F-10 | "Применить" button | **230.51×47.65px** | `width: 231px; height: 48px` | ✅ |
-| F-11 | Gap grid → кнопка | **14px** | `margin-top: 14px` | ✅ |
-| F-12 | Gap кнопка → "Сбросить" | **37px** (из layout) | `margin-top: 37px` | ✅ |
-| F-13 | "Сбросить фильтр" | underlined link | `.pub-filter-reset-link` | ✅ |
-| F-14 | Статус dot — Запланировано | зелёный (`#015A3F`) | `bg-green-marker` | ✅ |
-| F-15 | Статус dot — Идёт сейчас | жёлтый (`#FFDB99`) | `bg-live-status` | ✅ |
-| F-16 | Статус dot — Завершено | серый (`#ACACAC`) | `bg-completed-marker` | ✅ |
-| F-17 | Колонки в нижней сетке | Формат (лево) / Статус+Стоимость (право) | CSS grid 2 col | ✅ |
-
-**Регион/Город**: в Figma присутствует. Пропущен в реализации — не существует в текущем API.
-Добавление нового функционала запрещено (требование Stage 44D).
+> Важно: 1428px — высота всей панели, включая Filter+Calendar row, заголовок событий и Event Cards. `min-height` применено к `.pub-events-outer`, не к row.
 
 ---
 
-## ЧАСТЬ 3 — CALENDAR
+## ЧАСТЬ 2 — FILTER CARD
 
-Подтверждено из `{5B059CE1}`, `{6CCE146D}`, `{FBB54E41}`:
+Фигма node `5913:4888` — Stage 44E.2 (финальные значения):
 
-| # | Параметр | Figma | Stage 44D код | Статус |
-|---|----------|-------|---------------|--------|
-| C-1 | Ширина | flex:1 (~967px в 1388px inner) | `flex: 1; min-width: 0` | ✅ ИСПРАВЛЕНО |
-| C-2 | Карточка-обёртка | нет (вписан в outer panel) | removed | ✅ ИСПРАВЛЕНО |
-| C-3 | 7 колонок | Пн Вт Ср Чт Пт Сб Вс | `grid-cols-7` | ✅ |
-| C-4 | Маркеры событий | угловые треугольники (top-right) | CSS border trick | ✅ ИСПРАВЛЕНО |
-| C-5 | Выбранная дата | teal fill, white text | `bg-selected-day text-white` | ✅ |
-| C-6 | Навигация | ‹ Месяц Год › | CalendarHeader | ✅ |
-| C-7 | Ячейки | aspect-square, clickable if has events | as before | ✅ |
-| C-8 | Legenda | Запланировано / Идёт сейчас / Завершено | retained | ✅ |
+| # | Параметр | Figma | Применено | Selector |
+|---|----------|-------|-----------|----------|
+| F-1 | width | **588px** | `width: 588px` | `.pub-events-filters-col` |
+| F-2 | height | **632px** | `height: 632px` | `.pub-events-filters-col` |
+| F-3 | border-radius | **40.23px** | `border-radius: 40.23px` | `.pub-events-filters-col` |
+| F-4 | box-shadow | `0 0 9.549px rgba(0,0,0,0.3)` | `box-shadow: 0 0 9.549px rgba(0,0,0,0.3)` | `.pub-events-filters-col` |
+| F-5 | background | **#FFFFFF** | `background: #ffffff` | `.pub-events-filters-col` |
+| F-6 | padding | **39px 24.86px 24px** | `padding: 39px 24.86px 24px` | `.pub-events-filters-col` |
+| F-7 | X в outer panel | 54px (от padding outer) | наследуется от outer | — |
+| F-8 | Y в outer panel | 40px (от padding outer) | наследуется от outer | — |
+
+### Filter internal typography (Stage 44E.2):
+
+| # | Элемент | Figma | Применено | Selector |
+|---|---------|-------|-----------|----------|
+| FT-1 | Заголовок «Фильтр мероприятий» | Montserrat Bold 21px | `font-size: 21px; font-weight: 700` | `.pub-filter-title` |
+| FT-2 | Section labels | Montserrat SemiBold 17px | `font-size: 17px; font-weight: 600` | `.pub-filter-label` |
+| FT-3 | Checkbox text | Montserrat Regular 16px | `font-size: 16px; font-weight: 400` | `.pub-filter-check-text` |
+| FT-4 | Select / dropdown | Montserrat 14px | `font-size: 14px` | `.pub-filter-select` |
+| FT-5 | Select border | `#e8e3dc` | `border: 1px solid #e8e3dc` | `.pub-filter-select` |
+| FT-6 | Select border-radius | 9.233px | `border-radius: 9.233px` | `.pub-filter-select` |
+| FT-7 | Select padding | 17px 36px 17px 18px | `padding: 17px 36px 17px 18px` | `.pub-filter-select` |
+
+### Filter two-column layout (Stage 44E.2):
+
+| # | Параметр | Figma | Применено | Selector |
+|---|----------|-------|-----------|----------|
+| FC-1 | LEFT col width | **236px** | `grid-template-columns: 236px 1fr` | `.pub-filter-two-col` |
+| FC-2 | column-gap | **96px** | `column-gap: 96px` | `.pub-filter-two-col` |
+| FC-3 | LEFT содержимое | Регион/Город + Направление + Формат | реализовано | `EventFilters.tsx` |
+| FC-4 | RIGHT содержимое | Статус + Стоимость | реализовано | `EventFilters.tsx` |
+| FC-5 | Кнопки «Применить»/«Сбросить» | внизу карточки | `mt-auto` | `EventFilters.tsx` |
+
+### Структура фильтра (Stage 44E.2):
+- «Фильтр мероприятий»
+- Регион / Город (disabled select — в API отсутствует)
+- Направление (functional select)
+- Формат (checkboxes)
+- Статус (checkboxes с цветными dots)
+- Стоимость (checkboxes)
+- «Применить» + «Сбросить фильтр»
 
 ---
 
-## ЧАСТЬ 4 — EVENT CARDS
+## ЧАСТЬ 3 — CALENDAR CARD
 
-Подтверждено из `{E539CD30}`, `{FBB54E41}`, `{5BE027B5}`, `{55B0883C}`, `{6CCE146D}`:
+Фигма node `5913:4757` — Stage 44E.2 (финальные значения):
+
+| # | Параметр | Figma | Применено | Selector/Component |
+|---|----------|-------|-----------|--------------------|
+| C-1 | width | **760.866px** | `width: 760.866px` | `.pub-events-calendar-col` |
+| C-2 | height | **631.824px** | `height: 631.824px` | `.pub-events-calendar-col` |
+| C-3 | border-radius | **40.228px** | `border-radius: 40.228px` | `.pub-events-calendar-col` |
+| C-4 | box-shadow | `0 0 9.355px rgba(0,0,0,0.3)` | `box-shadow: 0 0 9.355px rgba(0,0,0,0.3)` | `.pub-events-calendar-col` |
+| C-5 | background | `rgba(255,255,255,0.21)` | `background: rgba(255,255,255,0.21)` | `.pub-events-calendar-col` |
+| C-6 | padding-left | **41.102px** | `padding-left: 41.102px` | `.pub-events-calendar-col` |
+| C-7 | padding-right | **26.764px** | `padding-right: 26.764px` | `.pub-events-calendar-col` |
+| C-8 | padding-top/bottom | **28.066px** | `padding: 28.066px 26.764px 28.066px 41.102px` | `.pub-events-calendar-col` |
+| C-9 | internal section gap | **29.002px** | `gap: '29.002px'` (inline style) | `EventCalendar.tsx` root div |
+
+---
+
+## ЧАСТЬ 4 — CALENDAR GRID & TYPOGRAPHY
+
+Stage 44E.2 (финальные значения):
+
+| # | Параметр | Figma | Применено | Selector/Component |
+|---|----------|-------|-----------|--------------------|
+| G-1 | Weekday header font | Montserrat SemiBold 19px | `fontSize: '19px'` + `font-semibold` | `EventCalendar.tsx` |
+| G-2 | Day number font | Montserrat SemiBold 23px | `fontSize: '23px'` + `font-semibold` | `EventCalendar.tsx` |
+| G-3 | Month header — название | Montserrat SemiBold 30px | `<span className="font-semibold">` | `CalendarHeader.tsx` |
+| G-4 | Month header — год | Montserrat Regular 30px | `<span className="font-normal">` | `CalendarHeader.tsx` |
+| G-5 | Day cell size | **31.808 × 31.808px** | `width: '31.808px'; height: '31.808px'` | `EventCalendar.tsx` |
+| G-6 | Grid row-gap | **9.355px** | `rowGap: '9.355px'` (inline style) | `EventCalendar.tsx` |
+| G-7 | Grid columns | 7 | `grid-cols-7` | `EventCalendar.tsx` |
+| G-8 | aspect-square | **отсутствует** | удалён | `EventCalendar.tsx` |
+| G-9 | День без событий | text-primary/30, cursor-default | `text-primary/30 cursor-default` | `EventCalendar.tsx` |
+| G-10 | День с событиями | hover:bg-date-hover | `hover:bg-date-hover` | `EventCalendar.tsx` |
+| G-11 | Выбранная дата | bg-selected-day text-white | `bg-selected-day text-white` | `EventCalendar.tsx` |
+| G-12 | Сегодня | bg-primary/10 text-primary | `bg-primary/10 text-primary` | `EventCalendar.tsx` |
+| G-13 | Event marker | треугольник top-right, цвет по статусу | CSS border trick | `EventCalendar.tsx` |
+
+---
+
+## ЧАСТЬ 5 — EVENT CARDS (Stage 44D, не изменены в 44E.2)
 
 | # | Параметр | Figma | Stage 44D код | Статус |
 |---|----------|-------|---------------|--------|
 | E-1 | Карточка W×H | **428×300px** | grid с col gap 53px | ✅ |
-| E-2 | Shadow | X0/Y4/Blur4/25% | `shadow-base` class | ✅ |
+| E-2 | Shadow | X0/Y4/Blur4/25% | `shadow-base` | ✅ |
 | E-3 | Corner radius | Mixed | `rounded-2xl` | ⚠️ TEMP |
-| E-4 | Status badge "Завершено" | **94×27px** | badge absolute top-3 left-3 | ⚠️ |
-| E-5 | "Подробнее →" | **98.96×26**, padding 5×5, radius 1.5 | text link with arrow | ✅ approx |
+| E-4 | Status badge «Завершено» | **94×27px** | badge absolute top-3 left-3 | ⚠️ TEMP |
+| E-5 | «Подробнее →» | **98.96×26**, padding 5×5, radius 1.5 | text link | ✅ approx |
 | E-6 | Grid колонки | 3 columns | `grid-cols-3` | ✅ |
-| E-7 | Column gap | **53px** (verify: 3×428+2×53=1390≈1388) | `gap-[53px]` | ✅ |
-| E-8 | "События на {дата}" заголовок | виден в Figma при выбранной дате | dynamically shown | ✅ |
+| E-7 | Column gap | **53px** | `gap-[53px]` | ✅ |
 
 ---
 
-## ЧАСТЬ 5 — MAIN EVENTS CAROUSEL "Главные события"
-
-Подтверждено из `{566A9221}`, `{5B65A8D3}`, `{6CCE146D}`, `{FBB54E41}`:
+## ЧАСТЬ 6 — MAIN EVENTS CAROUSEL (Stage 44D, не изменён в 44E.2)
 
 | # | Параметр | Figma | Stage 44D код | Статус |
 |---|----------|-------|---------------|--------|
-| M-1 | Секция background | **#FFFFFF белый** | white card (НЕ bg-primary) | ✅ ИСПРАВЛЕНО |
-| M-2 | Секция border-radius | **20px** | `border-radius: 20px` | ✅ |
-| M-3 | Секция border | 1px Inside | `border: 1px solid rgba(0,0,0,0.15)` | ✅ |
-| M-4 | Секция shadow | X0/Y4/B4/25% | `box-shadow: 0 4px 4px 0 rgba(0,0,0,0.25)` | ✅ |
-| M-5 | Секция padding | 54px sides (аналог events) | `padding: 32px 54px` | ✅ |
-| M-6 | Gallery W | **1388px** (inner content width) | full inner width | ✅ |
-| M-7 | Gallery H | **428px** | `height: 428px` | ✅ |
-| M-8 | Layout | fan/perspective, 5 карточек видимых | CSS transforms | ✅ |
-| M-9 | Center card | largest, z-index highest, no rotation | scale(1), zIndex=5 | ✅ |
-| M-10 | Cards ±1 | scale ~0.82, translateX ±310px, rotate ±5deg | TEMP estimate | ⚠️ TEMP |
-| M-11 | Cards ±2 | scale ~0.68, translateX ±545px, rotate ±11deg | TEMP estimate | ⚠️ TEMP |
-| M-12 | Navigation | ‹ dots › | prev/next + dots | ✅ |
-| M-13 | Card aspect ratio | portrait (~3:4.5) | w-[268px], h-[395px] | ⚠️ TEMP |
+| M-1 | Background | **#FFFFFF** | white card | ✅ |
+| M-2 | border-radius | **20px** | `border-radius: 20px` | ✅ |
+| M-3 | border | 1px Inside | `border: 1px solid rgba(0,0,0,0.15)` | ✅ |
+| M-4 | Shadow | X0/Y4/B4/25% | `box-shadow: 0 4px 4px 0 rgba(0,0,0,0.25)` | ✅ |
+| M-5 | Gallery H | **428px** | `height: 428px` | ✅ |
+| M-6 | Layout | fan/perspective, 5 карточек | CSS transforms | ✅ |
+| M-10 | Cards ±1 | scale/translateX/rotate | TEMP estimate | ⚠️ TEMP |
+| M-11 | Cards ±2 | scale/translateX/rotate | TEMP estimate | ⚠️ TEMP |
+| M-13 | Card aspect ratio | portrait | TEMP | ⚠️ TEMP |
 
 ---
 
-## TEMP-UNRESOLVED (уточнить в следующей итерации)
+## TEMP-UNRESOLVED
 
-| ID | Параметр | Причина неопределённости |
-|----|----------|--------------------------|
-| F-1 | Filter panel ширина | Точное значение не видно в Figma-панели; ~380px — визуальная оценка |
-| M-10,11 | Carousel card transform values | scale/translateX/rotate не видны в Figma-панели |
-| M-13 | Carousel card dimensions | Точные W×H не зафиксированы в скриншотах |
-| E-3 | Card corner radius Mixed | Отдельные значения углов не перечислены |
+| ID | Параметр | Причина |
+|----|----------|---------|
+| M-10,11 | Carousel card transform values | scale/translateX/rotate не в Figma-панели |
+| M-13 | Carousel card dimensions | точные W×H не зафиксированы |
+| E-3 | Card corner radius Mixed | отдельные углы не перечислены |
+
+> Event Cards и Carousel CSS: BLOCKED до появления данных на staging.
 
 ---
 
-## Изменения Stage 44C.3 → Stage 44D (DIFF)
+## Changelog
 
-| Файл | Изменение |
-|------|----------|
-| `globals.css` | outer panel padding 24px→54px sides; filter col 300px→380px fixed; calendar col flex:1; gap 32px→41px; +filter panel CSS; +carousel section CSS |
-| `EventFilters.tsx` | полный редизайн: горизонтальные dropdown → вертикальный сайдбар с "Применить" |
-| `EventCalendar.tsx` | убрана карточка-обёртка; маркеры событий → треугольники top-right |
-| `EventsSection.tsx` | убран заголовок "Мероприятия" из filter col; добавлен "События на {дата}"; gap grid→[53px] |
-| `MainEventsBanner.tsx` | bg-primary → white card; 4-col grid → fan-perspective carousel |
+| Stage | Изменение |
+|-------|-----------|
+| 44C.3 | Начальная реализация |
+| 44D | Outer panel padding/gap; filter сайдбар; carousel white card; маркеры событий |
+| 44E.1 | Figma аудит node 5913:4745 — точные значения задокументированы |
+| 44E.2 | Outer panel (1497/1428/35.604px/no border/9.129px shadow); Filter card (588/632/40.23px); Calendar card (760.866/631.824/40.228px/rgba bg); Calendar grid typography (19px/23px/31.808px cells/9.355px row-gap/29.002px section gap); Filter 2-col layout (236px + 96px gap); CalendarHeader SemiBold month + Regular year |
