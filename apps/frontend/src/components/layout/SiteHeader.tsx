@@ -35,7 +35,7 @@ export function SiteHeader() {
             width={40}
             height={40}
             className="shrink-0"
-            style={{ mixBlendMode: 'multiply' }}
+            style={{ mixBlendMode: 'multiply', objectFit: 'contain' }}
             aria-hidden="true"
           />
 
