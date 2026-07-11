@@ -9,15 +9,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow bypassing maintenance on staging via env flag (set in docker-compose.staging.yml)
-  if (process.env.MAINTENANCE_BYPASS === 'true') {
+  // Bypass maintenance only for the staging domain, never for production.
+  // Requires BOTH the env flag (set in docker-compose.staging.yml) AND
+  // the correct hostname, so a misconfigured container cannot accidentally
+  // disable maintenance on ab-event.pro.
+  const host = request.headers.get('host') ?? request.nextUrl.hostname;
+  const isStagingHost = host === 'test.ab-event.pro' || host.startsWith('test.ab-event.pro:');
+  if (process.env.MAINTENANCE_BYPASS === 'true' && isStagingHost) {
     return NextResponse.next();
   }
 
   try {
     const backendUrl = process.env.BACKEND_URL ?? 'http://backend:3001';
     // Edge Runtime does not support Next.js Data Cache; plain fetch is used.
-    // To reduce load, consider adding a CDN or in-process TTL cache in a future stage.
     const res = await fetch(`${backendUrl}/api/admin/site-status`, { cache: 'no-store' });
     if (res.ok) {
       const data = (await res.json()) as { maintenanceEnabled: boolean };

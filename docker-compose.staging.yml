@@ -1,13 +1,18 @@
 # Staging overlay — test.ab-event.pro
 #
 # Adds:
-#   1. staging-ssl.conf for nginx (HTTPS, requires cert from certbot)
-#   2. MAINTENANCE_BYPASS=true for frontend (skips maintenance redirect)
+#   1. staging-ssl.conf for nginx (HTTPS; requires Let's Encrypt cert)
+#   2. MAINTENANCE_BYPASS=true for frontend (skips maintenance redirect
+#      only when host == test.ab-event.pro — see middleware.ts)
 #
-# Usage:
+# First-run (cert not yet issued):
+#   docker compose -f docker-compose.prod.yml up -d --no-deps nginx
+#   certbot certonly --webroot -d test.ab-event.pro ...
+#
+# After cert is issued:
 #   docker compose -f docker-compose.prod.yml -f docker-compose.staging.yml up -d --no-deps nginx frontend
-# Or rebuild frontend image first and then:
-#   docker compose -f docker-compose.prod.yml -f docker-compose.staging.yml up -d
+#
+# See: docs/PROJECT_BIBLE/STAGING_SSL_SETUP.md
 version: '3.9'
 
 services:
