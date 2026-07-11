@@ -9,6 +9,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow bypassing maintenance on staging via env flag (set in docker-compose.staging.yml)
+  if (process.env.MAINTENANCE_BYPASS === 'true') {
+    return NextResponse.next();
+  }
+
   try {
     const backendUrl = process.env.BACKEND_URL ?? 'http://backend:3001';
     // Edge Runtime does not support Next.js Data Cache; plain fetch is used.
