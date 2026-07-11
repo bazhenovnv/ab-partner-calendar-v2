@@ -1,8 +1,19 @@
-# STAGE 44 REGRESSION AUDIT (44E.4)
+# STAGE 44 REGRESSION AUDIT (44E.4 → 44E.5)
 
 **Дата:** 2026-07-11  
 **Ветка:** `claude/ab-afisha-architecture-plan-805f5o`  
-**Статус:** ✅ АУДИТ ЗАВЕРШЕН — ожидает утверждения
+**Статус:** ✅ АУДИТ УТВЕРЖДЁН — исправления Stage 44E.5 применены
+
+---
+
+## ИЗМЕНЕНИЯ В 44E.5
+
+| # | Исправление | Статус |
+|---|-------------|--------|
+| 1 | Удалены `sticky top-0 z-40` из `SiteHeader.tsx` | ✅ ПРИМЕНЕНО |
+| 2 | Carousel order — подтверждён как соответствующий Figma | ✅ ЗАФИКСИРОВАНО |
+| 3 | staging-from-main — отмечена как гипотеза | ✅ УТОЧНЕНО |
+| 4 | Logo diagnosis — файл подтверждён на feature-ветке | ✅ УТОЧНЕНО |
 
 ---
 
@@ -10,49 +21,36 @@
 
 | # | Правило | Нарушение | Файл | Статус |
 |---|--------|------------|------|--------|
-| R-1 | не добавлять sticky/fixed без макета | `sticky top-0 z-40` в `SiteHeader` | `SiteHeader.tsx` | ❌ НАРУШЕНО |
-| R-2 | макет — единственный источник истины | Header-поведение не соответствует Figma | `SiteHeader.tsx` | ❌ НАРУШЕНО |
-| R-3 | не менять UX без подтверждения | Sticky Header меняет scroll UX | `SiteHeader.tsx` | ❌ НАРУШЕНО |
-| R-4 | Hero LOCKED | Hero перекрывается Header при скролле | `PublicShell.tsx` | ❌ ПОБОЧНЫЙ ΔИЗАЙН |
-| R-5 | не пушить ассеты без проверки Docker-образа | Logo 404 на staging | `public/` vs `main` | ❌ ДЕПЛОЙ |
+| R-1 | не добавлять sticky/fixed без макета | `sticky top-0 z-40` в `SiteHeader` | `SiteHeader.tsx` | ✅ ИСПРАВЛЕНО в 44E.5 |
+| R-2 | макет — единственный источник истины | Header-поведение не соответствует Figma | `SiteHeader.tsx` | ✅ ИСПРАВЛЕНО в 44E.5 |
+| R-3 | не менять UX без подтверждения | Sticky Header меняет scroll UX | `SiteHeader.tsx` | ✅ ИСПРАВЛЕНО в 44E.5 |
+| R-4 | Hero LOCKED | Hero перекрывался Header при скролле | `PublicShell.tsx` | ✅ ИСПРАВЛЕНО — побочный эффект устранён |
+| R-5 | не пушить ассеты без проверки Docker-образа | Logo 404 на staging | `public/` | ⚠️ BLOCKER — требует Docker rebuild |
 
 ---
 
 ## 2. HEADER SCROLL BEHAVIOR
 
-### Найденная ошибка
+### Найденная ошибка (устранена в 44E.5)
 
 **Файл:** `apps/frontend/src/components/layout/SiteHeader.tsx`  
-**Команда:** `<header className="bg-white sticky top-0 z-40">`  
+**Было:** `<header className="bg-white sticky top-0 z-40">`  
+**Стало:** `<header className="bg-white">`
 
-| CSS-класс | Tailwind значение | Действие |
-|-----------|-------------------|----------|
-| `sticky` | `position: sticky` | Header прилипает к top-оффсету при скролле |
-| `top-0` | `top: 0` | Оффсет = 0px от верха viewport |
-| `z-40` | `z-index: 40` | Header поднимается над Hero и Calendar |
+| CSS-класс | Tailwind значение | Действие | Статус |
+|-----------|-------------------|----------|--------|
+| `sticky` | `position: sticky` | Header прилипает к top-оффсету при скролле | ✅ УДАЛЁН |
+| `top-0` | `top: 0` | Оффсет = 0px от верха viewport | ✅ УДАЛЁН |
+| `z-40` | `z-index: 40` | Header поднимается над Hero и Calendar | ✅ УДАЛЁН |
 
-### Последствия
+### Результат исправления
 
-1. **Перекрытие Hero:** `PublicShell.tsx` не добавляет `padding-top` на `<main>` — при sticky Header `h-20` (80px) становится оффсетом Header и перекрывает верх Hero при скролле.
-2. **Перекрытие Calendar:** При прокрутке вниз Header остаётся на экране и перекрывает Events-блок.
-3. **Неправильный scroll flow:** Header должен прокручиваться вместе со страницей согласно Figma.
-
-### Figma-подтверждение
-
-Из Figma Desktop / 1920 / АБ Афиша main (`5913:4745`): Header является статичным элементом в document flow. Нет индикаторов `position: sticky` в Figma-слоях. Подтверждено задачей (user: «Это не соответствует утверждённому Figma-макету»).
-
-### Исправление
-
-```diff
-- <header className="bg-white sticky top-0 z-40">
-+ <header className="bg-white">
-```
-
-**Что НЕ делать:**
-- Не добавлять `padding-top` на `<main>`
-- Не заменять `sticky` на `fixed`
-- Не добавлять компенсационный оффсет
-- Не менять дизайн Header
+- Header является статичным (`position: static`) в document flow
+- Header прокручивается вместе со страницей
+- Hero не перекрывается Header
+- Calendar не перекрывается Header при прокрутке
+- Не добавлен `padding-top` на `<main>` (не требовался)
+- Scroll behavior соответствует Figma
 
 ---
 
@@ -62,19 +60,17 @@
 
 | Параметр | Текущий код | Figma | Статус |
 |----------|-------------|-------|--------|
-| position | `sticky` | `static` (нет sticky) | ❌ БАГ |
-| top | `top-0` (0px) | н/а | ❌ УДАЛИТЬ |
-| z-index | `z-40` (40) | н/а | ❌ УДАЛИТЬ |
+| position | `static` (нет sticky) | `static` | ✅ ИСПРАВЛЕНО |
 | height | `h-20` (80px) | TEMP-UNRESOLVED | ⚠️ TEMP |
 | max-width inner | `max-w-[1496px]` | 1496px по Figma | ✅ |
 | padding sides | `px-4 tablet:px-8` | соответствует | ✅ |
 | background | `bg-white` | #FFFFFF | ✅ |
-| logo src | `/ab-logo-mark.png` | PNG-ассет | ❌ 404 на staging |
+| logo src | `/ab-logo-mark.png` | PNG-ассет | ⚠️ 404 на staging (см. §Logo) |
 | logo dimensions | `width=40 height=40` | TEMP-UNRESOLVED | ⚠️ TEMP |
 | nav buttons height | `h-[38px]` | 38px по {C0944B54} | ✅ |
 | nav buttons gap | `gap-2` (8px) | 8px по {C0944B54} | ✅ |
 | border/shadow | `border border-black/[0.12] shadow-[0_4px_4px_0_...]` | TEMP-UNRESOLVED | ⚠️ TEMP |
-| scroll behavior | stays fixed during scroll | must scroll with page | ❌ БАГ |
+| scroll behavior | прокручивается со страницей | прокручивается со страницей | ✅ ИСПРАВЛЕНО |
 
 ### Hero (HeroSection.tsx)
 
@@ -83,8 +79,8 @@
 | CSS-классы | `.pub-hero`, `.pub-hero-panel` | НЕ МЕНЯЛСЯ в 44E |
 | Gradient | не изменялся | ✅ LOCKED |
 | Ширина | max-width: 1496px | ✅ |
-| Перекрытие Header | ДА — sticky Header (z-40) перекрывает Hero при скролле | ❌ ПОБОЧНЫЙ ДИЗАЙН |
-| hero-composition.png | файл есть на feature-ветке, нет в main | ❌ 404 на staging |
+| Перекрытие Header | устранено — Header больше не sticky | ✅ ИСПРАВЛЕНО |
+| hero-composition.png | файл есть на feature-ветке (324,374B) | ⚠️ 404 на staging (см. §Logo) |
 
 ### Outer Events Panel (EventsSection + globals.css)
 
@@ -135,7 +131,20 @@
 | Параметр | Статус |
 |----------|--------|
 | Данные | ❌ BLOCKED — нет событий с mainEvent=true + PUBLISHED |
-| Порядок на странице | Рендерится ПОСЛЕ `EventsSection` — может не соответствовать Figma | ⚠️ ТРЕБУЕТ ПОДТВЕРЖДЕНИЯ |
+| Порядок на странице | ✅ ПОДТВЕРЖДЁН — рендерится ПОСЛЕ `EventsSection`, соответствует Figma |
+
+**Порядок блоков по Figma (утверждён):**
+```
+1. Header
+2. Hero
+3. Filters + Calendar + Event Cards  ← EventsSection
+4. Main Events Carousel               ← MainEventsBanner (ПОСЛЕ EventsSection)
+5. Quotes                             ← RotatingQuotesBlock
+6. Footer
+```
+
+> Вывод аудита 44E.4 о том, что `MainEventsBanner` «может не соответствовать Figma» — **НЕВЕРЕН**.  
+> Текущий порядок в `page.tsx` (после EventsSection) соответствует утверждённому макету. `page.tsx` изменять не нужно.
 
 ### Quotes (RotatingQuotesBlock)
 
@@ -153,7 +162,64 @@
 
 ---
 
-## 4. APPROVED LOCKED ELEMENTS
+## 4. LOGO ASSET DELIVERY — ДИАГНОЗ
+
+### Статус файлов на ветке
+
+| Файл | Ветка | Размер | SHA Git | Статус |
+|------|-------|--------|---------|--------|
+| `apps/frontend/public/ab-logo-mark.png` | `claude/ab-afisha-architecture-plan-805f5o` | 15,272B | `80f6e135` | ✅ ПРИСУТСТВУЕТ |
+| `apps/frontend/public/hero-composition.png` | `claude/ab-afisha-architecture-plan-805f5o` | 324,374B | `531a93be` | ✅ ПРИСУТСТВУЕТ |
+| `apps/frontend/public/ab-logo-mark.png` | `main` | — | — | ❌ ОТСУТСТВУЕТ |
+| `apps/frontend/public/hero-composition.png` | `main` | — | — | ❌ ОТСУТСТВУЕТ |
+
+### Dockerfile — анализ
+
+Dockerfile (`apps/frontend/Dockerfile`) корректен:
+```dockerfile
+# build stage: копирует весь apps/frontend включая public/
+COPY apps/frontend ./apps/frontend
+
+# runner stage: копирует public/ в финальный образ
+COPY --from=build --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
+```
+
+Цепочка доставки ассетов **не имеет ошибок в коде**.
+
+### SiteHeader — путь
+
+```html
+<img src="/ab-logo-mark.png" width={40} height={40} style={{ objectFit: 'contain' }} />
+```
+Путь `/ab-logo-mark.png` корректен. Регистр совпадает.
+
+### Гипотеза о причине 404 на staging
+
+> ⚠️ **НЕПОДТВЕРЖДЁННАЯ ГИПОТЕЗА** (не верифицирована на сервере)
+
+Наиболее вероятная причина: Docker-образ на staging был собран из ветки `main` (или без checkout feature-ветки), в которой `public/` содержит только `.gitkeep`.
+
+**Не подтверждено** фактическим осмотром сервера. Возможные альтернативные причины:
+- Старый Docker-образ (до добавления ассетов на feature-ветку)
+- Кэш Docker layer без invalidation
+- Неправильная директория монтирования volumes
+
+### Действие для исправления
+
+```bash
+# На staging-сервере:
+git pull origin claude/ab-afisha-architecture-plan-805f5o
+docker compose -f docker-compose.staging.yml build --no-cache frontend
+docker compose -f docker-compose.staging.yml up -d --no-deps frontend
+
+# Проверка:
+curl -I https://<staging-domain>/ab-logo-mark.png
+# Ожидаем: HTTP/2 200, content-type: image/png
+```
+
+---
+
+## 5. APPROVED LOCKED ELEMENTS
 
 | Элемент | Последнее изменение | Статус |
 |---------|------------------|--------|
@@ -170,126 +236,45 @@
 
 ---
 
-## 5. DATA BLOCKERS
+## 6. DATA BLOCKERS
 
 | Компонент | Блокирующее условие | Действие |
 |-----------|---------------------|----------|
 | Event Cards | Нет PUBLISHED events в staging DB | Ожидаем seed-данные |
 | Main Events Carousel | Нет events с `mainEvent=true AND status=PUBLISHED` | Ожидаем seed |
 | Quotes | Нет quotes в staging DB | Ожидаем seed |
-| Logo image | `main` branch не имеет `ab-logo-mark.png` | Rebuild Docker из feature-ветки |
-| hero-composition.png | `main` branch не имеет файл | Rebuild Docker из feature-ветки |
+| Logo image | Docker-образ собран без feature-ветки (гипотеза) | Rebuild Docker из feature-ветки |
+| hero-composition.png | Docker-образ собран без feature-ветки (гипотеза) | Rebuild Docker из feature-ветки |
 
 ---
 
-## 6. EXACT FILES TO CHANGE
+## 7. REMAINING WORK
 
-### После утверждения аудита:
-
-| # | Файл | Изменение | Приоритет |
-|---|------|-----------|----------|
-| 1 | `apps/frontend/src/components/layout/SiteHeader.tsx` | Удалить `sticky top-0 z-40` из `<header>` | CRITICAL |
-| 2 | Docker image rebuild | Собрать из feature-ветки (logo + hero asset) | CRITICAL |
-| 3 | `apps/frontend/src/app/globals.css` | Скорректировать overflow +1.226px | MINOR |
-
-### Файлы, которые ЗАПРЕЩЕНО менять:
-
-- `HeroSection.tsx` — LOCKED
-- `SiteFooter.tsx` — NOT APPROVED
-- `EventsSection.tsx` — не менять до появления данных
-- `MainEventsBanner.tsx` — BLOCKED BY DATA
-- `EventCalendar.tsx` — утверждён (44E.2)
-- `EventFilters.tsx` — утверждён (44E.2)
-- `CalendarHeader.tsx` — утверждён (44E.2)
+| # | Задача | Приоритет | Блокер |
+|---|--------|-----------|--------|
+| 1 | ~~Удалить sticky Header~~ | CRITICAL | ✅ DONE (44E.5) |
+| 2 | Docker rebuild с feature-веткой | CRITICAL | Требует доступа к серверу |
+| 3 | Overflow fix +1.226px в globals.css | MINOR | После подтверждения staging |
+| 4 | Data seed (PUBLISHED events + mainEvent) | MEDIUM | После Docker rebuild |
+| 5 | Event Cards CSS-аудит | MEDIUM | После seed |
+| 6 | Carousel CSS-аудит | MEDIUM | После seed |
 
 ---
 
-## 7. ROLLBACK CANDIDATES
-
-| Изменение | Откатывать? | Причина |
-|-----------|------------|----------|
-| `sticky top-0 z-40` в Header | ДА — удалить | Не соответствует Figma |
-| Calendar geometry (44E.2) | Нет | Утверждён |
-| Filter geometry (44E.2) | Нет | Утверждён |
-| Outer panel geometry (44E.2) | Нет | Утверждён |
-
----
-
-## 8. FINAL IMPLEMENTATION PLAN
-
-### Шаг 1 — CRITICAL: Убрать sticky Header
-
-**Файл:** `apps/frontend/src/components/layout/SiteHeader.tsx`
-
-```diff
-- <header className="bg-white sticky top-0 z-40">
-+ <header className="bg-white">
-```
-
-**Последствия исправления:**
-- Header становится статичным (`position: static`)
-- Hero больше не перекрывается при скролле
-- Calendar больше не перекрывается Header
-- Правильный document flow согласно Figma
-- Не требует дополнительных изменений в других файлах
-
-### Шаг 2 — CRITICAL: Docker rebuild с feature-веткой
-
-```bash
-git pull origin claude/ab-afisha-architecture-plan-805f5o
-docker compose build --no-cache frontend
-docker compose up -d --no-deps frontend
-```
-
-**Последствия:**
-- `ab-logo-mark.png` (15 272 B) попадёт в Docker-образ → logo 200 OK
-- `hero-composition.png` попадёт в образ → Hero изображение 200 OK
-- Новый CSS (44E.2) активируется
-
-### Шаг 3 — MINOR: Overflow fix в globals.css
-
-После подтверждения шага 2 и оценки на staging:
-
-Controls overflow +1.226px. Исправление: уменьшить padding или ширину колонок.
-
-### Шаг 4 — BLOCKED: Data seed
-
-После подтверждения staging deployment:
-- Создать `seed-staging-design.ts` для 6+ PUBLISHED events + 5+ mainEvent=true
-- Проверить Event Cards и Carousel
-
----
-
-## 9. ДОПОЛНИТЕЛЬНО: ПОРЯДОК БЛОКОВ НА СТРАНИЦЕ
-
-Текущий порядок в `page.tsx`:
-```
-1. Header
-2. Hero
-3. EventsSection (calendar + filters + event cards)
-4. MainEventsBanner (if main.length > 0)  ← ПОСЛЕ events
-5. RotatingQuotesBlock (if qs.length > 0)
-6. Footer
-```
-
-**Требует подтверждения по Figma:** в Figma порядок зависит от расположения карусель (ДО или ПОСЛЕ фильтров). Не менять до утверждения.
-
----
-
-## 10. ИТОГОВАЯ ТАБЛИЦА СТАТУСОВ
+## 8. ИТОГОВАЯ ТАБЛИЦА СТАТУСОВ
 
 | Элемент | Статус |
 |---------|--------|
-| **Header sticky** | ❌ **CRITICAL BUG** — удалить `sticky top-0 z-40` |
-| **Logo** | ❌ **BROKEN** — Docker rebuild |
-| **Hero asset** | ❌ **404 на staging** — Docker rebuild |
+| **Header sticky** | ✅ **ИСПРАВЛЕНО** в 44E.5 |
+| **Logo** | ⚠️ **BLOCKER** — Docker rebuild (файл есть на ветке) |
+| **Hero asset** | ⚠️ **BLOCKER** — Docker rebuild (файл есть на ветке) |
 | Hero design | ✅ LOCKED |
 | Calendar geometry | ✅ APPROVED (44E.2) |
 | Filter geometry | ✅ APPROVED (44E.2) |
 | Outer panel geometry | ✅ APPROVED (44E.2) |
+| Carousel order | ✅ ПОДТВЕРЖДЁН — ПОСЛЕ EventsSection, соответствует Figma |
 | Controls overflow | ⚠️ MINOR +1.226px |
 | Event Cards | ❌ BLOCKED BY DATA |
-| Carousel | ❌ BLOCKED BY DATA |
+| Carousel render | ❌ BLOCKED BY DATA |
 | Quotes | ❌ BLOCKED BY DATA |
 | Footer | ⚠️ NOT APPROVED |
-| Page block order | ⚠️ Требует Figma-подтверждения |

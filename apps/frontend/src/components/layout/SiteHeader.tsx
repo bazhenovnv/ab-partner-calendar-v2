@@ -18,7 +18,7 @@ const NAV_BTN =
 
 export function SiteHeader() {
   return (
-    <header className="bg-white sticky top-0 z-40">
+    <header className="bg-white">
       {/* max-w-[1496px]: confirmed {F6242A4C} footer 1496×72, {DDFD1908} modal 1496×768 */}
       <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-20 flex items-center justify-between gap-4">
         <Link
