@@ -68,29 +68,33 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   const todayStr = toDateString(now.getFullYear(), now.getMonth(), now.getDate());
 
   return (
-    <div className="select-none">
+    <div className="select-none flex flex-col h-full" style={{ gap: '29.002px' }}>
       <CalendarHeader
         year={year}
         month={month}
         onPrev={goToPrev}
         onNext={goToNext}
-        className="mb-4"
       />
 
       <div
-        className="grid grid-cols-7 gap-0.5 mb-1"
+        className="grid grid-cols-7"
         role="row"
         aria-label="Дни недели"
       >
         {DAYS_RU.map((d) => (
-          <div key={d} className="text-center text-xs font-medium text-primary/40 py-1">
+          <div
+            key={d}
+            className="text-center font-semibold text-primary/40"
+            style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '19px' }}
+          >
             {d}
           </div>
         ))}
       </div>
 
       <div
-        className={cn('grid grid-cols-7 gap-0.5 transition-opacity', loading && 'opacity-40')}
+        className={cn('grid grid-cols-7 transition-opacity', loading && 'opacity-40')}
+        style={{ rowGap: '9.355px' }}
         role="grid"
         aria-label="Календарь мероприятий"
       >
@@ -115,7 +119,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
               aria-selected={isSelected}
               onClick={() => onSelectDate(isSelected ? null : dateStr)}
               className={cn(
-                'relative flex flex-col items-center justify-center aspect-square rounded-lg text-sm font-medium transition-colors',
+                'relative flex flex-col items-center justify-center rounded-lg font-semibold transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
                 isSelected
                   ? 'bg-selected-day text-white'
@@ -125,6 +129,13 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                   ? 'hover:bg-date-hover text-primary cursor-pointer'
                   : 'text-primary/30 cursor-default',
               )}
+              style={{
+                fontFamily: 'var(--font-montserrat), sans-serif',
+                fontSize: '23px',
+                width: '31.808px',
+                height: '31.808px',
+                margin: '0 auto',
+              }}
               disabled={!hasEvents && !isSelected}
             >
               {day}

@@ -57,53 +57,72 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
     setPending((p) => ({ ...p, priceType: p.priceType === val ? '' : val }));
 
   return (
-    <div role="search" aria-label="Фильтры мероприятий">
+    <div role="search" aria-label="Фильтры мероприятий" className="flex flex-col h-full">
       <h3 className="pub-filter-title">Фильтр мероприятий</h3>
 
-      {/* Направление */}
-      <div className="pub-filter-section">
-        <label className="pub-filter-label" htmlFor="filter-direction">
-          Направление
-        </label>
-        <select
-          id="filter-direction"
-          className="pub-filter-select"
-          value={pending.directions[0] ?? ''}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPending((p) => ({ ...p, directions: v ? [v] : [] }));
-          }}
-        >
-          <option value="">Все направления</option>
-          {directions.map((d) => (
-            <option key={d.id} value={d.slug}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Нижняя сетка: Формат | Статус + Стоимость */}
-      <div className="pub-filter-grid">
-        {/* Левая колонка: Формат */}
+      {/* Two-col: LEFT=Регион/Направление/Формат, RIGHT=Статус+Стоимость */}
+      <div className="pub-filter-two-col">
+        {/* LEFT column */}
         <div>
-          <p className="pub-filter-label">Формат</p>
+          {/* Регион / Город (disabled placeholder) */}
+          <div className="pub-filter-section">
+            <label className="pub-filter-label" htmlFor="filter-region">
+              Регион / Город
+            </label>
+            <select
+              id="filter-region"
+              className="pub-filter-select"
+              disabled
+              value=""
+              onChange={() => undefined}
+            >
+              <option value="">Все регионы</option>
+            </select>
+          </div>
+
+          {/* Направление */}
+          <div className="pub-filter-section">
+            <label className="pub-filter-label" htmlFor="filter-direction">
+              Направление
+            </label>
+            <select
+              id="filter-direction"
+              className="pub-filter-select"
+              value={pending.directions[0] ?? ''}
+              onChange={(e) => {
+                const v = e.target.value;
+                setPending((p) => ({ ...p, directions: v ? [v] : [] }));
+              }}
+            >
+              <option value="">Все направления</option>
+              {directions.map((d) => (
+                <option key={d.id} value={d.slug}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Формат */}
           <div>
-            {FORMAT_OPTIONS.map((opt) => (
-              <label key={opt.value} className="pub-filter-check-row">
-                <input
-                  type="checkbox"
-                  className="pub-filter-checkbox"
-                  checked={pending.format === opt.value}
-                  onChange={() => toggleFormat(opt.value)}
-                />
-                <span className="pub-filter-check-text">{opt.label}</span>
-              </label>
-            ))}
+            <p className="pub-filter-label">Формат</p>
+            <div>
+              {FORMAT_OPTIONS.map((opt) => (
+                <label key={opt.value} className="pub-filter-check-row">
+                  <input
+                    type="checkbox"
+                    className="pub-filter-checkbox"
+                    checked={pending.format === opt.value}
+                    onChange={() => toggleFormat(opt.value)}
+                  />
+                  <span className="pub-filter-check-text">{opt.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Правая колонка: Статус + Стоимость */}
+        {/* RIGHT column: Статус + Стоимость */}
         <div>
           <p className="pub-filter-label">Статус</p>
           <div>
@@ -138,26 +157,28 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
         </div>
       </div>
 
-      <button
-        type="button"
-        className="pub-filter-apply-btn"
-        onClick={() => onChange(pending)}
-      >
-        Применить
-      </button>
-
-      {hasFilters && (
+      <div className="mt-auto pt-4">
         <button
           type="button"
-          className="pub-filter-reset-link"
-          onClick={() => {
-            setPending(EMPTY);
-            onChange(EMPTY);
-          }}
+          className="pub-filter-apply-btn"
+          onClick={() => onChange(pending)}
         >
-          Сбросить фильтр
+          Применить
         </button>
-      )}
+
+        {hasFilters && (
+          <button
+            type="button"
+            className="pub-filter-reset-link"
+            onClick={() => {
+              setPending(EMPTY);
+              onChange(EMPTY);
+            }}
+          >
+            Сбросить фильтр
+          </button>
+        )}
+      </div>
     </div>
   );
 }
