@@ -3,22 +3,19 @@ import Image from 'next/image';
 export function HeroSection() {
   return (
     <section className="pub-hero" aria-label="Главные мероприятия для бухгалтеров">
-      <div className="pub-hero-inner">
+      {/* pub-hero-panel: Figma {DB7079EA} 1495×323px, radius 28.3, border 1px Inside, shadow 0/4/4/0 25% */}
+      <div className="pub-hero-panel">
         <div className="pub-hero-content">
           <h1 className="pub-hero-title">
-            Главные мероприятия для бухгалтеров
-            <span className="pub-hero-geo"> по всей России</span>
+            Главные мероприятия для бухгалтеров по всей России
           </h1>
           <p className="pub-hero-sub">
             Онлайн и офлайн события для профессионального роста,
             обмена опытом и актуальной практики
           </p>
+          {/* Button: text "Важные события →" {R-21}, bg mint #7CD8B3 {R-22}, color #0D2344 {R-23}, no icon {R-24} */}
           <a href="#events" className="pub-hero-btn">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <rect x="2" y="3.5" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.4" />
-              <path d="M5 2v3M11 2v3M2 7.5h12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
-            Главные события
+            Важные события →
           </a>
         </div>
         <div className="pub-hero-visual" aria-hidden="true">

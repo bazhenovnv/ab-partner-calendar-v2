@@ -4,24 +4,31 @@ const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
 const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
 const PARTNER_URL = 'https://ab-buhpartner.ru/';
 
+// TEMP-UNRESOLVED: nav button border-radius — Figma panel not found in screenshots.
+// Visual estimate ≈8px → rounded-lg (8px). Confirm before marking Header approved.
+const NAV_BTN =
+  'flex items-center gap-2 ' +
+  'border border-black/[0.12] ' +
+  'rounded-lg ' +
+  'px-4 h-[38px] ' +        // h=38px confirmed {C0944B54} {CA965F25}
+  'text-sm font-medium text-primary bg-white ' +
+  'shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' + // project shadow standard
+  'hover:bg-gray-50 transition-colors ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint';
+
 export function SiteHeader() {
   return (
     <header className="bg-white sticky top-0 z-40">
-      <div className="max-w-[1440px] mx-auto px-4 tablet:px-8 h-20 flex items-center justify-between gap-4">
+      {/* max-w-[1496px]: confirmed {F6242A4C} footer 1496×72, {DDFD1908} modal 1496×768 */}
+      <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-20 flex items-center justify-between gap-4">
         <Link
           href="/"
           className="flex items-center gap-3 group shrink-0"
           aria-label="АБ Афиша Бухгалтера — на главную"
         >
           {/*
-            Monogram "аб" — geometry traced from project-assets/03_logo_frames/Frame 60.png
+            Monogram "аб" — geometry from project-assets/03_logo_frames/Frame 60.png
             viewBox 0 0 130 100, strokeWidth 9
-
-            "а": left leg (16,93)→(16,27) + semicircular arch A 21 21 to (58,27) going up
-                 + shorter right leg (58,27)→(58,54) + counter circle cx=37 cy=70 r=12
-
-            "б": diagonal stroke (63,84)→(98,10) + parallel stroke (74,84)→(109,10)
-                 + belly circle cx=106 cy=76 r=14
           */}
           <svg
             width="52"
@@ -32,7 +39,6 @@ export function SiteHeader() {
             className="text-primary shrink-0"
             aria-hidden="true"
           >
-            {/* "а" — left leg + semicircular arch + shorter right leg + counter circle */}
             <path
               d="M 16 93 L 16 27 A 21 21 0 0 1 58 27 L 58 54"
               stroke="currentColor"
@@ -40,25 +46,10 @@ export function SiteHeader() {
               strokeLinecap="round"
               fill="none"
             />
-            <circle
-              cx="37"
-              cy="70"
-              r="12"
-              stroke="currentColor"
-              strokeWidth="9"
-              fill="none"
-            />
-            {/* "б" — two parallel diagonal strokes (lower-left to upper-right) + belly circle */}
+            <circle cx="37" cy="70" r="12" stroke="currentColor" strokeWidth="9" fill="none" />
             <line x1="63" y1="84" x2="98"  y2="10" stroke="currentColor" strokeWidth="9" strokeLinecap="butt" />
             <line x1="74" y1="84" x2="109" y2="10" stroke="currentColor" strokeWidth="9" strokeLinecap="butt" />
-            <circle
-              cx="106"
-              cy="76"
-              r="14"
-              stroke="currentColor"
-              strokeWidth="9"
-              fill="none"
-            />
+            <circle cx="106" cy="76" r="14" stroke="currentColor" strokeWidth="9" fill="none" />
           </svg>
 
           <span className="font-gilroy font-semibold text-primary text-xl leading-tight">
@@ -66,14 +57,16 @@ export function SiteHeader() {
           </span>
         </Link>
 
+        {/* gap-2 = 8px confirmed {C0944B54} {CA965F25} */}
         <nav aria-label="Внешние ссылки" className="flex items-center gap-2">
-          {/* Telegram — official brand icon: #2AABEE circle + white paper plane */}
+
+          {/* Telegram — 118×38px {C0944B54}; brand #2AABEE */}
           <a
             href={TG_CHANNEL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Наш канал в Telegram"
-            className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-primary bg-white shadow-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+            className={NAV_BTN}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="12" fill="#2AABEE" />
@@ -85,13 +78,13 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">Telegram</span>
           </a>
 
-          {/* MAX — official brand icon: #006BFF circle + white chat-bubble mark */}
+          {/* MAX — width not confirmed in audit; auto width, h=38px consistent */}
           <a
             href={MAX_CHANNEL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Наш канал в MAX"
-            className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-primary bg-white shadow-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+            className={NAV_BTN}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="12" fill="#006BFF" />
@@ -104,13 +97,13 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">MAX</span>
           </a>
 
-          {/* Стать партнёром */}
+          {/* Стать партнёром — 181.67×38.34px confirmed {CA965F25} */}
           <a
             href={PARTNER_URL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Стать партнёром АБ Афиша"
-            className="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-primary bg-white shadow-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint"
+            className={NAV_BTN}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5" />
@@ -119,6 +112,7 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">Стать партнёром</span>
             <span className="tablet:hidden">Партнёр</span>
           </a>
+
         </nav>
       </div>
     </header>
