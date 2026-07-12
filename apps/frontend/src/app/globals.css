@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Gilroy font ──────────────────────────────────────────────────── */
+/* ─── Gilroy font ────────────────────────────────────────────── */
 @font-face {
   font-family: 'Gilroy';
   src: url('/fonts/gilroy/Gilroy-Regular.woff2') format('woff2'),
@@ -46,7 +46,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ─── Skip-to-content ───────────────────────────────────────────────── */
+/* ─── Skip-to-content ────────────────────────────────────────── */
 .skip-to-content {
   position: absolute;
   left: -9999px;
@@ -72,7 +72,7 @@ html {
   outline-offset: 2px;
 }
 
-/* ─── Utility animations ─────────────────────────────────────────── */
+/* ─── Utility animations ─────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -81,7 +81,7 @@ html {
   animation: fade-in 0.2s ease-out forwards;
 }
 
-/* ─── Legal pages ───────────────────────────────────────────────────── */
+/* ─── Legal pages ─────────────────────────────────────────────── */
 .legal-page {
   min-height: 100vh;
   display: flex;
@@ -183,10 +183,10 @@ html {
 body {
   font-family: var(--font-montserrat), sans-serif;
   color: var(--color-primary);
-  background: #f5f5f5;
+  background: #f1f1f1;
 }
 
-/* ─── Cookie banner ───────────────────────────────────────────────────── */
+/* ─── Cookie banner ───────────────────────────────────────────── */
 .cookie-banner {
   position: fixed;
   bottom: 0;
@@ -255,7 +255,7 @@ body {
   }
 }
 
-/* ─── Admin UI ────────────────────────────────────────────────────────── */
+/* ─── Admin UI ────────────────────────────────────────────────── */
 
 /* Login */
 .adm-login-wrap {
@@ -564,7 +564,7 @@ body {
 }
 .maint-tg-btn:hover { background: rgba(124,216,179,0.22); border-color: rgba(124,216,179,0.5); }
 
-/* ─── Hero Section ─────────────────────────────────────────────────────── */
+/* ─── Hero Section ─────────────────────────────────────────────── */
 .hero-section {
   position: relative;
   background: var(--color-primary);
@@ -710,7 +710,7 @@ body {
   .hero-stat-divider { display: none; }
 }
 
-/* ─── How It Works ────────────────────────────────────────────────────── */
+/* ─── How It Works ─────────────────────────────────────────────── */
 .how-section {
   background: #f8f9fc;
   padding: 4rem 1.5rem;
@@ -792,7 +792,7 @@ body {
   .how-step-card { padding: 1.5rem 1.125rem; }
 }
 
-/* ─── Reminders Block ────────────────────────────────────────────────────── */
+/* ─── Reminders Block ──────────────────────────────────────────── */
 .reminders-section {
   background: var(--color-primary);
   padding: 4rem 1.5rem;
@@ -898,7 +898,7 @@ body {
   .reminders-btn { justify-content: center; width: 100%; }
 }
 
-/* ─── Rotating Quotes ────────────────────────────────────────────────────── */
+/* ─── Rotating Quotes ──────────────────────────────────────────── */
 .quotes-section {
   background: #f8f9fc;
   padding: 3.5rem 1.5rem;
@@ -979,7 +979,7 @@ body {
   .quotes-text { font-size: 1rem; }
 }
 
-/* ─── Empty State (no events) ──────────────────────────────────────────── */
+/* ─── Empty State (no events) ──────────────────────────────────── */
 .empty-state-card {
   display: flex;
   flex-direction: column;
@@ -1055,14 +1055,13 @@ body {
 body {
   font-family: var(--font-montserrat), sans-serif;
   color: var(--color-primary);
-  background: #f5f5f5;
+  background: #f1f1f1;
 }
 
 /* ─── Hero ─── */
-/* TEMP-UNRESOLVED: page background color outside Hero panel not confirmed in Figma.
-   Using #f5f5f5 as placeholder — confirm on staging. */
+/* Figma confirmed page background: #F1F1F1 {5913:4745} */
 .pub-hero {
-  background: #f5f5f5;
+  background: #f1f1f1;
   padding: 16px;
 }
 /* Hero panel — Figma {DB7079EA}: 1495×323px, radius 28.3, border 1px Inside, shadow 0/4/4/0 25% */
@@ -1225,7 +1224,7 @@ body {
   }
 }
 
-/* ─── Filter panel sidebar (44D → 44E) ───────────────────────────── */
+/* ─── Filter panel sidebar (44D) ─────────────────────────────── */
 .pub-filter-title {
   font-family: var(--font-montserrat), sans-serif;
   font-size: 21px;
@@ -1353,7 +1352,7 @@ body {
 }
 .pub-filter-reset-link:hover { color: rgba(13, 35, 68, 0.75); }
 
-/* ─── Events date heading (44D) ─────────────────────────────────── */
+/* ─── Events date heading (44D) ───────────────────────────────── */
 .pub-events-date-heading {
   font-family: var(--font-montserrat), sans-serif;
   font-size: 20px;
@@ -1362,7 +1361,7 @@ body {
   margin: 32px 0 0;
 }
 
-/* ─── Main Events Carousel section (44D) ──────────────────────────────────*/
+/* ─── Main Events Carousel section (44D) ────────────────────────*/
 .pub-main-events-section {
   padding: 0 16px 16px;
 }
