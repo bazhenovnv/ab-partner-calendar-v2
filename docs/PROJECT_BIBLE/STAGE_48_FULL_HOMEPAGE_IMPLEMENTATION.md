@@ -1,7 +1,7 @@
 # Stage 48 — Full Homepage Pixel-Perfect Implementation
 
 **Branch:** `claude/ab-afisha-architecture-plan-805f5o`  
-**GitHub HEAD after stage:** `70d8588b`  
+**GitHub HEAD after stage:** `aa2852be`  
 **Date:** 2026-07-12
 
 ---
@@ -10,7 +10,7 @@
 
 Stage 48 applied all pending pixel-perfect corrections to the public homepage
 for `bazhenovnv/ab-partner-calendar-v2`. Changes target layout, event section,
-quotes section and clean up visual regressions identified in Stage 47 review.
+quotes section, and logo reliability.
 
 ---
 
@@ -21,7 +21,8 @@ quotes section and clean up visual regressions identified in Stage 47 review.
 | `f4e81734` | fix(layout): align page canvas, header and hero with Figma |
 | `fb03050e` | fix(events): rebuild calendar grid and event cards to Figma |
 | `70d8588b` | fix(carousel): implement Figma quotes card with mint border |
-| this commit | docs(stage-48): record full homepage pixel-perfect implementation |
+| `c4cdfcf1` | docs(stage-48): record full homepage pixel-perfect implementation |
+| `aa2852be` | fix(logo): switch to Next.js static import for logo asset in header and footer |
 
 ---
 
@@ -67,6 +68,20 @@ quotes section and clean up visual regressions identified in Stage 47 review.
 - Wrapped the blockquote, eyebrow, and dots in `.quotes-card`.
 - `.quotes-inner` is now a centering shell only; `.quotes-card` is the
   visual card with mint border.
+
+### 5. `apps/frontend/src/components/layout/SiteHeader.tsx` (second pass)
+
+- **Replaced** `<img src="/ab-logo-mark-cropped.png">` with Next.js `<Image>`
+  using a static import: `import logoImg from '../../../public/ab-logo-mark-cropped.png'`.
+- Asset path is now resolved at build time and bundled deterministically into
+  the standalone output, eliminating the broken-logo issue on staging caused
+  by runtime public-path resolution.
+- Added `priority` prop — logo is above the fold.
+- Removed `// eslint-disable-next-line @next/next/no-img-element` comment.
+
+### 6. `apps/frontend/src/components/layout/SiteFooter.tsx` (second pass)
+
+- Same static-import fix as SiteHeader: `<Image src={logoImg} width={46} height={50} ...>`.
 
 ---
 
@@ -136,8 +151,9 @@ STAGING_DESIGN_SEED=1 npx ts-node --project tsconfig.json prisma/seed-staging-qu
 
 - [x] All P1 corrections applied and committed
 - [x] All P2 corrections applied and committed
+- [x] Logo static import fix applied to header and footer
 - [x] No required assets missing for committed changes
 - [x] No secrets committed
 - [x] No DB schema changes
 - [x] No force push
-- [x] Audit document created
+- [x] Audit document updated
