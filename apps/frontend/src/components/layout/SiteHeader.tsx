@@ -4,39 +4,38 @@ const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
 const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
 const PARTNER_URL = 'https://ab-buhpartner.ru/';
 
-// TEMP-UNRESOLVED: nav button border-radius — Figma panel not found in screenshots.
-// Visual estimate ≈8px → rounded-lg (8px). Confirm before marking Header approved.
 const NAV_BTN =
   'flex items-center gap-2 ' +
   'border border-black/[0.12] ' +
   'rounded-lg ' +
-  'px-4 h-[38px] ' +        // h=38px confirmed {C0944B54} {CA965F25}
+  'px-4 h-[38px] ' +
   'text-sm font-medium text-primary bg-white ' +
-  'shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' + // project shadow standard
+  'shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' +
   'hover:bg-gray-50 transition-colors ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint';
 
 export function SiteHeader() {
   return (
     <header className="bg-white">
-      {/* max-w-[1496px]: confirmed {F6242A4C} footer 1496×72, {DDFD1908} modal 1496×768 */}
       <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-20 flex items-center justify-between gap-4">
         <Link
           href="/"
           className="flex items-center gap-3 group shrink-0"
           aria-label="АБ Афиша Бухгалтера — на главную"
         >
-          {/* Logo: Frame 60.png from project-assets/03_logo_frames/ — "аб" monogram */}
-          {/* mix-blend-mode:multiply makes white bg transparent on white header */}
-          {/* Figma: 61.6×66.7px → rounded to 62×67px */}
+          {/*
+            Tailwind preflight sets `img { height: auto }` which overrides HTML height attribute.
+            Explicit w-[62px] h-[67px] classes set CSS dimensions (Figma: 61.6×66.7px).
+            mix-blend-mode:multiply makes white PNG background transparent on white header.
+          */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/ab-logo-mark.png"
             alt=""
             width={62}
             height={67}
-            className="shrink-0"
-            style={{ mixBlendMode: 'multiply', objectFit: 'contain' }}
+            className="shrink-0 w-[62px] h-[67px] object-contain"
+            style={{ mixBlendMode: 'multiply' }}
             aria-hidden="true"
           />
 
@@ -45,10 +44,8 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        {/* gap-2 = 8px confirmed {C0944B54} {CA965F25} */}
         <nav aria-label="Внешние ссылки" className="flex items-center gap-2">
 
-          {/* Telegram — 118×38px {C0944B54}; brand #2AABEE */}
           <a
             href={TG_CHANNEL}
             target="_blank"
@@ -66,7 +63,6 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">Telegram</span>
           </a>
 
-          {/* MAX — width not confirmed in audit; auto width, h=38px consistent */}
           <a
             href={MAX_CHANNEL}
             target="_blank"
@@ -85,7 +81,6 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">MAX</span>
           </a>
 
-          {/* Стать партнёром — 181.67×38.34px confirmed {CA965F25} */}
           <a
             href={PARTNER_URL}
             target="_blank"
