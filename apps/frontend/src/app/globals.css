@@ -905,21 +905,11 @@ body {
   overflow: hidden;
 }
 .quotes-inner {
-  max-width: 1496px;
+  max-width: 860px;
   margin: 0 auto;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0;
+  justify-content: center;
 }
-.quotes-decor {
-  flex-shrink: 0;
-  width: 180px;
-  height: 260px;
-  opacity: 0.9;
-}
-.quotes-decor--left { margin-right: -16px; }
-.quotes-decor--right { margin-left: -16px; }
 .quotes-card {
   background: #ffffff;
   border: 1.5px solid #7CD8B3;
@@ -998,7 +988,6 @@ body {
 }
 
 @media (max-width: 900px) {
-  .quotes-decor { display: none; }
   .quotes-inner { justify-content: center; }
 }
 @media (max-width: 390px) {
@@ -1499,22 +1488,15 @@ body {
 }
 .pub-footer-top {
   display: grid;
-  grid-template-columns: 1fr 160px 160px 220px;
+  grid-template-columns: 1fr 160px 160px;
   gap: 2.5rem;
   align-items: flex-start;
-}
-@media (max-width: 1100px) {
-  .pub-footer-top {
-    grid-template-columns: 1fr 140px 140px;
-  }
-  .pub-footer-illus { display: none; }
 }
 @media (max-width: 767px) {
   .pub-footer-top {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  .pub-footer-illus { display: none; }
 }
 .pub-footer-brand {}
 .pub-footer-logo {
@@ -1562,17 +1544,6 @@ body {
   transition: color 0.15s;
 }
 .pub-footer-link:hover { color: #0D2344; }
-.pub-footer-illus {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding-top: 0;
-}
-.pub-footer-illustration {
-  width: 200px;
-  height: 180px;
-  opacity: 0.9;
-}
 .pub-footer-divider {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
