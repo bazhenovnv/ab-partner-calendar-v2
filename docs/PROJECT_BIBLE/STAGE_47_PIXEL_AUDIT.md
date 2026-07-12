@@ -13,7 +13,7 @@
 - Figma values: from `get_design_context` calls in Stages 44–46 (node IDs documented per block)
 - Code values: from `globals.css` fetched at HEAD `a9138a02` + component TSX files
 - Figma MCP rate-limited (Starter plan) — no new Figma calls possible in this session
-- ⚠️ Where Figma value is labelled `PREV-SESSION`, it came from a prior session’s Figma fetch and is confirmed-accurate
+- ⚠️ Where Figma value is labelled `PREV-SESSION`, it came from a prior session's Figma fetch and is confirmed-accurate
 - Visual guessing: FORBIDDEN — all values sourced from code or documented Figma node data
 
 ---
@@ -376,3 +376,69 @@ STAGING_DESIGN_SEED=1 npx ts-node --project tsconfig.json prisma/seed-staging-qu
 | MATCH ✅ | 36 | All other properties |
 
 **Minimum commits to ship: 2 code commits + 1 Docker rebuild + 2 seed runs.**
+
+---
+
+## Stage 47.1 — Applied Confirmed P1/P2 Corrections
+
+**Date:** 2026-07-12  
+**Commits pushed to `claude/ab-afisha-architecture-plan-805f5o`:**
+
+| Commit | SHA | Message | Changes |
+|--------|-----|---------|----------|
+| 1 | `ad21976e` | `fix(footer): restore Figma light theme` | globals.css — all footer P1 selectors (light theme) + Hero CTA P2 + Main Events P2 (bundled in one push) |
+| 2 | `[this commit]` | `fix(home): align Hero CTA and Main Events with Figma` | Audit doc update — Stage 47.1 section |
+
+### CSS changes applied (globals.css)
+
+**Footer P1 — all applied:**
+- `.pub-footer`: `background: #ffffff`, added `border-top: 1px solid rgba(0,0,0,0.06)`
+- `.pub-footer-logo-text`: `color: #fff` → `#1e1e1e`
+- `.pub-footer-logo-accent`: `color: var(--color-mint)` → `#1e1e1e`
+- `.pub-footer-desc`: `color: rgba(255,255,255,0.5)` → `rgba(13,35,68,0.55)`
+- `.pub-footer-col-title`: Gilroy Bold 1rem `#323232`, removed uppercase/letter-spacing
+- `.pub-footer-link`: `color: rgba(255,255,255,0.65)` → `#323232`
+- `.pub-footer-link:hover`: `#fff` → `#0D2344`
+- `.pub-footer-divider`: `rgba(255,255,255,0.08)` → `rgba(0,0,0,0.1)`
+- `.pub-footer-legal-link`: `rgba(255,255,255,0.4)` → `rgba(0,0,0,0.45)`
+- `.pub-footer-legal-link:hover`: `rgba(255,255,255,0.75)` → `rgba(0,0,0,0.75)`
+- `.pub-footer-copy`: `rgba(255,255,255,0.25)` → `rgba(0,0,0,0.4)`
+- `.pub-footer-operator`: `rgba(255,255,255,0.18)` → `rgba(0,0,0,0.3)`
+
+**Hero CTA P2 — applied:**
+- `height`: 42px → 47px
+- `font-size`: 0.9375rem → 1.0625rem (17px)
+- `border-radius`: 10px → 5.98px
+- `width`: auto → 212px (fixed)
+- Added `justify-content: center`
+
+**Main Events P2 — applied:**
+- `box-shadow`: `0 4px 4px 0 rgba(0,0,0,0.25)` → `0 0 10px rgba(0,0,0,0.3)`
+- `border`: removed (was `1px solid rgba(0,0,0,0.15)`)
+- `.pub-main-events-title font-size`: 24px → 26px
+- `.pub-carousel-card border-radius`: 16px → 18.259px
+- `.pub-carousel-card-link border-radius`: 16px → 18.259px
+
+### Remaining P3 items (not applied — need Figma node confirmation)
+
+- M-01: Header nav button border-radius
+- M-02: EventCard title case (uppercase vs mixed)
+- M-03: EventCard grid gap
+- Quotes section background color
+
+### Deploy commands — run on server after push
+
+```bash
+# staging
+docker compose -f docker-compose.staging.yml build frontend
+docker compose -f docker-compose.staging.yml up -d frontend
+
+# prod
+docker compose -f docker-compose.prod.yml build frontend
+docker compose -f docker-compose.prod.yml up -d frontend
+
+# seed (run from repo root on server, staging only)
+cd apps/backend
+STAGING_DESIGN_SEED=1 npx ts-node --project tsconfig.json prisma/seed-staging-design.ts
+STAGING_DESIGN_SEED=1 npx ts-node --project tsconfig.json prisma/seed-staging-quotes.ts
+```
