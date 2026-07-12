@@ -106,7 +106,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
       </div>
 
       {/* Events grid — full width below controls */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 mt-8">
         {isFallback && !loading && (
           <div className="bg-primary/5 rounded-xl px-4 py-3 text-sm text-primary/70">
             Актуальных мероприятий пока нет — показываем последние завершённые.

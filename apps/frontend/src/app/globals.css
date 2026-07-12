@@ -1089,7 +1089,7 @@ body {
   padding: 41px 54px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   z-index: 1;
 }
@@ -1152,6 +1152,7 @@ body {
   transition: opacity 0.15s;
   align-self: flex-start;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .pub-hero-btn:hover { opacity: 0.85; }
 /* Mobile: collapse, hide image */

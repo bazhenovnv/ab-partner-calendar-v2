@@ -32,6 +32,7 @@ export function SiteHeader() {
             width={62}
             height={67}
             className="shrink-0 object-contain"
+            style={{ height: '67px' }}
             aria-hidden
             priority
           />
