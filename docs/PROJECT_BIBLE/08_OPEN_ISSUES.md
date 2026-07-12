@@ -5,7 +5,7 @@ Only current unresolved issues belong here. Historical closed work belongs in CH
 | ID | Area | Issue | Required evidence to close | Status |
 |---|---|---|---|---|
 | `UI-001` | Page scale | Current staging proportions do not yet match the approved desktop reference | 1920px side-by-side measurement and screenshot comparison | OPEN |
-| `UI-002` | Calendar | Filters/calendar/event-card composition requires canonical comparison against approved reference | `CALENDAR_COMPARISON.md`, build and staging screenshot | OPEN |
+| `UI-002` | Calendar | Filters/calendar/event-card composition requires canonical comparison against approved reference | `CALENDAR_COMPARISON.md`, build and staging screenshot | PARTIAL — Stage 52 fixed: prev-month dates, weekend tint (bg-mint/10), selected-day color (bg-selected-day text-white). Full staging comparison pending. |
 | `ASSET-001` | Quotes | Approved left person illustration is not registered as a usable local asset | approved binary source/path/dimensions | MISSING_APPROVED_ASSET |
 | `ASSET-002` | Quotes | Approved right person illustration is not registered as a usable local asset | approved binary source/path/dimensions | MISSING_APPROVED_ASSET |
 | `ASSET-003` | Footer | Approved notebook/pen/plant/cup composition is not registered as a usable local asset | approved binary source/path/dimensions | MISSING_APPROVED_ASSET |

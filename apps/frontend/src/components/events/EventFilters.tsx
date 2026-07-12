@@ -166,18 +166,19 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
           Применить
         </button>
 
-        {hasFilters && (
-          <button
-            type="button"
-            className="pub-filter-reset-link"
-            onClick={() => {
-              setPending(EMPTY);
-              onChange(EMPTY);
-            }}
-          >
-            Сбросить фильтр
-          </button>
-        )}
+        <button
+          type="button"
+          className="pub-filter-reset-link"
+          onClick={() => {
+            if (!hasFilters) return;
+            setPending(EMPTY);
+            onChange(EMPTY);
+          }}
+          style={{ opacity: hasFilters ? 1 : 0.35, cursor: hasFilters ? 'pointer' : 'default' }}
+          aria-disabled={!hasFilters}
+        >
+          Сбросить фильтр
+        </button>
       </div>
     </div>
   );
