@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import logoImg from '../../../public/ab-logo-mark-cropped.png';
 import { LEGAL_LINKS } from '@/lib/legal';
 
 const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
@@ -33,8 +35,14 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="pub-footer-brand">
             <div className="pub-footer-logo">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/ab-logo-mark-cropped.png" alt="" className="shrink-0 w-[46px] h-[50px] object-contain" aria-hidden="true" />
+              <Image
+                src={logoImg}
+                alt=""
+                width={46}
+                height={50}
+                className="shrink-0 object-contain"
+                aria-hidden
+              />
               <span className="pub-footer-logo-text">
                 Афиша <span className="pub-footer-logo-accent">Бухгалтера</span>
               </span>

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import logoImg from '../../../public/ab-logo-mark-cropped.png';
 
 const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
 const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
@@ -26,12 +28,14 @@ export function SiteHeader() {
           className="flex items-center gap-3 group shrink-0"
           aria-label="АБ Афиша Бухгалтера — на главную"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/ab-logo-mark-cropped.png"
+          <Image
+            src={logoImg}
             alt=""
-            className="shrink-0 w-[62px] h-[67px] object-contain"
-            aria-hidden="true"
+            width={62}
+            height={67}
+            className="shrink-0 object-contain"
+            aria-hidden
+            priority
           />
 
           {/* Figma 5893:346: Montserrat SemiBold 18.69px #1e1e1e */}
