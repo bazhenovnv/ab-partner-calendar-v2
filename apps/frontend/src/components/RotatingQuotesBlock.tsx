@@ -35,35 +35,37 @@ export function RotatingQuotesBlock({ quotes }: Props) {
   return (
     <section className="quotes-section" aria-labelledby="quotes-title">
       <div className="quotes-inner">
-        <div className="quotes-header">
-          <span className="quotes-eyebrow">Цитаты</span>
-          <h2 id="quotes-title" className="sr-only">Цитаты для бухгалтеров</h2>
-        </div>
-        <div className={`quotes-body ${visible ? 'quotes-visible' : 'quotes-hidden'}`}>
-          <blockquote className="quotes-blockquote">
-            <span className="quotes-mark" aria-hidden="true">&ldquo;</span>
-            <p className="quotes-text">{q.text}</p>
-            <footer className="quotes-author">— {q.author}</footer>
-          </blockquote>
-        </div>
-        {quotes.length > 1 && (
-          <div className="quotes-dots" role="tablist" aria-label="Переключение цитат">
-            {quotes.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                role="tab"
-                aria-selected={i === idx}
-                aria-label={`Цитата ${i + 1}`}
-                className={`quotes-dot ${i === idx ? 'quotes-dot-active' : ''}`}
-                onClick={() => {
-                  setVisible(false);
-                  setTimeout(() => { setIdx(i); setVisible(true); }, 350);
-                }}
-              />
-            ))}
+        <div className="quotes-card">
+          <div className="quotes-header">
+            <span className="quotes-eyebrow">Цитаты</span>
+            <h2 id="quotes-title" className="sr-only">Цитаты для бухгалтеров</h2>
           </div>
-        )}
+          <div className={`quotes-body ${visible ? 'quotes-visible' : 'quotes-hidden'}`}>
+            <blockquote className="quotes-blockquote">
+              <span className="quotes-mark" aria-hidden="true">&ldquo;</span>
+              <p className="quotes-text">{q.text}</p>
+              <footer className="quotes-author">— {q.author}</footer>
+            </blockquote>
+          </div>
+          {quotes.length > 1 && (
+            <div className="quotes-dots" role="tablist" aria-label="Переключение цитат">
+              {quotes.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === idx}
+                  aria-label={`Цитата ${i + 1}`}
+                  className={`quotes-dot ${i === idx ? 'quotes-dot-active' : ''}`}
+                  onClick={() => {
+                    setVisible(false);
+                    setTimeout(() => { setIdx(i); setVisible(true); }, 350);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
