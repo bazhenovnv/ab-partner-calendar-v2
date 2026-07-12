@@ -33,7 +33,8 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="pub-footer-brand">
             <div className="pub-footer-logo">
-              <div className="pub-footer-logo-mark">АБ</div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/ab-logo-mark-cropped.png" alt="" className="shrink-0 w-[46px] h-[50px] object-contain" aria-hidden="true" />
               <span className="pub-footer-logo-text">
                 Афиша <span className="pub-footer-logo-accent">Бухгалтера</span>
               </span>

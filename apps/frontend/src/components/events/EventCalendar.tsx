@@ -124,7 +124,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                 'relative flex flex-col items-center justify-center font-semibold transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
                 isSelected
-                  ? 'bg-selected-day text-white rounded-[93.554px] drop-shadow-[0px_0px_4.779px_rgba(0,0,0,0.3)]'
+                  ? 'bg-mint text-black rounded-[93.554px] drop-shadow-[0px_0px_4.779px_rgba(0,0,0,0.3)]'
                   : isToday
                   ? 'bg-primary/10 text-primary rounded-lg'
                   : hasEvents
