@@ -76,6 +76,8 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
         onNext={goToNext}
       />
 
+      {/* Figma: gap between weekday row and date grid = 9.355px */}
+      <div className="flex flex-col" style={{ gap: '9.355px' }}>
       <div
         className="grid grid-cols-7"
         role="row"
@@ -119,21 +121,21 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
               aria-selected={isSelected}
               onClick={() => onSelectDate(isSelected ? null : dateStr)}
               className={cn(
-                'relative flex flex-col items-center justify-center rounded-lg font-semibold transition-colors',
+                'relative flex flex-col items-center justify-center font-semibold transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
                 isSelected
-                  ? 'bg-selected-day text-white'
+                  ? 'bg-selected-day text-white rounded-[93.554px] drop-shadow-[0px_0px_4.779px_rgba(0,0,0,0.3)]'
                   : isToday
-                  ? 'bg-primary/10 text-primary'
+                  ? 'bg-primary/10 text-primary rounded-lg'
                   : hasEvents
-                  ? 'hover:bg-date-hover text-primary cursor-pointer'
-                  : 'text-primary/30 cursor-default',
+                  ? 'hover:bg-date-hover text-primary cursor-pointer rounded-lg'
+                  : 'text-primary/30 cursor-default rounded-lg',
               )}
               style={{
                 fontFamily: 'var(--font-montserrat), sans-serif',
                 fontSize: '23px',
-                width: '31.808px',
-                height: '31.808px',
+                width: isSelected ? '43.97px' : '31.808px',
+                height: isSelected ? '43.014px' : '31.808px',
                 margin: '0 auto',
               }}
               disabled={!hasEvents && !isSelected}
@@ -159,6 +161,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           );
         })}
       </div>
+      </div>{/* end grid wrapper */}
 
       <div className="mt-3 pt-3 border-t border-dropdown-border flex flex-wrap gap-3 text-xs text-primary/60">
         <span className="flex items-center gap-1.5">
