@@ -6,8 +6,6 @@ const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
 const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
 const PARTNER_URL = 'https://ab-buhpartner.ru/';
 
-// TEMP-UNRESOLVED: nav button border-radius — Figma panel not found in screenshots.
-// Visual estimate ≈8px → rounded-lg (8px). Confirm before marking Header approved.
 const NAV_BTN =
   'flex items-center gap-2 ' +
   'border border-black/[0.12] ' +

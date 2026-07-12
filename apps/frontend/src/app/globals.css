@@ -1064,12 +1064,6 @@ body {
 
 /* ===== Public page layout (PR-36) ===================================== */
 
-body {
-  font-family: var(--font-montserrat), sans-serif;
-  color: var(--color-primary);
-  background: #f1f1f1;
-}
-
 /* ─── Hero ─── */
 /* Figma confirmed page background: #F1F1F1 {5913:4745} */
 .pub-hero {
@@ -1083,7 +1077,6 @@ body {
   margin: 0 auto;
   background: #ffffff;
   border-radius: 28.3px;
-  /* TEMP-UNRESOLVED: Figma shows "stroke 000000 Inside 1px" — opacity unknown. Using 0.15. */
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   overflow: hidden;
@@ -1439,7 +1432,7 @@ body {
   cursor: pointer;
   transition: color 0.15s;
   line-height: 1;
-  select: none;
+  user-select: none;
 }
 .pub-carousel-nav-btn:hover:not(:disabled) { color: #0D2344; }
 .pub-carousel-nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
