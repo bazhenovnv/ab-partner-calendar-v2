@@ -1129,19 +1129,19 @@ body {
   line-height: 1.3;
   margin: 0 0 28px;
 }
-/* Button — mint #7CD8B3, dark #0D2344, h=42px {FF5DFC96}, text "Важные события →", no icon
-   TEMP-UNRESOLVED: border-radius not found in Figma panel. Keeping 10px from previous. */
+/* Button — mint #7CD8B3, dark #0D2344 — Figma confirmed values */
 .pub-hero-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   background: #7CD8B3;
   color: #0D2344;
   font-family: var(--font-montserrat), sans-serif;
   font-weight: 700;
-  font-size: 0.9375rem;
-  height: 42px;
-  padding: 0 1.5rem;
-  border-radius: 10px;
+  font-size: 1.0625rem;
+  height: 47px;
+  width: 212px;
+  border-radius: 5.98px;
   text-decoration: none;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   transition: opacity 0.15s;
@@ -1370,13 +1370,12 @@ body {
   margin: 0 auto;
   background: #ffffff;
   border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   padding: 32px 54px 40px;
 }
 .pub-main-events-title {
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: #0D2344;
   margin: 0 0 24px;
@@ -1396,7 +1395,7 @@ body {
   margin-top: -197px;
   transform-origin: center bottom;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s, z-index 0s;
-  border-radius: 16px;
+  border-radius: 18.259px;
   overflow: hidden;
   cursor: pointer;
 }
@@ -1406,7 +1405,7 @@ body {
   height: 100%;
   position: relative;
   text-decoration: none;
-  border-radius: 16px;
+  border-radius: 18.259px;
   overflow: hidden;
 }
 .pub-carousel-nav {
@@ -1466,10 +1465,11 @@ body {
   }
 }
 
-/* Footer */
+/* Footer — Figma light theme */
 .pub-footer {
-  background: var(--color-primary);
+  background: #ffffff;
   margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 .pub-footer-inner {
   /* F6242A4C: footer width confirmed 1496px — match all other containers */
@@ -1510,30 +1510,11 @@ body {
   color: var(--color-mint);
   flex-shrink: 0;
 }
-.pub-footer-logo-text {
-  font-family: var(--font-montserrat), sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  color: #fff;
-}
-.pub-footer-logo-accent { color: var(--color-mint); }
-.pub-footer-desc {
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 0.8125rem;
-  color: rgba(255,255,255,0.5);
-  line-height: 1.6;
-  max-width: 320px;
-}
+.pub-footer-logo-text { font-family: var(--font-montserrat), sans-serif; font-weight: 700; font-size: 1rem; color: #1e1e1e; }
+.pub-footer-logo-accent { color: #1e1e1e; }
+.pub-footer-desc { font-family: var(--font-gilroy), sans-serif; font-size: 0.8125rem; color: rgba(13, 35, 68, 0.55); line-height: 1.6; max-width: 320px; }
 .pub-footer-col {}
-.pub-footer-col-title {
-  font-family: var(--font-montserrat), sans-serif;
-  font-weight: 600;
-  font-size: 0.8125rem;
-  color: rgba(255,255,255,0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 0.75rem;
-}
+.pub-footer-col-title { font-family: var(--font-gilroy), sans-serif; font-weight: 700; font-size: 1rem; color: #323232; margin-bottom: 0.75rem; }
 .pub-footer-links {
   list-style: none;
   padding: 0;
@@ -1542,19 +1523,9 @@ body {
   flex-direction: column;
   gap: 0.5rem;
 }
-.pub-footer-link {
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 0.875rem;
-  color: rgba(255,255,255,0.65);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.pub-footer-link:hover { color: #fff; }
-.pub-footer-divider {
-  border: none;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  margin: 2rem 0 1.25rem;
-}
+.pub-footer-link { font-family: var(--font-gilroy), sans-serif; font-size: 0.875rem; color: #323232; text-decoration: none; transition: color 0.15s; }
+.pub-footer-link:hover { color: #0D2344; }
+.pub-footer-divider { border: none; border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 2rem 0 1.25rem; }
 .pub-footer-bottom {
   display: flex;
   flex-wrap: wrap;
@@ -1567,24 +1538,7 @@ body {
   flex-wrap: wrap;
   gap: 0.75rem 1.25rem;
 }
-.pub-footer-legal-link {
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.pub-footer-legal-link:hover { color: rgba(255,255,255,0.75); }
-.pub-footer-copy {
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.25);
-  white-space: nowrap;
-}
-.pub-footer-operator {
-  font-family: var(--font-gilroy), sans-serif;
-  font-size: 0.6875rem;
-  color: rgba(255,255,255,0.18);
-  margin-top: 0.5rem;
-  text-align: left;
-}
+.pub-footer-legal-link { font-family: var(--font-gilroy), sans-serif; font-size: 0.75rem; color: rgba(0, 0, 0, 0.45); text-decoration: none; transition: color 0.15s; }
+.pub-footer-legal-link:hover { color: rgba(0, 0, 0, 0.75); }
+.pub-footer-copy { font-family: var(--font-gilroy), sans-serif; font-size: 0.75rem; color: rgba(0, 0, 0, 0.4); white-space: nowrap; }
+.pub-footer-operator { font-family: var(--font-gilroy), sans-serif; font-size: 0.6875rem; color: rgba(0, 0, 0, 0.3); margin-top: 0.5rem; text-align: left; }
