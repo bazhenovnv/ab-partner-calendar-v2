@@ -76,92 +76,115 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
         onNext={goToNext}
       />
 
-      {/* Figma: gap between weekday row and date grid = 9.355px */}
+      {/* gap between weekday row and date grid = 9.355px */}
       <div className="flex flex-col" style={{ gap: '9.355px' }}>
-      <div
-        className="grid grid-cols-7"
-        role="row"
-        aria-label="Дни недели"
-      >
-        {DAYS_RU.map((d) => (
-          <div
-            key={d}
-            className="text-center font-semibold text-primary/40"
-            style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '19px' }}
-          >
-            {d}
-          </div>
-        ))}
-      </div>
-
-      <div
-        className={cn('grid grid-cols-7 transition-opacity', loading && 'opacity-40')}
-        style={{ rowGap: '9.355px' }}
-        role="grid"
-        aria-label="Календарь мероприятий"
-      >
-        {Array.from({ length: firstDow }).map((_, i) => (
-          <div key={`empty-${i}`} role="gridcell" />
-        ))}
-
-        {Array.from({ length: daysInMonth }).map((_, i) => {
-          const day = i + 1;
-          const dateStr = toDateString(year, month, day);
-          const marker = markerMap.get(dateStr);
-          const isSelected = selectedDate === dateStr;
-          const isToday = dateStr === todayStr;
-          const hasEvents = !!marker;
-
-          return (
-            <button
-              key={day}
-              type="button"
-              role="gridcell"
-              aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ''}${isSelected ? ', выбрано' : ''}`}
-              aria-selected={isSelected}
-              onClick={() => onSelectDate(isSelected ? null : dateStr)}
+        <div
+          className="grid grid-cols-7"
+          role="row"
+          aria-label="Дни недели"
+        >
+          {DAYS_RU.map((d, idx) => (
+            <div
+              key={d}
               className={cn(
-                'relative flex flex-col items-center justify-center font-semibold transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
-                isSelected
-                  ? 'bg-mint text-black rounded-[93.554px] drop-shadow-[0px_0px_4.779px_rgba(0,0,0,0.3)]'
-                  : isToday
-                  ? 'bg-primary/10 text-primary rounded-lg'
-                  : hasEvents
-                  ? 'hover:bg-date-hover text-primary cursor-pointer rounded-lg'
-                  : 'text-primary/30 cursor-default rounded-lg',
+                'text-center font-semibold text-primary/40',
+                (idx === 5 || idx === 6) && 'text-primary/30',
               )}
-              style={{
-                fontFamily: 'var(--font-montserrat), sans-serif',
-                fontSize: '23px',
-                width: isSelected ? '43.97px' : '31.808px',
-                height: isSelected ? '43.014px' : '31.808px',
-                margin: '0 auto',
-              }}
-              disabled={!hasEvents && !isSelected}
+              style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '19px' }}
             >
-              {day}
-              {hasEvents && !isSelected && (
-                <span
-                  className="absolute top-0 right-0 w-0 h-0"
-                  aria-hidden="true"
-                  style={{
-                    borderTop: `10px solid ${
-                      marker!.live > 0
-                        ? 'var(--color-live-status)'
-                        : marker!.planned > 0
-                        ? 'var(--color-green-marker)'
-                        : 'var(--color-completed-marker)'
-                    }`,
-                    borderLeft: '10px solid transparent',
-                  }}
-                />
+              {d}
+            </div>
+          ))}
+        </div>
+
+        {/* Date grid with table-style borders */}
+        <div
+          className={cn(
+            'grid grid-cols-7 border-t border-l border-primary/[0.06] transition-opacity',
+            loading && 'opacity-40',
+          )}
+          role="grid"
+          aria-label="Календарь мероприятий"
+        >
+          {Array.from({ length: firstDow }).map((_, i) => (
+            <div
+              key={`empty-${i}`}
+              role="gridcell"
+              className={cn(
+                'border-r border-b border-primary/[0.06]',
+                ((i % 7) === 5 || (i % 7) === 6) && 'bg-primary/[0.025]',
               )}
-            </button>
-          );
-        })}
+              style={{ minHeight: '40px' }}
+            />
+          ))}
+
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const day = i + 1;
+            const dateStr = toDateString(year, month, day);
+            const marker = markerMap.get(dateStr);
+            const isSelected = selectedDate === dateStr;
+            const isToday = dateStr === todayStr;
+            const hasEvents = !!marker;
+            const colIndex = (firstDow + i) % 7;
+            const isWeekend = colIndex === 5 || colIndex === 6;
+
+            return (
+              <div
+                key={day}
+                className={cn(
+                  'flex items-center justify-center border-r border-b border-primary/[0.06]',
+                  isWeekend && 'bg-primary/[0.025]',
+                )}
+                style={{ minHeight: '40px' }}
+              >
+                <button
+                  type="button"
+                  role="gridcell"
+                  aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ''}${isSelected ? ', выбрано' : ''}`}
+                  aria-selected={isSelected}
+                  onClick={() => onSelectDate(isSelected ? null : dateStr)}
+                  className={cn(
+                    'relative flex flex-col items-center justify-center font-semibold transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
+                    isSelected
+                      ? 'bg-mint text-black rounded-[93.554px] drop-shadow-[0px_0px_4.779px_rgba(0,0,0,0.3)]'
+                      : isToday
+                      ? 'bg-primary/10 text-primary rounded-lg'
+                      : hasEvents
+                      ? 'hover:bg-date-hover text-primary cursor-pointer rounded-lg'
+                      : 'text-primary/30 cursor-default rounded-lg',
+                  )}
+                  style={{
+                    fontFamily: 'var(--font-montserrat), sans-serif',
+                    fontSize: '23px',
+                    width: isSelected ? '43.97px' : '31.808px',
+                    height: isSelected ? '43.014px' : '31.808px',
+                  }}
+                  disabled={!hasEvents && !isSelected}
+                >
+                  {day}
+                  {hasEvents && !isSelected && (
+                    <span
+                      className="absolute top-0 right-0 w-0 h-0"
+                      aria-hidden="true"
+                      style={{
+                        borderTop: `10px solid ${
+                          marker!.live > 0
+                            ? 'var(--color-live-status)'
+                            : marker!.planned > 0
+                            ? 'var(--color-green-marker)'
+                            : 'var(--color-completed-marker)'
+                        }`,
+                        borderLeft: '10px solid transparent',
+                      }}
+                    />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      </div>{/* end grid wrapper */}
 
       <div className="mt-3 pt-3 border-t border-dropdown-border flex flex-wrap gap-3 text-xs text-primary/60">
         <span className="flex items-center gap-1.5">

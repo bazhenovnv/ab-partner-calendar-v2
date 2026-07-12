@@ -97,7 +97,7 @@ export function EventCard({ event, className }: EventCardProps) {
           )}
         </div>
 
-        <h3 className="font-montserrat font-semibold text-primary text-sm tablet:text-base leading-snug line-clamp-2 uppercase group-hover:text-selected-day transition-colors">
+        <h3 className="font-montserrat font-semibold text-primary text-sm tablet:text-base leading-snug line-clamp-2 group-hover:text-selected-day transition-colors">
           {event.title}
         </h3>
 
