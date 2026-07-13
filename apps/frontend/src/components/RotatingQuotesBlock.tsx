@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import personLeftImg from '../../public/quote-person-left.png';
+import personRightImg from '../../public/quote-person-right.png';
 
 export type PublicQuote = {
   id: string;
@@ -36,8 +39,17 @@ export function RotatingQuotesBlock({ quotes }: Props) {
     <section className="quotes-section" aria-labelledby="quotes-title">
       <h2 id="quotes-title" className="sr-only">Цитаты для бухгалтеров</h2>
       <div className="quotes-layout">
-        {/* Left person area — ASSET-QUOTE-LEFT (MISSING_APPROVED_ASSET) */}
-        <div className="quotes-person quotes-person-left" aria-hidden="true" />
+        {/* Left person — ASSET-QUOTE-LEFT */}
+        <div className="quotes-person quotes-person-left" aria-hidden="true">
+          <Image
+            src={personLeftImg}
+            alt=""
+            width={181}
+            height={217}
+            className="quotes-person-img quotes-person-img--left"
+            aria-hidden
+          />
+        </div>
 
         {/* Central quote card */}
         <div className="quotes-card">
@@ -71,8 +83,17 @@ export function RotatingQuotesBlock({ quotes }: Props) {
           )}
         </div>
 
-        {/* Right person area — ASSET-QUOTE-RIGHT (MISSING_APPROVED_ASSET) */}
-        <div className="quotes-person quotes-person-right" aria-hidden="true" />
+        {/* Right person — ASSET-QUOTE-RIGHT */}
+        <div className="quotes-person quotes-person-right" aria-hidden="true">
+          <Image
+            src={personRightImg}
+            alt=""
+            width={172}
+            height={215}
+            className="quotes-person-img quotes-person-img--right"
+            aria-hidden
+          />
+        </div>
       </div>
     </section>
   );

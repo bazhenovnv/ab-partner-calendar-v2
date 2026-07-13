@@ -38,7 +38,7 @@ interface MainEventsBannerProps {
 }
 
 export function MainEventsBanner({ events }: MainEventsBannerProps) {
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(2);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const total = events.length;
