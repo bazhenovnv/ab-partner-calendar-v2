@@ -81,6 +81,16 @@ export function SiteFooter() {
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Контакты</p>
             <ul className="pub-footer-links">
+              <li>
+                <a href="tel:+79298386482" className="pub-footer-link">
+                  +7 (929) 838 64 82
+                </a>
+              </li>
+              <li>
+                <span className="pub-footer-link" style={{ cursor: 'default' }}>
+                  Пн–Пт, 9:00–18:00 (МСК)
+                </span>
+              </li>
               <li className="relative">
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
@@ -99,6 +109,11 @@ export function SiteFooter() {
                     {toast === 'copied' ? 'Email скопирован' : 'Почтовый клиент открыт'}
                   </div>
                 )}
+              </li>
+              <li>
+                <span className="pub-footer-link" style={{ cursor: 'default' }}>
+                  Россия, г. Краснодар
+                </span>
               </li>
               <li>
                 <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">

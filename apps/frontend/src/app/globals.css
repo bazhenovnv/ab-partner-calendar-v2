@@ -900,7 +900,7 @@ body {
 
 /* ─── Rotating Quotes ──────────────────────────────────────────────────────────────── */
 .quotes-section {
-  background: #f8f9fc;
+  background: #f1f1f1;
   padding: 0 16px 16px;
   overflow: hidden;
 }
@@ -1420,6 +1420,7 @@ body {
   position: relative;
   height: 428px;
   overflow: hidden;
+  perspective: 1200px;
 }
 .pub-carousel-card {
   position: absolute;
@@ -1429,7 +1430,7 @@ body {
   height: 395px;
   margin-left: -134px;
   margin-top: -197px;
-  transform-origin: center bottom;
+  transform-origin: center center;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s, z-index 0s;
   border-radius: 18.259px;
   overflow: hidden;
@@ -1532,7 +1533,7 @@ body {
 }
 .pub-footer-stationery-img {
   width: auto;
-  height: 160px;
+  height: 260px;
   object-fit: contain;
 }
 @media (max-width: 767px) {
