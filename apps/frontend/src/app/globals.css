@@ -1130,7 +1130,8 @@ body {
 /* Figma confirmed page background: #F1F1F1 {5913:4745} */
 .pub-hero {
   background: #f1f1f1;
-  padding: 16px;
+  /* top: 52px aligns hero panel at y=132 (matching Figma frame geometry); bottom: 25px = Figma gap hero→events */
+  padding: 52px 16px 25px;
 }
 /* Hero panel — Figma {DB7079EA}: 1495×323px, radius 28.3, border 1px Inside, shadow 0/4/4/0 25% */
 .pub-hero-panel {
@@ -1230,7 +1231,8 @@ body {
 /* BACC095C: W=1496, H=945, radius=20, stroke 000000 Inside 1px, shadow 0/4/4/0 25%, fill #fff */
 /* 44D: inner padding = 54px sides (verified: 1496-2×54=1388 = carousel gallery width) */
 .pub-events-section {
-  padding: 0 16px 16px;
+  /* bottom: 25px = Figma gap events→Carousel+Quotes panel */
+  padding: 0 16px 25px;
 }
 /* Figma 5913:4752 — W:1497 H:1428 radius:35.604 shadow:0 0 9.129px rgba(0,0,0,0.3) pad:40px 54px */
 .pub-events-outer {

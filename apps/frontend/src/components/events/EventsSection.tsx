@@ -137,7 +137,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
           />
         ) : (
           <>
-            <div className="grid grid-cols-1 tablet:grid-cols-2 wide:grid-cols-3 gap-[53px]">
+            <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-[53px]">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
