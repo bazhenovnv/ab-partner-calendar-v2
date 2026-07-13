@@ -900,13 +900,14 @@ body {
 
 /* ─── Rotating Quotes ──────────────────────────────────────────────────────────────── */
 .quotes-section {
-  background: #f1f1f1;
-  padding: 0 16px 16px;
+  /* Transparent — sits inside pub-main-quotes-inner white panel */
+  background: transparent;
+  padding: 0 54px 40px;
   overflow: hidden;
 }
 /* Three-column layout: left-person | card | right-person (matches Figma 1496px section) */
 .quotes-layout {
-  max-width: 1496px;
+  max-width: none;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 220px 1fr 220px;
@@ -938,7 +939,7 @@ body {
 
 .quotes-card {
   background: #ffffff;
-  border: 1.5px solid #7CD8B3;
+  border: 2px solid #7CD8B3;
   border-radius: 20px;
   padding: 2rem 2.5rem 2.5rem;
   display: flex;
@@ -946,7 +947,8 @@ body {
   align-items: center;
   gap: 1.25rem;
   box-shadow: 0 2px 16px rgba(13,35,68,0.06);
-  margin: 2.5rem 32px;
+  margin: 2.5rem 24px;
+  position: relative;
 }
 .quotes-header { text-align: center; }
 .quotes-eyebrow {
@@ -1015,10 +1017,11 @@ body {
   .quotes-layout { grid-template-columns: 1fr; }
   .quotes-person { display: none; }
   .quotes-card { margin: 2rem 0; }
+  .quotes-section { padding: 0 24px 32px; }
 }
 @media (max-width: 390px) {
-  .quotes-section { padding: 0 1rem 1rem; }
-  .quotes-card { padding: 1.5rem 1.25rem 2rem; }
+  .quotes-section { padding: 0 1rem 1.5rem; }
+  .quotes-card { padding: 1.5rem 1.25rem 2rem; margin: 1.5rem 0; }
   .quotes-text { font-size: 1rem; }
 }
 
@@ -1397,17 +1400,33 @@ body {
   margin: 32px 0 0;
 }
 
-/* ─── Main Events Carousel section (44D) ─────────────────────────────────────────────────*/
-.pub-main-events-section {
-  padding: 0 16px 16px;
+/* ─── Shared Main Events + Quotes white panel ──────────────────────────────────────────── */
+.pub-main-quotes-wrapper {
+  padding: 0 16px 32px;
 }
-.pub-main-events-outer {
+.pub-main-quotes-inner {
   max-width: 1496px;
   margin: 0 auto;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  padding: 32px 54px 40px;
+}
+@media (max-width: 767px) {
+  .pub-main-quotes-wrapper { padding: 0 8px 24px; }
+}
+
+/* ─── Main Events Carousel section (44D) ─────────────────────────────────────────────────*/
+.pub-main-events-section {
+  padding: 32px 54px 24px;
+}
+.pub-main-events-outer {
+  /* Transparent passthrough — white panel provided by pub-main-quotes-inner */
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  max-width: none;
+  margin: 0;
 }
 .pub-main-events-title {
   font-family: var(--font-montserrat), sans-serif;
@@ -1486,10 +1505,10 @@ body {
   background: #7CD8B3;
   width: 20px;
 }
-/* Mobile carousel: single card */
+/* Mobile carousel */
 @media (max-width: 1023px) {
-  .pub-main-events-outer {
-    padding: 24px 16px 32px;
+  .pub-main-events-section {
+    padding: 24px 16px 16px;
   }
   .pub-carousel-gallery {
     height: 320px;

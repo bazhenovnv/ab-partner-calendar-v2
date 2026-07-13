@@ -152,7 +152,8 @@ export function SiteFooter() {
           </p>
         </div>
         <p className="pub-footer-operator">
-          ООО «АБ ГРУПП» · ОГРН&nbsp;1212300074766 · ИНН&nbsp;2308283450
+          ООО «АБ ГРУПП» · ОГРН&nbsp;1212300074766 · ИНН&nbsp;2308283450 ·
+          350049, Краснодарский край, г.&nbsp;Краснодар, ул.&nbsp;Красных Партизан, д.&nbsp;164, помещение&nbsp;5
         </p>
       </div>
     </footer>

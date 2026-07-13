@@ -61,8 +61,14 @@ export default async function HomePage() {
     <PublicShell>
       <HeroSection />
       <EventsSection initialData={events} directions={dirs} />
-      {main.length > 0 && <MainEventsBanner events={main} />}
-      {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
+      {(main.length > 0 || qs.length > 0) && (
+        <div className="pub-main-quotes-wrapper">
+          <div className="pub-main-quotes-inner">
+            {main.length > 0 && <MainEventsBanner events={main} />}
+            {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
+          </div>
+        </div>
+      )}
     </PublicShell>
   );
 }
