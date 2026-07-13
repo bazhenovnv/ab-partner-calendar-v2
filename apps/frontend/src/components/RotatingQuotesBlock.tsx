@@ -26,8 +26,8 @@ export function RotatingQuotesBlock({ quotes }: Props) {
       setTimeout(() => {
         setIdx((prev) => (prev + 1) % quotes.length);
         setVisible(true);
-      }, 350);
-    }, 5000);
+      }, 400);
+    }, 10000);
     return () => clearInterval(timer);
   }, [quotes.length]);
 
