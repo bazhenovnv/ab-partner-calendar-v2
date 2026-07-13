@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,7 @@ interface MainEventsBannerProps {
 
 export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const [active, setActive] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   const total = events.length;
 
@@ -46,6 +47,17 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     (i: number) => setActive(Math.max(0, Math.min(i, total - 1))),
     [total],
   );
+
+  useEffect(() => {
+    const el = galleryRef.current;
+    if (!el) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(active - 1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(active + 1); }
+    };
+    el.addEventListener('keydown', onKey);
+    return () => el.removeEventListener('keydown', onKey);
+  }, [active, goTo]);
 
   if (!total) return null;
 
@@ -56,9 +68,12 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
         {/* Fan/perspective carousel gallery */}
         <div
+          ref={galleryRef}
           className="pub-carousel-gallery"
           aria-live="polite"
           aria-atomic="true"
+          tabIndex={0}
+          aria-label="Карусель главных событий"
         >
           {events.map((event, idx) => {
             const offset = idx - active;

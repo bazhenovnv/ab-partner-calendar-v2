@@ -24,7 +24,7 @@ Approved copies should be placed under:
 | `ASSET-HERO` | Hero books/photo composition | current registered public/project asset | approved Figma/project asset | HeroSection | VERIFY | Do not regenerate or replace |
 | `ASSET-QUOTE-LEFT` | Approved person illustration left | TBD after extraction/source identification | approved Figma/PDF | Quotes | MISSING_APPROVED_ASSET | Do not use books/caps/custom SVG |
 | `ASSET-QUOTE-RIGHT` | Approved person illustration right | TBD after extraction/source identification | approved Figma/PDF | Quotes | MISSING_APPROVED_ASSET | Do not invent replacement |
-| `ASSET-FOOTER-STATIONERY` | Notebook/pen/plant/cup composition | TBD after extraction/source identification | approved Figma/PDF | Footer | MISSING_APPROVED_ASSET | Do not replace with calendar/custom SVG |
+| `ASSET-FOOTER-STATIONERY` | Notebook/pen/plant/cup composition | `apps/frontend/public/notebook-stationery.png` | `project-assets/04_creative_archives/Креативы АБ (19).zip` → `notebook_mint_transparent 1.png` | SiteFooter | APPROVED_SOURCE | 365×349px RGBA PNG · SHA256: 768202ee881272e2db74dbb5c5c61e1c289b809c038b4c367fa9b3ce1e78053e · transparent background · notebook + mint pen + plant + cup |
 | `ASSET-EVENT-COVERS` | Approved event covers for staging demo | TBD from project assets/admin content | approved project assets | Event cards/carousel | MISSING_APPROVED_ASSET | No gradients or AB placeholders as final |
 
 ## Validation checklist

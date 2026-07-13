@@ -35,7 +35,11 @@ export function RotatingQuotesBlock({ quotes }: Props) {
   return (
     <section className="quotes-section" aria-labelledby="quotes-title">
       <h2 id="quotes-title" className="sr-only">Цитаты для бухгалтеров</h2>
-      <div className="quotes-inner">
+      <div className="quotes-layout">
+        {/* Left person area — ASSET-QUOTE-LEFT (MISSING_APPROVED_ASSET) */}
+        <div className="quotes-person quotes-person-left" aria-hidden="true" />
+
+        {/* Central quote card */}
         <div className="quotes-card">
           <div className="quotes-header">
             <span className="quotes-eyebrow">Цитаты</span>
@@ -66,6 +70,9 @@ export function RotatingQuotesBlock({ quotes }: Props) {
             </div>
           )}
         </div>
+
+        {/* Right person area — ASSET-QUOTE-RIGHT (MISSING_APPROVED_ASSET) */}
+        <div className="quotes-person quotes-person-right" aria-hidden="true" />
       </div>
     </section>
   );

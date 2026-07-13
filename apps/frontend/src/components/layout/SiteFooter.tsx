@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import logoImg from '../../../public/ab-logo-mark-cropped.png';
 import { LEGAL_LINKS } from '@/lib/legal';
+import stationeryImg from '../../../public/notebook-stationery.png';
 
 const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
 const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
@@ -107,6 +108,17 @@ export function SiteFooter() {
             </ul>
           </div>
 
+          {/* Stationery composition — ASSET-FOOTER-STATIONERY */}
+          <div className="pub-footer-stationery" aria-hidden="true">
+            <Image
+              src={stationeryImg}
+              alt=""
+              width={365}
+              height={349}
+              className="pub-footer-stationery-img"
+              aria-hidden
+            />
+          </div>
 
         </div>
 

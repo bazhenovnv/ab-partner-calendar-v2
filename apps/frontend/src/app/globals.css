@@ -901,27 +901,40 @@ body {
 /* ─── Rotating Quotes ──────────────────────────────────────────────────────────────── */
 .quotes-section {
   background: #f8f9fc;
-  padding: 3rem 1rem;
+  padding: 0 16px 16px;
   overflow: hidden;
 }
-.quotes-inner {
-  max-width: 860px;
+/* Three-column layout: left-person | card | right-person (matches Figma 1496px section) */
+.quotes-layout {
+  max-width: 1496px;
   margin: 0 auto;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  align-items: flex-end;
+  gap: 0;
+  min-height: 340px;
 }
+/* Person placeholder areas — filled when ASSET-QUOTE-LEFT/RIGHT are approved and registered */
+.quotes-person {
+  width: 220px;
+  min-height: 300px;
+  background: transparent;
+  /* MISSING_APPROVED_ASSET: do not substitute */
+}
+.quotes-person-left { align-self: flex-end; }
+.quotes-person-right { align-self: flex-end; }
+
 .quotes-card {
   background: #ffffff;
   border: 1.5px solid #7CD8B3;
   border-radius: 20px;
   padding: 2rem 2.5rem 2.5rem;
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
   box-shadow: 0 2px 16px rgba(13,35,68,0.06);
+  margin: 2.5rem 32px;
 }
 .quotes-header { text-align: center; }
 .quotes-eyebrow {
@@ -958,7 +971,6 @@ body {
   color: var(--color-primary);
   line-height: 1.65;
   margin: 0 0 1rem;
-  max-width: 680px;
 }
 .quotes-author {
   font-size: 0.875rem;
@@ -988,10 +1000,12 @@ body {
 }
 
 @media (max-width: 900px) {
-  .quotes-inner { justify-content: center; }
+  .quotes-layout { grid-template-columns: 1fr; }
+  .quotes-person { display: none; }
+  .quotes-card { margin: 2rem 0; }
 }
 @media (max-width: 390px) {
-  .quotes-section { padding: 2.5rem 1rem; }
+  .quotes-section { padding: 0 1rem 1rem; }
   .quotes-card { padding: 1.5rem 1.25rem 2rem; }
   .quotes-text { font-size: 1rem; }
 }
@@ -1488,7 +1502,7 @@ body {
 }
 .pub-footer-top {
   display: grid;
-  grid-template-columns: 1fr 160px 160px;
+  grid-template-columns: 1fr 160px 160px auto;
   gap: 2.5rem;
   align-items: flex-start;
 }
@@ -1497,6 +1511,20 @@ body {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
+}
+.pub-footer-stationery {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  align-self: flex-end;
+}
+.pub-footer-stationery-img {
+  width: auto;
+  height: 160px;
+  object-fit: contain;
+}
+@media (max-width: 767px) {
+  .pub-footer-stationery { display: none; }
 }
 .pub-footer-brand {}
 .pub-footer-logo {

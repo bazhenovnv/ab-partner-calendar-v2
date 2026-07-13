@@ -177,7 +177,7 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
           style={{ opacity: hasFilters ? 1 : 0.35, cursor: hasFilters ? 'pointer' : 'default' }}
           aria-disabled={!hasFilters}
         >
-          Сбросить фильтр
+          ↺ Сбросить фильтр
         </button>
       </div>
     </div>
