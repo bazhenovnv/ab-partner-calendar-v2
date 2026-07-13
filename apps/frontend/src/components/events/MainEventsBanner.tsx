@@ -9,8 +9,16 @@ import type { PublicEvent } from '@/types/event';
 const BLUR_PLACEHOLDER =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0Ii8+PC9zdmc+';
 
-// Carousel card transform: offset is position relative to active center (-2, -1, 0, +1, +2)
-// Uses rotateY for true 3D perspective effect (requires perspective on parent)
+/**
+ * Circular offset: how far idx is from active in the range [-⌊N/2⌋, ⌊N/2⌋].
+ * Wraps around so the carousel is always cyclic.
+ */
+function circularOffset(idx: number, active: number, total: number): number {
+  const d = ((idx - active + total) % total);
+  return d > Math.floor(total / 2) ? d - total : d;
+}
+
+/** 3D card transform per offset position (-2 … +2). Uses rotateY for real perspective. */
 function getCardStyle(offset: number): React.CSSProperties {
   if (offset === 0) {
     return { transform: 'translateX(0) scale(1) rotateY(0deg)', zIndex: 5, opacity: 1 };
@@ -19,16 +27,16 @@ function getCardStyle(offset: number): React.CSSProperties {
   const dir = offset > 0 ? 1 : -1;
   if (abs === 1) {
     return {
-      transform: `translateX(${dir * 220}px) scale(0.86) rotateY(${-dir * 18}deg)`,
+      transform: `translateX(${dir * 230}px) scale(0.86) rotateY(${-dir * 18}deg)`,
       zIndex: 4,
       opacity: 1,
     };
   }
   if (abs === 2) {
     return {
-      transform: `translateX(${dir * 420}px) scale(0.70) rotateY(${-dir * 28}deg)`,
+      transform: `translateX(${dir * 430}px) scale(0.70) rotateY(${-dir * 28}deg)`,
       zIndex: 3,
-      opacity: 0.7,
+      opacity: 0.9,
     };
   }
   return { transform: `translateX(${dir * 600}px) scale(0.5) rotateY(${-dir * 35}deg)`, zIndex: 1, opacity: 0 };
@@ -39,13 +47,14 @@ interface MainEventsBannerProps {
 }
 
 export function MainEventsBanner({ events }: MainEventsBannerProps) {
-  const [active, setActive] = useState(2);
+  const [active, setActive] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const total = events.length;
 
+  /** Circular navigation — wraps around at both ends */
   const goTo = useCallback(
-    (i: number) => setActive(Math.max(0, Math.min(i, total - 1))),
+    (i: number) => setActive(((i % total) + total) % total),
     [total],
   );
 
@@ -67,7 +76,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
       <div className="pub-main-events-outer">
         <h2 className="pub-main-events-title">Главные события</h2>
 
-        {/* Fan/perspective carousel gallery */}
+        {/* Fan/perspective carousel gallery — perspective set in CSS */}
         <div
           ref={galleryRef}
           className="pub-carousel-gallery"
@@ -77,25 +86,29 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
           aria-label="Карусель главных событий"
         >
           {events.map((event, idx) => {
-            const offset = idx - active;
+            const offset = circularOffset(idx, active, total);
             if (Math.abs(offset) > 2) return null;
 
             const image = event.images?.[0];
             const imgUrl =
               image?.mainEventUrl ?? image?.thumbnailUrl ?? image?.eventCardUrl ?? image?.originalUrl;
 
+            const isCenter = offset === 0;
+
             return (
               <div
                 key={event.id}
                 className="pub-carousel-card"
                 style={getCardStyle(offset)}
-                aria-hidden={offset !== 0}
+                aria-hidden={!isCenter}
+                onClick={!isCenter ? () => goTo(idx) : undefined}
               >
                 <Link
                   href={`/events/${event.id}`}
                   className="pub-carousel-card-link"
-                  tabIndex={offset === 0 ? 0 : -1}
+                  tabIndex={isCenter ? 0 : -1}
                   aria-label={event.title}
+                  onClick={!isCenter ? (e: React.MouseEvent) => e.preventDefault() : undefined}
                 >
                   {imgUrl ? (
                     <Image
@@ -123,13 +136,12 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
           })}
         </div>
 
-        {/* Navigation */}
+        {/* Navigation — circular, no disabled state */}
         {total > 1 && (
           <nav className="pub-carousel-nav" aria-label="Навигация по главным событиям">
             <button
               type="button"
               onClick={() => goTo(active - 1)}
-              disabled={active === 0}
               className="pub-carousel-nav-btn"
               aria-label="Предыдущее событие"
             >
@@ -153,7 +165,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
             <button
               type="button"
               onClick={() => goTo(active + 1)}
-              disabled={active === total - 1}
               className="pub-carousel-nav-btn"
               aria-label="Следующее событие"
             >
