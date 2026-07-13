@@ -76,13 +76,9 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
         onNext={goToNext}
       />
 
-      {/* gap between weekday row and date grid = 9.355px */}
       <div className="flex flex-col" style={{ gap: '9.355px' }}>
-        <div
-          className="grid grid-cols-7"
-          role="row"
-          aria-label="Дни недели"
-        >
+        {/* Weekday headers */}
+        <div className="grid grid-cols-7" role="row" aria-label="Дни недели">
           {DAYS_RU.map((d, idx) => (
             <div
               key={d}
@@ -97,7 +93,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           ))}
         </div>
 
-        {/* Date grid with table-style borders */}
+        {/* Date grid — square cells, full-fill selected day */}
         <div
           className={cn(
             'grid grid-cols-7 border-t border-l border-primary/[0.06] transition-opacity',
@@ -106,6 +102,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           role="grid"
           aria-label="Календарь мероприятий"
         >
+          {/* Previous-month filler cells */}
           {Array.from({ length: firstDow }).map((_, i) => {
             const prevMonth = month === 0 ? 11 : month - 1;
             const prevYear = month === 0 ? year - 1 : year;
@@ -118,10 +115,9 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                 role="gridcell"
                 aria-disabled="true"
                 className={cn(
-                  'flex items-center justify-center border-r border-b border-primary/[0.06]',
+                  'relative aspect-square flex items-center justify-center border-r border-b border-primary/[0.06]',
                   isWeekendPrev && 'bg-mint/[0.10]',
                 )}
-                style={{ minHeight: '40px' }}
               >
                 <span
                   className="font-semibold text-primary/25"
@@ -133,6 +129,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
             );
           })}
 
+          {/* Current-month cells */}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
             const dateStr = toDateString(year, month, day);
@@ -146,38 +143,34 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
             return (
               <div
                 key={day}
+                role="gridcell"
                 className={cn(
-                  'flex items-center justify-center border-r border-b border-primary/[0.06]',
-                  isWeekend && 'bg-mint/[0.10]',
+                  'relative aspect-square flex items-center justify-center border-r border-b border-primary/[0.06]',
+                  isWeekend && !isSelected && 'bg-mint/[0.10]',
+                  isSelected && 'bg-selected-day',
                 )}
-                style={{ minHeight: '40px' }}
               >
                 <button
                   type="button"
-                  role="gridcell"
                   aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ''}${isSelected ? ', выбрано' : ''}`}
                   aria-selected={isSelected}
                   onClick={() => onSelectDate(isSelected ? null : dateStr)}
-                  className={cn(
-                    'relative flex flex-col items-center justify-center font-semibold transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
-                    isSelected
-                      ? 'bg-selected-day text-white rounded-[93.554px] drop-shadow-[0px_0px_4.779px_rgba(0,0,0,0.3)]'
-                      : isToday
-                      ? 'bg-primary/10 text-primary rounded-lg'
-                      : hasEvents
-                      ? 'hover:bg-date-hover text-primary cursor-pointer rounded-lg'
-                      : 'text-primary/30 cursor-default rounded-lg',
-                  )}
-                  style={{
-                    fontFamily: 'var(--font-montserrat), sans-serif',
-                    fontSize: '23px',
-                    width: isSelected ? '43.97px' : '31.808px',
-                    height: isSelected ? '43.014px' : '31.808px',
-                  }}
                   disabled={!hasEvents && !isSelected}
+                  className={cn(
+                    'absolute inset-0 flex items-center justify-center font-semibold transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset',
+                    isSelected
+                      ? 'text-white cursor-pointer'
+                      : isToday
+                      ? 'text-primary bg-primary/10 rounded-lg m-1'
+                      : hasEvents
+                      ? 'text-primary hover:bg-date-hover cursor-pointer'
+                      : 'text-primary cursor-default',
+                  )}
+                  style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '23px' }}
                 >
                   {day}
+                  {/* Corner triangle event marker */}
                   {hasEvents && !isSelected && (
                     <span
                       className="absolute top-0 right-0 w-0 h-0"

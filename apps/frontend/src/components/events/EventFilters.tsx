@@ -60,11 +60,10 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
     <div role="search" aria-label="Фильтры мероприятий" className="flex flex-col h-full">
       <h3 className="pub-filter-title">Фильтр мероприятий</h3>
 
-      {/* Two-col: LEFT=Регион/Направление/Формат, RIGHT=Статус+Стоимость */}
+      {/* Two-col layout with vertical divider */}
       <div className="pub-filter-two-col">
-        {/* LEFT column */}
-        <div>
-          {/* Регион / Город (disabled placeholder) */}
+        {/* LEFT: Регион / Направление / Формат */}
+        <div className="pub-filter-left-col">
           <div className="pub-filter-section">
             <label className="pub-filter-label" htmlFor="filter-region">
               Регион / Город
@@ -80,7 +79,6 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
             </select>
           </div>
 
-          {/* Направление */}
           <div className="pub-filter-section">
             <label className="pub-filter-label" htmlFor="filter-direction">
               Направление
@@ -103,7 +101,6 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
             </select>
           </div>
 
-          {/* Формат */}
           <div>
             <p className="pub-filter-label">Формат</p>
             <div>
@@ -122,8 +119,11 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
           </div>
         </div>
 
-        {/* RIGHT column: Статус + Стоимость */}
-        <div>
+        {/* Vertical divider */}
+        <div className="pub-filter-divider-v" aria-hidden="true" />
+
+        {/* RIGHT: Статус + Стоимость */}
+        <div className="pub-filter-right-col">
           <p className="pub-filter-label">Статус</p>
           <div>
             {STATUS_OPTIONS.map((opt) => (
@@ -140,7 +140,9 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
             ))}
           </div>
 
-          <p className="pub-filter-label pub-filter-label--mt">Стоимость</p>
+          <div className="pub-filter-divider-h" aria-hidden="true" />
+
+          <p className="pub-filter-label">Стоимость</p>
           <div>
             {PRICE_OPTIONS.map((opt) => (
               <label key={opt.value} className="pub-filter-check-row">
@@ -166,19 +168,18 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
           Применить
         </button>
 
-        <button
-          type="button"
-          className="pub-filter-reset-link"
-          onClick={() => {
-            if (!hasFilters) return;
-            setPending(EMPTY);
-            onChange(EMPTY);
-          }}
-          style={{ opacity: hasFilters ? 1 : 0.35, cursor: hasFilters ? 'pointer' : 'default' }}
-          aria-disabled={!hasFilters}
-        >
-          ↺ Сбросить фильтр
-        </button>
+        {hasFilters && (
+          <button
+            type="button"
+            className="pub-filter-reset-link"
+            onClick={() => {
+              setPending(EMPTY);
+              onChange(EMPTY);
+            }}
+          >
+            ↺ Сбросить фильтр
+          </button>
+        )}
       </div>
     </div>
   );
