@@ -10,27 +10,28 @@ const BLUR_PLACEHOLDER =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0Ii8+PC9zdmc+';
 
 // Carousel card transform: offset is position relative to active center (-2, -1, 0, +1, +2)
+// Uses rotateY for true 3D perspective effect (requires perspective on parent)
 function getCardStyle(offset: number): React.CSSProperties {
   if (offset === 0) {
-    return { transform: 'translateX(0) scale(1) rotate(0deg)', zIndex: 5, opacity: 1 };
+    return { transform: 'translateX(0) scale(1) rotateY(0deg)', zIndex: 5, opacity: 1 };
   }
   const abs = Math.abs(offset);
   const dir = offset > 0 ? 1 : -1;
   if (abs === 1) {
     return {
-      transform: `translateX(${dir * 310}px) scale(0.82) rotate(${dir * 5}deg)`,
+      transform: `translateX(${dir * 220}px) scale(0.86) rotateY(${-dir * 18}deg)`,
       zIndex: 4,
       opacity: 1,
     };
   }
   if (abs === 2) {
     return {
-      transform: `translateX(${dir * 545}px) scale(0.68) rotate(${dir * 11}deg)`,
+      transform: `translateX(${dir * 420}px) scale(0.70) rotateY(${-dir * 28}deg)`,
       zIndex: 3,
       opacity: 0.7,
     };
   }
-  return { transform: `translateX(${dir * 700}px) scale(0.5) rotate(${dir * 15}deg)`, zIndex: 1, opacity: 0 };
+  return { transform: `translateX(${dir * 600}px) scale(0.5) rotateY(${-dir * 35}deg)`, zIndex: 1, opacity: 0 };
 }
 
 interface MainEventsBannerProps {
@@ -81,7 +82,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
             const image = event.images?.[0];
             const imgUrl =
-              image?.thumbnailUrl ?? image?.eventCardUrl ?? image?.originalUrl;
+              image?.mainEventUrl ?? image?.thumbnailUrl ?? image?.eventCardUrl ?? image?.originalUrl;
 
             return (
               <div
