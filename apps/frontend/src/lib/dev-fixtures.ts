@@ -1,7 +1,14 @@
 /**
  * Development-only fixture data for visual QA without a running backend.
  * Activated only when NEXT_PUBLIC_DEV_FIXTURES=1 AND NODE_ENV=development.
- * NEVER imported or bundled in production builds.
+ * NEVER imported or bundled in production or staging builds.
+ *
+ * IMPORTANT — QA placeholder content only:
+ * Titles, descriptions, and quote texts below are NOT approved editorial content.
+ * They exist solely to exercise the UI layout during local development.
+ * Canonical staging content lives in apps/backend/prisma/seed-staging-design.ts
+ * and apps/backend/prisma/seed-staging-quotes.ts.
+ * Never copy fixture texts into the database, seed files, or production.
  */
 
 import type { PublicEvent, PublicEventsResponse } from '@/types/event';
