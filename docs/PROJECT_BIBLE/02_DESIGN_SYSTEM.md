@@ -11,6 +11,8 @@
 - Do not use `transform: scale`, CSS `zoom`, or root font scaling to imitate the design.
 - A build passing does not prove design compliance.
 - Visual acceptance requires a current screenshot comparison.
+- Overall page canvas, desktop scale, section widths and background ownership are defined canonically in `09_PAGE_CANVAS_AND_SCALE.md`.
+- A Figma prototype displayed with `scaling=min-zoom` is a scaled viewer presentation, not a source of CSS dimensions. Use raw node geometry and the approved PDF.
 
 ## Canonical wording
 - Hero CTA: `Важные события →`.
@@ -18,12 +20,14 @@
 - Completed status: `Завершено`.
 
 ## Base visual language
-- Page canvas: light grey approved background.
+- Page canvas: light grey approved background `#F1F1F1`.
 - Cards/panels: white.
 - Primary dark: navy used in approved buttons/text.
 - Accent: approved mint.
 - Header: white, non-sticky.
-- Main desktop reference: 1920px viewport with central content approximately 1496–1497px where confirmed by Figma.
+- Main desktop reference: `1920×1080` CSS viewport.
+- Canonical centered desktop panels: approximately `1496–1497px`, with exact geometry defined in `09_PAGE_CANVAS_AND_SCALE.md` and the relevant feature specification.
+- Do not add black side bars: black areas around a Figma prototype are viewer chrome, not part of the public website.
 
 ## Typography
 Use project-loaded Montserrat and Gilroy only where the approved design/spec explicitly assigns them. Do not substitute fonts silently.
