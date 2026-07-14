@@ -28,11 +28,12 @@ export interface ParsedMaxPost {
 export class MaxParserService {
   private readonly logger = new Logger(MaxParserService.name);
 
-  // Detect collection posts (multiple events) — must NOT auto-import
+  /** Weekly selections and posts containing several events must not be split automatically. */
   isCollectionPost(text: string): boolean {
     const collectionMarkers = [
       /ПОДБОРКА\s+(НЕДЕЛИ|МЕСЯЦА|ДНЯ)/i,
-      /АБ АФИША БУХГАЛТЕРА[:：]\s*ЧТО ПОСМОТРЕТЬ/i,
+      /АБ\s+АФИША\s+БУХГАЛТЕРА[:：]\s*ЧТО\s+ПОСМОТРЕТЬ/i,
+      /\b(?:мероприятия|вебинары|семинары)\s+на\s+(?:неделю|месяц)\b/i,
     ];
     return collectionMarkers.some((re) => re.test(text));
   }
@@ -41,7 +42,7 @@ export class MaxParserService {
     const result: ParsedMaxPost = {
       title: null,
       shortDescription: null,
-      fullDescription: null,
+      fullDescription: text.trim() || null,
       startDate: null,
       endDate: null,
       startTime: null,
@@ -51,8 +52,9 @@ export class MaxParserService {
       address: null,
       venue: null,
       eventUrl: null,
-      priceType: null,
-      priceText: null,
+      // BR-008: an omitted price is treated as free.
+      priceType: 'FREE',
+      priceText: 'Бесплатно',
       speaker: null,
       mainEvent: false,
       directionSlugs: [],
@@ -61,97 +63,105 @@ export class MaxParserService {
       attentionReasons: [],
     };
 
-    const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+    const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
 
-    // Title: first non-empty line (uppercase or regular)
-    result.title = lines[0] ?? null;
-
-    // Hashtags
-    const hashtagLine = lines.find((l) => l.startsWith('#'));
-    const hashtags = hashtagLine ? hashtagLine.match(/#[\wА-яЁё]+/g) ?? [] : [];
-
-    for (const tag of hashtags) {
-      if (tag === '#Хит') {
-        result.mainEvent = true;
-      }
-      const mapped = HASHTAG_TO_DIRECTIONS[tag];
-      if (mapped && mapped.length > 0) {
-        result.directionSlugs.push(...mapped);
-      } else if (tag !== '#АБАфиша' && tag !== '#Хит') {
-        result.tags.push(tag.replace('#', ''));
-      }
-    }
-    result.directionSlugs = [...new Set(result.directionSlugs)];
-
-    // Date parsing
+    result.title = this.extractTitle(lines);
+    this.parseHashtags(text, result);
     this.parseDate(text, postDate, result);
-
-    // Format / location
     this.parseFormatLocation(text, result);
-
-    // Price
     this.parsePrice(text, result);
-
-    // Speaker (🎙 or [микрофон])
     this.parseSpeaker(lines, result);
-
-    // Event URL (from "здесь", "тут", "зарегистрироваться" etc)
     this.parseEventUrl(text, result);
-
-    // Description: everything between title and structured fields
     result.shortDescription = this.extractDescription(lines);
-
-    // Validation
     this.validate(result);
 
     return result;
   }
 
-  private parseDate(text: string, postDate: Date | undefined, result: ParsedMaxPost) {
-    // Format: "Когда: 7–8 июля 2026 года" (multi-day)
-    const multiDay = text.match(/Когда:\s*(\d+)[–\-—](\d+)\s+([а-яА-Я]+)\s+(\d{4})\s+года?/i);
-    if (multiDay) {
-      const [, d1, d2, monthStr, year] = multiDay;
-      const month = this.parseMonthRu(monthStr);
-      if (month !== null) {
-        result.startDate = new Date(+year, month, +d1);
-        result.endDate = new Date(+year, month, +d2);
+  private extractTitle(lines: string[]): string | null {
+    return lines.find((line) => {
+      if (line.startsWith('#')) return false;
+      return !/^(Когда|Дата|Время|Начало|Формат|Где|Стоимость|Спикер):/i.test(line);
+    }) ?? null;
+  }
+
+  private parseHashtags(text: string, result: ParsedMaxPost) {
+    const hashtags = text.match(/#[\wА-Яа-яЁё]+/g) ?? [];
+    const mappingEntries = Object.entries(HASHTAG_TO_DIRECTIONS);
+
+    for (const rawTag of hashtags) {
+      const canonical = mappingEntries.find(([key]) => key.toLocaleLowerCase('ru-RU') === rawTag.toLocaleLowerCase('ru-RU'));
+      const tag = canonical?.[0] ?? rawTag;
+
+      if (tag.toLocaleLowerCase('ru-RU') === '#хит') {
+        result.mainEvent = true;
+        continue;
       }
-      return;
+
+      const mapped = canonical?.[1];
+      if (mapped?.length) {
+        result.directionSlugs.push(...mapped);
+      } else if (tag.toLocaleLowerCase('ru-RU') !== '#абафи ша'.replace(' ', '').toLocaleLowerCase('ru-RU')) {
+        result.tags.push(rawTag.slice(1));
+      }
     }
 
-    // Format: "Когда: 8 июля, 11:00 (МСК)"
-    const single = text.match(/Когда:\s*(\d{1,2})\s+([а-яА-Я]+)(?:,\s*(\d{2}:\d{2})\s*\(МСК\))?/i);
-    if (single) {
-      const [, day, monthStr, time] = single;
+    result.directionSlugs = [...new Set(result.directionSlugs)];
+    result.tags = [...new Set(result.tags)];
+  }
+
+  private parseDate(text: string, postDate: Date | undefined, result: ParsedMaxPost) {
+    const multiDay = text.match(/(?:Когда|Дата):\s*(\d{1,2})[–\-—](\d{1,2})\s+([а-яА-ЯёЁ]+)(?:\s+(\d{4}))?(?:\s+года?)?/i);
+    if (multiDay) {
+      const [, d1, d2, monthStr, explicitYear] = multiDay;
       const month = this.parseMonthRu(monthStr);
       if (month !== null) {
-        const year = postDate?.getFullYear() ?? new Date().getFullYear();
-        result.startDate = new Date(year, month, +day);
-        if (time) result.startTime = time;
-      } else {
-        result.needsAttention = true;
-        result.attentionReasons.push('Не удалось распознать месяц');
+        const year = explicitYear ? Number(explicitYear) : this.inferYear(month, postDate);
+        result.startDate = this.safeDate(year, month, Number(d1));
+        result.endDate = this.safeDate(year, month, Number(d2));
       }
-      return;
     }
 
     if (!result.startDate) {
-      result.needsAttention = true;
-      result.attentionReasons.push('Дата не найдена');
+      const single = text.match(/(?:Когда|Дата):\s*(\d{1,2})\s+([а-яА-ЯёЁ]+)(?:\s+(\d{4}))?(?:\s+года?)?(?:,?\s*(\d{1,2}:\d{2})\s*(?:\(МСК\))?)?/i);
+      if (single) {
+        const [, day, monthStr, explicitYear, time] = single;
+        const month = this.parseMonthRu(monthStr);
+        if (month !== null) {
+          const year = explicitYear ? Number(explicitYear) : this.inferYear(month, postDate);
+          result.startDate = this.safeDate(year, month, Number(day));
+          if (time) result.startTime = this.normalizeTime(time);
+        }
+      }
+    }
+
+    if (!result.startDate) {
+      const numeric = text.match(/(?:Когда|Дата):\s*(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?(?:,?\s*(\d{1,2}:\d{2}))?/i);
+      if (numeric) {
+        const [, day, monthNumber, rawYear, time] = numeric;
+        const month = Number(monthNumber) - 1;
+        const year = rawYear
+          ? Number(rawYear.length === 2 ? `20${rawYear}` : rawYear)
+          : this.inferYear(month, postDate);
+        result.startDate = this.safeDate(year, month, Number(day));
+        if (time) result.startTime = this.normalizeTime(time);
+      }
+    }
+
+    if (!result.startTime) {
+      const separateTime = text.match(/(?:Время|Начало):\s*(\d{1,2}:\d{2})/i);
+      if (separateTime) result.startTime = this.normalizeTime(separateTime[1]);
     }
   }
 
   private parseFormatLocation(text: string, result: ParsedMaxPost) {
-    // "Формат: Онлайн"
-    if (/Формат:\s*Онлайн/i.test(text)) {
+    if (/Формат:\s*(?:Онлайн|Online)/i.test(text) || /Где:\s*(?:Онлайн|Online)/i.test(text)) {
       result.format = 'ONLINE';
       result.city = 'Онлайн';
       return;
     }
 
-    // "Формат: <Venue>, г. <City>, <Address>"
-    const venueMatch = text.match(/Формат:\s*(.+),\s*г\.\s*([^,]+),\s*(.+)/);
+    const venueMatch = text.match(/Формат:\s*(.+),\s*г\.\s*([^,\n]+),\s*([^\n]+)/i);
     if (venueMatch) {
       result.format = 'OFFLINE';
       result.venue = venueMatch[1].trim();
@@ -160,28 +170,40 @@ export class MaxParserService {
       return;
     }
 
-    // "Где: Россия, Санкт-Петербург"
-    const whereMatch = text.match(/Где:\s*Россия,\s*(.+)/i);
-    if (whereMatch) {
+    const whereRussia = text.match(/Где:\s*Россия,\s*([^,\n]+)(?:,\s*([^\n]+))?/i);
+    if (whereRussia) {
       result.format = 'OFFLINE';
-      result.city = whereMatch[1].trim();
+      result.city = whereRussia[1].trim();
+      result.address = whereRussia[2]?.trim() ?? null;
       return;
     }
 
-    // "Где: <city>" without Russia
-    const whereSimple = text.match(/Где:\s*(.+)/i);
+    const whereSimple = text.match(/Где:\s*([^\n]+)/i);
     if (whereSimple) {
-      result.format = 'OFFLINE';
-      result.city = whereSimple[1].trim();
+      const value = whereSimple[1].trim();
+      if (/онлайн|online/i.test(value)) {
+        result.format = 'ONLINE';
+        result.city = 'Онлайн';
+      } else {
+        result.format = 'OFFLINE';
+        result.city = value;
+      }
+      return;
+    }
+
+    // Explicit webinar wording is accepted as online only when no conflicting offline location exists.
+    if (/\bвебинар\b/i.test(text)) {
+      result.format = 'ONLINE';
+      result.city = 'Онлайн';
     }
   }
 
   private parsePrice(text: string, result: ParsedMaxPost) {
-    const priceMatch = text.match(/Стоимость:\s*(.+)/i);
+    const priceMatch = text.match(/Стоимость:\s*([^\n]+)/i);
     if (!priceMatch) return;
 
     const raw = priceMatch[1].trim();
-    if (/бесплатно/i.test(raw)) {
+    if (/бесплатно|0\s*(?:₽|руб)/i.test(raw)) {
       result.priceType = 'FREE';
       result.priceText = 'Бесплатно';
     } else {
@@ -191,66 +213,99 @@ export class MaxParserService {
   }
 
   private parseSpeaker(lines: string[], result: ParsedMaxPost) {
-    // Emoji mic or [микрофон]
     const speakerLine = lines.find(
-      (l) => l.startsWith('🎙') || /\[микрофон\]/i.test(l),
+      (line) => line.startsWith('🎙') || /\[микрофон\]/i.test(line) || /^Спикер:/i.test(line),
     );
     if (speakerLine) {
-      result.speaker = speakerLine.replace(/^🎙\s*/, '').replace(/\[микрофон\]\s*/i, '').trim();
+      result.speaker = speakerLine
+        .replace(/^🎙\s*/, '')
+        .replace(/\[микрофон\]\s*/i, '')
+        .replace(/^Спикер:\s*/i, '')
+        .trim();
     }
   }
 
   private parseEventUrl(text: string, result: ParsedMaxPost) {
-    // Look for markdown links like [здесь](url) or [тут](url)
-    const mdLink = text.match(/\[(здесь|тут|зарегистрироваться|подробнее|участвовать)\]\(([^)]+)\)/i);
-    if (mdLink) {
-      result.eventUrl = mdLink[2];
+    const markdownLink = text.match(/\[(здесь|тут|зарегистрироваться|регистрация|подробнее|участвовать)\]\((https?:\/\/[^)]+)\)/i);
+    if (markdownLink) {
+      result.eventUrl = markdownLink[2];
       return;
     }
 
-    // Plain URL after registration keywords
-    const plainUrl = text.match(
-      /(?:здесь|тут|зарегистрироваться|подробнее)[\s\S]*?(https?:\/\/[^\s\n]+)/i,
-    );
-    if (plainUrl) {
-      result.eventUrl = plainUrl[1];
+    const keywordUrl = text.match(/(?:здесь|тут|зарегистрироваться|регистрация|подробнее|участвовать)[\s\S]*?(https?:\/\/[^\s)\]}]+)/i);
+    if (keywordUrl) {
+      result.eventUrl = keywordUrl[1].replace(/[.,;!?]+$/, '');
+      return;
     }
+
+    const allUrls = text.match(/https?:\/\/[^\s)\]}]+/gi) ?? [];
+    const externalUrl = allUrls.find((url) => !/max\.ru\/(?:join|id)/i.test(url));
+    if (externalUrl) result.eventUrl = externalUrl.replace(/[.,;!?]+$/, '');
   }
 
   private extractDescription(lines: string[]): string | null {
-    // Skip title (line 0), skip lines with structured fields, skip hashtags
-    const structuredPrefixes = ['Когда:', 'Формат:', 'Где:', 'Стоимость:', '#'];
-    const descLines = lines.slice(1).filter(
-      (l) => !structuredPrefixes.some((p) => l.startsWith(p)) && !l.startsWith('🎙'),
-    );
-    const desc = descLines.join(' ').trim();
-    return desc || null;
+    const structuredPrefixes = ['Когда:', 'Дата:', 'Время:', 'Начало:', 'Формат:', 'Где:', 'Стоимость:', 'Спикер:', '#'];
+    const description = lines
+      .slice(1)
+      .filter((line) => !structuredPrefixes.some((prefix) => line.startsWith(prefix)) && !line.startsWith('🎙'))
+      .join(' ')
+      .trim();
+    return description || null;
   }
 
   private validate(result: ParsedMaxPost) {
-    if (!result.title) {
-      result.needsAttention = true;
-      result.attentionReasons.push('Заголовок не найден');
+    if (!result.title) this.addAttention(result, 'Заголовок не найден');
+    if (!result.startDate) this.addAttention(result, 'Дата не найдена');
+    if (!result.startTime) this.addAttention(result, 'Время не указано');
+    if (!result.eventUrl) this.addAttention(result, 'Ссылка на регистрацию не найдена');
+    if (!result.format) this.addAttention(result, 'Формат не определён');
+    if (!result.city) this.addAttention(result, 'Город или признак «Онлайн» не определён');
+    if (result.directionSlugs.length === 0) this.addAttention(result, 'Направление не определено по хэштегам');
+  }
+
+  private addAttention(result: ParsedMaxPost, reason: string) {
+    result.needsAttention = true;
+    if (!result.attentionReasons.includes(reason)) result.attentionReasons.push(reason);
+  }
+
+  private inferYear(month: number, postDate?: Date): number {
+    const reference = postDate ?? new Date();
+    let year = reference.getUTCFullYear();
+    const referenceMonth = reference.getUTCMonth();
+    // A December post announcing a January event belongs to the next year.
+    if (month < referenceMonth - 6) year += 1;
+    return year;
+  }
+
+  private safeDate(year: number, month: number, day: number): Date | null {
+    const date = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) {
+      this.logger.warn(`Invalid MAX event date: ${day}.${month + 1}.${year}`);
+      return null;
     }
-    if (!result.startDate) {
-      result.needsAttention = true;
-      result.attentionReasons.push('Дата не найдена');
-    }
-    if (!result.startTime && result.startDate) {
-      result.needsAttention = true;
-      result.attentionReasons.push('Время не указано');
-    }
-    if (!result.eventUrl) {
-      result.needsAttention = true;
-      result.attentionReasons.push('Ссылка на регистрацию не найдена');
-    }
+    return date;
+  }
+
+  private normalizeTime(value: string): string {
+    const [hours, minutes] = value.split(':').map(Number);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   }
 
   private parseMonthRu(monthStr: string): number | null {
     const months: Record<string, number> = {
-      января: 0, февраля: 1, марта: 2, апреля: 3, мая: 4, июня: 5,
-      июля: 6, августа: 7, сентября: 8, октября: 9, ноября: 10, декабря: 11,
+      января: 0,
+      февраля: 1,
+      марта: 2,
+      апреля: 3,
+      мая: 4,
+      июня: 5,
+      июля: 6,
+      августа: 7,
+      сентября: 8,
+      октября: 9,
+      ноября: 10,
+      декабря: 11,
     };
-    return months[monthStr.toLowerCase()] ?? null;
+    return months[monthStr.toLocaleLowerCase('ru-RU')] ?? null;
   }
 }
