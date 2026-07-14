@@ -41,7 +41,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
         setMarkers(data);
       }
     } catch {
-      // ignore
+      // The current month remains usable if marker loading fails.
     } finally {
       setLoading(false);
     }
@@ -52,102 +52,92 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   }, [year, month, loadMarkers]);
 
   const goToPrev = () => {
-    if (month === 0) { setYear((y) => y - 1); setMonth(11); }
-    else setMonth((m) => m - 1);
+    if (month === 0) {
+      setYear((value) => value - 1);
+      setMonth(11);
+    } else {
+      setMonth((value) => value - 1);
+    }
   };
 
   const goToNext = () => {
-    if (month === 11) { setYear((y) => y + 1); setMonth(0); }
-    else setMonth((m) => m + 1);
+    if (month === 11) {
+      setYear((value) => value + 1);
+      setMonth(0);
+    } else {
+      setMonth((value) => value + 1);
+    }
   };
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDow = getFirstDayOfWeek(year, month);
-  const markerMap = new Map(markers.map((m) => [m.date, m]));
-
+  const occupiedCells = firstDow + daysInMonth;
+  const totalCells = Math.ceil(occupiedCells / 7) * 7;
+  const trailingCells = totalCells - occupiedCells;
+  const markerMap = new Map(markers.map((marker) => [marker.date, marker]));
   const todayStr = toDateString(now.getFullYear(), now.getMonth(), now.getDate());
 
   return (
-    <div className="select-none flex flex-col h-full" style={{ gap: '29.002px' }}>
-      <CalendarHeader
-        year={year}
-        month={month}
-        onPrev={goToPrev}
-        onNext={goToNext}
-      />
+    <div className="pub-calendar select-none">
+      <CalendarHeader year={year} month={month} onPrev={goToPrev} onNext={goToNext} />
 
-      <div className="flex flex-col" style={{ gap: '9.355px' }}>
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7" role="row" aria-label="Дни недели">
-          {DAYS_RU.map((d, idx) => (
+      <div className="pub-calendar-table">
+        <div className="pub-calendar-weekdays" role="row" aria-label="Дни недели">
+          {DAYS_RU.map((day, index) => (
             <div
-              key={d}
-              className={cn(
-                'text-center font-semibold text-primary/40',
-                (idx === 5 || idx === 6) && 'text-primary/30',
-              )}
-              style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '19px' }}
+              key={day}
+              className={cn('pub-calendar-weekday', index >= 5 && 'pub-calendar-weekday--weekend')}
             >
-              {d}
+              {day}
             </div>
           ))}
         </div>
 
-        {/* Date grid — square cells, full-fill selected day */}
         <div
-          className={cn(
-            'grid grid-cols-7 border-t border-l border-primary/[0.06] transition-opacity',
-            loading && 'opacity-40',
-          )}
+          className={cn('pub-calendar-grid', loading && 'pub-calendar-grid--loading')}
           role="grid"
           aria-label="Календарь мероприятий"
         >
-          {/* Previous-month filler cells */}
-          {Array.from({ length: firstDow }).map((_, i) => {
-            const prevMonth = month === 0 ? 11 : month - 1;
-            const prevYear = month === 0 ? year - 1 : year;
-            const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
-            const prevDay = daysInPrevMonth - firstDow + i + 1;
-            const isWeekendPrev = i === 5 || i === 6;
+          {Array.from({ length: firstDow }).map((_, index) => {
+            const previousMonth = month === 0 ? 11 : month - 1;
+            const previousYear = month === 0 ? year - 1 : year;
+            const previousMonthDays = getDaysInMonth(previousYear, previousMonth);
+            const previousDay = previousMonthDays - firstDow + index + 1;
+            const isWeekend = index >= 5;
+
             return (
               <div
-                key={`prev-${i}`}
+                key={`previous-${index}`}
                 role="gridcell"
                 aria-disabled="true"
                 className={cn(
-                  'relative aspect-square flex items-center justify-center border-r border-b border-primary/[0.06]',
-                  isWeekendPrev && 'bg-mint/[0.10]',
+                  'pub-calendar-cell pub-calendar-cell--outside',
+                  isWeekend && 'pub-calendar-cell--weekend',
                 )}
               >
-                <span
-                  className="font-semibold text-primary/25"
-                  style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '23px' }}
-                >
-                  {prevDay}
-                </span>
+                {previousDay}
               </div>
             );
           })}
 
-          {/* Current-month cells */}
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const day = i + 1;
+          {Array.from({ length: daysInMonth }).map((_, index) => {
+            const day = index + 1;
             const dateStr = toDateString(year, month, day);
             const marker = markerMap.get(dateStr);
             const isSelected = selectedDate === dateStr;
             const isToday = dateStr === todayStr;
-            const hasEvents = !!marker;
-            const colIndex = (firstDow + i) % 7;
-            const isWeekend = colIndex === 5 || colIndex === 6;
+            const hasEvents = Boolean(marker);
+            const columnIndex = (firstDow + index) % 7;
+            const isWeekend = columnIndex >= 5;
 
             return (
               <div
                 key={day}
                 role="gridcell"
                 className={cn(
-                  'relative aspect-square flex items-center justify-center border-r border-b border-primary/[0.06]',
-                  isWeekend && !isSelected && 'bg-mint/[0.10]',
-                  isSelected && 'bg-selected-day',
+                  'pub-calendar-cell',
+                  isWeekend && !isSelected && 'pub-calendar-cell--weekend',
+                  isSelected && 'pub-calendar-cell--selected',
                 )}
               >
                 <button
@@ -157,33 +147,24 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                   onClick={() => onSelectDate(isSelected ? null : dateStr)}
                   disabled={!hasEvents && !isSelected}
                   className={cn(
-                    'absolute inset-0 flex items-center justify-center font-semibold transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset',
-                    isSelected
-                      ? 'text-white cursor-pointer'
-                      : isToday
-                      ? 'text-primary bg-primary/10 rounded-lg m-1'
-                      : hasEvents
-                      ? 'text-primary hover:bg-date-hover cursor-pointer'
-                      : 'text-primary cursor-default',
+                    'pub-calendar-day',
+                    isSelected && 'pub-calendar-day--selected',
+                    isToday && !isSelected && 'pub-calendar-day--today',
+                    hasEvents && !isSelected && 'pub-calendar-day--event',
                   )}
-                  style={{ fontFamily: 'var(--font-montserrat), sans-serif', fontSize: '23px' }}
                 >
                   {day}
-                  {/* Corner triangle event marker */}
                   {hasEvents && !isSelected && (
                     <span
-                      className="absolute top-0 right-0 w-0 h-0"
+                      className="pub-calendar-marker"
                       aria-hidden="true"
                       style={{
-                        borderTop: `10px solid ${
+                        borderTopColor:
                           marker!.live > 0
                             ? 'var(--color-live-status)'
                             : marker!.planned > 0
-                            ? 'var(--color-green-marker)'
-                            : 'var(--color-completed-marker)'
-                        }`,
-                        borderLeft: '10px solid transparent',
+                              ? 'var(--color-green-marker)'
+                              : 'var(--color-completed-marker)',
                       }}
                     />
                   )}
@@ -191,22 +172,30 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
               </div>
             );
           })}
+
+          {Array.from({ length: trailingCells }).map((_, index) => {
+            const columnIndex = (occupiedCells + index) % 7;
+            return (
+              <div
+                key={`next-${index}`}
+                role="gridcell"
+                aria-disabled="true"
+                className={cn(
+                  'pub-calendar-cell pub-calendar-cell--outside',
+                  columnIndex >= 5 && 'pub-calendar-cell--weekend',
+                )}
+              >
+                {index + 1}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-dropdown-border flex flex-wrap gap-3 text-xs text-primary/60">
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-green-marker inline-block" aria-hidden="true" />
-          Запланировано
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-live-status inline-block" aria-hidden="true" />
-          Идёт сейчас
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-completed-marker inline-block" aria-hidden="true" />
-          Завершено
-        </span>
+      <div className="pub-calendar-legend">
+        <span><i className="pub-calendar-legend-dot bg-green-marker" />Запланировано</span>
+        <span><i className="pub-calendar-legend-dot bg-live-status" />Идёт сейчас</span>
+        <span><i className="pub-calendar-legend-dot bg-completed-marker" />Завершено</span>
       </div>
     </div>
   );
