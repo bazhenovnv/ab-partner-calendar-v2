@@ -13,9 +13,8 @@ export function HeroSection() {
             Онлайн и офлайн события для профессионального роста,
             обмена опытом и актуальной практики
           </p>
-          {/* Button: text "Важные события →" {R-21}, bg mint #7CD8B3 {R-22}, color #0D2344 {R-23}, no icon {R-24} */}
-          <a href="#events" className="pub-hero-btn">
-            Важные события →
+          <a href="#main-events" className="pub-hero-btn">
+            Главные события →
           </a>
         </div>
         <div className="pub-hero-visual" aria-hidden="true">
