@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 
 const BLUR_PLACEHOLDER =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMEQyMzQ0Ii8+PC9zdmc+';
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMEQYMzQ0Ii8+PC9zdmc+';
 
 function circularOffset(idx: number, active: number, total: number): number {
   const d = ((idx - active + total) % total);
@@ -46,10 +46,22 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const [active, setActive] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
   const total = events.length;
+  const indicatorCount = Math.min(3, total);
+  const activeIndicator = total > 0
+    ? Math.min(indicatorCount - 1, Math.floor((active * indicatorCount) / total))
+    : 0;
 
   const goTo = useCallback(
     (i: number) => setActive(((i % total) + total) % total),
     [total],
+  );
+
+  const goToIndicator = useCallback(
+    (indicator: number) => {
+      const eventIndex = Math.floor((indicator * total) / indicatorCount);
+      goTo(eventIndex);
+    },
+    [goTo, indicatorCount, total],
   );
 
   useEffect(() => {
@@ -129,14 +141,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
         {total > 1 && (
           <nav className="pub-carousel-nav" aria-label="Навигация по главным событиям">
             <button type="button" onClick={() => goTo(active - 1)} className="pub-carousel-nav-btn" aria-label="Предыдущее событие">‹</button>
-            {events.map((_, i) => (
+            {Array.from({ length: indicatorCount }, (_, i) => (
               <button
                 key={i}
                 type="button"
-                onClick={() => goTo(i)}
-                aria-label={`Событие ${i + 1}`}
-                aria-current={i === active ? 'true' : undefined}
-                className={cn('pub-carousel-dot', i === active && 'pub-carousel-dot--active')}
+                onClick={() => goToIndicator(i)}
+                aria-label={`Группа событий ${i + 1}`}
+                aria-current={i === activeIndicator ? 'true' : undefined}
+                className={cn('pub-carousel-dot', i === activeIndicator && 'pub-carousel-dot--active')}
               />
             ))}
             <button type="button" onClick={() => goTo(active + 1)} className="pub-carousel-nav-btn" aria-label="Следующее событие">›</button>
