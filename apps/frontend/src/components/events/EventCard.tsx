@@ -13,92 +13,56 @@ interface EventCardProps {
 }
 
 const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  LIVE: { label: 'Идёт сейчас', className: 'bg-live-status text-primary' },
-  COMPLETED: { label: 'Завершено', className: 'bg-completed-status text-white' },
-  PLANNED: { label: 'Запланировано', className: 'bg-green-marker/90 text-white' },
+  LIVE: { label: 'Идёт сейчас', className: 'pub-event-card-status--live' },
+  COMPLETED: { label: 'Завершено', className: 'pub-event-card-status--completed' },
+  PLANNED: { label: 'Запланировано', className: 'pub-event-card-status--planned' },
 };
 
 export function EventCard({ event, className }: EventCardProps) {
   const image = event.images?.[0];
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
   const dateParts = formatEventDateParts(event.startDate);
-  const status = STATUS_LABEL[event.autoStatus];
+  const status = STATUS_LABEL[event.autoStatus] ?? null;
 
   return (
     <Link
       href={`/events/${event.id}`}
-      className={cn(
-        'group block rounded-2xl overflow-hidden bg-white shadow-base',
-        'border border-dropdown-border hover:border-primary/20',
-        'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2',
-        className,
-      )}
+      className={cn('pub-event-card group', className)}
       aria-label={`Перейти к мероприятию: ${event.title}`}
     >
-      {/* Image area */}
-      <div className="relative aspect-[16/9] bg-primary/5 overflow-hidden">
+      <div className="pub-event-card-media">
         {imgUrl ? (
           <Image
             src={imgUrl}
             alt={event.title}
             fill
             loading="lazy"
-            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 767px) 100vw, (max-width: 1439px) 50vw, 428px"
+            className="pub-event-card-image"
             placeholder="blur"
             blurDataURL={CARD_BLUR_PLACEHOLDER}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-primary/20 text-4xl font-bold">АБ</span>
+          <div className="pub-event-card-placeholder" aria-hidden="true">
+            <span>АБ</span>
           </div>
         )}
 
-        {/* Status badge — top left */}
-        {status.label && (
-          <span
-            className={cn(
-              'absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full',
-              status.className,
-            )}
-            style={{ fontFamily: 'var(--font-gilroy), sans-serif' }}
-          >
+        {status?.label && (
+          <span className={cn('pub-event-card-status', status.className)}>
             {status.label}
           </span>
         )}
-
-        {/* Date badge — bottom left overlay */}
-        <div className="absolute bottom-3 left-3 bg-white rounded-xl shadow-sm flex flex-col items-center justify-center w-[60px] py-2 leading-none">
-          <span
-            className="font-bold text-primary text-2xl leading-none"
-            style={{ fontFamily: 'var(--font-montserrat), sans-serif' }}
-          >
-            {dateParts.day}
-          </span>
-          <span
-            className="font-bold text-primary text-[11px] leading-none mt-0.5 lowercase"
-            style={{ fontFamily: 'var(--font-montserrat), sans-serif' }}
-          >
-            {dateParts.month}
-          </span>
-        </div>
       </div>
 
-      {/* Card body — title + CTA only */}
-      <div className="p-4 tablet:p-5 flex flex-col gap-3">
-        <h3
-          className="font-bold text-primary text-sm tablet:text-base leading-snug line-clamp-3 uppercase group-hover:text-selected-day transition-colors"
-          style={{ fontFamily: 'var(--font-montserrat), sans-serif' }}
-        >
-          {event.title}
-        </h3>
+      <div className="pub-event-card-date" aria-label={`${dateParts.day} ${dateParts.month}`}>
+        <span className="pub-event-card-date-day">{dateParts.day}</span>
+        <span className="pub-event-card-date-month">{dateParts.month}</span>
+      </div>
 
-        <div className="mt-auto flex justify-end">
-          <span className="pub-event-card-cta">
-            Подробнее →
-          </span>
-        </div>
+      <div className="pub-event-card-body">
+        <h3 className="pub-event-card-title">{event.title}</h3>
+        <span className="pub-event-card-cta">Подробнее →</span>
       </div>
     </Link>
   );
