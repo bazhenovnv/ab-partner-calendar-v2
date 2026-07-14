@@ -21,13 +21,18 @@ const STATUS_LABEL: Record<string, { label: string; className: string }> = {
 export function EventCard({ event, className }: EventCardProps) {
   const image = event.images?.[0];
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
+  const isApprovedComposite = Boolean(imgUrl?.includes('/events/event-card-'));
   const dateParts = formatEventDateParts(event.startDate);
   const status = STATUS_LABEL[event.autoStatus] ?? null;
 
   return (
     <Link
       href={`/events/${event.id}`}
-      className={cn('pub-event-card group', className)}
+      className={cn(
+        'pub-event-card group',
+        isApprovedComposite && 'pub-event-card--composite',
+        className,
+      )}
       aria-label={`Перейти к мероприятию: ${event.title}`}
     >
       <div className="pub-event-card-media">
@@ -48,22 +53,26 @@ export function EventCard({ event, className }: EventCardProps) {
           </div>
         )}
 
-        {status?.label && (
+        {!isApprovedComposite && status?.label && (
           <span className={cn('pub-event-card-status', status.className)}>
             {status.label}
           </span>
         )}
       </div>
 
-      <div className="pub-event-card-date" aria-label={`${dateParts.day} ${dateParts.month}`}>
-        <span className="pub-event-card-date-day">{dateParts.day}</span>
-        <span className="pub-event-card-date-month">{dateParts.month}</span>
-      </div>
+      {!isApprovedComposite && (
+        <>
+          <div className="pub-event-card-date" aria-label={`${dateParts.day} ${dateParts.month}`}>
+            <span className="pub-event-card-date-day">{dateParts.day}</span>
+            <span className="pub-event-card-date-month">{dateParts.month}</span>
+          </div>
 
-      <div className="pub-event-card-body">
-        <h3 className="pub-event-card-title">{event.title}</h3>
-        <span className="pub-event-card-cta">Подробнее →</span>
-      </div>
+          <div className="pub-event-card-body">
+            <h3 className="pub-event-card-title">{event.title}</h3>
+            <span className="pub-event-card-cta">Подробнее →</span>
+          </div>
+        </>
+      )}
     </Link>
   );
 }
