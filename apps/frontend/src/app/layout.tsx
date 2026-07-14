@@ -10,6 +10,7 @@ import './stage64-figma-lock.css';
 import './stage65-centering-carousel-footer.css';
 import './stage66-approved-quote-frame.css';
 import './stage67-final-spacing-footer.css';
+import './stage68-header-quotes-footer.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
