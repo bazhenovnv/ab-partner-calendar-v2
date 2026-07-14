@@ -1,0 +1,173 @@
+/* Stage 62 — user-approved desktop scale and final artwork placement.
+   Code-only visual changes. No generated assets and no content changes. */
+
+/* At desktop widths the entire approved 1920 layout is displayed at 80%.
+   width:125% compensates zoom so the grey canvas still fills the viewport and
+   every max-width panel remains centred after visual scaling. */
+@media (min-width: 1440px) {
+  .pub-site-scale {
+    width: 125%;
+    min-height: 125vh;
+    zoom: 0.8;
+  }
+}
+
+/* Main events and quotes remain in the approved shared white panel, while the
+   quote itself has its own framed window and the people anchor to the lower
+   outside corners of that quote area. */
+.pub-main-quotes-inner {
+  position: relative;
+  overflow: hidden;
+}
+
+.quotes-section {
+  position: relative;
+  min-height: 390px;
+  padding: 18px 0 0;
+  overflow: hidden;
+}
+
+.quotes-layout {
+  position: relative;
+  display: block;
+  min-height: 372px;
+  width: 100%;
+}
+
+.quotes-card {
+  position: relative;
+  z-index: 2;
+  width: min(64%, 900px);
+  min-height: 218px;
+  margin: 54px auto 42px;
+}
+
+.quotes-person {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.quotes-person-left {
+  left: 0;
+  justify-content: flex-start;
+}
+
+.quotes-person-right {
+  right: 0;
+  justify-content: flex-end;
+}
+
+.quotes-person-img--left {
+  width: 226px;
+  height: auto;
+  object-fit: contain;
+  object-position: left bottom;
+}
+
+.quotes-person-img--right {
+  width: 215px;
+  height: auto;
+  object-fit: contain;
+  object-position: right bottom;
+}
+
+/* Footer artwork: larger composition, seated lower and farther right as in
+   the approved sketch. */
+.pub-footer-top {
+  grid-template-columns: minmax(330px, 1fr) 190px 240px minmax(360px, 460px);
+  gap: 2rem;
+  align-items: end;
+}
+
+.pub-footer-stationery {
+  min-height: 300px;
+  align-self: end;
+  align-items: flex-end;
+  justify-content: flex-end;
+  overflow: visible;
+}
+
+.pub-footer-stationery-img {
+  width: auto;
+  height: 350px;
+  max-width: none;
+  object-fit: contain;
+  object-position: right bottom;
+  transform: translate(18px, 18px);
+}
+
+@media (max-width: 1439px) {
+  .quotes-section {
+    min-height: 330px;
+  }
+
+  .quotes-layout {
+    min-height: 312px;
+  }
+
+  .quotes-card {
+    width: min(68%, 820px);
+    margin-top: 40px;
+  }
+
+  .quotes-person-img--left,
+  .quotes-person-img--right {
+    width: 185px;
+  }
+
+  .pub-footer-top {
+    grid-template-columns: 1fr 160px 200px minmax(280px, 360px);
+  }
+
+  .pub-footer-stationery-img {
+    height: 300px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .quotes-section {
+    min-height: 300px;
+  }
+
+  .quotes-layout {
+    min-height: 282px;
+  }
+
+  .quotes-card {
+    width: calc(100% - 190px);
+    min-height: 190px;
+    margin-top: 36px;
+  }
+
+  .quotes-person-img--left,
+  .quotes-person-img--right {
+    width: 145px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-site-scale {
+    width: 100%;
+    min-height: 100vh;
+    zoom: 1;
+  }
+
+  .quotes-section,
+  .quotes-layout {
+    min-height: 0;
+  }
+
+  .quotes-card {
+    width: 100%;
+    min-height: 180px;
+    margin: 20px 0;
+  }
+
+  .quotes-person {
+    display: none;
+  }
+}
