@@ -7,14 +7,14 @@ import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 
 const BLUR_PLACEHOLDER =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0Ii8+PC9zdmc+';
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMEQyMzQ0Ii8+PC9zdmc+';
 
 function circularOffset(idx: number, active: number, total: number): number {
   const d = ((idx - active + total) % total);
   return d > Math.floor(total / 2) ? d - total : d;
 }
 
-/** Approved Figma fan: wider cards, shallower rotation and balanced overlap. */
+/** Approved Figma fan: portrait cards, shallow perspective and balanced overlap. */
 function getCardStyle(offset: number): React.CSSProperties {
   if (offset === 0) {
     return { transform: 'translateX(0) scale(1) rotateY(0deg)', zIndex: 5, opacity: 1 };
@@ -23,19 +23,19 @@ function getCardStyle(offset: number): React.CSSProperties {
   const dir = offset > 0 ? 1 : -1;
   if (abs === 1) {
     return {
-      transform: `translateX(${dir * 255}px) scale(0.88) rotateY(${-dir * 12}deg)`,
+      transform: `translateX(${dir * 205}px) scale(0.92) rotateY(${-dir * 8}deg)`,
       zIndex: 4,
       opacity: 0.98,
     };
   }
   if (abs === 2) {
     return {
-      transform: `translateX(${dir * 470}px) scale(0.72) rotateY(${-dir * 20}deg)`,
+      transform: `translateX(${dir * 380}px) scale(0.82) rotateY(${-dir * 14}deg)`,
       zIndex: 3,
-      opacity: 0.92,
+      opacity: 0.94,
     };
   }
-  return { transform: `translateX(${dir * 650}px) scale(0.54) rotateY(${-dir * 28}deg)`, zIndex: 1, opacity: 0 };
+  return { transform: `translateX(${dir * 540}px) scale(0.66) rotateY(${-dir * 20}deg)`, zIndex: 1, opacity: 0 };
 }
 
 interface MainEventsBannerProps {
@@ -106,7 +106,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                       alt={event.title}
                       fill
                       loading="lazy"
-                      sizes="320px"
+                      sizes="268px"
                       className="object-cover"
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
