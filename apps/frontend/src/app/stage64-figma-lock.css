@@ -1,0 +1,177 @@
+/* Stage 64 — final desktop Figma lock.
+   Corrects the 80% zoom centering, quote artwork geometry, carousel card form,
+   footer artwork and legal text. Code-only changes. */
+
+/* The 125% layout compensation must be shifted left by half of the excess
+   width. Without this, every centered max-width panel is visually displaced. */
+@media (min-width: 1440px) {
+  .pub-site-scale {
+    width: 125vw;
+    margin-left: -12.5vw;
+    margin-right: -12.5vw;
+    transform-origin: top center;
+  }
+}
+
+/* Main carousel — wider and slightly shorter cards from the approved sketch. */
+.pub-carousel-gallery {
+  height: 420px;
+  overflow: visible;
+}
+
+.pub-carousel-card {
+  width: 320px;
+  height: 400px;
+  margin-left: -160px;
+  margin-top: -200px;
+  border-radius: 14px;
+}
+
+.pub-carousel-card-link {
+  border-radius: 14px;
+}
+
+/* Quotes — compact central frame with large artwork anchored to panel corners. */
+.quotes-section {
+  min-height: 350px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.quotes-layout {
+  min-height: 350px;
+  width: 100%;
+}
+
+.quotes-card {
+  width: min(48%, 720px);
+  min-height: 168px;
+  margin: 58px auto 0;
+  padding: 24px 34px 20px;
+  border-radius: 18px;
+}
+
+.quotes-header {
+  margin-bottom: 4px;
+}
+
+.quotes-eyebrow {
+  font-size: 11px;
+}
+
+.quotes-mark {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.quotes-text {
+  font-size: 16px;
+  line-height: 1.45;
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+.quotes-author {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.quotes-person-left,
+.quotes-person-right {
+  bottom: 0;
+}
+
+.quotes-person-left {
+  left: 0;
+}
+
+.quotes-person-right {
+  right: 0;
+}
+
+.quotes-person-img--left {
+  width: 285px;
+  max-width: 285px;
+}
+
+.quotes-person-img--right {
+  width: 270px;
+  max-width: 270px;
+}
+
+/* Footer geometry and legal visibility. */
+.pub-footer-inner {
+  padding-top: 54px;
+  padding-bottom: 28px;
+}
+
+.pub-footer-top {
+  grid-template-columns: minmax(330px, 1fr) 190px 245px minmax(390px, 470px);
+  align-items: end;
+  min-height: 330px;
+}
+
+.pub-footer-stationery {
+  transform: translateY(78px);
+}
+
+.pub-footer-stationery-img {
+  height: 390px;
+  transform: translate(26px, 22px);
+}
+
+.pub-footer-divider {
+  margin-top: 0;
+}
+
+.pub-footer-disclaimer {
+  margin: 18px 0 0;
+  max-width: 1320px;
+  font-family: var(--font-gilroy), sans-serif;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(13, 35, 68, 0.52);
+}
+
+.pub-footer-operator {
+  margin-top: 7px;
+  color: rgba(13, 35, 68, 0.42);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1439px) {
+  .pub-carousel-card {
+    width: 280px;
+    height: 360px;
+    margin-left: -140px;
+    margin-top: -180px;
+  }
+
+  .quotes-card {
+    width: min(52%, 680px);
+  }
+
+  .quotes-person-img--left {
+    width: 230px;
+    max-width: 230px;
+  }
+
+  .quotes-person-img--right {
+    width: 220px;
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-site-scale {
+    width: 100%;
+    margin: 0;
+  }
+
+  .quotes-card {
+    width: 100%;
+    min-height: 170px;
+    margin: 18px 0;
+  }
+}
