@@ -1,0 +1,197 @@
+/* Stage 67 — final spacing and typography lock from the approved homepage sketch. */
+
+/* Main events: preserve the approved vertical rhythm inside the shared panel. */
+.pub-main-events-section {
+  padding: 25px 54px 0;
+}
+
+.pub-main-events-title {
+  margin-bottom: 18px;
+}
+
+.pub-carousel-gallery {
+  height: 395px;
+}
+
+.pub-carousel-nav {
+  margin-top: 12px;
+  gap: 10px;
+}
+
+/* Exactly three circular indicators. Active state changes colour only. */
+.pub-carousel-dot,
+.pub-carousel-dot--active {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  border-radius: 50%;
+  padding: 0;
+  transition: background-color 0.2s ease;
+}
+
+.pub-carousel-dot--active {
+  background: #7cd8b3;
+}
+
+/* Quote block: move the supplied artwork closer to the carousel and align the
+   text to the visual centre of the open frame, not the PNG bounding box. */
+.quotes-section {
+  min-height: 390px;
+  margin-top: 4px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.quotes-layout {
+  min-height: 390px;
+}
+
+.quotes-card--approved-frame {
+  width: min(58%, 744px);
+  margin-top: 14px;
+}
+
+.quotes-card--approved-frame .quotes-body {
+  inset: 42px 102px 30px 62px;
+}
+
+.quotes-card--approved-frame .quotes-text {
+  max-width: 520px;
+  font-size: 15px;
+  line-height: 1.42;
+  text-align: center;
+}
+
+.quotes-card--approved-frame .quotes-author {
+  text-align: center;
+}
+
+/* The figures scale from their bottom corners so their approved anchoring is
+   retained while increasing their visual size. */
+.quotes-person-left,
+.quotes-person-right {
+  bottom: 0;
+}
+
+.quotes-person-left {
+  left: 0;
+  transform-origin: left bottom;
+}
+
+.quotes-person-right {
+  right: 0;
+  transform-origin: right bottom;
+}
+
+@media (min-width: 1440px) {
+  .quotes-person-img--left {
+    width: 365px;
+    max-width: 365px;
+  }
+
+  .quotes-person-img--right {
+    width: 350px;
+    max-width: 350px;
+  }
+}
+
+/* Footer content order and emphasis from the approved sketch. */
+.pub-footer-inner {
+  padding-top: 38px;
+}
+
+.pub-footer-top {
+  grid-template-columns: minmax(360px, 1.15fr) 220px 310px minmax(390px, 470px);
+  gap: 38px;
+  align-items: center;
+  min-height: 280px;
+}
+
+.pub-footer-brand,
+.pub-footer-col {
+  align-self: center;
+}
+
+.pub-footer-desc {
+  max-width: 285px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #0d2344;
+}
+
+.pub-footer-col-title {
+  margin-bottom: 16px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #0d2344;
+}
+
+.pub-footer-links {
+  gap: 12px;
+}
+
+.pub-footer-link {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.pub-footer-link--strong {
+  font-weight: 700;
+  color: #0d2344;
+}
+
+.pub-footer-divider {
+  margin-top: 6px;
+}
+
+.pub-footer-disclaimer {
+  max-width: 1320px;
+  font-size: 11px;
+  line-height: 1.38;
+}
+
+@media (max-width: 1439px) {
+  .quotes-person-img--left {
+    width: 275px;
+    max-width: 275px;
+  }
+
+  .quotes-person-img--right {
+    width: 265px;
+    max-width: 265px;
+  }
+
+  .pub-footer-top {
+    grid-template-columns: 1fr 180px 235px minmax(290px, 350px);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-main-events-section {
+    padding: 24px 16px 0;
+  }
+
+  .pub-carousel-gallery {
+    height: 320px;
+  }
+
+  .quotes-section,
+  .quotes-layout {
+    min-height: auto;
+  }
+
+  .quotes-card--approved-frame {
+    margin-top: 18px;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    inset: 34px 52px 24px;
+  }
+
+  .pub-footer-top {
+    grid-template-columns: 1fr;
+  }
+}
