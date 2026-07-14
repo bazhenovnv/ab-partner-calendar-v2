@@ -4,6 +4,7 @@ import { Montserrat } from 'next/font/google';
 import './globals.css';
 import './stage60-visual.css';
 import './stage61-visual.css';
+import './stage62-scale-quotes-footer.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
