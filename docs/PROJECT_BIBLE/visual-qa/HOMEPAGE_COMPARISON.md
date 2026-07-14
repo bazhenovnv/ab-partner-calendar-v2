@@ -62,3 +62,55 @@ At 1920px viewport:
 - No `zoom` CSS property found
 - Content panels use `max-width: 1496px` centered
 - Full page width: 1920px ✅
+
+---
+
+## Stage 58 / 58.2 / 58.3 update — 2026-07-14
+
+### Fixes applied (commit `e8e153d`)
+
+| Fix | Status |
+|---|---|
+| Event card grid: `wide:grid-cols-3` → `desktop:grid-cols-3` (activates at ≥1440px) | ✅ |
+| Hero top padding 52px → hero panel at y=132 matching Figma | ✅ |
+| Hero bottom padding 25px → gap hero→events = 25px | ✅ |
+| Events section bottom padding 25px → gap events→carousel = 25px | ✅ |
+| `html, body { background-color: #f1f1f1 }` explicit | ✅ |
+
+### Canonical scale verification (Stage 58.2)
+
+Figma frame `5913:4745` actual width: **1920px** (design space, confirmed via Figma MCP `get_metadata`).
+
+Figma prototype viewer uses `scaling=min-zoom` — displays the 1920px frame at ~66–75% on a 1280–1440px laptop screen. This viewer zoom is **not a CSS reference**.
+
+Playwright-measured CSS values at 1920px viewport vs Figma node dimensions:
+
+| Element | Figma width | CSS width | Δ |
+|---|---:|---:|---:|
+| Events outer | 1497 | 1497 | 0 |
+| Filters | 588 | 588 | 0 |
+| Calendar | 760.866 | 760.9 | +0.034 |
+| Hero panel | ~1496 | 1496 | 0 |
+| Carousel+Quotes | 1496 | 1496 | 0 |
+| Footer | 1496 | 1496 | 0 |
+
+**Canonical desktop scale is LOCKED. Do not reduce panel widths.**
+
+### Background audit (Stage 58.3)
+
+| Element | Required | Computed | OK |
+|---|---|---|---|
+| `html` | `#F1F1F1` | `rgb(241,241,241)` | ✅ |
+| `body` | `#F1F1F1` | `rgb(241,241,241)` | ✅ |
+| `PublicShell` root | `#F1F1F1` | `rgb(241,241,241)` | ✅ |
+| `main` | transparent | `rgba(0,0,0,0)` | ✅ |
+| `.pub-hero` | `#F1F1F1` | `rgb(241,241,241)` | ✅ |
+| `.pub-hero-panel` | `#FFFFFF` | `rgb(255,255,255)` | ✅ |
+| `.pub-events-section` | transparent | `rgba(0,0,0,0)` | ✅ |
+| `.pub-events-outer` | `#FFFFFF` | `rgb(255,255,255)` | ✅ |
+| `.pub-main-quotes-wrapper` | transparent | `rgba(0,0,0,0)` | ✅ |
+| `.pub-main-quotes-inner` | `#FFFFFF` | `rgb(255,255,255)` | ✅ |
+| `header` | `#FFFFFF` | `rgb(255,255,255)` | ✅ |
+| `footer` | `#FFFFFF` | `rgb(255,255,255)` | ✅ |
+
+No conflicts found. No CSS changes were required for background architecture.

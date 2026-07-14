@@ -21,5 +21,8 @@
 | Main page background | Figma viewer shows black side areas around the prototype | Approved website canvas is light grey `#F1F1F1` with white panels | raw design frame + `02_DESIGN_SYSTEM.md` + `09_PAGE_CANVAS_AND_SCALE.md` | Do not add black side bars; black areas are Figma viewer chrome |
 | Historical visual QA | `HOMEPAGE_COMPARISON.md` contains Stage 52 statuses that later changed | Current branch/staging may differ | current code + current staging + canonical specs | Treat Stage 52 comparison as historical; do not use old status rows as current truth |
 
+| Canonical desktop scale | Some agents/reports attempted to shrink widths after comparing to Figma prototype displayed with `scaling=min-zoom` | Stage 58.2 Playwright audit confirms all panel widths match actual Figma node dimensions to ≤1px | raw Figma node geometry (MCP) + `09_PAGE_CANVAS_AND_SCALE.md` | Scale is LOCKED. Do not reduce `max-width` values. Figma editor zoom is not a CSS target. |
+| Global background | Some older CSS drafts applied `background: #ffffff` to section wrapper elements | Required: `html`, `body`, `PublicShell` root = `#F1F1F1`; section wrappers = transparent; content panels = `#FFFFFF` | Stage 58.3 background audit + `09_PAGE_CANVAS_AND_SCALE.md` | VERIFIED. All backgrounds correct as of Stage 58.3. Do not add full-width white wrappers between sections. |
+
 ## Status
 This matrix records known conflicts confirmed during governance reset. A full repository inventory may add more entries. No conflict should be resolved silently; update this table and the canonical document together.
