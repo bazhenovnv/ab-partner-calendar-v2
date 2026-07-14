@@ -61,37 +61,17 @@ export function SiteFooter() {
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Наши проекты</p>
             <ul className="pub-footer-links">
-              <li>
-                <a href={PARTNER_URL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
-                  АБ Партнёр
-                </a>
-              </li>
-              <li>
-                <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
-                  Telegram-канал
-                </a>
-              </li>
-              <li>
-                <a href={MAX_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
-                  MAX-канал
-                </a>
-              </li>
+              <li><a href={PARTNER_URL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">АБ Партнёр</a></li>
+              <li><a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">Telegram-канал</a></li>
+              <li><a href={MAX_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">MAX-канал</a></li>
             </ul>
           </div>
 
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Контакты</p>
             <ul className="pub-footer-links">
-              <li>
-                <a href="tel:+79298386482" className="pub-footer-link">
-                  +7 (929) 838 64 82
-                </a>
-              </li>
-              <li>
-                <span className="pub-footer-link" style={{ cursor: 'default' }}>
-                  Пн–Пт, 9:00–18:00 (МСК)
-                </span>
-              </li>
+              <li><a href="tel:+79298386482" className="pub-footer-link">+7 (929) 838 64 82</a></li>
+              <li><span className="pub-footer-link" style={{ cursor: 'default' }}>Пн–Пт, 9:00–18:00 (МСК)</span></li>
               <li className="relative">
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
@@ -111,16 +91,8 @@ export function SiteFooter() {
                   </div>
                 )}
               </li>
-              <li>
-                <span className="pub-footer-link" style={{ cursor: 'default' }}>
-                  Россия, г. Краснодар
-                </span>
-              </li>
-              <li>
-                <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
-                  Telegram
-                </a>
-              </li>
+              <li><span className="pub-footer-link" style={{ cursor: 'default' }}>Россия, г. Краснодар</span></li>
+              <li><a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">Telegram</a></li>
             </ul>
           </div>
 
@@ -146,10 +118,15 @@ export function SiteFooter() {
               </Link>
             ))}
           </nav>
-          <p className="pub-footer-copy">
-            © {new Date().getFullYear()} АБ Афиша Бухгалтера
-          </p>
+          <p className="pub-footer-copy">© {new Date().getFullYear()} АБ Афиша Бухгалтера</p>
         </div>
+
+        <p className="pub-footer-disclaimer">
+          © 2022–{new Date().getFullYear()}. Официальный сайт интернет-площадки «АБ Афиша Бухгалтера» в России.
+          Материалы сайта являются объектами авторского права. Копирование, распространение, переработка и иное
+          использование материалов без письменного разрешения правообладателя не допускаются. Нарушение исключительных
+          прав преследуется в соответствии с законодательством Российской Федерации.
+        </p>
         <p className="pub-footer-operator">
           ООО «АБ ГРУПП» · ОГРН&nbsp;1212300074766 · ИНН&nbsp;2308283450 ·
           350049, Краснодарский край, г.&nbsp;Краснодар, ул.&nbsp;Красных Партизан, д.&nbsp;164, помещение&nbsp;5
