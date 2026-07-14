@@ -1507,7 +1507,7 @@ body {
 
 /* ─── Main Events Carousel section (44D) ─────────────────────────────────────────────────*/
 .pub-main-events-section {
-  padding: 32px 54px 24px;
+  padding: 25px 54px 24px;
 }
 .pub-main-events-outer {
   /* Transparent passthrough — white panel provided by pub-main-quotes-inner */
@@ -1615,7 +1615,6 @@ body {
 .pub-footer {
   background: #ffffff;
   margin-top: auto;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 .pub-footer-inner {
   max-width: 1496px;
