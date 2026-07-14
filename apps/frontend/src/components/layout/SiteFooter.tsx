@@ -30,10 +30,13 @@ export function SiteFooter() {
   );
 
   return (
-    <footer className="pub-footer" aria-label="Подвал сайта">
+    <footer
+      className="pub-footer"
+      style={{ background: 'transparent' }}
+      aria-label="Подвал сайта"
+    >
       <div className="pub-footer-inner">
         <div className="pub-footer-top">
-          {/* Brand */}
           <div className="pub-footer-brand">
             <div className="pub-footer-logo">
               <Image
@@ -55,7 +58,6 @@ export function SiteFooter() {
             </p>
           </div>
 
-          {/* Projects */}
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Наши проекты</p>
             <ul className="pub-footer-links">
@@ -77,7 +79,6 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Contacts */}
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Контакты</p>
             <ul className="pub-footer-links">
@@ -123,7 +124,6 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Stationery composition — ASSET-FOOTER-STATIONERY */}
           <div className="pub-footer-stationery" aria-hidden="true">
             <Image
               src={stationeryImg}
@@ -134,7 +134,6 @@ export function SiteFooter() {
               aria-hidden
             />
           </div>
-
         </div>
 
         <div className="pub-footer-divider" />
