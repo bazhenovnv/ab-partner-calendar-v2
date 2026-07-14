@@ -1,0 +1,112 @@
+/* Stage 68 — approved header icons and final vertical alignment corrections. */
+
+.pub-header-action-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  object-fit: contain;
+}
+
+@media (min-width: 1440px) {
+  /* Reduce the excessive empty band between the header logo row and hero panel. */
+  .pub-hero {
+    padding-top: 24px;
+  }
+
+  /* Centre quote copy in the actual open area of the supplied frame artwork. */
+  .quotes-card--approved-frame .quotes-body {
+    inset: auto;
+    left: 50%;
+    top: 52%;
+    width: calc(100% - 188px);
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quotes-card--approved-frame .quotes-blockquote,
+  .quotes-card--approved-frame .quotes-text,
+  .quotes-card--approved-frame .quotes-author {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .quotes-card--approved-frame .quotes-text {
+    max-width: 540px;
+  }
+
+  /* Enlarge the approved people cut-outs from the bottom corners only. */
+  .quotes-person-img--left {
+    width: 430px;
+    max-width: 430px;
+  }
+
+  .quotes-person-img--right {
+    width: 415px;
+    max-width: 415px;
+  }
+
+  /* Remove the excessive grey interval before the footer content. */
+  .pub-main-quotes-wrapper {
+    padding-bottom: 10px;
+  }
+
+  .pub-footer-inner {
+    padding-top: 18px;
+  }
+
+  .pub-footer-top {
+    min-height: 230px;
+    align-items: center;
+  }
+
+  /* Raise the stationery composition while preserving the leaf overlap. */
+  .pub-footer-stationery {
+    transform: translateY(28px);
+  }
+
+  .pub-footer-stationery-img {
+    height: 365px;
+    transform: translate(20px, -8px);
+  }
+}
+
+@media (max-width: 1439px) and (min-width: 768px) {
+  .pub-hero {
+    padding-top: 28px;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    inset: auto;
+    left: 50%;
+    top: 52%;
+    width: calc(100% - 150px);
+    transform: translate(-50%, -50%);
+  }
+
+  .quotes-person-img--left {
+    width: 315px;
+    max-width: 315px;
+  }
+
+  .quotes-person-img--right {
+    width: 305px;
+    max-width: 305px;
+  }
+
+  .pub-main-quotes-wrapper {
+    padding-bottom: 12px;
+  }
+
+  .pub-footer-inner {
+    padding-top: 22px;
+  }
+
+  .pub-footer-stationery {
+    transform: translateY(22px);
+  }
+}
