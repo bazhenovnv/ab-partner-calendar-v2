@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Montserrat } from 'next/font/google';
 import './globals.css';
+import './stage60-visual.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
@@ -65,10 +66,7 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
         />
       </head>
       <body>
-        <a
-          href="#main-content"
-          className="skip-to-content"
-        >
+        <a href="#main-content" className="skip-to-content">
           Перейти к содержимому
         </a>
         <noscript>
