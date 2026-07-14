@@ -1,162 +1,76 @@
-# MAX Bot API — Official Documentation References
+# MAX Import — canonical integration notes
 
-## Sources
+## Authority
 
-| Document | URL |
-|---|---|
-| Developer portal | https://dev.max.ru/ |
-| API methods index | https://dev.max.ru/docs-api |
-| GET /updates | https://dev.max.ru/docs-api/methods/GET/updates |
-| POST /subscriptions | https://dev.max.ru/docs-api/methods/POST/subscriptions |
-| GET /subscriptions | https://dev.max.ru/docs-api/methods/GET/subscriptions |
-| TypeScript SDK | https://github.com/max-messenger/max-bot-api-client-ts |
-| Python SDK | https://github.com/max-messenger/max-botapi-python |
-| Go SDK | https://pkg.go.dev/github.com/max-messenger/max-bot-api-client-go |
-| PHP SDK + docs | https://github.com/BushlanovDev/max-bot-api-client-php |
-| Java SDK | https://github.com/etsft/max-bot-api-java |
+Project behaviour is defined by `PROJECT_BIBLE`, `BUSINESS_RULES.md` and the active TZ. This document explains the implementation only.
 
-## Confirmed API Facts
+## Approved source
 
-### Base URL
-`https://platform-api2.max.ru`
-(Migration from `platform-api.max.ru` mandatory by July 19, 2026)
+- MAX source from TZ: `https://max.ru/join/tumioTNhr5Kh90TaDp1Tzgn-uDKw8Eko7KFhXdKeu9c`
+- The URL is stored in `MAX_SOURCE_CHANNEL_URL` for source links.
+- API filtering uses the numeric `MAX_SOURCE_CHANNEL_ID` received in a `bot_added` update after the bot is added to the channel as administrator.
+- The invite URL itself is not an API chat ID.
 
-### Authentication
-```
-Authorization: Bearer <MAX_BOT_TOKEN>
-```
-No "Bot" prefix. Token obtained from @MasterBot in MAX messenger via /create command.
+## Runtime variables
 
-### Bot Identity Verification
-```
-GET /me
-Authorization: Bearer <token>
-```
+Required variable names:
 
-### Webhook Subscription
-```
-POST /subscriptions
-Content-Type: application/json
-Authorization: Bearer <token>
+- `MAX_BOT_TOKEN`
+- `MAX_IMPORT_ENABLED`
+- `MAX_SOURCE_CHANNEL_ID`
+- `MAX_SOURCE_CHANNEL_URL`
+- `MAX_WEBHOOK_SECRET`
+- `MAX_WEBHOOK_PUBLIC_URL`
 
-{
-  "url": "https://your-domain.com/api/max-webhook",
-  "secret": "<MAX_WEBHOOK_SECRET>",
-  "updateTypes": ["message_created", "bot_added"]
-}
-```
-Requirements:
-- HTTPS only, port 443
-- Certificate from trusted CA (self-signed rejected since May 25, 2026)
-- Secret: 5–256 chars, A-Z a-z 0-9 hyphen
+Secrets are configured only in the server environment and are never committed.
 
-### Webhook Validation
-Each delivery includes header:
-```
-X-Max-Bot-Api-Secret: <the secret you registered>
-```
-Validate with **timing-safe comparison** (not regular string equality).
+## Synchronisation policy
 
-### Updates Polling (backup / development)
-```
-GET /updates?limit=100&marker=<last_marker>&types=message_created,bot_added
-Authorization: Bearer <token>
-```
-Parameters: `limit` (1–1000), `timeout` (0–90s), `marker` (int64), `types` (comma-separated).
-Returns: `{ updates: [...], marker: <next_marker> }`.
-**Not suitable for production** — use webhook.
+The project uses two complementary ingestion paths:
 
-### Update Types
-| Type | Trigger |
-|---|---|
-| `message_created` | New message posted in chat/channel |
-| `message_edited` | Message edited |
-| `message_removed` | Message deleted |
-| `message_callback` | User clicked inline button |
-| `bot_added` | Bot added to a chat or channel |
-| `bot_removed` | Bot removed |
-| `user_added` | User joined chat |
-| `user_removed` | User left chat |
-| `bot_started` | User opened direct dialog |
-| `bot_stopped` | User blocked bot |
-| `chat_title_changed` | Chat renamed |
+1. Webhook for immediate delivery.
+2. Hourly reconciliation through `GET /updates`, as required by the TZ.
 
-### message_created Event Schema (key fields)
-```json
-{
-  "updateType": "message_created",
-  "timestamp": 1720000000000,
-  "message": {
-    "sender": { "userId": 12345, "name": "..." },
-    "recipient": {
-      "chatId": 987654321
-    },
-    "timestamp": 1720000000000,
-    "body": {
-      "mid": "mid.unique.string",
-      "text": "Post text content",
-      "attachments": [
-        {
-          "type": "image",
-          "payload": {
-            "url": "https://...",
-            "token": "...",
-            "width": 1280,
-            "height": 720
-          }
-        }
-      ]
-    }
-  }
-}
-```
+The polling marker is persisted in `SiteConfig` under `maxImport.pollMarker`. Both paths use the same normalisation, filtering, parsing and persistence code. Duplicate deliveries are safe because `message.body.mid` is stored as `externalId`.
 
-### bot_added Event Schema
-```json
-{
-  "updateType": "bot_added",
-  "timestamp": 1720000000000,
-  "chatId": 987654321,
-  "chat": {
-    "chatId": 987654321,
-    "type": "channel",
-    "title": "Channel name"
-  }
-}
-```
+## Import rules
 
-### Chat/Channel IDs
-- **Numeric only** — no @username addressing
-- `chat.chatId` in updates is the integer identifier
-- To resolve `GET /chats/{chatLink}` works for **public usernames** only
-- **Invite links** (`max.ru/join/...`) cannot be resolved via API — the bot must be added to the channel by an admin; it then receives a `bot_added` update containing the numeric `chatId`
+- One MAX post creates or updates one event.
+- A collection post is not split. It is saved as `NEEDS_ATTENTION` and produces an admin notification.
+- `#Хит` sets `mainEvent=true`.
+- A complete `#Хит` event appears in Calendar, Events and Main Events.
+- A complete normal event appears in Calendar and Events only.
+- Required fields are title, date, time, image, format, direction, event link and city or `Онлайн`.
+- Missing price means `Бесплатно`.
+- Missing speaker or address does not block publication.
+- Complete imports are published automatically. Incomplete imports are never public.
+- Edited posts update the existing event by `externalId`.
+- Removed posts hide the corresponding event unless the status was manually fixed by an administrator.
 
-### Channel ID Resolution Procedure
-1. Add the bot (created via @MasterBot) to the MAX channel as admin
-2. The backend will log: `Bot added to chat. chatId=<N>. Set MAX_SOURCE_CHANNEL_ID=<N> in env`
-3. An admin notification is created in the dashboard
-4. Set `MAX_SOURCE_CHANNEL_ID=<N>` in production environment variables
-5. Set `MAX_IMPORT_ENABLED=true` to activate import
+## Images
 
-### Rate Limits
-- 30 requests per second
-- HTTP 429 on excess — honor `Retry-After` header (exponential backoff recommended)
+The first image attachment is downloaded locally. JPEG, PNG, WebP and GIF are accepted, with a maximum source size of 10 MB. Sharp creates local variants for the event card, Main Events carousel, modal and thumbnail. Temporary MAX image URLs are not hotlinked.
 
-### Image Attachments
-- `payload.url` — direct download URL (may require Authorization header)
-- Validate MIME type before storing
-- Enforce maximum file size
-- Store locally; never hotlink signed/temporary URLs
+If an image is absent or cannot be processed, the event receives `NEEDS_ATTENTION`.
 
-## What Was Removed (and Why)
+## API and endpoints
 
-The previous implementation called:
-```
-GET https://api.max.ru/v1/channels/posts?channel_url=...
-```
-This endpoint is **not documented** in any official MAX Bot API source.
-It consistently returned HTTP 404. It has been removed entirely.
+Implementation base URL: `https://platform-api2.max.ru`.
 
-The hardcoded `MAX_IMPORT_CHANNEL` join link in `packages/shared` was used only
-by this broken endpoint and has been removed. The public-facing `MAX_CHANNEL`
-constant (used in UI links) is preserved.
+Admin endpoints:
+
+- `GET /api/max-import/bot-info`
+- `GET /api/max-import/discover-channel`
+- `POST /api/max-import/run`
+- `GET /api/max-import/logs`
+
+Webhook endpoint: `POST /api/max-webhook`.
+
+## Initial setup
+
+1. Add the MAX bot to the approved source channel as administrator.
+2. Read the numeric `chat_id` from backend logs, admin notification or `GET /api/max-import/discover-channel`.
+3. Set `MAX_SOURCE_CHANNEL_ID` and enable MAX import in the server environment.
+4. Recreate the backend container.
+5. Run `POST /api/max-import/run` once.
+6. Verify results in Admin → Events and Admin → Requires attention.
