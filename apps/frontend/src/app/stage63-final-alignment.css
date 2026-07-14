@@ -1,0 +1,130 @@
+/* Stage 63 — final alignment against the approved desktop sketch.
+   Code-only changes. No generated assets and no content changes. */
+
+/* The 80% desktop scale must never create a horizontal document scrollbar. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.pub-site-scale {
+  overflow-x: clip;
+}
+
+/* Approved event-card exports are complete 428×246 compositions.
+   Keep the complete image visible and lock the grid to the Figma geometry. */
+@media (min-width: 1440px) {
+  .pub-events-outer .grid.grid-cols-1 {
+    grid-template-columns: repeat(3, 428px);
+    justify-content: center;
+    gap: 53px;
+  }
+
+  .pub-event-card--composite {
+    width: 428px;
+    height: 246px;
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(13, 35, 68, 0.17);
+    overflow: hidden;
+  }
+}
+
+.pub-event-card--composite .pub-event-card-media {
+  background: #fff;
+}
+
+.pub-event-card--composite .pub-event-card-image {
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Quote artwork belongs to the lower inner corners and must remain fully visible. */
+.pub-main-quotes-inner {
+  overflow: hidden;
+}
+
+.quotes-section {
+  min-height: 360px;
+}
+
+.quotes-layout {
+  min-height: 342px;
+}
+
+.quotes-person-left {
+  left: 28px;
+}
+
+.quotes-person-right {
+  right: 28px;
+}
+
+.quotes-person-img--left {
+  width: 181px;
+  max-width: 181px;
+}
+
+.quotes-person-img--right {
+  width: 172px;
+  max-width: 172px;
+}
+
+/* Quotes rotate automatically; no dots or manual controls are presented. */
+.quotes-dots {
+  display: none !important;
+}
+
+/* Lower the stationery so the leaves overlap the footer divider, as in Figma. */
+.pub-footer-top {
+  position: relative;
+  overflow: visible;
+}
+
+.pub-footer-stationery {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+  transform: translateY(48px);
+}
+
+.pub-footer-stationery-img {
+  height: 350px;
+  transform: translate(18px, 18px);
+}
+
+.pub-footer-divider {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1439px) {
+  .pub-events-outer .grid.grid-cols-1 {
+    justify-content: stretch;
+  }
+
+  .quotes-person-left {
+    left: 18px;
+  }
+
+  .quotes-person-right {
+    right: 18px;
+  }
+
+  .pub-footer-stationery {
+    transform: translateY(36px);
+  }
+}
+
+@media (max-width: 767px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .pub-footer-stationery {
+    transform: none;
+  }
+}
