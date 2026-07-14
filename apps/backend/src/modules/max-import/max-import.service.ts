@@ -6,12 +6,13 @@ import { join } from 'path';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { MaxParserService } from './max-parser.service';
 import { MAX_CHANNEL } from '@ab-afisha/shared';
-import type {
-  MaxUpdate,
-  MaxMessageCreatedUpdate,
-  MaxBotAddedUpdate,
-  MaxUpdatesResponse,
-  MaxImagePayload,
+import {
+  normalizeMaxUpdate,
+  type MaxUpdate,
+  type MaxMessageCreatedUpdate,
+  type MaxBotAddedUpdate,
+  type RawMaxUpdatesResponse,
+  type MaxAttachmentPayload,
 } from './max-api.types';
 
 const MAX_API_BASE = 'https://platform-api2.max.ru';
@@ -51,37 +52,25 @@ export class MaxImportService {
     private readonly config: ConfigService,
   ) {}
 
-  /** Hourly cron: polls GET /updates as a safety net for missed webhook deliveries. */
+  /**
+   * Hourly heartbeat — logs import status only.
+   * Webhook is the primary ingestion path; polling is NOT run on schedule.
+   * Use POST /api/max-import/run for a diagnostic manual poll.
+   */
   @Cron('0 * * * *')
-  async runImport() {
+  runHeartbeat() {
     if (!this.isEnabled()) {
       this.logger.debug('MAX import disabled (MAX_IMPORT_ENABLED != true)');
       return;
     }
-
-    const log = this.emptyLog();
-    try {
-      const updates = await this.pollUpdates(log);
-      log.postsFound = updates.length;
-      for (const update of updates) {
-        await this.dispatchUpdate(update, log);
-      }
-    } catch (err) {
-      log.errors++;
-      log.errorDetail.push({ type: 'FETCH_ERROR', detail: String(err) });
-      this.logger.error(`MAX import failed: ${err}`);
-      await this.notifyAdminError(`MAX import error: ${err}`);
-    }
-
-    await this.prisma.maxImportLog.create({ data: log });
-    this.logger.log(`MAX import done: ${JSON.stringify(log)}`);
+    this.logger.log('MAX import enabled — webhook is primary ingestion path');
   }
 
-  /** Called by the webhook controller for each inbound MAX update. */
-  async processWebhookUpdate(payload: unknown): Promise<void> {
-    const update = payload as MaxUpdate;
-    if (!update?.updateType) {
-      this.logger.warn('Webhook: missing updateType, ignoring');
+  /** Called by the webhook controller for each inbound MAX update. Raw payload normalized here. */
+  async processWebhookUpdate(rawPayload: unknown): Promise<void> {
+    const update = normalizeMaxUpdate(rawPayload);
+    if (!update) {
+      this.logger.warn('Webhook: missing or invalid update_type in payload, ignoring');
       return;
     }
 
@@ -94,10 +83,19 @@ export class MaxImportService {
     }
   }
 
-  /** Admin: manual trigger using the same poll path. */
+  /**
+   * Admin diagnostic: polls GET /updates for missed events.
+   * Not intended as a continuous production mechanism.
+   */
   async runManual(): Promise<{ log: ImportLog }> {
     if (!this.isEnabled()) {
-      return { log: { ...this.emptyLog(), errorDetail: [{ type: 'FETCH_ERROR', detail: 'MAX_IMPORT_ENABLED is false' }] } };
+      return {
+        log: {
+          ...this.emptyLog(),
+          errors: 1,
+          errorDetail: [{ type: 'FETCH_ERROR', detail: 'MAX_IMPORT_ENABLED is false' }],
+        },
+      };
     }
 
     const log = this.emptyLog();
@@ -135,7 +133,12 @@ export class MaxImportService {
     return this.config.get<string>('MAX_BOT_TOKEN') ?? null;
   }
 
-  /** GET /updates — long-polling safety net with marker tracking. */
+  private maxHeaders(tok: string): Record<string, string> {
+    // MAX API uses bare token: Authorization: <token> — no "Bearer" prefix
+    return { Authorization: tok };
+  }
+
+  /** GET /updates — manual diagnostic poll with marker tracking. */
   private async pollUpdates(log: ImportLog): Promise<MaxUpdate[]> {
     const tok = this.token();
     if (!tok) {
@@ -146,20 +149,20 @@ export class MaxImportService {
 
     const params = new URLSearchParams({
       limit: '100',
-      types: 'message_created,bot_added',
+      types: 'message_created,message_edited,message_removed,bot_added,bot_removed',
     });
     if (this.pollMarker !== undefined) {
       params.set('marker', String(this.pollMarker));
     }
 
     const res = await fetch(`${MAX_API_BASE}/updates?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${tok}` },
+      headers: this.maxHeaders(tok),
       signal: AbortSignal.timeout(30_000),
     });
 
     if (res.status === 401) {
       log.errors++;
-      log.errorDetail.push({ type: 'AUTH_ERROR', detail: 'HTTP 401 — token rejected' });
+      log.errorDetail.push({ type: 'AUTH_ERROR', detail: 'HTTP 401 — token invalid or revoked' });
       return [];
     }
     if (res.status === 403) {
@@ -173,11 +176,15 @@ export class MaxImportService {
       return [];
     }
 
-    const data = (await res.json()) as MaxUpdatesResponse;
+    const data = (await res.json()) as RawMaxUpdatesResponse;
     if (data.marker !== undefined) {
       this.pollMarker = data.marker;
     }
-    return data.updates ?? [];
+
+    // Normalize raw snake_case updates at the polling boundary
+    return (data.updates ?? [])
+      .map((raw) => normalizeMaxUpdate(raw))
+      .filter((u): u is MaxUpdate => u !== null);
   }
 
   private async dispatchUpdate(update: MaxUpdate, log: ImportLog): Promise<void> {
@@ -194,7 +201,6 @@ export class MaxImportService {
     }
 
     if (type === 'message_edited') {
-      // Future: update existing event on edits
       log.skipped++;
       return;
     }
@@ -204,14 +210,15 @@ export class MaxImportService {
   }
 
   private async handleBotAdded(update: MaxBotAddedUpdate): Promise<void> {
-    const chatId = update.chatId ?? update.chat?.chatId;
+    const chatId = update.chatId;
+    const isChannel = update.isChannel ? ' (channel)' : '';
     this.logger.warn(
-      `Bot added to chat. chatId=${chatId}. ` +
+      `Bot added to chat. chat_id=${chatId}${isChannel}. ` +
       `Set MAX_SOURCE_CHANNEL_ID=${chatId} in env to enable import from this channel.`,
     );
     await this.notifyAdminError(
-      `MAX bot добавлен в чат chatId=${chatId}. ` +
-      `Если это нужный канал, добавьте MAX_SOURCE_CHANNEL_ID=${chatId} в конфигурацию.`,
+      `MAX bot добавлен в чат chat_id=${chatId}${isChannel}. ` +
+      `Если это нужный канал — установите MAX_SOURCE_CHANNEL_ID=${chatId} в конфигурации.`,
     );
   }
 
@@ -219,19 +226,18 @@ export class MaxImportService {
     const sourceChannelId = this.sourceChannelId();
     const chatId = update.message?.recipient?.chatId;
 
-    // Filter: only process messages from the approved source channel
-    if (sourceChannelId !== null && chatId !== sourceChannelId) {
-      log.skipped++;
-      log.errorDetail.push({
-        type: 'CHANNEL_MISMATCH',
-        detail: `chatId=${chatId} != MAX_SOURCE_CHANNEL_ID=${sourceChannelId}`,
-      });
-      return;
-    }
-
     if (sourceChannelId === null) {
       log.errors++;
       log.errorDetail.push({ type: 'SOURCE_NOT_FOUND', detail: 'MAX_SOURCE_CHANNEL_ID not configured' });
+      return;
+    }
+
+    if (chatId !== sourceChannelId) {
+      log.skipped++;
+      log.errorDetail.push({
+        type: 'CHANNEL_MISMATCH',
+        detail: `chat_id=${chatId} != MAX_SOURCE_CHANNEL_ID=${sourceChannelId}`,
+      });
       return;
     }
 
@@ -328,11 +334,10 @@ export class MaxImportService {
           await this.notifyAdminNeedsAttention(parsed.title, parsed.attentionReasons);
         }
 
-        // Download and store image attachments
         const attachments = update.message?.body?.attachments ?? [];
         for (const att of attachments) {
           if (att.type === 'image') {
-            await this.downloadAndStoreImage(event.id, att.payload as MaxImagePayload | undefined, log);
+            await this.downloadAndStoreImage(event.id, att.payload as MaxAttachmentPayload | undefined, log);
           }
         }
       }
@@ -345,7 +350,7 @@ export class MaxImportService {
 
   private async downloadAndStoreImage(
     eventId: string,
-    payload: MaxImagePayload | undefined,
+    payload: MaxAttachmentPayload | undefined,
     log: ImportLog,
   ): Promise<void> {
     const url = payload?.url;
@@ -354,7 +359,7 @@ export class MaxImportService {
     try {
       const tok = this.token();
       const headers: Record<string, string> = {};
-      if (tok) headers['Authorization'] = `Bearer ${tok}`;
+      if (tok) headers['Authorization'] = tok; // no "Bearer" prefix
 
       const res = await fetch(url, { headers, signal: AbortSignal.timeout(15_000) });
       if (!res.ok) {
@@ -389,11 +394,7 @@ export class MaxImportService {
       });
 
       await this.prisma.eventImage.create({
-        data: {
-          eventId,
-          url: `/uploads/events/${filename}`,
-          source: 'MAX',
-        },
+        data: { eventId, originalUrl: `/uploads/events/${filename}` },
       });
     } catch (err) {
       log.errorDetail.push({ type: 'MEDIA_ERROR', detail: String(err) });

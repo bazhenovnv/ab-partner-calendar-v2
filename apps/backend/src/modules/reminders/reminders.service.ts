@@ -137,7 +137,7 @@ export class RemindersService {
     const res = await fetch(`${MAX_API}/messages`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: token, // MAX API: bare token, no "Bearer" prefix
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ chat_id: externalId, text }),

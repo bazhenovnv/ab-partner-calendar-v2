@@ -474,7 +474,7 @@ export class BroadcastsService {
       try {
         const res = await fetch('https://platform-api2.max.ru/messages', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          headers: { Authorization: token, 'Content-Type': 'application/json' }, // MAX API: bare token
           body: JSON.stringify({ chat_id: user.externalId, text }),
         });
         if (res.ok) return { success: true };

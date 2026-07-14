@@ -15,7 +15,8 @@ import { MaxImportService } from './max-import.service';
 /**
  * Public endpoint for MAX Bot API webhook deliveries.
  * No JWT guard — authentication is via X-Max-Bot-Api-Secret header.
- * Returns 200 immediately; processing is synchronous but safe to await.
+ * Raw snake_case payload is passed to MaxImportService.processWebhookUpdate(),
+ * which calls normalizeMaxUpdate() as the single normalization boundary.
  */
 @ApiTags('max-webhook')
 @ApiExcludeController()
@@ -48,14 +49,15 @@ export class MaxWebhookController {
 
     const enabled = this.config.get<string>('MAX_IMPORT_ENABLED') === 'true';
     if (!enabled) {
-      this.logger.debug('MAX_IMPORT_ENABLED=false — webhook payload ignored');
+      this.logger.debug('MAX_IMPORT_ENABLED=false — webhook payload acknowledged but not processed');
       return { ok: true };
     }
 
     try {
+      // Pass raw body to service — normalization happens inside processWebhookUpdate
       await this.maxImportService.processWebhookUpdate(body);
     } catch (err) {
-      // Log but still return 200 so MAX does not keep retrying a broken payload
+      // Return 200 so MAX does not retry; error is logged and stored in MaxImportLog
       this.logger.error(`Webhook processing error: ${err}`);
     }
 
