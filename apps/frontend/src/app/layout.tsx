@@ -11,6 +11,7 @@ import './stage65-centering-carousel-footer.css';
 import './stage66-approved-quote-frame.css';
 import './stage67-final-spacing-footer.css';
 import './stage68-header-quotes-footer.css';
+import './stage69-canvas-calendar-footer.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
