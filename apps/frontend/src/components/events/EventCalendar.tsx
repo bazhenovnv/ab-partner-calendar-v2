@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { CalendarHeader } from '@/components/ui/CalendarHeader';
 import type { CalendarMarker } from '@/types/event';
@@ -31,6 +31,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   const [month, setMonth] = useState(now.getMonth());
   const [markers, setMarkers] = useState<CalendarMarker[]>([]);
   const [loading, setLoading] = useState(false);
+  const initializedToday = useRef(false);
 
   const loadMarkers = useCallback(async (y: number, m: number) => {
     setLoading(true);
@@ -50,6 +51,26 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   useEffect(() => {
     void loadMarkers(year, month);
   }, [year, month, loadMarkers]);
+
+  useEffect(() => {
+    if (initializedToday.current || selectedDate) return;
+    initializedToday.current = true;
+    onSelectDate(toDateString(now.getFullYear(), now.getMonth(), now.getDate()));
+  }, [now, onSelectDate, selectedDate]);
+
+  const scrollToSelectedDateResults = () => {
+    window.setTimeout(() => {
+      const target = document.querySelector<HTMLElement>(
+        '.pub-events-date-heading, .empty-state-card',
+      ) ?? document.getElementById('events');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 260);
+  };
+
+  const selectDate = (date: string | null) => {
+    onSelectDate(date);
+    if (date) scrollToSelectedDateResults();
+  };
 
   const goToPrev = () => {
     if (month === 0) {
@@ -142,7 +163,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                   type="button"
                   aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ', мероприятий нет'}${isSelected ? ', выбрано' : ''}`}
                   aria-selected={isSelected}
-                  onClick={() => onSelectDate(isSelected ? null : dateStr)}
+                  onClick={() => selectDate(isSelected ? null : dateStr)}
                   className={cn(
                     'pub-calendar-day',
                     isSelected && 'pub-calendar-day--selected',
