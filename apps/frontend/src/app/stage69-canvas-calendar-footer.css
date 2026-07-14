@@ -1,0 +1,63 @@
+/* Stage 69 — lock the approved 1920 desktop canvas, calendar interaction and footer artwork. */
+
+@media (min-width: 1920px) {
+  /* Figma desktop frame: 1920 - 212 - 212 = 1496px. */
+  header > div,
+  .pub-hero-panel,
+  .pub-events-outer,
+  .pub-main-quotes-inner,
+  .pub-footer-inner {
+    width: 1496px;
+    max-width: 1496px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Every date in the current month is an interactive filter. The current day
+   must not receive a separate grey treatment; only an explicitly selected
+   date gets the approved selected-cell fill. */
+.pub-calendar-day {
+  cursor: pointer;
+  color: #0d2344;
+}
+
+.pub-calendar-day:disabled {
+  cursor: pointer;
+  color: #0d2344;
+  opacity: 1;
+}
+
+.pub-calendar-day--today:not(.pub-calendar-day--selected) {
+  background: transparent !important;
+  color: #0d2344 !important;
+  box-shadow: none !important;
+}
+
+/* Footer brand wording is monochrome in the approved sketch. */
+.pub-footer-logo-text,
+.pub-footer-logo-accent {
+  color: #1e1e1e !important;
+}
+
+@media (min-width: 1440px) {
+  /* Enlarge the stationery group and lower it just enough for the mint leaves
+     to cross the divider line as in the approved reference. */
+  .pub-footer-stationery-img {
+    height: 390px;
+    max-height: 390px;
+    transform: translate(12px, 8px);
+  }
+
+  .pub-footer-stationery {
+    transform: translateY(32px);
+  }
+}
+
+@media (max-width: 1439px) and (min-width: 768px) {
+  .pub-footer-stationery-img {
+    height: 320px;
+    max-height: 320px;
+    transform: translate(8px, 6px);
+  }
+}
