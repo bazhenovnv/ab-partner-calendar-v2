@@ -14,7 +14,6 @@ import type {
   MaxImagePayload,
 } from './max-api.types';
 
-/** Official MAX Bot API base URL (platform-api.max.ru migrated to platform-api2.max.ru July 19 2026) */
 const MAX_API_BASE = 'https://platform-api2.max.ru';
 
 const ALLOWED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
