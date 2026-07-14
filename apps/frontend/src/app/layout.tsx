@@ -7,6 +7,7 @@ import './stage61-visual.css';
 import './stage62-scale-quotes-footer.css';
 import './stage63-final-alignment.css';
 import './stage64-figma-lock.css';
+import './stage65-centering-carousel-footer.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
