@@ -1,7 +1,7 @@
 FROM node:20-alpine AS base
 RUN npm install -g pnpm@9.15.0
-# openssl required by Prisma schema engine (prisma generate + prisma migrate deploy)
-RUN apk add --no-cache openssl
+# openssl is required by Prisma; ca-certificates is required for outbound HTTPS (MAX API, image downloads).
+RUN apk add --no-cache openssl ca-certificates && update-ca-certificates
 WORKDIR /app
 
 FROM base AS deps
@@ -21,8 +21,8 @@ RUN pnpm --filter backend run build
 
 FROM node:20-alpine AS runner
 RUN npm install -g pnpm@9.15.0
-# openssl required by Prisma schema engine at runtime (prisma migrate deploy)
-RUN apk add --no-cache openssl
+# openssl is required by Prisma; ca-certificates is required for outbound HTTPS (MAX API, image downloads).
+RUN apk add --no-cache openssl ca-certificates && update-ca-certificates
 WORKDIR /app
 
 COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
