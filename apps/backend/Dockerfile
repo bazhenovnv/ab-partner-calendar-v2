@@ -1,7 +1,12 @@
 FROM node:20-alpine AS base
 RUN npm install -g pnpm@9.15.0
-# openssl is required by Prisma; ca-certificates is required for outbound HTTPS (MAX API, image downloads).
-RUN apk add --no-cache openssl ca-certificates && update-ca-certificates
+# openssl is required by Prisma; ca-certificates is required for outbound HTTPS.
+RUN apk add --no-cache openssl ca-certificates
+# MAX platform-api2.max.ru is signed by the Russian Trusted Root CA, which is
+# not included in Alpine's default trust store. Add the approved root certificate
+# and rebuild the generated CA bundle without disabling TLS verification.
+COPY apps/backend/certs/russian-trusted-root-ca.crt /usr/local/share/ca-certificates/russian-trusted-root-ca.crt
+RUN update-ca-certificates
 WORKDIR /app
 
 FROM base AS deps
@@ -21,8 +26,10 @@ RUN pnpm --filter backend run build
 
 FROM node:20-alpine AS runner
 RUN npm install -g pnpm@9.15.0
-# openssl is required by Prisma; ca-certificates is required for outbound HTTPS (MAX API, image downloads).
-RUN apk add --no-cache openssl ca-certificates && update-ca-certificates
+# openssl is required by Prisma; ca-certificates is required for outbound HTTPS.
+RUN apk add --no-cache openssl ca-certificates
+COPY apps/backend/certs/russian-trusted-root-ca.crt /usr/local/share/ca-certificates/russian-trusted-root-ca.crt
+RUN update-ca-certificates
 WORKDIR /app
 
 COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
