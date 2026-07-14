@@ -39,7 +39,6 @@ export function RotatingQuotesBlock({ quotes }: Props) {
     <section className="quotes-section" aria-labelledby="quotes-title">
       <h2 id="quotes-title" className="sr-only">Цитаты для бухгалтеров</h2>
       <div className="quotes-layout">
-        {/* Left person — ASSET-QUOTE-LEFT */}
         <div className="quotes-person quotes-person-left" aria-hidden="true">
           <Image
             src={personLeftImg}
@@ -51,7 +50,6 @@ export function RotatingQuotesBlock({ quotes }: Props) {
           />
         </div>
 
-        {/* Central quote card */}
         <div className="quotes-card">
           <div className="quotes-header">
             <span className="quotes-eyebrow">Цитаты</span>
@@ -63,27 +61,8 @@ export function RotatingQuotesBlock({ quotes }: Props) {
               {q.author && <footer className="quotes-author">— {q.author}</footer>}
             </blockquote>
           </div>
-          {quotes.length > 1 && (
-            <div className="quotes-dots" role="tablist" aria-label="Переключение цитат">
-              {quotes.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  role="tab"
-                  aria-selected={i === idx}
-                  aria-label={`Цитата ${i + 1}`}
-                  className={`quotes-dot ${i === idx ? 'quotes-dot-active' : ''}`}
-                  onClick={() => {
-                    setVisible(false);
-                    setTimeout(() => { setIdx(i); setVisible(true); }, 350);
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Right person — ASSET-QUOTE-RIGHT */}
         <div className="quotes-person quotes-person-right" aria-hidden="true">
           <Image
             src={personRightImg}
