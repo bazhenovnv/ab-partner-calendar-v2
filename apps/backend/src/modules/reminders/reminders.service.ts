@@ -4,7 +4,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReminderDto } from './create-reminder.dto';
 
 const TG_API = 'https://api.telegram.org';
-const MAX_API = 'https://api.max.ru/v1';
+const MAX_API = 'https://platform-api2.max.ru';
 
 function formatMsk(date: Date): string {
   return date.toLocaleString('ru-RU', {

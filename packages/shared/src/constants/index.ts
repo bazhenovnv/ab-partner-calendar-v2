@@ -10,7 +10,6 @@ export const PARTNER_URL = 'https://ab-buhpartner.ru/';
 export const TELEGRAM_BOT = '@PartnersTogether_bot';
 export const MAX_BOT_URL = 'https://max.ru/id2308283362_bot';
 
-export const MAX_IMPORT_CHANNEL = 'https://max.ru/join/tumioTNhr5Kh90TaDp1Tzgn-uDKw8Eko7KFhXdKeu9c';
 
 export const DEFAULT_DIRECTIONS = [
   { slug: '1c', name: '1C' },

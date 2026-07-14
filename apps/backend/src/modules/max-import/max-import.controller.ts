@@ -4,6 +4,7 @@ import { MaxImportService } from './max-import.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @ApiTags('max-import')
 @Controller('max-import')
@@ -11,7 +12,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 @ApiBearerAuth()
 @Roles('ADMIN')
 export class MaxImportController {
-  constructor(private readonly maxImportService: MaxImportService) {}
+  constructor(
+    private readonly maxImportService: MaxImportService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Post('run')
   runManualImport() {
@@ -19,7 +23,10 @@ export class MaxImportController {
   }
 
   @Get('logs')
-  getLogs() {
-    return { message: 'Logs endpoint - implement with PrismaService' };
+  async getLogs() {
+    return this.prisma.maxImportLog.findMany({
+      orderBy: { runAt: 'desc' },
+      take: 50,
+    });
   }
 }
