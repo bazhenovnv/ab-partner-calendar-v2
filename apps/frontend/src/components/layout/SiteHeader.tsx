@@ -10,16 +10,15 @@ const NAV_BTN =
   'flex items-center gap-2 ' +
   'border border-black/[0.12] ' +
   'rounded-lg ' +
-  'px-4 h-[38px] ' +        // h=38px confirmed {C0944B54} {CA965F25}
+  'px-4 h-[38px] ' +
   'text-sm font-medium text-primary bg-white ' +
-  'shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' + // project shadow standard
+  'shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' +
   'hover:bg-gray-50 transition-colors ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint';
 
 export function SiteHeader() {
   return (
-    <header className="bg-white">
-      {/* max-w-[1496px]: confirmed {F6242A4C} footer 1496×72, {DDFD1908} modal 1496×768 */}
+    <header className="bg-transparent">
       <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-20 flex items-center justify-between gap-4">
         <Link
           href="/"
@@ -36,17 +35,12 @@ export function SiteHeader() {
             aria-hidden
             priority
           />
-
-          {/* Figma 5893:346: Montserrat SemiBold 18.69px #1e1e1e */}
           <span className="[font-family:var(--font-montserrat)] font-semibold text-[#1e1e1e] text-[18.69px] leading-normal">
             Афиша Бухгалтера
           </span>
         </Link>
 
-        {/* gap-2 = 8px confirmed {C0944B54} {CA965F25} */}
         <nav aria-label="Внешние ссылки" className="flex items-center gap-2">
-
-          {/* Telegram — 118×38px {C0944B54}; brand #2AABEE */}
           <a
             href={TG_CHANNEL}
             target="_blank"
@@ -64,7 +58,6 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">Telegram</span>
           </a>
 
-          {/* MAX — width not confirmed in audit; auto width, h=38px consistent */}
           <a
             href={MAX_CHANNEL}
             target="_blank"
@@ -83,7 +76,6 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">MAX</span>
           </a>
 
-          {/* Стать партнёром — 181.67×38.34px confirmed {CA965F25} */}
           <a
             href={PARTNER_URL}
             target="_blank"
@@ -98,7 +90,6 @@ export function SiteHeader() {
             <span className="hidden tablet:inline">Стать партнёром</span>
             <span className="tablet:hidden">Партнёр</span>
           </a>
-
         </nav>
       </div>
     </header>
