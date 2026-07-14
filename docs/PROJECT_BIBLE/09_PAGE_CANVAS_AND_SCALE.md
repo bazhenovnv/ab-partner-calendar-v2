@@ -15,6 +15,18 @@ Authority order:
 
 A screenshot of the Figma prototype viewer is **not** a geometry source when the URL uses `scaling=min-zoom` or another viewer scaling mode. The viewer can visually shrink the entire frame to fit the browser window. Do not reproduce that viewer zoom with CSS.
 
+## Color sampling rule
+
+**Sample colors only inside the selected 1920×3565 Figma frame (node `5913:4745`, marked by the blue boundary rectangle in the Figma editor). Areas outside that blue frame are Figma editor workspace UI and are not design content.**
+
+| Area | Color | Source |
+|---|---|---|
+| Figma frame canvas (page background) | `#F1F1F1` / `rgb(241, 241, 241)` | Verified directly from inside the selected frame — APPROVED |
+| Figma editor workspace (outside frame) | ≈ `#BBBBBB` | Figma UI — **never implement this** |
+| Black Figma viewer gutters | `#000000` / near-black | Figma prototype viewer chrome — **never implement this** |
+
+The medium-gray area (~`#BBBBBB`) visible in Figma editor screenshots surrounds the selected frame. It belongs to the Figma workspace, not the website. Do not sample it. Do not implement it. Do not use any gray darker than `#F1F1F1` as the page canvas.
+
 ## Desktop reference viewport
 
 - Reference viewport: `1920 × 1080` CSS pixels.
