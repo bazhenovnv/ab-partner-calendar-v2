@@ -75,7 +75,6 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   const totalCells = Math.ceil(occupiedCells / 7) * 7;
   const trailingCells = totalCells - occupiedCells;
   const markerMap = new Map(markers.map((marker) => [marker.date, marker]));
-  const todayStr = toDateString(now.getFullYear(), now.getMonth(), now.getDate());
 
   return (
     <div className="pub-calendar select-none">
@@ -125,7 +124,6 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
             const dateStr = toDateString(year, month, day);
             const marker = markerMap.get(dateStr);
             const isSelected = selectedDate === dateStr;
-            const isToday = dateStr === todayStr;
             const hasEvents = Boolean(marker);
             const columnIndex = (firstDow + index) % 7;
             const isWeekend = columnIndex >= 5;
@@ -142,14 +140,12 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
               >
                 <button
                   type="button"
-                  aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ''}${isSelected ? ', выбрано' : ''}`}
+                  aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ', мероприятий нет'}${isSelected ? ', выбрано' : ''}`}
                   aria-selected={isSelected}
                   onClick={() => onSelectDate(isSelected ? null : dateStr)}
-                  disabled={!hasEvents && !isSelected}
                   className={cn(
                     'pub-calendar-day',
                     isSelected && 'pub-calendar-day--selected',
-                    isToday && !isSelected && 'pub-calendar-day--today',
                     hasEvents && !isSelected && 'pub-calendar-day--event',
                   )}
                 >
