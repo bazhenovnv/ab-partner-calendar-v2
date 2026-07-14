@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import personLeftImg from '../../public/quote-person-left.png';
 import personRightImg from '../../public/quote-person-right.png';
+import { QUOTE_FRAME_DATA_URI } from './quote-frame-data';
 
 export type PublicQuote = {
   id: string;
@@ -50,13 +51,17 @@ export function RotatingQuotesBlock({ quotes }: Props) {
           />
         </div>
 
-        <div className="quotes-card">
-          <div className="quotes-header">
-            <span className="quotes-eyebrow">Цитаты</span>
-          </div>
+        <div className="quotes-card quotes-card--approved-frame">
+          <img
+            src={QUOTE_FRAME_DATA_URI}
+            alt=""
+            width={744}
+            height={214}
+            className="quotes-frame-art"
+            aria-hidden="true"
+          />
           <div className={`quotes-body ${visible ? 'quotes-visible' : 'quotes-hidden'}`}>
             <blockquote className="quotes-blockquote">
-              <span className="quotes-mark" aria-hidden="true">&ldquo;</span>
               <p className="quotes-text">{q.text}</p>
               {q.author && <footer className="quotes-author">— {q.author}</footer>}
             </blockquote>
