@@ -12,6 +12,14 @@ const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4i
 const PARTNER_URL = 'https://ab-buhpartner.ru/';
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'info-event@a-b.ru';
 
+const PROJECT_LINKS = [
+  { label: 'АБ Партнёр', href: PARTNER_URL },
+  { label: 'АБ Онлайн-касса', href: 'https://a-b.ru/' },
+  { label: 'АБ Ресторан', href: 'https://a-b.ru/' },
+  { label: 'АБ Сервис', href: 'https://a-b.ru/' },
+  { label: 'АБ Креатив', href: 'https://a-b.ru/' },
+];
+
 export function SiteFooter() {
   const [toast, setToast] = useState<'copied' | 'fallback' | null>(null);
 
@@ -30,11 +38,7 @@ export function SiteFooter() {
   );
 
   return (
-    <footer
-      className="pub-footer"
-      style={{ background: 'transparent' }}
-      aria-label="Подвал сайта"
-    >
+    <footer className="pub-footer" style={{ background: 'transparent' }} aria-label="Подвал сайта">
       <div className="pub-footer-inner">
         <div className="pub-footer-top">
           <div className="pub-footer-brand">
@@ -52,25 +56,26 @@ export function SiteFooter() {
                 Афиша <span className="pub-footer-logo-accent">Бухгалтера</span>
               </span>
             </div>
-            <p className="pub-footer-desc">
-              Онлайн и офлайн события для профессионального роста, обмена опытом
-              и актуальной практики бухгалтеров по всей России.
-            </p>
+            <p className="pub-footer-desc">Мероприятия для бухгалтеров по всей России.</p>
           </div>
 
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Наши проекты</p>
             <ul className="pub-footer-links">
-              <li><a href={PARTNER_URL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">АБ Партнёр</a></li>
-              <li><a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">Telegram-канал</a></li>
-              <li><a href={MAX_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">MAX-канал</a></li>
+              {PROJECT_LINKS.map((project) => (
+                <li key={project.label}>
+                  <a href={project.href} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
+                    {project.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Контакты</p>
             <ul className="pub-footer-links">
-              <li><a href="tel:+79298386482" className="pub-footer-link">+7 (929) 838 64 82</a></li>
+              <li><a href="tel:+79298386482" className="pub-footer-link pub-footer-link--strong">+7 (929) 838 64 82</a></li>
               <li><span className="pub-footer-link" style={{ cursor: 'default' }}>Пн–Пт, 9:00–18:00 (МСК)</span></li>
               <li className="relative">
                 <a
@@ -92,7 +97,6 @@ export function SiteFooter() {
                 )}
               </li>
               <li><span className="pub-footer-link" style={{ cursor: 'default' }}>Россия, г. Краснодар</span></li>
-              <li><a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" className="pub-footer-link">Telegram</a></li>
             </ul>
           </div>
 
@@ -123,9 +127,10 @@ export function SiteFooter() {
 
         <p className="pub-footer-disclaimer">
           © 2022–{new Date().getFullYear()}. Официальный сайт интернет-площадки «АБ Афиша Бухгалтера» в России.
-          Материалы сайта являются объектами авторского права. Копирование, распространение, переработка и иное
-          использование материалов без письменного разрешения правообладателя не допускаются. Нарушение исключительных
-          прав преследуется в соответствии с законодательством Российской Федерации.
+          Текущий сайт является объектом авторского права, исключительные права на использование которого принадлежат
+          компании ООО «Автоматизация Бизнеса». Копирование, размножение, распространение, перепечатка (целиком или
+          частично), а также любое использование материалов без письменного разрешения компании не допускается.
+          Любое нарушение прав автора будет преследоваться на основе российского и международного законодательства.
         </p>
         <p className="pub-footer-operator">
           ООО «АБ ГРУПП» · ОГРН&nbsp;1212300074766 · ИНН&nbsp;2308283450 ·
