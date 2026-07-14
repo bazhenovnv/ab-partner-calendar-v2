@@ -1,0 +1,446 @@
+/* Stage 60 — approved 1920px homepage visual lock.
+   This file intentionally loads after globals.css and contains only homepage
+   geometry/polish overrides. It does not change content or business logic. */
+
+/* ── Events panel vertical rhythm ───────────────────────────────────────── */
+.pub-events-outer {
+  padding-bottom: 44px;
+}
+
+.pub-events-outer > .flex.flex-col {
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.pub-events-date-heading {
+  margin: 0;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Filter card ────────────────────────────────────────────────────────── */
+.pub-events-filters-col {
+  height: 632px;
+  min-height: 632px;
+  padding: 38px 25px 24px;
+}
+
+.pub-filter-title {
+  margin-bottom: 24px;
+}
+
+.pub-filter-label {
+  color: #0d2344;
+  line-height: 1.25;
+}
+
+.pub-filter-select {
+  height: 52px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.pub-filter-divider-v,
+.pub-filter-divider-h {
+  background: rgba(13, 35, 68, 0.14);
+}
+
+.pub-filter-check-row {
+  margin-bottom: 20px;
+}
+
+.pub-filter-apply-btn {
+  margin-top: auto;
+  box-shadow: 0 3px 9px rgba(13, 35, 68, 0.12);
+  transition: transform 150ms ease, background-color 180ms ease,
+    box-shadow 180ms ease, color 180ms ease;
+}
+
+.pub-filter-apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(54, 125, 103, 0.22);
+}
+
+.pub-filter-apply-btn:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: 0 1px 4px rgba(13, 35, 68, 0.18);
+}
+
+.pub-filter-reset-link {
+  margin: 13px auto 0;
+  width: fit-content;
+  color: #0d2344;
+}
+
+/* ── Calendar: fixed cell geometry instead of aspect-square growth ─────── */
+.pub-events-calendar-col {
+  height: 632px;
+  min-height: 632px;
+  padding: 28px 27px 27px 41px;
+}
+
+.pub-calendar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pub-calendar-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pub-calendar-weekdays,
+.pub-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.pub-calendar-weekday {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(13, 35, 68, 0.42);
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.pub-calendar-weekday--weekend {
+  color: rgba(13, 35, 68, 0.32);
+}
+
+.pub-calendar-grid {
+  border-top: 1px solid rgba(13, 35, 68, 0.08);
+  border-left: 1px solid rgba(13, 35, 68, 0.08);
+  transition: opacity 160ms ease;
+}
+
+.pub-calendar-grid--loading {
+  opacity: 0.45;
+}
+
+.pub-calendar-cell {
+  position: relative;
+  height: 63px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(13, 35, 68, 0.08);
+  border-bottom: 1px solid rgba(13, 35, 68, 0.08);
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.pub-calendar-cell--weekend {
+  background: rgba(124, 216, 179, 0.12);
+}
+
+.pub-calendar-cell--outside {
+  color: rgba(13, 35, 68, 0.25);
+}
+
+.pub-calendar-cell--selected {
+  background: #55ae90;
+}
+
+.pub-calendar-day {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.pub-calendar-day--event {
+  cursor: pointer;
+}
+
+.pub-calendar-day--event:hover {
+  background: rgba(124, 216, 179, 0.24);
+}
+
+.pub-calendar-day--selected {
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.pub-calendar-day--today:not(.pub-calendar-day--selected) {
+  background: rgba(13, 35, 68, 0.09);
+}
+
+.pub-calendar-marker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 11px solid transparent;
+  border-left: 11px solid transparent;
+}
+
+.pub-calendar-legend {
+  margin-top: auto;
+  min-height: 35px;
+  padding-top: 13px;
+  border-top: 1px solid #e8e3dc;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  color: rgba(13, 35, 68, 0.58);
+  font-size: 12px;
+}
+
+.pub-calendar-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pub-calendar-legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+/* ── Event cards: fixed zones matching the approved two-row grid ───────── */
+.pub-event-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: 180px 1fr;
+  width: 100%;
+  height: 286px;
+  overflow: hidden;
+  border: 1px solid rgba(13, 35, 68, 0.14);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(13, 35, 68, 0.17);
+  text-decoration: none;
+  transition: transform 180ms ease, box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.pub-event-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(54, 125, 103, 0.38);
+  box-shadow: 0 8px 18px rgba(13, 35, 68, 0.2);
+}
+
+.pub-event-card:active {
+  transform: translateY(0) scale(0.992);
+}
+
+.pub-event-card-media {
+  position: relative;
+  overflow: hidden;
+  background: #f1f2f4;
+}
+
+.pub-event-card-image {
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.pub-event-card:hover .pub-event-card-image {
+  transform: scale(1.025);
+}
+
+.pub-event-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(13, 35, 68, 0.17);
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 38px;
+  font-weight: 700;
+}
+
+.pub-event-card-status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  min-height: 28px;
+  padding: 6px 13px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-gilroy), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(13, 35, 68, 0.12);
+}
+
+.pub-event-card-status--planned {
+  background: #7cd8b3;
+  color: #0d2344;
+}
+
+.pub-event-card-status--live {
+  background: #ffd27f;
+  color: #0d2344;
+}
+
+.pub-event-card-status--completed {
+  background: #b7b7b7;
+  color: #0d2344;
+}
+
+.pub-event-card-date {
+  position: absolute;
+  z-index: 3;
+  left: 16px;
+  top: 151px;
+  width: 66px;
+  height: 78px;
+  border: 1px solid rgba(13, 35, 68, 0.12);
+  border-radius: 9px;
+  background: #ffffff;
+  box-shadow: 0 4px 9px rgba(13, 35, 68, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #0d2344;
+  line-height: 1;
+}
+
+.pub-event-card-date-day {
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+}
+
+.pub-event-card-date-month {
+  margin-top: 6px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.pub-event-card-body {
+  position: relative;
+  min-height: 106px;
+  padding: 16px 16px 14px 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pub-event-card-title {
+  margin: 0;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-transform: uppercase;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.pub-event-card-cta {
+  align-self: flex-end;
+  margin-top: auto;
+  min-width: 92px;
+  min-height: 30px;
+  padding: 6px 12px;
+  justify-content: center;
+  border-width: 1px;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 11px;
+}
+
+/* ── Main carousel and quotes: stronger approved depth hierarchy ───────── */
+.pub-carousel-gallery {
+  perspective: 1450px;
+}
+
+.pub-carousel-card {
+  box-shadow: 0 9px 22px rgba(13, 35, 68, 0.24);
+  backface-visibility: hidden;
+}
+
+.quotes-layout {
+  align-items: end;
+}
+
+/* ── Footer optical alignment ──────────────────────────────────────────── */
+.pub-footer-top {
+  align-items: start;
+}
+
+.pub-footer-stationery-img {
+  object-fit: contain;
+  object-position: center top;
+}
+
+@media (max-width: 1439px) {
+  .pub-events-filters-col,
+  .pub-events-calendar-col {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+
+  .pub-calendar-cell {
+    height: clamp(48px, 7vw, 63px);
+  }
+
+  .pub-event-card {
+    height: 300px;
+    grid-template-rows: 185px 1fr;
+  }
+
+  .pub-event-card-date {
+    top: 156px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-events-filters-col,
+  .pub-events-calendar-col {
+    padding: 24px 18px;
+    border-radius: 24px;
+  }
+
+  .pub-calendar-cell {
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .pub-calendar-weekday {
+    font-size: 14px;
+  }
+
+  .pub-event-card {
+    height: 286px;
+    grid-template-rows: 180px 1fr;
+  }
+
+  .pub-event-card-body {
+    padding-left: 92px;
+  }
+}
