@@ -1,0 +1,53 @@
+/* Stage 70 — homepage interaction lock: smooth anchors, complete calendar hover,
+   and approved larger quote-side artwork. */
+
+html {
+  scroll-behavior: smooth;
+}
+
+#main-events {
+  scroll-margin-top: 28px;
+}
+
+/* Every date belonging to the displayed month is interactive, regardless of
+   whether the API returned an event marker for it. */
+.pub-calendar-cell:not(.pub-calendar-cell--outside) .pub-calendar-day {
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside) .pub-calendar-day:hover:not(.pub-calendar-day--selected) {
+  background-color: rgba(124, 216, 179, 0.28);
+  color: #0d2344;
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside) .pub-calendar-day:focus-visible {
+  outline: 2px solid #367d67;
+  outline-offset: -2px;
+}
+
+@media (min-width: 1440px) {
+  /* Bring both approved cut-outs close to the carousel navigation while
+     retaining their bottom-corner anchors. */
+  .quotes-person-img--left {
+    width: 520px;
+    max-width: 520px;
+  }
+
+  .quotes-person-img--right {
+    width: 500px;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 1439px) and (min-width: 768px) {
+  .quotes-person-img--left {
+    width: 360px;
+    max-width: 360px;
+  }
+
+  .quotes-person-img--right {
+    width: 345px;
+    max-width: 345px;
+  }
+}
