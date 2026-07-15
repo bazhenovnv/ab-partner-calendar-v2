@@ -7,34 +7,48 @@ import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 
 const BLUR_PLACEHOLDER =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY4IiBoZWlnaHQ9IjM5NSIgeG1sbnM9Imh0dHA6Ly93d3cub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMEQYMzQ0Ii8+PC9zdmc+';
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDI3IiBoZWlnaHQ9IjQyNyIgeG1sbnM9Imh0dHA6Ly93d3cub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0IiBmaWxsLW9wYWNpdHk9IjAuMDUiLz48L3N2Zz4=';
 
 function circularOffset(idx: number, active: number, total: number): number {
   const d = ((idx - active + total) % total);
   return d > Math.floor(total / 2) ? d - total : d;
 }
 
+/**
+ * Approved desktop Figma geometry:
+ * center   427.25 × 427.25
+ * adjacent 369.47 × 369.47 (scale 0.86476)
+ * outer    309.11 × 307.28 (non-uniform scale)
+ */
 function getCardStyle(offset: number): React.CSSProperties {
   if (offset === 0) {
-    return { transform: 'translateX(0) scale(1) rotateY(0deg)', zIndex: 5, opacity: 1 };
+    return { transform: 'translateX(0) scale(1)', zIndex: 5, opacity: 1 };
   }
+
   const abs = Math.abs(offset);
   const dir = offset > 0 ? 1 : -1;
+
   if (abs === 1) {
     return {
-      transform: `translateX(${dir * 350}px) scale(0.92) rotateY(${-dir * 8}deg)`,
+      transform: `translateX(${dir * 260}px) scale(0.86476)`,
       zIndex: 4,
-      opacity: 0.98,
+      opacity: 1,
     };
   }
+
   if (abs === 2) {
     return {
-      transform: `translateX(${dir * 585}px) scale(0.82) rotateY(${-dir * 14}deg)`,
+      transform: `translateX(${dir * 485}px) scale(0.72349, 0.71920)`,
       zIndex: 3,
-      opacity: 0.94,
+      opacity: 1,
     };
   }
-  return { transform: `translateX(${dir * 720}px) scale(0.66) rotateY(${-dir * 20}deg)`, zIndex: 1, opacity: 0 };
+
+  return {
+    transform: `translateX(${dir * 700}px) scale(0.6)`,
+    zIndex: 1,
+    opacity: 0,
+  };
 }
 
 interface MainEventsBannerProps {
@@ -117,7 +131,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                       alt={event.title}
                       fill
                       loading="lazy"
-                      sizes="268px"
+                      sizes="427px"
                       className="object-cover"
                       placeholder="blur"
                       blurDataURL={BLUR_PLACEHOLDER}
