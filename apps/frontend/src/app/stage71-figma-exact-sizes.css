@@ -1,0 +1,155 @@
+/* Stage 71 — exact approved Figma dimensions (desktop)
+   This file is imported last and intentionally overrides earlier visual stages. */
+
+@media (min-width: 1024px) {
+  /* Main-events carousel: approved card sizes */
+  .pub-carousel-gallery {
+    height: 460px;
+    overflow: hidden;
+  }
+
+  .pub-carousel-card {
+    width: 427.25px;
+    height: 427.25px;
+    margin-left: -213.625px;
+    margin-top: -213.625px;
+    border-radius: 18.26px;
+  }
+
+  .pub-carousel-card-link {
+    border-radius: 18.26px;
+  }
+
+  /* Approved quote composition */
+  .quotes-section {
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+  }
+
+  .quotes-layout {
+    grid-template-columns: 302px minmax(744px, 1fr) 287px;
+    min-height: 362px;
+    align-items: end;
+  }
+
+  .quotes-person-left {
+    width: 302px;
+    min-height: 362px;
+    justify-content: flex-start;
+  }
+
+  .quotes-person-right {
+    width: 287px;
+    min-height: 359px;
+    justify-content: flex-end;
+  }
+
+  .quotes-person-img--left {
+    width: 302px !important;
+    max-width: 302px !important;
+    height: 362px !important;
+    object-fit: contain;
+    object-position: left bottom;
+  }
+
+  .quotes-person-img--right {
+    width: 287px !important;
+    max-width: 287px !important;
+    height: 359px !important;
+    object-fit: contain;
+    object-position: right bottom;
+  }
+
+  .quotes-card--approved-frame {
+    width: 744px;
+    height: 214px;
+    min-width: 744px;
+    min-height: 214px;
+    margin: 0 auto 46px;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    justify-self: center;
+    position: relative;
+  }
+
+  .quotes-card--approved-frame::before,
+  .quotes-card--approved-frame::after {
+    display: none;
+  }
+
+  .quotes-frame-art {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 744px;
+    height: 214px;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 76px 34px;
+    box-sizing: border-box;
+  }
+
+  .quotes-card--approved-frame .quotes-text {
+    margin: 0;
+    max-width: 590px;
+    font-size: 16px;
+    line-height: 1.35;
+    text-align: center;
+  }
+
+  /* Footer stationery — approved 450×427 artwork */
+  .pub-footer-stationery {
+    width: 450px;
+    height: 427px;
+    align-items: flex-end;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+
+  .pub-footer-stationery-img {
+    width: 450px !important;
+    height: 427px !important;
+    max-width: none;
+    object-fit: contain;
+    object-position: right bottom;
+  }
+
+  /* Event cards — approved 428×300 */
+  .pub-event-card {
+    width: 428px;
+    height: 300px;
+    min-width: 428px;
+    min-height: 300px;
+    max-width: 428px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .pub-event-card-media,
+  .pub-event-card--composite .pub-event-card-media {
+    width: 428px;
+    height: 300px;
+  }
+
+  .pub-event-card--composite .pub-event-card-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  .pub-events-outer .grid.desktop\:grid-cols-3 {
+    grid-template-columns: repeat(3, 428px);
+    column-gap: 53px;
+    row-gap: 53px;
+  }
+}
