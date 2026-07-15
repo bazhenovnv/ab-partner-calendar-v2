@@ -13,6 +13,7 @@ import './stage67-final-spacing-footer.css';
 import './stage68-header-quotes-footer.css';
 import './stage69-canvas-calendar-footer.css';
 import './stage70-calendar-navigation.css';
+import './stage71-figma-exact-sizes.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
