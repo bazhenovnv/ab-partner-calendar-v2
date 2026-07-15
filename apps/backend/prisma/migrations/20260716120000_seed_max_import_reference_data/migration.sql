@@ -20,7 +20,7 @@ SET
 
 INSERT INTO "HashtagMapping" ("id", "hashtag", "directionId", "isMainEvent", "createdAt")
 VALUES
-  (gen_random_uuid()::text, '#Хит',        NULL, false, CURRENT_TIMESTAMP),
+  (gen_random_uuid()::text, '#Хит',        NULL, true, CURRENT_TIMESTAMP),
   (gen_random_uuid()::text, '#УСН',        (SELECT "id" FROM "Direction" WHERE "slug" = 'sno'), false, CURRENT_TIMESTAMP),
   (gen_random_uuid()::text, '#АУСН',       (SELECT "id" FROM "Direction" WHERE "slug" = 'sno'), false, CURRENT_TIMESTAMP),
   (gen_random_uuid()::text, '#ПСН',        (SELECT "id" FROM "Direction" WHERE "slug" = 'sno'), false, CURRENT_TIMESTAMP),
