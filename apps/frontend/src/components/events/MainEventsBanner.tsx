@@ -22,19 +22,19 @@ function getCardStyle(offset: number): React.CSSProperties {
   const dir = offset > 0 ? 1 : -1;
   if (abs === 1) {
     return {
-      transform: `translateX(${dir * 205}px) scale(0.92) rotateY(${-dir * 8}deg)`,
+      transform: `translateX(${dir * 350}px) scale(0.92) rotateY(${-dir * 8}deg)`,
       zIndex: 4,
       opacity: 0.98,
     };
   }
   if (abs === 2) {
     return {
-      transform: `translateX(${dir * 380}px) scale(0.82) rotateY(${-dir * 14}deg)`,
+      transform: `translateX(${dir * 585}px) scale(0.82) rotateY(${-dir * 14}deg)`,
       zIndex: 3,
       opacity: 0.94,
     };
   }
-  return { transform: `translateX(${dir * 540}px) scale(0.66) rotateY(${-dir * 20}deg)`, zIndex: 1, opacity: 0 };
+  return { transform: `translateX(${dir * 720}px) scale(0.66) rotateY(${-dir * 20}deg)`, zIndex: 1, opacity: 0 };
 }
 
 interface MainEventsBannerProps {
