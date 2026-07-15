@@ -38,7 +38,7 @@
 
   .quotes-person {
     position: absolute !important;
-    bottom: 0 !important;
+    bottom: -18px !important;
     display: block !important;
     min-height: 0 !important;
     margin: 0 !important;
