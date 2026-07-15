@@ -20,91 +20,142 @@
     border-radius: 18.26px;
   }
 
-  /* Approved quote composition */
+  /* Approved quote composition.
+     Use one positioned canvas so older grid/flex rules cannot displace the text or people. */
   .quotes-section {
-    padding-left: 0;
-    padding-right: 0;
-    padding-bottom: 0;
+    padding: 0 !important;
+    overflow: hidden;
   }
 
   .quotes-layout {
-    grid-template-columns: 302px minmax(744px, 1fr) 287px;
-    min-height: 362px;
-    align-items: end;
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 362px !important;
+    min-height: 362px !important;
+    margin: 0 !important;
+  }
+
+  .quotes-person {
+    position: absolute !important;
+    bottom: 0 !important;
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    z-index: 2;
   }
 
   .quotes-person-left {
-    width: 302px;
-    min-height: 362px;
-    justify-content: flex-start;
+    left: 0 !important;
+    width: 302px !important;
+    height: 362px !important;
   }
 
   .quotes-person-right {
-    width: 287px;
-    min-height: 359px;
-    justify-content: flex-end;
+    right: 0 !important;
+    width: 287px !important;
+    height: 359px !important;
   }
 
   .quotes-person-img--left {
+    display: block !important;
     width: 302px !important;
-    max-width: 302px !important;
+    max-width: none !important;
     height: 362px !important;
-    object-fit: contain;
-    object-position: left bottom;
+    object-fit: contain !important;
+    object-position: left bottom !important;
   }
 
   .quotes-person-img--right {
+    display: block !important;
     width: 287px !important;
-    max-width: 287px !important;
+    max-width: none !important;
     height: 359px !important;
-    object-fit: contain;
-    object-position: right bottom;
+    object-fit: contain !important;
+    object-position: right bottom !important;
   }
 
   .quotes-card--approved-frame {
-    width: 744px;
-    height: 214px;
-    min-width: 744px;
-    min-height: 214px;
-    margin: 0 auto 46px;
-    padding: 0;
-    border-radius: 0;
-    box-shadow: none;
-    justify-self: center;
-    position: relative;
+    position: absolute !important;
+    top: 72px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 744px !important;
+    height: 214px !important;
+    min-width: 744px !important;
+    min-height: 214px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    z-index: 3;
   }
 
   .quotes-card--approved-frame::before,
   .quotes-card--approved-frame::after {
-    display: none;
+    content: none !important;
+    display: none !important;
   }
 
   .quotes-frame-art {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 744px;
-    height: 214px;
-    object-fit: contain;
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 744px !important;
+    height: 214px !important;
+    object-fit: fill !important;
     pointer-events: none;
+    z-index: 0;
   }
 
   .quotes-card--approved-frame .quotes-body {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 76px 34px;
-    box-sizing: border-box;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 744px !important;
+    height: 214px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 36px 76px 30px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 1;
+  }
+
+  .quotes-card--approved-frame .quotes-body.quotes-visible {
+    transform: none !important;
+  }
+
+  .quotes-card--approved-frame .quotes-body.quotes-hidden {
+    transform: translateY(4px) !important;
+  }
+
+  .quotes-card--approved-frame .quotes-blockquote {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
   }
 
   .quotes-card--approved-frame .quotes-text {
-    margin: 0;
-    max-width: 590px;
-    font-size: 16px;
-    line-height: 1.35;
-    text-align: center;
+    width: 100% !important;
+    max-width: 590px !important;
+    margin: 0 auto !important;
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+  }
+
+  .quotes-card--approved-frame .quotes-author {
+    margin-top: 8px !important;
+    text-align: center !important;
   }
 
   /* Footer stationery — approved 450×427 artwork */
