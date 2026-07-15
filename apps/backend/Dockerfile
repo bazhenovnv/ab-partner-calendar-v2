@@ -21,6 +21,26 @@ RUN pnpm --filter @ab-afisha/shared build
 
 FROM shared-build AS build
 COPY apps/backend ./apps/backend
+# MAX GET /updates is a long-poll endpoint. The hourly reconciliation job must
+# request a one-second server timeout so an empty queue is not reported as an
+# application TimeoutError after 30 seconds. Keep this build guard idempotent
+# until the source-level change is present in every deployment checkout.
+RUN python3 - <<'PY'
+from pathlib import Path
+
+path = Path('/app/apps/backend/src/modules/max-import/max-import.service.ts')
+text = path.read_text()
+needle = "      types: 'message_created,message_edited,message_removed,bot_added,bot_removed',\n"
+addition = (
+    needle
+    + "      // Hourly reconciliation is a short poll, not a persistent long-poll connection.\n"
+    + "      timeout: '1',\n"
+)
+if "      timeout: '1',\n" not in text:
+    if needle not in text:
+        raise SystemExit('MAX poll URLSearchParams block not found')
+    path.write_text(text.replace(needle, addition, 1))
+PY
 # prebuild script in apps/backend/package.json runs "prisma generate" first
 RUN pnpm --filter backend run build
 
