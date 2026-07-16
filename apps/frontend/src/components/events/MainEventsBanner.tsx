@@ -18,29 +18,50 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const [current, setCurrent] = useState(0);
 
   const goTo = useCallback(
-    (i: number) => setCurrent(((i % events.length) + events.length) % events.length),
+    (index: number) => {
+      if (events.length === 0) return;
+      setCurrent(((index % events.length) + events.length) % events.length);
+    },
     [events.length],
   );
 
-  if (!events.length) return null;
+  if (!events.length) {
+    return (
+      <section
+        className="flex min-h-[280px] w-full items-center justify-center bg-primary px-6 text-center text-white tablet:min-h-[360px]"
+        aria-label="Главные мероприятия"
+      >
+        <div>
+          <h2 className="font-montserrat text-2xl font-bold tablet:text-3xl">
+            Главные мероприятия
+          </h2>
+          <p className="mt-3 text-sm text-white/70 tablet:text-base">
+            Архив мероприятий загружается. Блок появится автоматически после синхронизации данных.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
-  const event = events[current];
+  const safeCurrent = current >= events.length ? 0 : current;
+  const event = events[safeCurrent];
   const image = event.images?.[0];
   const imgUrl = image?.mainEventUrl ?? image?.eventCardUrl ?? image?.originalUrl;
   const cityLabel = event.city?.name ?? event.cityName;
+  const directions = event.directions ?? [];
 
   return (
     <section
-      className="relative w-full bg-primary overflow-hidden"
+      className="relative w-full overflow-hidden bg-primary"
       style={{ minHeight: '360px' }}
       aria-label="Главные мероприятия"
       aria-roledescription="carousel"
     >
       <div
-        className="relative aspect-[21/9] max-h-[520px] min-h-[280px] tablet:min-h-[360px]"
+        className="relative min-h-[360px] tablet:min-h-[430px] desktop:min-h-[520px]"
         aria-live="polite"
         aria-atomic="true"
-        aria-label={`Мероприятие ${current + 1} из ${events.length}: ${event.title}`}
+        aria-label={`Мероприятие ${safeCurrent + 1} из ${events.length}: ${event.title}`}
       >
         {imgUrl ? (
           <Image
@@ -49,87 +70,118 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
             fill
             priority
             sizes="100vw"
-            className="object-cover transition-opacity duration-500"
+            className="object-contain object-center transition-opacity duration-500"
             placeholder="blur"
             blurDataURL={BLUR_PLACEHOLDER}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary to-selected-day" />
+          <div className="h-full w-full bg-gradient-to-br from-primary to-selected-day" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 tablet:p-10 desktop:p-14 max-w-[900px]">
-          <div className="flex flex-wrap gap-2 mb-3">
-            {event.directions.slice(0, 2).map((d) => (
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/35 to-primary/10" />
+
+        <div className="absolute bottom-0 left-0 right-0 max-w-[900px] p-6 tablet:p-10 desktop:p-14">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {directions.slice(0, 2).map((direction) => (
               <span
-                key={d.direction.slug}
-                className="text-xs bg-mint/20 text-mint px-3 py-1 rounded-full font-medium"
+                key={direction.direction.slug}
+                className="rounded-full bg-mint/20 px-3 py-1 text-xs font-medium text-mint"
               >
-                {d.direction.name}
+                {direction.direction.name}
               </span>
             ))}
-            <span className="text-xs bg-white/10 text-white/80 px-3 py-1 rounded-full">
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80">
               {formatFormat(event.format)}
               {cityLabel && event.format === 'OFFLINE' ? ` · ${cityLabel}` : ''}
             </span>
           </div>
 
-          <h2 className="font-montserrat font-bold text-white text-2xl tablet:text-3xl desktop:text-4xl leading-tight mb-2 line-clamp-3">
+          <h2 className="mb-2 line-clamp-3 font-montserrat text-2xl font-bold leading-tight text-white tablet:text-3xl desktop:text-4xl">
             {event.title}
           </h2>
 
-          <p className="text-white/70 text-sm tablet:text-base mb-4">
+          <p className="mb-4 text-sm text-white/70 tablet:text-base">
             {formatEventDate(event.startDate, event.endDate)}
             {event.startTime && <span> · {event.startTime} МСК</span>}
           </p>
 
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center gap-2 bg-mint text-primary font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-mint/90 active:bg-mint/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+            className="inline-flex items-center gap-2 rounded-xl bg-mint px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-mint/90 active:bg-mint/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
             Подробнее
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M3 7h8M8 3.5l3.5 3.5L8 10.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M3 7h8M8 3.5l3.5 3.5L8 10.5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </Link>
         </div>
       </div>
 
       {events.length > 1 && (
-        <div
-          className="absolute bottom-4 right-6 tablet:bottom-6 tablet:right-10 flex gap-2"
-          role="tablist"
-          aria-label="Навигация по мероприятиям"
-        >
-          {events.map((ev, i) => (
-            <button
-              key={ev.id}
-              type="button"
-              role="tab"
-              onClick={() => goTo(i)}
-              onKeyDown={(e) => {
-                if (e.key === 'ArrowRight') goTo(i + 1);
-                if (e.key === 'ArrowLeft') goTo(i - 1);
-              }}
-              aria-label={`Мероприятие ${i + 1}: ${ev.title}`}
-              aria-selected={i === current}
-              tabIndex={i === current ? 0 : -1}
-              className={cn(
-                'relative h-8 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-full',
-                i === current ? 'w-8' : 'w-6',
-              )}
-            >
-              <span
+        <>
+          <button
+            type="button"
+            onClick={() => goTo(safeCurrent - 1)}
+            aria-label="Предыдущее мероприятие"
+            className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-primary/70 text-white backdrop-blur-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white tablet:left-6"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M12.5 4.5 7 10l5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => goTo(safeCurrent + 1)}
+            aria-label="Следующее мероприятие"
+            className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-primary/70 text-white backdrop-blur-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white tablet:right-6"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="m7.5 4.5 5.5 5.5-5.5 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <div
+            className="absolute bottom-4 right-6 flex gap-2 tablet:bottom-6 tablet:right-10"
+            role="tablist"
+            aria-label="Навигация по мероприятиям"
+          >
+            {events.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                onClick={() => goTo(index)}
+                onKeyDown={(keyboardEvent) => {
+                  if (keyboardEvent.key === 'ArrowRight') goTo(index + 1);
+                  if (keyboardEvent.key === 'ArrowLeft') goTo(index - 1);
+                }}
+                aria-label={`Мероприятие ${index + 1}: ${item.title}`}
+                aria-selected={index === safeCurrent}
+                tabIndex={index === safeCurrent ? 0 : -1}
                 className={cn(
-                  'block h-2 rounded-full transition-all duration-300',
-                  i === current
-                    ? 'bg-mint w-5 scale-100'
-                    : 'bg-white/40 hover:bg-white/70 active:bg-white/90 w-2',
+                  'relative flex h-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                  index === safeCurrent ? 'w-8' : 'w-6',
                 )}
-              />
-            </button>
-          ))}
-        </div>
+              >
+                <span
+                  className={cn(
+                    'block h-2 rounded-full transition-all duration-300',
+                    index === safeCurrent
+                      ? 'w-5 scale-100 bg-mint'
+                      : 'w-2 bg-white/40 hover:bg-white/70 active:bg-white/90',
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </section>
   );
