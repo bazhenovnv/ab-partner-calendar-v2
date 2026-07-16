@@ -19,7 +19,7 @@ interface RawHistoryResponse {
   messages?: RawHistoryMessage[];
 }
 
-interface BackfillState {
+type BackfillState = Record<string, string | number | boolean | null> & {
   cursor: number | null;
   lowerBound: number | null;
   pagesProcessed: number;
@@ -27,8 +27,8 @@ interface BackfillState {
   completed: boolean;
   startedAt: string;
   updatedAt: string;
-  completedAt?: string;
-}
+  completedAt: string | null;
+};
 
 export interface BackfillOptions {
   maxPages?: number;
@@ -70,19 +70,7 @@ export class MaxBackfillService {
   async run(options: BackfillOptions = {}): Promise<BackfillResult> {
     if (this.running) {
       const state = (await this.getState()) ?? this.newState(null, null);
-      return {
-        ok: false,
-        pagesFetched: 0,
-        messagesFound: 0,
-        processed: 0,
-        imported: 0,
-        updated: 0,
-        skipped: 0,
-        errors: ['MAX history backfill is already running'],
-        completed: state.completed,
-        nextCursor: state.cursor,
-        state,
-      };
+      return this.emptyResult(false, state, ['MAX history backfill is already running']);
     }
 
     const token = this.config.get<string>('MAX_BOT_TOKEN');
@@ -90,19 +78,11 @@ export class MaxBackfillService {
     const sourceId = sourceIdRaw ? Number.parseInt(sourceIdRaw, 10) : Number.NaN;
     if (!token || !Number.isFinite(sourceId)) {
       const state = (await this.getState()) ?? this.newState(null, null);
-      return {
-        ok: false,
-        pagesFetched: 0,
-        messagesFound: 0,
-        processed: 0,
-        imported: 0,
-        updated: 0,
-        skipped: 0,
-        errors: [!token ? 'MAX_BOT_TOKEN not set' : 'MAX_SOURCE_CHANNEL_ID not configured'],
-        completed: false,
-        nextCursor: state.cursor,
+      return this.emptyResult(
+        false,
         state,
-      };
+        [!token ? 'MAX_BOT_TOKEN not set' : 'MAX_SOURCE_CHANNEL_ID not configured'],
+      );
     }
 
     this.running = true;
@@ -118,43 +98,34 @@ export class MaxBackfillService {
       }
       if (lowerBound !== null) state.lowerBound = lowerBound;
 
-      const result: BackfillResult = {
-        ok: true,
-        pagesFetched: 0,
-        messagesFound: 0,
-        processed: 0,
-        imported: 0,
-        updated: 0,
-        skipped: 0,
-        errors: [],
-        completed: false,
-        nextCursor: state.cursor,
-        state,
-      };
-
+      const result: BackfillResult = this.emptyResult(true, state);
       let cursor = state.cursor ?? Date.now() + 1;
+
       for (let page = 0; page < maxPages; page += 1) {
         const messages = await this.fetchPage(token, sourceId, cursor, state.lowerBound);
         result.pagesFetched += 1;
         result.messagesFound += messages.length;
 
         if (messages.length === 0) {
-          state.completed = true;
-          state.completedAt = new Date().toISOString();
+          this.markCompleted(state);
           break;
         }
 
         let oldestTimestamp = cursor;
-        for (const message of messages) {
-          const timestamp = this.normalizeTimestamp(message.timestamp);
-          const externalId = message.body?.mid;
-          if (timestamp === undefined || !externalId) {
+        for (const rawMessage of messages) {
+          const timestamp = this.normalizeTimestamp(rawMessage.timestamp);
+          const externalId = rawMessage.body?.mid;
+          const hasImage = rawMessage.body?.attachments?.some((attachment) => {
+            if (!attachment || typeof attachment !== 'object') return false;
+            return (attachment as { type?: unknown }).type === 'image';
+          }) === true;
+
+          if (timestamp === undefined || !externalId || (!rawMessage.body?.text?.trim() && !hasImage)) {
             result.skipped += 1;
             continue;
           }
           if (state.lowerBound !== null && timestamp < state.lowerBound) {
-            state.completed = true;
-            state.completedAt = new Date().toISOString();
+            this.markCompleted(state);
             continue;
           }
 
@@ -164,12 +135,23 @@ export class MaxBackfillService {
             select: { id: true },
           });
 
+          const message = this.withSourcePostUrl(rawMessage, externalId);
           try {
             await this.maxImportService.processWebhookUpdate({
               update_type: 'message_created',
               timestamp,
               message,
             });
+
+            const stored = await this.prisma.event.findFirst({
+              where: { source: 'MAX', externalId },
+              select: { id: true },
+            });
+            if (!stored) {
+              result.errors.push(`mid=${externalId}: event was not stored`);
+              continue;
+            }
+
             result.processed += 1;
             if (existing) result.updated += 1;
             else result.imported += 1;
@@ -192,8 +174,7 @@ export class MaxBackfillService {
         await this.saveState(state);
 
         if (state.completed || messages.length < PAGE_SIZE) {
-          state.completed = true;
-          state.completedAt = state.completedAt ?? new Date().toISOString();
+          this.markCompleted(state);
           break;
         }
       }
@@ -241,6 +222,38 @@ export class MaxBackfillService {
     return Array.isArray(data.messages) ? data.messages : [];
   }
 
+  private withSourcePostUrl(message: RawHistoryMessage, externalId: string): RawHistoryMessage {
+    const channelUrl = this.config.get<string>('MAX_SOURCE_CHANNEL_URL')?.replace(/\/+$/, '');
+    if (!channelUrl || !message.body) return message;
+
+    const sourcePostUrl = `${channelUrl}?mid=${encodeURIComponent(externalId)}`;
+    const text = message.body.text ?? '';
+    const hasExternalUrl = /https?:\/\/\S+/i.test(text);
+    return {
+      ...message,
+      body: {
+        ...message.body,
+        text: hasExternalUrl ? text : `${text.trim()}\n\n${sourcePostUrl}`.trim(),
+      },
+    };
+  }
+
+  private emptyResult(ok: boolean, state: BackfillState, errors: string[] = []): BackfillResult {
+    return {
+      ok,
+      pagesFetched: 0,
+      messagesFound: 0,
+      processed: 0,
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors,
+      completed: state.completed,
+      nextCursor: state.cursor,
+      state,
+    };
+  }
+
   private newState(cursor: number | null, lowerBound: number | null): BackfillState {
     const now = new Date().toISOString();
     return {
@@ -251,7 +264,13 @@ export class MaxBackfillService {
       completed: false,
       startedAt: now,
       updatedAt: now,
+      completedAt: null,
     };
+  }
+
+  private markCompleted(state: BackfillState): void {
+    state.completed = true;
+    state.completedAt = state.completedAt ?? new Date().toISOString();
   }
 
   private parseState(value: unknown): BackfillState | null {
@@ -266,7 +285,7 @@ export class MaxBackfillService {
       completed: state.completed === true,
       startedAt: state.startedAt,
       updatedAt: state.updatedAt,
-      completedAt: typeof state.completedAt === 'string' ? state.completedAt : undefined,
+      completedAt: typeof state.completedAt === 'string' ? state.completedAt : null,
     };
   }
 
