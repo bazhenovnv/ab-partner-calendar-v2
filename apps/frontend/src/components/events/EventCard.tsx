@@ -56,7 +56,6 @@ export function EventCard({ event, className }: EventCardProps) {
         </div>
         <div className={styles.eventBody}>
           <h3 className={styles.eventTitle}>{event.title}</h3>
-          {event.speaker && <p className={styles.eventSpeaker}><strong>Спикер: {event.speaker}</strong></p>}
           <span className={styles.eventCta}>Подробнее →</span>
         </div>
       </div>
