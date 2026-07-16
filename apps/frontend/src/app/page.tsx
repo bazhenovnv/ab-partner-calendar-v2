@@ -5,7 +5,13 @@ import { EventsSection } from '@/components/events/EventsSection';
 import { MainEventsBanner } from '@/components/events/MainEventsBanner';
 import { EventModalProvider } from '@/components/events/EventModalProvider';
 import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
-import { fetchMainEvents, fetchPublicEvents, fetchDirections, fetchPublicQuotes } from '@/lib/api';
+import {
+  fetchMainEvents,
+  fetchLatestCompletedEvents,
+  fetchPublicEvents,
+  fetchDirections,
+  fetchPublicQuotes,
+} from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,48 +38,54 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   let main: Awaited<ReturnType<typeof fetchMainEvents>> = [];
-  let events: Awaited<ReturnType<typeof fetchPublicEvents>> = { events: [], total: 0, isFallback: false };
+  let completed: Awaited<ReturnType<typeof fetchLatestCompletedEvents>> = [];
+  let events: Awaited<ReturnType<typeof fetchPublicEvents>> = {
+    events: [],
+    total: 0,
+    isFallback: false,
+  };
   let dirs: Awaited<ReturnType<typeof fetchDirections>> = [];
   let qs: Awaited<ReturnType<typeof fetchPublicQuotes>> = [];
 
   if (USE_FIXTURES) {
-    const { DEV_MAIN_EVENTS, DEV_EVENTS_RESPONSE, DEV_QUOTES } = await import('@/lib/dev-fixtures');
+    const { DEV_MAIN_EVENTS, DEV_EVENTS_RESPONSE, DEV_QUOTES } =
+      await import('@/lib/dev-fixtures');
+
     main = DEV_MAIN_EVENTS;
     events = DEV_EVENTS_RESPONSE;
     qs = DEV_QUOTES;
   } else {
-    const [mainEvents, initialEvents, directions, quotes] = await Promise.allSettled([
-      fetchMainEvents(),
-      fetchPublicEvents({ page: 1, limit: 6 }),
-      fetchDirections(),
-      fetchPublicQuotes(),
-    ]);
+    const [mainEvents, completedEvents, initialEvents, directions, quotes] =
+      await Promise.allSettled([
+        fetchMainEvents(),
+        fetchLatestCompletedEvents(5),
+        fetchPublicEvents({ page: 1, limit: 6 }),
+        fetchDirections(),
+        fetchPublicQuotes(),
+      ]);
 
     main = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
-    events = initialEvents.status === 'fulfilled'
-      ? initialEvents.value
-      : { events: [], total: 0, isFallback: false };
+    completed =
+      completedEvents.status === 'fulfilled' ? completedEvents.value : [];
+    events =
+      initialEvents.status === 'fulfilled'
+        ? initialEvents.value
+        : { events: [], total: 0, isFallback: false };
     dirs = directions.status === 'fulfilled' ? directions.value : [];
     qs = quotes.status === 'fulfilled' ? quotes.value : [];
-
-    if (main.length === 0) {
-      try {
-        const completed = await fetchPublicEvents({ page: 1, limit: 5, autoStatus: 'COMPLETED' });
-        main = completed.events.slice(0, 5);
-      } catch {
-        main = [];
-      }
-    }
   }
+
+  const carouselEvents = main.length > 0 ? main : completed;
 
   return (
     <PublicShell>
       <EventModalProvider>
         <HeroSection />
         <EventsSection initialData={events} directions={dirs} />
+
         <div className="pub-main-quotes-wrapper">
           <div className="pub-main-quotes-inner">
-            <MainEventsBanner events={main} />
+            <MainEventsBanner events={carouselEvents} />
             {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
           </div>
         </div>
