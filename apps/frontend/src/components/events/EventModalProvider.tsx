@@ -3,11 +3,9 @@
 import Image from 'next/image';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { PublicEvent } from '@/types/event';
+import styles from './events-runtime.module.css';
 
-interface EventModalContextValue {
-  openEvent: (event: PublicEvent) => void;
-}
-
+interface EventModalContextValue { openEvent: (event: PublicEvent) => void; }
 const EventModalContext = createContext<EventModalContextValue | null>(null);
 
 export function useEventModal(): EventModalContextValue {
@@ -20,11 +18,7 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   const [event, setEvent] = useState<PublicEvent | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const close = useCallback(() => {
-    setEvent(null);
-    setLoading(false);
-  }, []);
-
+  const close = useCallback(() => { setEvent(null); setLoading(false); }, []);
   const openEvent = useCallback(async (preview: PublicEvent) => {
     setEvent(preview);
     setLoading(true);
@@ -51,7 +45,6 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   }, [close, event]);
 
   const value = useMemo(() => ({ openEvent }), [openEvent]);
-
   return (
     <EventModalContext.Provider value={value}>
       {children}
@@ -69,44 +62,34 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
   }).format(new Date(event.startDate));
 
   return (
-    <div className="event-modal-backdrop" role="presentation" onMouseDown={onClose}>
-      <article
-        className="event-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="event-modal-title"
-        onMouseDown={(mouseEvent) => mouseEvent.stopPropagation()}
-      >
-        <button type="button" className="event-modal-close" onClick={onClose} aria-label="Закрыть окно">×</button>
-        <div className="event-modal-media">
+    <div className={styles.modalBackdrop} role="presentation" onMouseDown={onClose}>
+      <article className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="event-modal-title" onMouseDown={(eventObject) => eventObject.stopPropagation()}>
+        <button type="button" className={styles.modalClose} onClick={onClose} aria-label="Закрыть окно">×</button>
+        <div className={styles.modalMedia}>
           {imageUrl ? (
-            <Image src={imageUrl} alt={event.title} fill unoptimized priority className="event-modal-image" />
+            <Image src={imageUrl} alt={event.title} fill unoptimized priority className={styles.modalImage} />
           ) : (
-            <div className="event-modal-image-placeholder" aria-hidden="true">АБ</div>
+            <div className={styles.modalPlaceholder} aria-hidden="true">АБ</div>
           )}
         </div>
-        <div className="event-modal-content">
-          <div className="event-modal-meta">
+        <div className={styles.modalContent}>
+          <div className={styles.modalMeta}>
             <span>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</span>
             <span>{event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн'}</span>
             <span>{event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно'}</span>
           </div>
-          <h2 id="event-modal-title" className="event-modal-title">{event.title}</h2>
-          {event.speaker && <p className="event-modal-speaker">Спикер: {event.speaker}</p>}
-          <div className="event-modal-description">
+          <h2 id="event-modal-title" className={styles.modalTitle}>{event.title}</h2>
+          {event.speaker && <p className={styles.modalSpeaker}>Спикер: {event.speaker}</p>}
+          <div className={styles.modalDescription}>
             {(event.fullDescription ?? event.shortDescription ?? '').split('\n').filter(Boolean).map((line, index) => (
               <p key={`${index}-${line.slice(0, 20)}`}>{line}</p>
             ))}
           </div>
-          <div className="event-modal-actions">
-            {registrationUrl && (
-              <a href={registrationUrl} target="_blank" rel="noopener noreferrer" className="event-modal-primary-btn">
-                Подробнее →
-              </a>
-            )}
-            <button type="button" className="event-modal-secondary-btn" onClick={onClose}>Закрыть</button>
+          <div className={styles.modalActions}>
+            {registrationUrl && <a href={registrationUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>Подробнее →</a>}
+            <button type="button" className={styles.modalSecondary} onClick={onClose}>Закрыть</button>
           </div>
-          {loading && <span className="event-modal-loading">Обновляем данные…</span>}
+          {loading && <span className={styles.modalLoading}>Обновляем данные…</span>}
         </div>
       </article>
     </div>
