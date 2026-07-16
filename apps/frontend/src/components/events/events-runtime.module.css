@@ -295,7 +295,7 @@
 
 @media (max-width: 767px) {
   .eventCard { aspect-ratio: 603 / 441; }
-  .eventCardMedia { inset-bottom: 124px; }
+  .eventCardMedia { bottom: 124px; }
   .infoPanel, .eventBody { min-height: 124px; }
   .eventBody { padding-left: 94px; }
   .dateBadge { left: 14px; top: -42px; width: 68px; height: 86px; }
