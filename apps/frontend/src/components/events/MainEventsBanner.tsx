@@ -23,7 +23,7 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
   if (abs === 1) {
     return {
       ...size,
-      transform: `translateX(${dir * (compact ? 125 : 260)}px) scale(0.86476)`,
+      transform: `translateX(${dir * (compact ? 122 : 252)}px) scale(0.86476)`,
       zIndex: 4,
       opacity: 1,
     };
@@ -31,14 +31,14 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
   if (abs === 2) {
     return {
       ...size,
-      transform: `translateX(${dir * (compact ? 230 : 485)}px) scale(0.72349, 0.71920)`,
+      transform: `translateX(${dir * (compact ? 220 : 466)}px) scale(0.72349, 0.71920)`,
       zIndex: 3,
       opacity: 1,
     };
   }
   return {
     ...size,
-    transform: `translateX(${dir * (compact ? 340 : 700)}px) scale(0.6)`,
+    transform: `translateX(${dir * (compact ? 330 : 680)}px) scale(0.6)`,
     zIndex: 1,
     opacity: 0,
   };
@@ -107,7 +107,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                 const offset = circularOffset(idx, active, total);
                 if (Math.abs(offset) > 2) return null;
                 const image = event.images?.[0];
-                const imgUrl = image?.mainEventUrl ?? image?.originalUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
+                // Prefer the untouched source artwork. Generated square variants may already be cropped.
+                const imgUrl = image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
                 const isCenter = offset === 0;
                 return (
                   <button
