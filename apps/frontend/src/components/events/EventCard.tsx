@@ -1,8 +1,10 @@
+'use client';
+
 import Image from 'next/image';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatEventDateParts } from '@/lib/format';
 import type { PublicEvent } from '@/types/event';
+import { useEventModal } from './EventModalProvider';
 
 interface EventCardProps {
   event: PublicEvent;
@@ -16,21 +18,18 @@ const STATUS_LABEL: Record<string, { label: string; className: string }> = {
 };
 
 export function EventCard({ event, className }: EventCardProps) {
+  const { openEvent } = useEventModal();
   const image = event.images?.[0];
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
-  const isApprovedComposite = Boolean(imgUrl?.includes('/events/event-card-'));
   const dateParts = formatEventDateParts(event.startDate);
-  const status = STATUS_LABEL[event.autoStatus] ?? null;
+  const status = STATUS_LABEL[event.autoStatus] ?? STATUS_LABEL.PLANNED;
 
   return (
-    <Link
-      href={`/events/${event.id}`}
-      className={cn(
-        'pub-event-card group',
-        isApprovedComposite && 'pub-event-card--composite',
-        className,
-      )}
-      aria-label={`Перейти к мероприятию: ${event.title}`}
+    <button
+      type="button"
+      className={cn('pub-event-card group', className)}
+      aria-label={`Открыть мероприятие: ${event.title}`}
+      onClick={() => openEvent(event)}
     >
       <div className="pub-event-card-media">
         {imgUrl ? (
@@ -41,34 +40,25 @@ export function EventCard({ event, className }: EventCardProps) {
             unoptimized
             loading="lazy"
             sizes="(max-width: 767px) 100vw, (max-width: 1439px) 50vw, 428px"
-            className="pub-event-card-image object-cover object-center"
+            className="pub-event-card-image"
           />
         ) : (
-          <div className="pub-event-card-placeholder" aria-hidden="true">
-            <span>АБ</span>
-          </div>
+          <div className="pub-event-card-placeholder" aria-hidden="true"><span>АБ</span></div>
         )}
-
-        {!isApprovedComposite && status?.label && (
-          <span className={cn('pub-event-card-status', status.className)}>
-            {status.label}
-          </span>
-        )}
+        <span className={cn('pub-event-card-status', status.className)}>{status.label}</span>
       </div>
 
-      {!isApprovedComposite && (
-        <>
-          <div className="pub-event-card-date" aria-label={`${dateParts.day} ${dateParts.month}`}>
-            <span className="pub-event-card-date-day">{dateParts.day}</span>
-            <span className="pub-event-card-date-month">{dateParts.month}</span>
-          </div>
-
-          <div className="pub-event-card-body">
-            <h3 className="pub-event-card-title">{event.title}</h3>
-            <span className="pub-event-card-cta">Подробнее →</span>
-          </div>
-        </>
-      )}
-    </Link>
+      <div className="pub-event-card-info-panel">
+        <div className="pub-event-card-date" aria-label={`${dateParts.day} ${dateParts.month}`}>
+          <span className="pub-event-card-date-day">{dateParts.day}</span>
+          <span className="pub-event-card-date-month">{dateParts.month}</span>
+        </div>
+        <div className="pub-event-card-body">
+          <h3 className="pub-event-card-title">{event.title}</h3>
+          {event.speaker && <p className="pub-event-card-speaker">Спикер: {event.speaker}</p>}
+          <span className="pub-event-card-cta">Подробнее →</span>
+        </div>
+      </div>
+    </button>
   );
 }
