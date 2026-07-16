@@ -3,6 +3,7 @@ import { PublicShell } from '@/components/layout/PublicShell';
 import { HeroSection } from '@/components/HeroSection';
 import { EventsSection } from '@/components/events/EventsSection';
 import { MainEventsBanner } from '@/components/events/MainEventsBanner';
+import { EventModalProvider } from '@/components/events/EventModalProvider';
 import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
 import { fetchMainEvents, fetchPublicEvents, fetchDirections, fetchPublicQuotes } from '@/lib/api';
 
@@ -17,9 +18,7 @@ export const metadata: Metadata = {
   title: 'АБ Афиша Бухгалтера — Главные мероприятия для бухгалтеров',
   description:
     'Онлайн и офлайн события для профессионального роста, обмена опытом и актуальной практики бухгалтеров по всей России.',
-  alternates: {
-    canonical: SITE_URL,
-  },
+  alternates: { canonical: SITE_URL },
   openGraph: {
     title: 'АБ Афиша Бухгалтера',
     description:
@@ -69,14 +68,16 @@ export default async function HomePage() {
 
   return (
     <PublicShell>
-      <HeroSection />
-      <EventsSection initialData={events} directions={dirs} />
-      <div className="pub-main-quotes-wrapper">
-        <div className="pub-main-quotes-inner">
-          <MainEventsBanner events={main} />
-          {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
+      <EventModalProvider>
+        <HeroSection />
+        <EventsSection initialData={events} directions={dirs} />
+        <div className="pub-main-quotes-wrapper">
+          <div className="pub-main-quotes-inner">
+            <MainEventsBanner events={main} />
+            {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
+          </div>
         </div>
-      </div>
+      </EventModalProvider>
     </PublicShell>
   );
 }
