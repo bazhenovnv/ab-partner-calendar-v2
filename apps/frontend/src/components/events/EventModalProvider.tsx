@@ -61,6 +61,8 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Moscow',
   }).format(new Date(event.startDate));
 
+  const description = event.shortDescription ?? event.fullDescription ?? '';
+
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={onClose}>
       <article className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="event-modal-title" onMouseDown={(eventObject) => eventObject.stopPropagation()}>
@@ -79,15 +81,15 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
             <span>{event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно'}</span>
           </div>
           <h2 id="event-modal-title" className={styles.modalTitle}>{event.title}</h2>
-          {event.speaker && <p className={styles.modalSpeaker}>Спикер: {event.speaker}</p>}
-          <div className={styles.modalDescription}>
-            {(event.fullDescription ?? event.shortDescription ?? '').split('\n').filter(Boolean).map((line, index) => (
-              <p key={`${index}-${line.slice(0, 20)}`}>{line}</p>
-            ))}
-          </div>
+          {event.speaker && <p className={styles.modalSpeaker}><strong>Спикер: {event.speaker}</strong></p>}
+          {description && <div className={styles.modalDescription}><p>{description}</p></div>}
+          <dl className={styles.modalDetails}>
+            <div><dt>Когда:</dt><dd>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</dd></div>
+            <div><dt>Формат:</dt><dd>{event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн'}</dd></div>
+            <div><dt>Стоимость:</dt><dd>{event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно'}</dd></div>
+          </dl>
           <div className={styles.modalActions}>
-            {registrationUrl && <a href={registrationUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>Подробнее →</a>}
-            <button type="button" className={styles.modalSecondary} onClick={onClose}>Закрыть</button>
+            {registrationUrl && <a href={registrationUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>Зарегистрироваться</a>}
           </div>
           {loading && <span className={styles.modalLoading}>Обновляем данные…</span>}
         </div>
