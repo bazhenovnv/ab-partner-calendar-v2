@@ -39,9 +39,9 @@ export default async function HomePage() {
 
   if (USE_FIXTURES) {
     const { DEV_MAIN_EVENTS, DEV_EVENTS_RESPONSE, DEV_QUOTES } = await import('@/lib/dev-fixtures');
-    main   = DEV_MAIN_EVENTS;
+    main = DEV_MAIN_EVENTS;
     events = DEV_EVENTS_RESPONSE;
-    qs     = DEV_QUOTES;
+    qs = DEV_QUOTES;
   } else {
     const [mainEvents, initialEvents, directions, quotes] = await Promise.allSettled([
       fetchMainEvents(),
@@ -49,26 +49,34 @@ export default async function HomePage() {
       fetchDirections(),
       fetchPublicQuotes(),
     ]);
-    main   = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
+
+    main = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
     events = initialEvents.status === 'fulfilled'
       ? initialEvents.value
       : { events: [], total: 0, isFallback: false };
-    dirs   = directions.status === 'fulfilled' ? directions.value : [];
-    qs     = quotes.status === 'fulfilled' ? quotes.value : [];
+    dirs = directions.status === 'fulfilled' ? directions.value : [];
+    qs = quotes.status === 'fulfilled' ? quotes.value : [];
+
+    if (main.length === 0) {
+      try {
+        const completed = await fetchPublicEvents({ page: 1, limit: 5, autoStatus: 'COMPLETED' });
+        main = completed.events.slice(0, 5);
+      } catch {
+        main = [];
+      }
+    }
   }
 
   return (
     <PublicShell>
       <HeroSection />
       <EventsSection initialData={events} directions={dirs} />
-      {(main.length > 0 || qs.length > 0) && (
-        <div className="pub-main-quotes-wrapper">
-          <div className="pub-main-quotes-inner">
-            {main.length > 0 && <MainEventsBanner events={main} />}
-            {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
-          </div>
+      <div className="pub-main-quotes-wrapper">
+        <div className="pub-main-quotes-inner">
+          <MainEventsBanner events={main} />
+          {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
         </div>
-      )}
+      </div>
     </PublicShell>
   );
 }

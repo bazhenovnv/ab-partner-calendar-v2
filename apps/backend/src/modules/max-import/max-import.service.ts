@@ -175,6 +175,7 @@ export class MaxImportService {
     const params = new URLSearchParams({
       limit: '100',
       types: 'message_created,message_edited,message_removed,bot_added,bot_removed',
+      timeout: '1',
     });
     if (this.pollMarker !== undefined) params.set('marker', String(this.pollMarker));
 
@@ -286,6 +287,18 @@ export class MaxImportService {
 
     const sourceChannelUrl = this.sourceChannelUrl();
     const sourcePostUrl = `${sourceChannelUrl}?mid=${encodeURIComponent(externalId)}`;
+
+    // When a MAX publication has no separate registration URL, use the
+    // original MAX post as the event link. This keeps the event actionable
+    // without requiring a duplicated external link in every channel post.
+    if (!parsed.eventUrl) {
+      parsed.eventUrl = sourcePostUrl;
+      parsed.attentionReasons = parsed.attentionReasons.filter(
+        (reason) => reason !== 'Ссылка на регистрацию не найдена',
+      );
+      parsed.needsAttention = parsed.attentionReasons.length > 0;
+    }
+
     const imageAttachment = (update.message?.body?.attachments ?? []).find((attachment) => attachment.type === 'image');
 
     try {
