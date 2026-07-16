@@ -10,7 +10,6 @@ export const PARTNER_URL = 'https://ab-buhpartner.ru/';
 export const TELEGRAM_BOT = '@PartnersTogether_bot';
 export const MAX_BOT_URL = 'https://max.ru/id2308283362_bot';
 
-
 export const DEFAULT_DIRECTIONS = [
   { slug: '1c', name: '1C' },
   { slug: '54fz', name: '54-ФЗ' },
@@ -23,6 +22,11 @@ export const DEFAULT_DIRECTIONS = [
   { slug: 'kassy', name: 'Кассы' },
 ] as const;
 
+/**
+ * MAX publications use both narrow product hashtags and broad accounting tags.
+ * Broad accounting/legal/reporting tags map to `taxes`, because the current
+ * public taxonomy does not yet have separate HR, reporting or legal sections.
+ */
 export const HASHTAG_TO_DIRECTIONS: Record<string, string[]> = {
   '#Хит': [],
   '#УСН': ['sno', 'taxes'],
@@ -31,14 +35,40 @@ export const HASHTAG_TO_DIRECTIONS: Record<string, string[]> = {
   '#ОСНО': ['sno', 'taxes'],
   '#НПД': ['sno', 'taxes'],
   '#ЕСХН': ['sno', 'taxes'],
+  '#Самозанятые': ['sno', 'taxes'],
+  '#ИП': ['taxes'],
   '#Налоги': ['taxes'],
+  '#НалоговыйУчет': ['taxes'],
+  '#НалоговыйКонтроль': ['taxes'],
+  '#ФНС': ['taxes'],
+  '#СФР': ['taxes'],
+  '#Бухгалтерия': ['taxes'],
+  '#Бухучет': ['taxes'],
+  '#БухгалтерскийУчет': ['taxes'],
+  '#Отчетность': ['taxes'],
+  '#Зарплата': ['taxes'],
+  '#СтраховыеВзносы': ['taxes'],
+  '#Кадры': ['taxes'],
+  '#ТрудовоеЗаконодательство': ['taxes'],
+  '#Юрист': ['taxes'],
+  '#Бизнес': ['taxes'],
+  '#Проверки': ['taxes'],
+  '#Реклама': ['taxes'],
+  '#Скидки': ['taxes'],
+  '#Премии': ['taxes'],
   '#НДС': ['nds'],
   '#1С': ['1c'],
+  '#1СБухгалтерия': ['1c'],
+  '#1СБСО': ['1c'],
   '#54ФЗ': ['54fz'],
+  '#54ФЗКасса': ['54fz', 'kassy'],
   '#Маркировка': ['marking'],
+  '#ЧестныйЗнак': ['marking'],
   '#ЕГАИС': ['egais'],
   '#ОФД': ['ofd'],
   '#Кассы': ['kassy'],
+  '#ОнлайнКасса': ['kassy', '54fz'],
+  '#ККТ': ['kassy', '54fz'],
 };
 
 export const FOOTER_PROJECTS = [
@@ -48,7 +78,6 @@ export const FOOTER_PROJECTS = [
   { title: 'АБ Сервис', url: 'https://service-ab.ru/' },
   { title: 'АБ Креатив', url: 'https://ab-creative.ru/' },
 ] as const;
-
 
 export const LEGAL_OPERATOR = {
   name: 'ООО «АБ ГРУПП»',
