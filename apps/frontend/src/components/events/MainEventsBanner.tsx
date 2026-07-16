@@ -5,40 +5,46 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
+import styles from './events-runtime.module.css';
 
 function circularOffset(idx: number, active: number, total: number): number {
-  const d = ((idx - active + total) % total);
-  return d > Math.floor(total / 2) ? d - total : d;
+  const distance = (idx - active + total) % total;
+  return distance > Math.floor(total / 2) ? distance - total : distance;
 }
 
 function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
-  const size = compact
-    ? { width: 200, height: 200, marginLeft: -100, marginTop: -100 }
-    : { width: 427.25, height: 427.25, marginLeft: -213.625, marginTop: -213.625 };
+  const base = compact
+    ? { width: 214, height: 270, marginLeft: -107, marginTop: -135 }
+    : { width: 346, height: 347, marginLeft: -173, marginTop: -173.5 };
 
-  if (offset === 0) return { ...size, transform: 'translateX(0) scale(1)', zIndex: 5, opacity: 1 };
+  if (offset === 0) {
+    return { ...base, transform: 'translateX(0) scale(1)', zIndex: 5, opacity: 1 };
+  }
 
   const abs = Math.abs(offset);
-  const dir = offset > 0 ? 1 : -1;
+  const direction = offset > 0 ? 1 : -1;
+
   if (abs === 1) {
     return {
-      ...size,
-      transform: `translateX(${dir * (compact ? 122 : 252)}px) scale(0.86476)`,
+      ...base,
+      transform: `translateX(${direction * (compact ? 128 : 278)}px) scale(0.88)`,
       zIndex: 4,
       opacity: 1,
     };
   }
+
   if (abs === 2) {
     return {
-      ...size,
-      transform: `translateX(${dir * (compact ? 220 : 466)}px) scale(0.72349, 0.71920)`,
+      ...base,
+      transform: `translateX(${direction * (compact ? 226 : 505)}px) scale(0.73)`,
       zIndex: 3,
       opacity: 1,
     };
   }
+
   return {
-    ...size,
-    transform: `translateX(${dir * (compact ? 330 : 680)}px) scale(0.6)`,
+    ...base,
+    transform: `translateX(${direction * (compact ? 340 : 720)}px) scale(0.6)`,
     zIndex: 1,
     opacity: 0,
   };
@@ -57,9 +63,9 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     ? Math.min(indicatorCount - 1, Math.floor((active * indicatorCount) / total))
     : 0;
 
-  const goTo = useCallback((i: number) => {
+  const goTo = useCallback((index: number) => {
     if (!total) return;
-    setActive(((i % total) + total) % total);
+    setActive(((index % total) + total) % total);
   }, [total]);
 
   const goToIndicator = useCallback((indicator: number) => {
@@ -80,73 +86,90 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   }, [active, total]);
 
   useEffect(() => {
-    const el = galleryRef.current;
-    if (!el || !total) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft') { event.preventDefault(); goTo(active - 1); }
-      if (event.key === 'ArrowRight') { event.preventDefault(); goTo(active + 1); }
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
+    const gallery = galleryRef.current;
+    if (!gallery || !total) return;
+
+    const onKeyDown = (keyboardEvent: KeyboardEvent) => {
+      if (keyboardEvent.key === 'ArrowLeft') {
+        keyboardEvent.preventDefault();
+        goTo(active - 1);
+      }
+      if (keyboardEvent.key === 'ArrowRight') {
+        keyboardEvent.preventDefault();
+        goTo(active + 1);
+      }
+      if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+        keyboardEvent.preventDefault();
         openEvent(events[active]);
       }
     };
-    el.addEventListener('keydown', onKey);
-    return () => el.removeEventListener('keydown', onKey);
+
+    gallery.addEventListener('keydown', onKeyDown);
+    return () => gallery.removeEventListener('keydown', onKeyDown);
   }, [active, events, goTo, openEvent, total]);
 
   return (
-    <section id="main-events" className="pub-main-events-section" aria-label="Главные события">
-      <div className="pub-main-events-outer">
-        <h2 className="pub-main-events-title">Главные события</h2>
+    <section id="main-events" className={styles.mainEventsSection} aria-label="Главные события">
+      <div className={styles.mainEventsOuter}>
+        <h2 className={styles.mainEventsTitle}>Главные события</h2>
         {!total ? (
-          <div className="pub-main-events-empty" role="status"><p>Нет событий</p></div>
+          <div className={styles.mainEmpty} role="status"><p>Нет событий</p></div>
         ) : (
           <>
-            <div ref={galleryRef} className="pub-carousel-gallery" tabIndex={0} aria-label="Карусель главных событий">
-              {events.map((event, idx) => {
-                const offset = circularOffset(idx, active, total);
+            <div ref={galleryRef} className={styles.carouselGallery} tabIndex={0} aria-label="Карусель главных событий">
+              {events.map((event, index) => {
+                const offset = circularOffset(index, active, total);
                 if (Math.abs(offset) > 2) return null;
+
                 const image = event.images?.[0];
-                // Prefer the untouched source artwork. Generated square variants may already be cropped.
-                const imgUrl = image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
+                const imageUrl = image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
                 const isCenter = offset === 0;
+
                 return (
                   <button
                     type="button"
                     key={event.id}
-                    className="pub-carousel-card"
+                    className={styles.carouselCard}
                     style={getCardStyle(offset, compact)}
                     aria-hidden={!isCenter}
                     tabIndex={isCenter ? 0 : -1}
                     aria-label={isCenter ? `Открыть событие: ${event.title}` : `Показать событие: ${event.title}`}
-                    onClick={() => isCenter ? openEvent(event) : goTo(idx)}
+                    onClick={() => isCenter ? openEvent(event) : goTo(index)}
                   >
-                    <span className="pub-carousel-card-link bg-white">
-                      {imgUrl ? (
-                        <Image src={imgUrl} alt={event.title} fill unoptimized loading="lazy" sizes={compact ? '200px' : '427px'} className="object-contain object-center" />
+                    <span className={styles.carouselCardFrame}>
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={event.title}
+                          fill
+                          unoptimized
+                          loading="lazy"
+                          sizes={compact ? '214px' : '346px'}
+                          className={styles.carouselImage}
+                        />
                       ) : (
-                        <span className="absolute inset-0 bg-gradient-to-br from-selected-day/40 to-primary" />
+                        <span className={styles.carouselPlaceholder} />
                       )}
                     </span>
                   </button>
                 );
               })}
             </div>
+
             {total > 1 && (
-              <nav className="pub-carousel-nav" aria-label="Навигация по главным событиям">
-                <button type="button" onClick={() => goTo(active - 1)} className="pub-carousel-nav-btn" aria-label="Предыдущее событие">‹</button>
-                {Array.from({ length: indicatorCount }, (_, i) => (
+              <nav className={styles.carouselNav} aria-label="Навигация по главным событиям">
+                <button type="button" onClick={() => goTo(active - 1)} className={styles.carouselNavButton} aria-label="Предыдущее событие">‹</button>
+                {Array.from({ length: indicatorCount }, (_, index) => (
                   <button
-                    key={i}
+                    key={index}
                     type="button"
-                    onClick={() => goToIndicator(i)}
-                    aria-label={`Группа событий ${i + 1}`}
-                    aria-current={i === activeIndicator ? 'true' : undefined}
-                    className={cn('pub-carousel-dot', i === activeIndicator && 'pub-carousel-dot--active')}
-                    style={{ width: 8, height: 8, borderRadius: '50%' }}
+                    onClick={() => goToIndicator(index)}
+                    aria-label={`Группа событий ${index + 1}`}
+                    aria-current={index === activeIndicator ? 'true' : undefined}
+                    className={cn(styles.carouselDot, index === activeIndicator && styles.carouselDotActive)}
                   />
                 ))}
-                <button type="button" onClick={() => goTo(active + 1)} className="pub-carousel-nav-btn" aria-label="Следующее событие">›</button>
+                <button type="button" onClick={() => goTo(active + 1)} className={styles.carouselNavButton} aria-label="Следующее событие">›</button>
               </nav>
             )}
           </>
