@@ -4,7 +4,13 @@ import { HeroSection } from '@/components/HeroSection';
 import { EventsSection } from '@/components/events/EventsSection';
 import { MainEventsBanner } from '@/components/events/MainEventsBanner';
 import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
-import { fetchMainEvents, fetchPublicEvents, fetchDirections, fetchPublicQuotes } from '@/lib/api';
+import {
+  fetchMainEvents,
+  fetchLatestCompletedEvents,
+  fetchPublicEvents,
+  fetchDirections,
+  fetchPublicQuotes,
+} from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,25 +35,30 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [mainEvents, initialEvents, directions, quotes] = await Promise.allSettled([
-    fetchMainEvents(),
-    fetchPublicEvents({ page: 1, limit: 6 }),
-    fetchDirections(),
-    fetchPublicQuotes(),
-  ]);
+  const [mainEvents, completedEvents, initialEvents, directions, quotes] =
+    await Promise.allSettled([
+      fetchMainEvents(),
+      fetchLatestCompletedEvents(5),
+      fetchPublicEvents({ page: 1, limit: 6 }),
+      fetchDirections(),
+      fetchPublicQuotes(),
+    ]);
 
-  const main   = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
-  const events = initialEvents.status === 'fulfilled'
-    ? initialEvents.value
-    : { events: [], total: 0, isFallback: false };
-  const dirs   = directions.status === 'fulfilled' ? directions.value : [];
-  const qs     = quotes.status === 'fulfilled' ? quotes.value : [];
+  const main = mainEvents.status === 'fulfilled' ? mainEvents.value : [];
+  const completed = completedEvents.status === 'fulfilled' ? completedEvents.value : [];
+  const carouselEvents = main.length > 0 ? main : completed;
+  const events =
+    initialEvents.status === 'fulfilled'
+      ? initialEvents.value
+      : { events: [], total: 0, isFallback: false };
+  const dirs = directions.status === 'fulfilled' ? directions.value : [];
+  const qs = quotes.status === 'fulfilled' ? quotes.value : [];
 
   return (
     <PublicShell>
       <HeroSection />
       <EventsSection initialData={events} directions={dirs} />
-      {main.length > 0 && <MainEventsBanner events={main} />}
+      <MainEventsBanner events={carouselEvents} />
       {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
     </PublicShell>
   );
