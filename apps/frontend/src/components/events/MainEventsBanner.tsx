@@ -107,7 +107,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                 const offset = circularOffset(idx, active, total);
                 if (Math.abs(offset) > 2) return null;
                 const image = event.images?.[0];
-                const imgUrl = image?.mainEventUrl ?? image?.thumbnailUrl ?? image?.eventCardUrl ?? image?.originalUrl;
+                const imgUrl = image?.mainEventUrl ?? image?.originalUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
                 const isCenter = offset === 0;
                 return (
                   <button
@@ -120,9 +120,9 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                     aria-label={isCenter ? `Открыть событие: ${event.title}` : `Показать событие: ${event.title}`}
                     onClick={() => isCenter ? openEvent(event) : goTo(idx)}
                   >
-                    <span className="pub-carousel-card-link">
+                    <span className="pub-carousel-card-link bg-white">
                       {imgUrl ? (
-                        <Image src={imgUrl} alt={event.title} fill unoptimized loading="lazy" sizes={compact ? '200px' : '427px'} className="object-cover object-center" />
+                        <Image src={imgUrl} alt={event.title} fill unoptimized loading="lazy" sizes={compact ? '200px' : '427px'} className="object-contain object-center" />
                       ) : (
                         <span className="absolute inset-0 bg-gradient-to-br from-selected-day/40 to-primary" />
                       )}
