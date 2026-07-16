@@ -1,7 +1,8 @@
-import { Controller, Post, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { MaxImportService } from './max-import.service';
+import { MaxBackfillService } from './max-backfill.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -19,6 +20,7 @@ const MAX_API_BASE = 'https://platform-api2.max.ru';
 export class MaxImportController {
   constructor(
     private readonly maxImportService: MaxImportService,
+    private readonly maxBackfillService: MaxBackfillService,
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
@@ -43,15 +45,6 @@ export class MaxImportController {
    *
    * IMPORTANT: GET /chats is deprecated since June 2026.
    * Supported method: poll GET /updates?types=bot_added.
-   *
-   * Prerequisite procedure (must be done in this order):
-   *   1. Deploy this backend (webhook endpoint live)
-   *   2. Register the webhook subscription (POST /subscriptions, see docs)
-   *   3. Remove the bot from the MAX channel (if already added before step 1-2)
-   *   4. Re-add the bot as administrator
-   *   5. Call this endpoint — it polls for the bot_added event and returns chat_id
-   *   6. Set MAX_SOURCE_CHANNEL_ID=<chat_id> and MAX_IMPORT_ENABLED=true
-   *   7. Redeploy backend
    */
   @Get('discover-channel')
   async discoverChannel() {
@@ -60,7 +53,7 @@ export class MaxImportController {
 
     const params = new URLSearchParams({ limit: '100', types: 'bot_added' });
     const res = await fetch(`${MAX_API_BASE}/updates?${params.toString()}`, {
-      headers: { Authorization: tok }, // no "Bearer"
+      headers: { Authorization: tok },
       signal: AbortSignal.timeout(15_000),
     });
 
@@ -86,8 +79,8 @@ export class MaxImportController {
         timestamp: u.timestamp,
       })),
       instruction: botAddedUpdates.length > 0
-        ? `Set MAX_SOURCE_CHANNEL_ID=<chatId> and MAX_IMPORT_ENABLED=true in env, then redeploy.`
-        : `No bot_added events found. Ensure the bot was added AFTER the webhook was registered, then retry.`,
+        ? 'Set MAX_SOURCE_CHANNEL_ID=<chatId> and MAX_IMPORT_ENABLED=true in env, then redeploy.'
+        : 'No bot_added events found. Ensure the bot was added AFTER the webhook was registered, then retry.',
     };
   }
 
@@ -97,11 +90,46 @@ export class MaxImportController {
     return this.maxImportService.runManual();
   }
 
+  /**
+   * Initial/resumable import of channel history through official GET /messages.
+   * Repeated execution is safe: source + externalId prevents duplicate Event rows.
+   */
+  @Post('backfill')
+  @ApiQuery({ name: 'maxPages', required: false, type: Number, description: 'Pages per run, 1..500; default 25' })
+  @ApiQuery({ name: 'reset', required: false, type: Boolean, description: 'Restart from current time or explicit from cursor' })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Upper time cursor: Unix ms or ISO date' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Lower time boundary: Unix ms or ISO date' })
+  async runBackfill(
+    @Query('maxPages') maxPages?: string,
+    @Query('reset') reset?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.maxBackfillService.run({
+      maxPages: maxPages ? Number(maxPages) : undefined,
+      reset: reset === 'true' || reset === '1',
+      from: from ? this.parseTimestamp(from) : undefined,
+      to: to ? this.parseTimestamp(to) : undefined,
+    });
+  }
+
+  @Get('backfill-status')
+  async getBackfillStatus() {
+    return { state: await this.maxBackfillService.getState() };
+  }
+
   @Get('logs')
   async getLogs() {
     return this.prisma.maxImportLog.findMany({
       orderBy: { runAt: 'desc' },
       take: 50,
     });
+  }
+
+  private parseTimestamp(value: string): number | undefined {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric) && numeric > 0) return Math.floor(numeric);
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
   }
 }

@@ -50,13 +50,13 @@ export function EventCard({ event, className }: EventCardProps) {
       </div>
 
       <div className={styles.infoPanel}>
-        <div className="pub-event-card-date" aria-label={`${dateParts.day} ${dateParts.month}`}>
-          <span className="pub-event-card-date-day">{dateParts.day}</span>
-          <span className="pub-event-card-date-month">{dateParts.month}</span>
+        <div className={styles.dateBadge} aria-label={`${dateParts.day} ${dateParts.month}`}>
+          <span className={styles.dateDay}>{dateParts.day}</span>
+          <span className={styles.dateMonth}>{dateParts.month}</span>
         </div>
         <div className={styles.eventBody}>
           <h3 className={styles.eventTitle}>{event.title}</h3>
-          {event.speaker && <p className={styles.eventSpeaker}>Спикер: {event.speaker}</p>}
+          {event.speaker && <p className={styles.eventSpeaker}><strong>Спикер: {event.speaker}</strong></p>}
           <span className={styles.eventCta}>Подробнее →</span>
         </div>
       </div>
