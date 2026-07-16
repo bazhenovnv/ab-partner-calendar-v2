@@ -3,7 +3,7 @@
   display: block;
   width: 100%;
   aspect-ratio: 603 / 441;
-  overflow: hidden;
+  overflow: visible;
   border: 0;
   border-radius: 18px;
   background: #fff;
@@ -17,6 +17,7 @@
   position: absolute;
   inset: 0 0 102px;
   overflow: hidden;
+  border-radius: 18px 18px 0 0;
 }
 
 .eventCardImage {
@@ -30,6 +31,37 @@
   min-height: 112px;
   background: #f1f1f1;
   border-radius: 0 0 18px 18px;
+}
+
+.dateBadge {
+  position: absolute;
+  z-index: 5;
+  left: 18px;
+  top: -42px;
+  width: 78px;
+  height: 97px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(13, 35, 68, 0.2);
+  color: #0d2344;
+}
+
+.dateDay {
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.dateMonth {
+  margin-top: 7px;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 700;
+  text-transform: lowercase;
 }
 
 .eventBody {
@@ -53,9 +85,9 @@
 
 .eventSpeaker {
   margin: 5px 0 0;
-  color: rgba(13, 35, 68, 0.48);
+  color: #0d2344;
   font-size: 11px;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .eventCta {
@@ -90,11 +122,12 @@
 .modal {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(320px, 44%) minmax(0, 1fr);
-  width: min(1120px, 100%);
-  max-height: min(820px, calc(100vh - 48px));
+  grid-template-columns: minmax(420px, 46%) minmax(0, 54%);
+  width: min(1496px, calc(100vw - 48px));
+  aspect-ratio: 1496 / 788;
+  max-height: calc(100vh - 48px);
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 18px;
   background: #fff;
   box-shadow: 0 24px 80px rgba(13, 35, 68, 0.35);
 }
@@ -104,50 +137,143 @@
   z-index: 3;
   top: 16px;
   right: 16px;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   color: #0d2344;
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
 }
 
-.modalMedia { position: relative; min-height: 620px; background: #edf3f1; }
-.modalImage { object-fit: cover; object-position: center; }
-.modalPlaceholder { height: 100%; display: grid; place-items: center; color: #0d2344; font-size: 52px; font-weight: 800; }
+.modalMedia {
+  position: relative;
+  min-height: 0;
+  background: #edf3f1;
+}
+
+.modalImage {
+  object-fit: contain;
+  object-position: center;
+}
+
+.modalPlaceholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #0d2344;
+  font-size: 52px;
+  font-weight: 800;
+}
 
 .modalContent {
   min-width: 0;
   overflow-y: auto;
-  padding: 56px 48px 40px;
+  padding: 54px 50px 38px;
   color: #0d2344;
 }
 
-.modalMeta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-.modalMeta span { border-radius: 999px; background: #eef2f1; padding: 7px 12px; font-size: 12px; font-weight: 600; }
-.modalTitle { margin: 0 0 14px; font-size: clamp(24px, 3vw, 38px); line-height: 1.12; }
-.modalSpeaker { margin: 0 0 18px; color: rgba(13, 35, 68, 0.65); font-weight: 600; }
-.modalDescription { font-size: 15px; line-height: 1.6; color: rgba(13, 35, 68, 0.78); }
-.modalDescription p { margin: 0 0 12px; }
-.modalActions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-.modalPrimary, .modalSecondary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 8px; padding: 0 20px; font-weight: 700; text-decoration: none; cursor: pointer; }
-.modalPrimary { border: 0; background: #7cd8b3; color: #0d2344; }
-.modalSecondary { border: 1px solid rgba(13, 35, 68, 0.18); background: #fff; color: #0d2344; }
-.modalLoading { display: block; margin-top: 12px; color: rgba(13, 35, 68, 0.45); font-size: 12px; }
+.modalMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.modalMeta span {
+  border-radius: 999px;
+  background: #eef2f1;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.modalTitle {
+  margin: 0 0 14px;
+  font-size: clamp(25px, 2.3vw, 42px);
+  line-height: 1.05;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.modalSpeaker {
+  margin: 0 0 18px;
+  color: #0d2344;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modalDescription {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(13, 35, 68, 0.78);
+}
+
+.modalDescription p { margin: 0 0 14px; }
+
+.modalDetails {
+  margin: 18px 0 0;
+  display: grid;
+  gap: 9px;
+  color: rgba(13, 35, 68, 0.78);
+  font-size: 13px;
+}
+
+.modalDetails div { display: flex; gap: 5px; }
+.modalDetails dt { font-weight: 500; }
+.modalDetails dd { margin: 0; }
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modalPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 20px;
+  background: #20ad83;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modalLoading {
+  display: block;
+  margin-top: 12px;
+  color: rgba(13, 35, 68, 0.45);
+  font-size: 12px;
+}
 
 .carouselButton { border: 0; padding: 0; background: transparent; }
 .mainEmpty { min-height: 428px; display: grid; place-items: center; color: rgba(13, 35, 68, 0.4); font-size: 22px; font-weight: 600; }
 
+@media (max-width: 1023px) {
+  .modal {
+    grid-template-columns: minmax(300px, 44%) minmax(0, 56%);
+    width: min(1024px, calc(100vw - 32px));
+  }
+
+  .modalContent { padding: 42px 34px 30px; }
+}
+
 @media (max-width: 767px) {
   .eventCard { aspect-ratio: 603 / 441; }
   .eventBody { padding-left: 94px; }
+  .dateBadge { left: 14px; width: 68px; height: 86px; }
   .modalBackdrop { padding: 12px; align-items: flex-start; }
-  .modal { grid-template-columns: 1fr; max-height: none; border-radius: 18px; }
-  .modalMedia { min-height: 280px; }
+  .modal { grid-template-columns: 1fr; width: 100%; aspect-ratio: auto; max-height: none; border-radius: 18px; }
+  .modalMedia { min-height: 320px; }
   .modalContent { padding: 30px 22px 26px; }
   .modalTitle { font-size: 25px; }
 }
