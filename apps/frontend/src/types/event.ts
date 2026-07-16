@@ -3,6 +3,7 @@ export interface EventImage {
   eventCardUrl?: string | null;
   thumbnailUrl?: string | null;
   mainEventUrl?: string | null;
+  modalUrl?: string | null;
   originalUrl?: string | null;
 }
 

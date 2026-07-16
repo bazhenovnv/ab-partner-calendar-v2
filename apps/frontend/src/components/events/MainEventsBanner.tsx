@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
+import { useEventModal } from './EventModalProvider';
 
 function circularOffset(idx: number, active: number, total: number): number {
   const d = ((idx - active + total) % total);
@@ -12,20 +12,14 @@ function circularOffset(idx: number, active: number, total: number): number {
 }
 
 function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
-  const size = compact ? { width: 200, height: 295, marginLeft: -100, marginTop: -147.5 } : {
-    width: 427.25,
-    height: 427.25,
-    marginLeft: -213.625,
-    marginTop: -213.625,
-  };
+  const size = compact
+    ? { width: 200, height: 200, marginLeft: -100, marginTop: -100 }
+    : { width: 427.25, height: 427.25, marginLeft: -213.625, marginTop: -213.625 };
 
-  if (offset === 0) {
-    return { ...size, transform: 'translateX(0) scale(1)', zIndex: 5, opacity: 1 };
-  }
+  if (offset === 0) return { ...size, transform: 'translateX(0) scale(1)', zIndex: 5, opacity: 1 };
 
   const abs = Math.abs(offset);
   const dir = offset > 0 ? 1 : -1;
-
   if (abs === 1) {
     return {
       ...size,
@@ -34,7 +28,6 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
       opacity: 1,
     };
   }
-
   if (abs === 2) {
     return {
       ...size,
@@ -43,7 +36,6 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
       opacity: 1,
     };
   }
-
   return {
     ...size,
     transform: `translateX(${dir * (compact ? 340 : 700)}px) scale(0.6)`,
@@ -52,11 +44,10 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
   };
 }
 
-interface MainEventsBannerProps {
-  events: PublicEvent[];
-}
+interface MainEventsBannerProps { events: PublicEvent[]; }
 
 export function MainEventsBanner({ events }: MainEventsBannerProps) {
+  const { openEvent } = useEventModal();
   const [active, setActive] = useState(0);
   const [compact, setCompact] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -66,22 +57,15 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     ? Math.min(indicatorCount - 1, Math.floor((active * indicatorCount) / total))
     : 0;
 
-  const goTo = useCallback(
-    (i: number) => {
-      if (!total) return;
-      setActive(((i % total) + total) % total);
-    },
-    [total],
-  );
+  const goTo = useCallback((i: number) => {
+    if (!total) return;
+    setActive(((i % total) + total) % total);
+  }, [total]);
 
-  const goToIndicator = useCallback(
-    (indicator: number) => {
-      if (!indicatorCount) return;
-      const eventIndex = Math.floor((indicator * total) / indicatorCount);
-      goTo(eventIndex);
-    },
-    [goTo, indicatorCount, total],
-  );
+  const goToIndicator = useCallback((indicator: number) => {
+    if (!indicatorCount) return;
+    goTo(Math.floor((indicator * total) / indicatorCount));
+  }, [goTo, indicatorCount, total]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
@@ -98,81 +82,55 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   useEffect(() => {
     const el = galleryRef.current;
     if (!el || !total) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(active - 1); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(active + 1); }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goTo(active - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goTo(active + 1); }
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openEvent(events[active]);
+      }
     };
     el.addEventListener('keydown', onKey);
     return () => el.removeEventListener('keydown', onKey);
-  }, [active, goTo, total]);
+  }, [active, events, goTo, openEvent, total]);
 
   return (
     <section id="main-events" className="pub-main-events-section" aria-label="Главные события">
       <div className="pub-main-events-outer">
         <h2 className="pub-main-events-title">Главные события</h2>
-
         {!total ? (
-          <div className="flex min-h-[260px] items-center justify-center text-center text-primary/45">
-            <p className="font-montserrat text-lg font-semibold">Нет событий</p>
-          </div>
+          <div className="pub-main-events-empty" role="status"><p>Нет событий</p></div>
         ) : (
           <>
-            <div
-              ref={galleryRef}
-              className="pub-carousel-gallery"
-              aria-live="polite"
-              aria-atomic="true"
-              tabIndex={0}
-              aria-label="Карусель главных событий"
-            >
+            <div ref={galleryRef} className="pub-carousel-gallery" tabIndex={0} aria-label="Карусель главных событий">
               {events.map((event, idx) => {
                 const offset = circularOffset(idx, active, total);
                 if (Math.abs(offset) > 2) return null;
-
                 const image = event.images?.[0];
                 const imgUrl = image?.mainEventUrl ?? image?.thumbnailUrl ?? image?.eventCardUrl ?? image?.originalUrl;
                 const isCenter = offset === 0;
-
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={event.id}
                     className="pub-carousel-card"
                     style={getCardStyle(offset, compact)}
                     aria-hidden={!isCenter}
-                    onClick={!isCenter ? () => goTo(idx) : undefined}
+                    tabIndex={isCenter ? 0 : -1}
+                    aria-label={isCenter ? `Открыть событие: ${event.title}` : `Показать событие: ${event.title}`}
+                    onClick={() => isCenter ? openEvent(event) : goTo(idx)}
                   >
-                    <Link
-                      href={`/events/${event.id}`}
-                      className="pub-carousel-card-link"
-                      tabIndex={isCenter ? 0 : -1}
-                      aria-label={event.title}
-                      onClick={!isCenter ? (e: React.MouseEvent) => e.preventDefault() : undefined}
-                    >
+                    <span className="pub-carousel-card-link">
                       {imgUrl ? (
-                        <Image
-                          src={imgUrl}
-                          alt={event.title}
-                          fill
-                          unoptimized
-                          loading="lazy"
-                          sizes={compact ? '200px' : '427px'}
-                          className="object-cover object-center"
-                        />
+                        <Image src={imgUrl} alt={event.title} fill unoptimized loading="lazy" sizes={compact ? '200px' : '427px'} className="object-cover object-center" />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-selected-day/40 to-primary" />
+                        <span className="absolute inset-0 bg-gradient-to-br from-selected-day/40 to-primary" />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary/88 via-primary/22 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="font-montserrat font-bold text-white text-sm leading-snug line-clamp-3">
-                          {event.title}
-                        </p>
-                      </div>
-                    </Link>
-                  </div>
+                    </span>
+                  </button>
                 );
               })}
             </div>
-
             {total > 1 && (
               <nav className="pub-carousel-nav" aria-label="Навигация по главным событиям">
                 <button type="button" onClick={() => goTo(active - 1)} className="pub-carousel-nav-btn" aria-label="Предыдущее событие">‹</button>
