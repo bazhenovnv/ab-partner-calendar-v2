@@ -12,11 +12,15 @@ import { CalendarQueryDto } from './dto/calendar-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @ApiTags('events')
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get('public')
   getPublicEvents(@Query() query: EventsQueryDto) {
@@ -28,9 +32,44 @@ export class EventsController {
     return this.eventsService.getCalendarMarkers(query);
   }
 
+  /**
+   * Carousel contract:
+   * 1. Return up to five active main events (#Хит), ordered chronologically.
+   * 2. If there are no active main events, return the five most recent completed
+   *    published events, regardless of whether they previously had #Хит.
+   * 3. Only return events with a generated main image.
+   */
   @Get('public/main')
-  getMainEvents() {
-    return this.eventsService.getMainEvents();
+  async getMainEvents() {
+    const include = {
+      images: { select: { mainEventUrl: true } },
+      city: { select: { name: true } },
+    } as const;
+
+    const activeMain = await this.prisma.event.findMany({
+      where: {
+        status: 'PUBLISHED',
+        mainEvent: true,
+        autoStatus: { in: ['PLANNED', 'LIVE'] },
+        images: { some: { mainEventUrl: { not: null } } },
+      },
+      orderBy: [{ sortOrder: 'asc' }, { startDate: 'asc' }],
+      take: 5,
+      include,
+    });
+
+    if (activeMain.length > 0) return activeMain;
+
+    return this.prisma.event.findMany({
+      where: {
+        status: 'PUBLISHED',
+        autoStatus: 'COMPLETED',
+        images: { some: { mainEventUrl: { not: null } } },
+      },
+      orderBy: [{ startDate: 'desc' }, { publishedAt: 'desc' }],
+      take: 5,
+      include,
+    });
   }
 
   @Get('public/:id')
