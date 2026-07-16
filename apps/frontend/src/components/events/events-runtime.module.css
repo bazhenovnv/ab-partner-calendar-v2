@@ -460,7 +460,7 @@
   }
 
   .eventCardMedia {
-    inset-bottom: 112px;
+    bottom: 112px;
   }
 
   .infoPanel,
