@@ -57,6 +57,31 @@ export async function fetchMainEvents(): Promise<PublicEvent[]> {
   return serverFetch<PublicEvent[]>('/events/public/main');
 }
 
+export async function fetchLatestCompletedEvents(limit = 5): Promise<PublicEvent[]> {
+  const normalizedLimit = Math.max(1, Math.min(limit, 50));
+  const firstPage = await fetchPublicEvents({
+    autoStatus: 'COMPLETED',
+    page: 1,
+    limit: 1,
+  });
+
+  if (firstPage.total === 0) return [];
+
+  const lastPage = Math.ceil(firstPage.total / normalizedLimit);
+  const result = await fetchPublicEvents({
+    autoStatus: 'COMPLETED',
+    page: lastPage,
+    limit: normalizedLimit,
+  });
+
+  return [...result.events]
+    .sort(
+      (left, right) =>
+        new Date(right.startDate).getTime() - new Date(left.startDate).getTime(),
+    )
+    .slice(0, normalizedLimit);
+}
+
 export async function fetchEventById(id: string): Promise<PublicEvent> {
   return serverFetch<PublicEvent>(`/events/public/${id}`, { cache: 'no-store' });
 }
