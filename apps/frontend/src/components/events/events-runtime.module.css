@@ -7,29 +7,39 @@
   border: 0;
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 4px 12px rgba(13, 35, 68, 0.18);
+  box-shadow: 0 5px 16px rgba(13, 35, 68, 0.16);
   padding: 0;
   text-align: left;
   cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.eventCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(13, 35, 68, 0.2);
 }
 
 .eventCardMedia {
   position: absolute;
-  inset: 0 0 102px;
+  inset: 0 0 132px;
   overflow: hidden;
   border-radius: 18px 18px 0 0;
+  background: #f5f7f6;
 }
 
 .eventCardImage {
   object-fit: cover;
   object-position: center;
+  transition: transform 220ms ease;
 }
+
+.eventCard:hover .eventCardImage { transform: scale(1.015); }
 
 .infoPanel {
   position: absolute;
   inset: auto 0 0;
-  min-height: 112px;
-  background: #f1f1f1;
+  min-height: 132px;
+  background: #f0f1f1;
   border-radius: 0 0 18px 18px;
 }
 
@@ -37,16 +47,17 @@
   position: absolute;
   z-index: 5;
   left: 18px;
-  top: -42px;
+  top: -48px;
   width: 78px;
   height: 97px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(13, 35, 68, 0.08);
   border-radius: 4px;
   background: #fff;
-  box-shadow: 0 3px 10px rgba(13, 35, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(13, 35, 68, 0.2);
   color: #0d2344;
 }
 
@@ -65,7 +76,7 @@
 }
 
 .eventBody {
-  min-height: 112px;
+  min-height: 132px;
   padding: 18px 16px 14px 112px;
   display: flex;
   flex-direction: column;
@@ -78,16 +89,9 @@
   font-weight: 700;
   line-height: 1.25;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.eventSpeaker {
-  margin: 5px 0 0;
-  color: #0d2344;
-  font-size: 11px;
-  line-height: 1.25;
 }
 
 .eventCta {
@@ -101,9 +105,13 @@
   font-size: 11px;
   font-weight: 600;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+  transition: background 160ms ease, transform 160ms ease;
 }
 
-.eventCard:hover .eventCta { background: #7cd8b3; }
+.eventCard:hover .eventCta {
+  background: #7cd8b3;
+  transform: translateY(-1px);
+}
 
 .modalBackdrop {
   position: fixed;
@@ -114,9 +122,10 @@
   justify-content: center;
   padding: 24px;
   overflow-y: auto;
-  background: rgba(13, 35, 68, 0.28);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(13, 35, 68, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: modalBackdropIn 180ms ease both;
 }
 
 .modal {
@@ -129,7 +138,8 @@
   overflow: hidden;
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 24px 80px rgba(13, 35, 68, 0.35);
+  box-shadow: 0 26px 84px rgba(13, 35, 68, 0.38);
+  animation: modalIn 200ms ease both;
 }
 
 .modalClose {
@@ -223,7 +233,7 @@
 }
 
 .modalDetails div { display: flex; gap: 5px; }
-.modalDetails dt { font-weight: 500; }
+.modalDetails dt { font-weight: 700; }
 .modalDetails dd { margin: 0; }
 
 .modalActions {
@@ -246,6 +256,12 @@
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.modalPrimary:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.97);
 }
 
 .modalLoading {
@@ -258,6 +274,16 @@
 .carouselButton { border: 0; padding: 0; background: transparent; }
 .mainEmpty { min-height: 428px; display: grid; place-items: center; color: rgba(13, 35, 68, 0.4); font-size: 22px; font-weight: 600; }
 
+@keyframes modalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @media (max-width: 1023px) {
   .modal {
     grid-template-columns: minmax(300px, 44%) minmax(0, 56%);
@@ -269,8 +295,12 @@
 
 @media (max-width: 767px) {
   .eventCard { aspect-ratio: 603 / 441; }
+  .eventCardMedia { inset-bottom: 124px; }
+  .infoPanel, .eventBody { min-height: 124px; }
   .eventBody { padding-left: 94px; }
-  .dateBadge { left: 14px; width: 68px; height: 86px; }
+  .dateBadge { left: 14px; top: -42px; width: 68px; height: 86px; }
+  .dateDay { font-size: 26px; }
+  .dateMonth { font-size: 14px; }
   .modalBackdrop { padding: 12px; align-items: flex-start; }
   .modal { grid-template-columns: 1fr; width: 100%; aspect-ratio: auto; max-height: none; border-radius: 18px; }
   .modalMedia { min-height: 320px; }
