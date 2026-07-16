@@ -55,13 +55,26 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
 
 function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: boolean; onClose: () => void }) {
   const image = event.images?.[0];
-  const imageUrl = image?.modalUrl ?? image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
+  const imageUrl = image?.originalUrl ?? image?.modalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
   const registrationUrl = event.ticketUrl ?? event.eventUrl;
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Moscow',
   }).format(new Date(event.startDate));
+  const format = event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
+  const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
+  const speakerName = event.speaker?.split(/\s+[—–-]\s+/)[0]?.trim();
 
-  const description = event.shortDescription ?? event.fullDescription ?? '';
+  const sourceDescription = event.fullDescription ?? event.shortDescription ?? '';
+  const descriptionLines = sourceDescription
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => line.toLocaleLowerCase('ru-RU') !== event.title.trim().toLocaleLowerCase('ru-RU'))
+    .filter((line) => !/^(дата|когда|формат|стоимость|спикер)\s*:/i.test(line))
+    .filter((line) => !/^🎙/u.test(line))
+    .filter((line) => !/^зарегистрироваться/i.test(line))
+    .filter((line) => !/^https?:\/\//i.test(line))
+    .filter((line) => !/^#/.test(line));
 
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={onClose}>
@@ -77,16 +90,20 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
         <div className={styles.modalContent}>
           <div className={styles.modalMeta}>
             <span>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</span>
-            <span>{event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн'}</span>
-            <span>{event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно'}</span>
+            <span>{format}</span>
+            <span>{price}</span>
           </div>
           <h2 id="event-modal-title" className={styles.modalTitle}>{event.title}</h2>
-          {event.speaker && <p className={styles.modalSpeaker}><strong>Спикер: {event.speaker}</strong></p>}
-          {description && <div className={styles.modalDescription}><p>{description}</p></div>}
+          {speakerName && <p className={styles.modalSpeaker}><strong>Спикер: {speakerName}</strong></p>}
+          {descriptionLines.length > 0 && (
+            <div className={styles.modalDescription}>
+              {descriptionLines.map((line, index) => <p key={`${index}-${line.slice(0, 24)}`}>{line}</p>)}
+            </div>
+          )}
           <dl className={styles.modalDetails}>
             <div><dt>Когда:</dt><dd>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</dd></div>
-            <div><dt>Формат:</dt><dd>{event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн'}</dd></div>
-            <div><dt>Стоимость:</dt><dd>{event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно'}</dd></div>
+            <div><dt>Формат:</dt><dd>{format}</dd></div>
+            <div><dt>Стоимость:</dt><dd>{price}</dd></div>
           </dl>
           <div className={styles.modalActions}>
             {registrationUrl && <a href={registrationUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>Зарегистрироваться</a>}
