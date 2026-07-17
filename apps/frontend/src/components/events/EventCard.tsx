@@ -24,41 +24,62 @@ export function EventCard({ event, className }: EventCardProps) {
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
   const dateParts = formatEventDateParts(event.startDate);
   const status = STATUS_LABEL[event.autoStatus] ?? STATUS_LABEL.PLANNED;
+  const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
+  const actionUrl = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
 
   return (
-    <button
-      type="button"
-      className={cn(styles.eventCard, 'group', className)}
-      aria-label={`Открыть мероприятие: ${event.title}`}
-      onClick={() => openEvent(event)}
-    >
-      <div className={styles.eventCardMedia}>
-        {imgUrl ? (
-          <Image
-            src={imgUrl}
-            alt={event.title}
-            fill
-            unoptimized
-            loading="lazy"
-            sizes="(max-width: 767px) 100vw, (max-width: 1439px) 50vw, 428px"
-            className={styles.eventCardImage}
-          />
-        ) : (
-          <div className="pub-event-card-placeholder" aria-hidden="true"><span>АБ</span></div>
-        )}
-        <span className={cn('pub-event-card-status', status.className)}>{status.label}</span>
-      </div>
+    <article className={cn(styles.eventCard, 'group', className)}>
+      <button
+        type="button"
+        className={styles.eventCardOpen}
+        aria-label={`Открыть мероприятие: ${event.title}`}
+        onClick={() => openEvent(event)}
+      >
+        <span className={styles.eventCardMedia}>
+          {imgUrl ? (
+            <Image
+              src={imgUrl}
+              alt={event.title}
+              fill
+              unoptimized
+              loading="lazy"
+              sizes="(max-width: 767px) 100vw, (max-width: 1439px) 50vw, 428px"
+              className={styles.eventCardImage}
+            />
+          ) : (
+            <span className="pub-event-card-placeholder" aria-hidden="true"><span>АБ</span></span>
+          )}
+          <span className={cn('pub-event-card-status', status.className)}>{status.label}</span>
+        </span>
 
-      <div className={styles.infoPanel}>
-        <div className={styles.dateBadge} aria-label={`${dateParts.day} ${dateParts.month}`}>
-          <span className={styles.dateDay}>{dateParts.day}</span>
-          <span className={styles.dateMonth}>{dateParts.month}</span>
-        </div>
-        <div className={styles.eventBody}>
-          <h3 className={styles.eventTitle}>{event.title}</h3>
-          <span className={styles.eventCta}>Подробнее →</span>
-        </div>
-      </div>
-    </button>
+        <span className={styles.infoPanel}>
+          <span className={styles.dateBadge} aria-label={`${dateParts.day} ${dateParts.month}`}>
+            <span className={styles.dateDay}>{dateParts.day}</span>
+            <span className={styles.dateMonth}>{dateParts.month}</span>
+          </span>
+          <span className={styles.eventBody}>
+            <span className={styles.eventTitle}>{event.title}</span>
+            {event.speaker && <strong className={styles.eventSpeaker}>Спикер: {event.speaker}</strong>}
+            <span className={styles.eventDetails}>Подробнее →</span>
+          </span>
+        </span>
+      </button>
+
+      {actionUrl ? (
+        <a
+          href={actionUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.eventAction}
+          aria-label={`${actionLabel}: ${event.title}`}
+        >
+          {actionLabel}
+        </a>
+      ) : (
+        <span className={cn(styles.eventAction, styles.eventActionDisabled)} aria-disabled="true">
+          {actionLabel}
+        </span>
+      )}
+    </article>
   );
 }
