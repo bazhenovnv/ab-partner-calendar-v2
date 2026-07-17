@@ -69,11 +69,14 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Moscow',
   }).format(new Date(event.startDate));
+  const time = event.startTime ? `${event.startTime}${event.endDate ? '' : ''}` : 'Время уточняется';
   const format = event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
   const speakerName = cleanSpeaker(event.speaker);
+  const statusLabel = event.autoStatus === 'LIVE' ? 'Идёт сейчас' : event.autoStatus === 'COMPLETED' ? 'Завершено' : 'Запланировано';
 
-  const sourceDescription = event.fullDescription ?? event.shortDescription ?? '';
+  const shortDescription = event.shortDescription?.trim() || '';
+  const sourceDescription = event.fullDescription ?? '';
   const descriptionLines = sourceDescription
     .split('\n')
     .map((line) => line.trim())
@@ -84,12 +87,14 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
     .filter((line) => !/^зарегистрироваться/i.test(line))
     .filter((line) => !/^https?:\/\//i.test(line))
     .filter((line) => !/^#/.test(line));
+  const detailText = descriptionLines.join(' ');
 
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={onClose}>
       <article className={cn(styles.modal, ui.modalFrame)} role="dialog" aria-modal="true" aria-labelledby="event-modal-title" onMouseDown={(eventObject) => eventObject.stopPropagation()}>
         <button type="button" className={cn(styles.modalClose, ui.modalClose)} onClick={onClose} aria-label="Закрыть окно">×</button>
-        <div className={cn(styles.modalMedia, ui.modalMedia)}>
+
+        <div className={ui.modalMedia}>
           <div className={ui.modalImageStage}>
             {imageUrl ? (
               <Image src={imageUrl} alt={event.title} fill unoptimized priority className={ui.modalImage} />
@@ -98,31 +103,32 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
             )}
           </div>
         </div>
-        <div className={cn(styles.modalContent, ui.modalContent)}>
-          <div className={cn(styles.modalMeta, ui.modalMeta)}>
-            <span>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</span>
-            <span>{format}</span>
-            <span>{price}</span>
+
+        <div className={ui.modalContent}>
+          <span className={cn(ui.modalStatus, event.autoStatus === 'LIVE' && ui.modalStatusLive, event.autoStatus === 'COMPLETED' && ui.modalStatusCompleted)}>{statusLabel}</span>
+          <h2 id="event-modal-title" className={ui.modalTitle}>{event.title}</h2>
+          {shortDescription && <p className={ui.modalLead}>{shortDescription}</p>}
+
+          <div className={ui.modalFacts}>
+            <div className={ui.modalFact}><span className={ui.modalFactIcon}>▣</span><span><small>Дата</small><strong>{date}</strong></span></div>
+            <div className={ui.modalFact}><span className={ui.modalFactIcon}>◷</span><span><small>Время</small><strong>{time}</strong></span></div>
+            <div className={ui.modalFact}><span className={ui.modalFactIcon}>₽</span><span><small>Стоимость</small><strong>{price}</strong></span></div>
           </div>
-          <h2 id="event-modal-title" className={cn(styles.modalTitle, ui.modalTitle)}>{event.title}</h2>
-          {speakerName && <p className={cn(styles.modalSpeaker, ui.modalSpeaker)}><strong>Спикер: {speakerName}</strong></p>}
-          {descriptionLines.length > 0 && (
-            <div className={cn(styles.modalDescription, ui.modalDescription)}>
-              {descriptionLines.map((line, index) => <p key={`${index}-${line.slice(0, 24)}`}>{line}</p>)}
-            </div>
-          )}
-          <dl className={cn(styles.modalDetails, ui.modalDetails)}>
-            <div><dt>Когда:</dt><dd>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</dd></div>
-            <div><dt>Формат:</dt><dd>{format}</dd></div>
-            {event.venue && <div><dt>Место:</dt><dd>{event.venue}</dd></div>}
-            {event.address && <div><dt>Адрес:</dt><dd>{event.address}</dd></div>}
-            <div><dt>Стоимость:</dt><dd>{price}</dd></div>
-          </dl>
-          <div className={cn(styles.modalActions, ui.modalActions)}>
+
+          <div className={ui.modalSummary}>
+            <p><span aria-hidden="true">⌁</span> {format}</p>
+            {speakerName && <p><span aria-hidden="true">♧</span> <strong>Спикер:</strong> {speakerName}</p>}
+            {event.venue && <p><strong>Место:</strong> {event.venue}</p>}
+            {event.address && <p><strong>Адрес:</strong> {event.address}</p>}
+          </div>
+
+          {detailText && <p className={ui.modalDescription}>{detailText}</p>}
+
+          <div className={ui.modalActions}>
             {actionUrl ? (
-              <a href={actionUrl} target="_blank" rel="noopener noreferrer" className={cn(styles.modalPrimary, ui.modalPrimary)}>{actionLabel}</a>
+              <a href={actionUrl} target="_blank" rel="noopener noreferrer" className={ui.modalPrimary}>{actionLabel}</a>
             ) : (
-              <span className={cn(styles.modalPrimary, ui.modalPrimary, ui.modalActionDisabled)} aria-disabled="true">{actionLabel}</span>
+              <span className={cn(ui.modalPrimary, ui.modalActionDisabled)} aria-disabled="true">{actionLabel}</span>
             )}
             <button type="button" className={ui.modalReminder} onClick={() => setReminderOpen(true)}>
               <span aria-hidden="true">♧</span> Напомнить
@@ -131,9 +137,7 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
           {loading && <span className={styles.modalLoading}>Обновляем данные…</span>}
         </div>
 
-        {reminderOpen && (
-          <ReminderChooser event={event} onClose={() => setReminderOpen(false)} />
-        )}
+        {reminderOpen && <ReminderChooser event={event} onClose={() => setReminderOpen(false)} />}
       </article>
     </div>
   );
@@ -153,16 +157,8 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
         <h3 id="reminder-title">Напомнить</h3>
         <p>Выберите, куда отправить напоминание</p>
         <div className={ui.reminderPlatforms}>
-          {telegramUrl ? (
-            <a href={telegramUrl} target="_blank" rel="noopener noreferrer" className={ui.reminderPlatform}>Telegram <span>›</span></a>
-          ) : (
-            <span className={cn(ui.reminderPlatform, ui.reminderPlatformDisabled)}>Telegram <span>›</span></span>
-          )}
-          {maxUrl ? (
-            <a href={maxUrl} target="_blank" rel="noopener noreferrer" className={ui.reminderPlatform}>MAX <span>›</span></a>
-          ) : (
-            <span className={cn(ui.reminderPlatform, ui.reminderPlatformDisabled)}>MAX <span>›</span></span>
-          )}
+          {telegramUrl ? <a href={telegramUrl} target="_blank" rel="noopener noreferrer" className={ui.reminderPlatform}>Telegram <span>›</span></a> : <span className={cn(ui.reminderPlatform, ui.reminderPlatformDisabled)}>Telegram <span>›</span></span>}
+          {maxUrl ? <a href={maxUrl} target="_blank" rel="noopener noreferrer" className={ui.reminderPlatform}>MAX <span>›</span></a> : <span className={cn(ui.reminderPlatform, ui.reminderPlatformDisabled)}>MAX <span>›</span></span>}
         </div>
         <button type="button" className={ui.reminderCancel} onClick={onClose}>Отмена</button>
       </section>
