@@ -141,8 +141,13 @@ function isAllowedWebsite(value?: string | null): value is string {
 }
 
 function organizerActionUrl(event: PublicEvent): string | null {
-  const candidate = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
-  return isAllowedWebsite(candidate) ? candidate : null;
+  const candidates = [event.eventUrl, event.ticketUrl];
+
+  for (const candidate of candidates) {
+    if (isAllowedWebsite(candidate)) return candidate;
+  }
+
+  return null;
 }
 
 function sanitizeDescription(value?: string | null): string {
@@ -222,7 +227,7 @@ function EventModal({
   const image = event.images?.[0];
   const imageUrl =
     image?.modalUrl ?? image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
-  const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
+  const actionLabel = 'Участвовать';
   const actionUrl = organizerActionUrl(event);
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
@@ -409,7 +414,7 @@ function buildReminderUrl(service: 'telegram' | 'max', eventId: string): string 
     const username = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, '').trim();
     if (username) return `https://t.me/${username}?start=${encodeURIComponent(payload)}`;
 
-    return 'https://t.me/ab_afisha_buh';
+    return `https://t.me/PartnersTogether_bot?start=${encodeURIComponent(payload)}`;
   }
 
   const directUrl = process.env.NEXT_PUBLIC_MAX_BOT_URL?.trim();
