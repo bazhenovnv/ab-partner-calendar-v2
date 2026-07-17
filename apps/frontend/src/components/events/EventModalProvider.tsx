@@ -22,9 +22,7 @@ const EventModalContext = createContext<EventModalContextValue | null>(null);
 
 export function useEventModal(): EventModalContextValue {
   const context = useContext(EventModalContext);
-  if (!context) {
-    throw new Error('useEventModal must be used within EventModalProvider');
-  }
+  if (!context) throw new Error('useEventModal must be used within EventModalProvider');
   return context;
 }
 
@@ -50,10 +48,7 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
         cache: 'no-store',
         signal: controller.signal,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const loadedEvent = (await response.json()) as PublicEvent;
       if (!controller.signal.aborted && requestSequence === requestSequenceRef.current) {
@@ -66,7 +61,6 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
       ) {
         return;
       }
-
       if (requestSequence === requestSequenceRef.current) {
         setLoadError('Не удалось загрузить полную информацию о мероприятии.');
       }
@@ -96,9 +90,7 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
     setLoadError(null);
 
     window.requestAnimationFrame(() => {
-      if (returnFocusRef.current?.isConnected) {
-        returnFocusRef.current.focus();
-      }
+      if (returnFocusRef.current?.isConnected) returnFocusRef.current.focus();
       returnFocusRef.current = null;
     });
   }, []);
@@ -107,10 +99,8 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!event) return;
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-
     return () => {
       document.body.style.overflow = previousOverflow;
     };
@@ -140,11 +130,9 @@ function cleanSpeaker(value?: string | null): string | null {
 
 function isAllowedWebsite(value?: string | null): value is string {
   if (!value) return false;
-
   try {
     const url = new URL(value);
     if (!['http:', 'https:'].includes(url.protocol)) return false;
-
     const host = url.hostname.replace(/^www\./, '').toLowerCase();
     return !['max.ru', 't.me', 'telegram.me', 'telegram.dog', 'vk.me', 'wa.me'].includes(host);
   } catch {
@@ -159,7 +147,6 @@ function organizerActionUrl(event: PublicEvent): string | null {
 
 function sanitizeDescription(value?: string | null): string {
   if (!value) return '';
-
   return value
     .replace(
       /<(p|div|li)[^>]*>[\s\S]*?(?:зарегистрир|регистрац|для\s+участия|принять\s+участие|подать\s+заявку)[\s\S]*?<\/\1>/gi,
@@ -175,14 +162,10 @@ function sanitizeDescription(value?: string | null): string {
     .trim();
 }
 
-type IconName = 'calendar' | 'clock' | 'price' | 'location' | 'speaker' | 'bell';
+type LineIconName = 'location' | 'speaker' | 'bell';
 
-function Icon({ name }: { name: IconName }) {
-  const paths: Record<IconName, string> = {
-    calendar:
-      'M7 3v3M17 3v3M4.5 9h15M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
-    clock: 'M12 7.5V12l3 2',
-    price: 'M8 5h5.2a4 4 0 1 1 0 8H8m0-4h7M8 13v6m0-3h6',
+function LineIcon({ name }: { name: LineIconName }) {
+  const paths: Record<LineIconName, string> = {
     location: 'M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z',
     speaker: 'M5.5 20c.6-4 3-6 6.5-6s5.9 2 6.5 6',
     bell: 'M6.5 16.5h11l-1.2-1.7V10a4.3 4.3 0 0 0-8.6 0v4.8l-1.2 1.7Z',
@@ -190,9 +173,6 @@ function Icon({ name }: { name: IconName }) {
 
   return (
     <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
-      {name === 'clock' && (
-        <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
-      )}
       {name === 'speaker' && (
         <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
       )}
@@ -217,6 +197,14 @@ function Icon({ name }: { name: IconName }) {
     </svg>
   );
 }
+
+const FACT_ICONS = {
+  calendar: '/ui-icons/event-calendar.png',
+  clock: '/ui-icons/event-clock.png',
+  price: '/ui-icons/event-price.png',
+} as const;
+
+type FactIconName = keyof typeof FACT_ICONS;
 
 function EventModal({
   event,
@@ -264,7 +252,6 @@ function EventModal({
   useEffect(() => {
     const onKeyDown = (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key !== 'Escape') return;
-
       keyboardEvent.preventDefault();
       if (reminderOpen) {
         setReminderOpen(false);
@@ -282,7 +269,7 @@ function EventModal({
     <div
       className={v2.backdrop}
       role="presentation"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+      onMouseDown={(mouseEvent) => mouseEvent.target === mouseEvent.currentTarget && onClose()}
     >
       <article
         className={v2.modal}
@@ -337,12 +324,12 @@ function EventModal({
 
             <div className={v2.lines}>
               <span className={v2.detailLine}>
-                <Icon name="location" />
+                <LineIcon name="location" />
                 {format}
               </span>
               {speaker && (
                 <strong className={v2.detailLine}>
-                  <Icon name="speaker" />
+                  <LineIcon name="speaker" />
                   Спикер: {speaker}
                 </strong>
               )}
@@ -398,13 +385,13 @@ function EventModal({
                 type="button"
                 onClick={() => setReminderOpen(true)}
               >
-                <Icon name="bell" />
+                <LineIcon name="bell" />
                 Напомнить
               </button>
             </div>
 
             {loading && (
-              <div className={v2.loading}>
+              <div className={v2.loading} role="status">
                 <span className={v2.spinner} />
                 Обновляем данные…
               </div>
@@ -425,16 +412,20 @@ function Fact({
   label,
   value,
 }: {
-  icon: 'calendar' | 'clock' | 'price';
+  icon: FactIconName;
   label: string;
   value: string;
 }) {
   return (
     <div className={v2.fact}>
-      <span className={v2.icon}>
-        <Icon name={icon} />
-      </span>
-      <span>
+      <Image
+        src={FACT_ICONS[icon]}
+        width={78}
+        height={78}
+        alt=""
+        className={`${v2.factIcon} ${v2[`factIcon_${icon}`]}`}
+      />
+      <span className={v2.factText}>
         <small className={v2.label}>{label}</small>
         <strong className={v2.value}>{value}</strong>
       </span>
@@ -442,19 +433,35 @@ function Fact({
   );
 }
 
+function buildReminderUrl(
+  service: 'telegram' | 'max',
+  eventId: string,
+): string | null {
+  const payload = `remind_${eventId}`;
+
+  if (service === 'telegram') {
+    const directUrl = process.env.NEXT_PUBLIC_TELEGRAM_BOT_URL?.trim();
+    if (directUrl) return `${directUrl}${directUrl.includes('?') ? '&' : '?'}start=${encodeURIComponent(payload)}`;
+
+    const username = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, '').trim();
+    if (username) return `https://t.me/${username}?start=${encodeURIComponent(payload)}`;
+
+    return 'https://t.me/ab_afisha_buh';
+  }
+
+  const directUrl = process.env.NEXT_PUBLIC_MAX_BOT_URL?.trim();
+  if (directUrl) return `${directUrl}${directUrl.includes('?') ? '&' : '?'}start=${encodeURIComponent(payload)}`;
+
+  const username = process.env.NEXT_PUBLIC_MAX_BOT_USERNAME?.replace(/^@/, '').trim();
+  return username
+    ? `https://max.ru/${username}?start=${encodeURIComponent(payload)}`
+    : null;
+}
+
 function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () => void }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const telegramUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
-    ?.replace(/^@/, '')
-    .trim();
-  const maxUsername = process.env.NEXT_PUBLIC_MAX_BOT_USERNAME?.replace(/^@/, '').trim();
-  const payload = `remind_${event.id}`;
-  const telegramUrl = telegramUsername
-    ? `https://t.me/${telegramUsername}?start=${encodeURIComponent(payload)}`
-    : null;
-  const maxUrl = maxUsername
-    ? `https://max.ru/${maxUsername}?start=${encodeURIComponent(payload)}`
-    : null;
+  const telegramUrl = buildReminderUrl('telegram', event.id);
+  const maxUrl = buildReminderUrl('max', event.id);
 
   useEffect(() => closeButtonRef.current?.focus(), []);
 
@@ -462,7 +469,7 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
     <div
       className={v2.chooserOverlay}
       role="presentation"
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+      onMouseDown={(mouseEvent) => mouseEvent.target === mouseEvent.currentTarget && onClose()}
     >
       <section
         className={v2.chooser}
@@ -487,7 +494,6 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
           alt=""
           className={v2.chooserHeaderImage}
         />
-
         <h3 id="reminder-dialog-title">Напомнить</h3>
         <p>Выберите удобный способ получить напоминание</p>
 
