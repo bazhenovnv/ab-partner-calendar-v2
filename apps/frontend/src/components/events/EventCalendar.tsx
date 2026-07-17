@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CalendarHeader } from '@/components/ui/CalendarHeader';
 import type { CalendarMarker } from '@/types/event';
@@ -25,10 +25,38 @@ function toDateString(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+function pluralizeEvents(value: number): string {
+  const mod100 = value % 100;
+  const mod10 = value % 10;
+
+  if (mod100 >= 11 && mod100 <= 14) return 'мероприятий';
+  if (mod10 === 1) return 'мероприятие';
+  if (mod10 >= 2 && mod10 <= 4) return 'мероприятия';
+  return 'мероприятий';
+}
+
+function getMarkerTotal(marker?: CalendarMarker): number {
+  if (!marker) return 0;
+  return marker.planned + marker.live + marker.completed;
+}
+
+function getCalendarTooltip(marker?: CalendarMarker): string {
+  const total = getMarkerTotal(marker);
+  if (total === 0) return 'Мероприятий нет';
+
+  const details = [
+    marker!.planned > 0 ? `Запланировано: ${marker!.planned}` : null,
+    marker!.live > 0 ? `Идёт сейчас: ${marker!.live}` : null,
+    marker!.completed > 0 ? `Завершено: ${marker!.completed}` : null,
+  ].filter(Boolean);
+
+  return `${total} ${pluralizeEvents(total)} · ${details.join(' · ')}`;
+}
+
 export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps) {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth());
+  const [today] = useState(() => new Date());
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
   const [markers, setMarkers] = useState<CalendarMarker[]>([]);
   const [loading, setLoading] = useState(false);
   const initializedToday = useRef(false);
@@ -42,7 +70,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
         setMarkers(data);
       }
     } catch {
-      // The current month remains usable if marker loading fails.
+      // The displayed month remains selectable if marker loading fails.
     } finally {
       setLoading(false);
     }
@@ -55,14 +83,14 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   useEffect(() => {
     if (initializedToday.current || selectedDate) return;
     initializedToday.current = true;
-    onSelectDate(toDateString(now.getFullYear(), now.getMonth(), now.getDate()));
-  }, [now, onSelectDate, selectedDate]);
+    onSelectDate(toDateString(today.getFullYear(), today.getMonth(), today.getDate()));
+  }, [onSelectDate, selectedDate, today]);
 
   const scrollToSelectedDateResults = () => {
     window.setTimeout(() => {
-      const target = document.querySelector<HTMLElement>(
-        '.pub-events-date-heading, .empty-state-card',
-      ) ?? document.getElementById('events');
+      const target =
+        document.querySelector<HTMLElement>('.pub-events-date-heading, .empty-state-card') ??
+        document.getElementById('events');
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 260);
   };
@@ -95,7 +123,10 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   const occupiedCells = firstDow + daysInMonth;
   const totalCells = Math.ceil(occupiedCells / 7) * 7;
   const trailingCells = totalCells - occupiedCells;
-  const markerMap = new Map(markers.map((marker) => [marker.date, marker]));
+  const markerMap = useMemo(
+    () => new Map(markers.map((marker) => [marker.date, marker])),
+    [markers],
+  );
 
   return (
     <div className="pub-calendar select-none">
@@ -106,7 +137,10 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           {DAYS_RU.map((day, index) => (
             <div
               key={day}
-              className={cn('pub-calendar-weekday', index >= 5 && 'pub-calendar-weekday--weekend')}
+              className={cn(
+                'pub-calendar-weekday',
+                index >= 5 && 'pub-calendar-weekday--weekend',
+              )}
             >
               {day}
             </div>
@@ -117,6 +151,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           className={cn('pub-calendar-grid', loading && 'pub-calendar-grid--loading')}
           role="grid"
           aria-label="Календарь мероприятий"
+          aria-busy={loading}
         >
           {Array.from({ length: firstDow }).map((_, index) => {
             const previousMonth = month === 0 ? 11 : month - 1;
@@ -145,9 +180,11 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
             const dateStr = toDateString(year, month, day);
             const marker = markerMap.get(dateStr);
             const isSelected = selectedDate === dateStr;
-            const hasEvents = Boolean(marker);
+            const hasEvents = getMarkerTotal(marker) > 0;
             const columnIndex = (firstDow + index) % 7;
             const isWeekend = columnIndex >= 5;
+            const tooltip = getCalendarTooltip(marker);
+            const tooltipId = `calendar-tooltip-${dateStr}`;
 
             return (
               <div
@@ -161,7 +198,8 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
               >
                 <button
                   type="button"
-                  aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ', мероприятий нет'}${isSelected ? ', выбрано' : ''}`}
+                  aria-label={`${day} числа, ${tooltip.toLowerCase()}${isSelected ? ', выбрано' : ''}`}
+                  aria-describedby={tooltipId}
                   aria-selected={isSelected}
                   onClick={() => selectDate(isSelected ? null : dateStr)}
                   className={cn(
@@ -170,7 +208,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                     hasEvents && !isSelected && 'pub-calendar-day--event',
                   )}
                 >
-                  {day}
+                  <span className="pub-calendar-day-number">{day}</span>
                   {hasEvents && !isSelected && (
                     <span
                       className="pub-calendar-marker"
@@ -185,6 +223,9 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                       }}
                     />
                   )}
+                  <span id={tooltipId} className="pub-calendar-tooltip" role="tooltip">
+                    {tooltip}
+                  </span>
                 </button>
               </div>
             );
@@ -210,9 +251,15 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
       </div>
 
       <div className="pub-calendar-legend">
-        <span><i className="pub-calendar-legend-dot bg-green-marker" />Запланировано</span>
-        <span><i className="pub-calendar-legend-dot bg-live-status" />Идёт сейчас</span>
-        <span><i className="pub-calendar-legend-dot bg-completed-marker" />Завершено</span>
+        <span>
+          <i className="pub-calendar-legend-dot bg-green-marker" />Запланировано
+        </span>
+        <span>
+          <i className="pub-calendar-legend-dot bg-live-status" />Идёт сейчас
+        </span>
+        <span>
+          <i className="pub-calendar-legend-dot bg-completed-marker" />Завершено
+        </span>
       </div>
     </div>
   );
