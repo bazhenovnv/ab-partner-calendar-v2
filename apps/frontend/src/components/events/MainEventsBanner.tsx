@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
-import styles from './events-runtime.module.css';
+import styles from './main-events-carousel.module.css';
 
 function circularOffset(idx: number, active: number, total: number): number {
   const distance = (idx - active + total) % total;
@@ -13,41 +12,38 @@ function circularOffset(idx: number, active: number, total: number): number {
 }
 
 function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
-  const base = compact
-    ? { width: 214, height: 270, marginLeft: -107, marginTop: -135 }
-    : { width: 346, height: 347, marginLeft: -173, marginTop: -173.5 };
-
-  if (offset === 0) {
-    return { ...base, transform: 'translateX(0) scale(1)', zIndex: 5, opacity: 1 };
-  }
-
+  const height = compact ? 270 : 347;
+  const maxWidth = compact ? 300 : 428;
   const abs = Math.abs(offset);
   const direction = offset > 0 ? 1 : -1;
 
-  if (abs === 1) {
-    return {
-      ...base,
-      transform: `translateX(${direction * (compact ? 128 : 278)}px) scale(0.88)`,
-      zIndex: 4,
-      opacity: 1,
-    };
-  }
+  let translateX = 0;
+  let scale = 1;
+  let zIndex = 5;
+  let opacity = 1;
 
-  if (abs === 2) {
-    return {
-      ...base,
-      transform: `translateX(${direction * (compact ? 226 : 505)}px) scale(0.73)`,
-      zIndex: 3,
-      opacity: 1,
-    };
+  if (abs === 1) {
+    translateX = direction * (compact ? 142 : 282);
+    scale = 0.88;
+    zIndex = 4;
+  } else if (abs === 2) {
+    translateX = direction * (compact ? 244 : 520);
+    scale = 0.73;
+    zIndex = 3;
+  } else if (abs > 2) {
+    translateX = direction * (compact ? 350 : 735);
+    scale = 0.6;
+    zIndex = 1;
+    opacity = 0;
   }
 
   return {
-    ...base,
-    transform: `translateX(${direction * (compact ? 340 : 720)}px) scale(0.6)`,
-    zIndex: 1,
-    opacity: 0,
-  };
+    '--poster-height': `${height}px`,
+    '--poster-max-width': `${maxWidth}px`,
+    transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
+    zIndex,
+    opacity,
+  } as React.CSSProperties;
 }
 
 interface MainEventsBannerProps { events: PublicEvent[]; }
@@ -109,14 +105,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   }, [active, events, goTo, openEvent, total]);
 
   return (
-    <section id="main-events" className={styles.mainEventsSection} aria-label="Главные события">
-      <div className={styles.mainEventsOuter}>
-        <h2 className={styles.mainEventsTitle}>Главные события</h2>
+    <section id="main-events" className={styles.section} aria-label="Главные события">
+      <div className={styles.outer}>
+        <h2 className={styles.title}>Главные события</h2>
         {!total ? (
-          <div className={styles.mainEmpty} role="status"><p>Нет событий</p></div>
+          <div className={styles.empty} role="status"><p>Нет событий</p></div>
         ) : (
           <>
-            <div ref={galleryRef} className={styles.carouselGallery} tabIndex={0} aria-label="Карусель главных событий">
+            <div ref={galleryRef} className={styles.gallery} tabIndex={0} aria-label="Карусель главных событий">
               {events.map((event, index) => {
                 const offset = circularOffset(index, active, total);
                 if (Math.abs(offset) > 2) return null;
@@ -129,26 +125,23 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                   <button
                     type="button"
                     key={event.id}
-                    className={styles.carouselCard}
+                    className={styles.card}
                     style={getCardStyle(offset, compact)}
                     aria-hidden={!isCenter}
                     tabIndex={isCenter ? 0 : -1}
                     aria-label={isCenter ? `Открыть событие: ${event.title}` : `Показать событие: ${event.title}`}
                     onClick={() => isCenter ? openEvent(event) : goTo(index)}
                   >
-                    <span className={styles.carouselCardFrame}>
+                    <span className={styles.frame}>
                       {imageUrl ? (
-                        <Image
+                        <img
                           src={imageUrl}
                           alt={event.title}
-                          fill
-                          unoptimized
                           loading="lazy"
-                          sizes={compact ? '214px' : '346px'}
-                          className={styles.carouselImage}
+                          className={styles.poster}
                         />
                       ) : (
-                        <span className={styles.carouselPlaceholder} />
+                        <span className={styles.placeholder} />
                       )}
                     </span>
                   </button>
@@ -157,8 +150,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
             </div>
 
             {total > 1 && (
-              <nav className={styles.carouselNav} aria-label="Навигация по главным событиям">
-                <button type="button" onClick={() => goTo(active - 1)} className={styles.carouselNavButton} aria-label="Предыдущее событие">‹</button>
+              <nav className={styles.nav} aria-label="Навигация по главным событиям">
+                <button type="button" onClick={() => goTo(active - 1)} className={styles.navButton} aria-label="Предыдущее событие">‹</button>
                 {Array.from({ length: indicatorCount }, (_, index) => (
                   <button
                     key={index}
@@ -166,10 +159,10 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                     onClick={() => goToIndicator(index)}
                     aria-label={`Группа событий ${index + 1}`}
                     aria-current={index === activeIndicator ? 'true' : undefined}
-                    className={cn(styles.carouselDot, index === activeIndicator && styles.carouselDotActive)}
+                    className={cn(styles.dot, index === activeIndicator && styles.dotActive)}
                   />
                 ))}
-                <button type="button" onClick={() => goTo(active + 1)} className={styles.carouselNavButton} aria-label="Следующее событие">›</button>
+                <button type="button" onClick={() => goTo(active + 1)} className={styles.navButton} aria-label="Следующее событие">›</button>
               </nav>
             )}
           </>
