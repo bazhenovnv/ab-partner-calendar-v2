@@ -2,8 +2,10 @@
 
 import Image from 'next/image';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 import styles from './events-runtime.module.css';
+import ui from './event-interactions.module.css';
 
 interface EventModalContextValue { openEvent: (event: PublicEvent) => void; }
 const EventModalContext = createContext<EventModalContextValue | null>(null);
@@ -85,7 +87,7 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
 
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={onClose}>
-      <article className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="event-modal-title" onMouseDown={(eventObject) => eventObject.stopPropagation()}>
+      <article className={cn(styles.modal, ui.modalFrame)} role="dialog" aria-modal="true" aria-labelledby="event-modal-title" onMouseDown={(eventObject) => eventObject.stopPropagation()}>
         <button type="button" className={styles.modalClose} onClick={onClose} aria-label="Закрыть окно">×</button>
         <div className={styles.modalMedia}>
           {imageUrl ? (
@@ -94,13 +96,13 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
             <div className={styles.modalPlaceholder} aria-hidden="true">АБ</div>
           )}
         </div>
-        <div className={styles.modalContent}>
+        <div className={cn(styles.modalContent, ui.modalContent)}>
           <div className={styles.modalMeta}>
             <span>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</span>
             <span>{format}</span>
             <span>{price}</span>
           </div>
-          <h2 id="event-modal-title" className={styles.modalTitle}>{event.title}</h2>
+          <h2 id="event-modal-title" className={cn(styles.modalTitle, ui.modalTitle)}>{event.title}</h2>
           {speakerName && <p className={styles.modalSpeaker}><strong>Спикер: {speakerName}</strong></p>}
           {descriptionLines.length > 0 && (
             <div className={styles.modalDescription}>
@@ -118,9 +120,9 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
             {actionUrl ? (
               <a href={actionUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>{actionLabel}</a>
             ) : (
-              <span className={`${styles.modalPrimary} ${styles.modalActionDisabled}`} aria-disabled="true">{actionLabel}</span>
+              <span className={cn(styles.modalPrimary, ui.modalActionDisabled)} aria-disabled="true">{actionLabel}</span>
             )}
-            <button type="button" className={styles.modalReminder} onClick={() => setReminderOpen(true)}>
+            <button type="button" className={ui.modalReminder} onClick={() => setReminderOpen(true)}>
               <span aria-hidden="true">♧</span> Напомнить
             </button>
           </div>
@@ -143,24 +145,24 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
   const maxUrl = maxUsername ? `https://max.ru/${maxUsername}?start=${encodeURIComponent(payload)}` : null;
 
   return (
-    <div className={styles.reminderOverlay} role="presentation" onMouseDown={onClose}>
-      <section className={styles.reminderDialog} role="dialog" aria-modal="true" aria-labelledby="reminder-title" onMouseDown={(e) => e.stopPropagation()}>
-        <button type="button" className={styles.reminderClose} onClick={onClose} aria-label="Закрыть выбор мессенджера">×</button>
+    <div className={ui.reminderOverlay} role="presentation" onMouseDown={onClose}>
+      <section className={ui.reminderDialog} role="dialog" aria-modal="true" aria-labelledby="reminder-title" onMouseDown={(e) => e.stopPropagation()}>
+        <button type="button" className={ui.reminderClose} onClick={onClose} aria-label="Закрыть выбор мессенджера">×</button>
         <h3 id="reminder-title">Напомнить</h3>
         <p>Выберите, куда отправить напоминание</p>
-        <div className={styles.reminderPlatforms}>
+        <div className={ui.reminderPlatforms}>
           {telegramUrl ? (
-            <a href={telegramUrl} target="_blank" rel="noopener noreferrer" className={styles.reminderPlatform}>Telegram <span>›</span></a>
+            <a href={telegramUrl} target="_blank" rel="noopener noreferrer" className={ui.reminderPlatform}>Telegram <span>›</span></a>
           ) : (
-            <span className={`${styles.reminderPlatform} ${styles.reminderPlatformDisabled}`}>Telegram <span>›</span></span>
+            <span className={cn(ui.reminderPlatform, ui.reminderPlatformDisabled)}>Telegram <span>›</span></span>
           )}
           {maxUrl ? (
-            <a href={maxUrl} target="_blank" rel="noopener noreferrer" className={styles.reminderPlatform}>MAX <span>›</span></a>
+            <a href={maxUrl} target="_blank" rel="noopener noreferrer" className={ui.reminderPlatform}>MAX <span>›</span></a>
           ) : (
-            <span className={`${styles.reminderPlatform} ${styles.reminderPlatformDisabled}`}>MAX <span>›</span></span>
+            <span className={cn(ui.reminderPlatform, ui.reminderPlatformDisabled)}>MAX <span>›</span></span>
           )}
         </div>
-        <button type="button" className={styles.reminderCancel} onClick={onClose}>Отмена</button>
+        <button type="button" className={ui.reminderCancel} onClick={onClose}>Отмена</button>
       </section>
     </div>
   );
