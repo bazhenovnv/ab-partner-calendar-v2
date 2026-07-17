@@ -15,7 +15,6 @@
   grid-template-columns: minmax(360px, 46%) minmax(0, 54%);
   width: min(1180px, calc(100vw - 48px));
   height: min(720px, calc(100vh - 48px));
-  max-height: calc(100vh - 48px);
   overflow: hidden;
   border-radius: 24px;
   background: #fff;
@@ -36,13 +35,13 @@
   color: #0d2344;
   font-size: 28px;
   line-height: 1;
-  box-shadow: 0 4px 14px rgba(13, 35, 68, .18);
   cursor: pointer;
 }
 
 .close {
   top: 16px;
   right: 16px;
+  box-shadow: 0 4px 14px rgba(13, 35, 68, .18);
 }
 
 .media {
@@ -122,45 +121,54 @@
 .facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0 0 16px;
-  border: 1px solid rgba(13, 35, 68, .14);
-  border-radius: 12px;
+  gap: 18px;
+  margin: 0 0 18px;
+  border-radius: 22px;
   background: #fff;
-  box-shadow: 0 4px 14px rgba(13, 35, 68, .1);
+  padding: 18px 22px;
+  box-shadow: 0 12px 34px rgba(13, 35, 68, .15);
 }
 
 .fact {
   display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 8px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
-  padding: 12px 14px;
+  min-width: 0;
 }
 
-.fact + .fact { border-left: 1px solid rgba(13, 35, 68, .1); }
+.factIcon {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
 
-.icon {
+.factIcon_calendar { width: 68px; height: 68px; }
+.factIcon_clock { width: 66px; height: 59px; }
+.factIcon_price { width: 72px; height: 72px; }
+
+.factText {
   display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 50%;
-  background: #dff6ec;
-  color: #20ad83;
+  gap: 5px;
+  min-width: 0;
 }
 
 .label {
   display: block;
-  color: rgba(13, 35, 68, .46);
-  font-size: 10px;
+  color: rgba(13, 35, 68, .56);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.1;
 }
 
 .value {
   display: block;
-  color: #0d2344;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.25;
+  overflow-wrap: anywhere;
+  color: #101820;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.15;
 }
 
 .lines {
@@ -305,7 +313,13 @@
   box-shadow: 0 24px 70px rgba(13, 35, 68, .3);
 }
 
-.chooserClose { top: 14px; right: 14px; box-shadow: none; background: #f4f7f6; }
+.chooserClose {
+  top: 14px;
+  right: 14px;
+  border: 2px solid #8ee1c5;
+  background: #f7fbf9;
+  box-shadow: none;
+}
 
 .chooserHeaderImage {
   display: block;
@@ -320,6 +334,7 @@
   text-align: center;
   color: #0d2344;
   font-size: 28px;
+  font-weight: 500;
 }
 
 .chooser > p {
@@ -327,6 +342,7 @@
   text-align: center;
   color: rgba(13, 35, 68, .62);
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .platforms { display: grid; gap: 12px; }
@@ -383,43 +399,58 @@
 .remind:focus-visible,
 .retry:focus-visible,
 .platform:focus-visible,
-.cancel:focus-visible { outline: 3px solid rgba(32, 173, 131, .42); outline-offset: 3px; }
+.cancel:focus-visible {
+  outline: 3px solid rgba(32, 173, 131, .42);
+  outline-offset: 3px;
+}
 
-@keyframes eventModalSpin { to { transform: rotate(360deg); } }
+@keyframes eventModalSpin {
+  to { transform: rotate(360deg); }
+}
 
-@media (max-width: 1023px) {
-  .modal { grid-template-columns: 42% 58%; }
-  .scrollArea { padding: 30px 30px 18px; }
-  .actionBar { padding: 15px 30px 17px; }
-  .title { font-size: clamp(24px, 3vw, 32px); }
+@media (max-width: 1100px) {
+  .facts { gap: 10px; padding: 16px; }
+  .fact { grid-template-columns: 58px minmax(0, 1fr); gap: 10px; }
+  .factIcon,
+  .factIcon_calendar,
+  .factIcon_price { width: 58px; height: 58px; }
+  .factIcon_clock { width: 56px; height: 50px; }
+  .label { font-size: 14px; }
+  .value { font-size: 16px; }
 }
 
 @media (max-width: 767px) {
-  .backdrop { padding: 10px; }
+  .backdrop { padding: 12px; }
   .modal {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(0, 1fr);
-    width: min(430px, 100%);
-    height: calc(100vh - 20px);
-    max-height: calc(100vh - 20px);
+    display: block;
+    width: min(390px, 100%);
+    height: auto;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
     border-radius: 18px;
   }
-  .media { padding: 12px; }
-  .imageStage { width: min(58vw, 250px); }
-  .content { min-height: 0; }
-  .scrollArea { padding: 18px 18px 14px; }
-  .actionBar { padding: 12px 18px 14px; }
-  .facts { grid-template-columns: 1fr; }
-  .fact + .fact { border-top: 1px solid rgba(13,35,68,.1); border-left: 0; }
-  .actions { gap: 10px; }
-  .primary, .remind { flex: 1; min-width: 0; padding: 0 12px; }
-  .title { font-size: 24px; }
-  .description { font-size: 14px; }
-  .chooser { padding: 24px 18px 20px; border-radius: 18px; }
+  .media { padding: 14px; }
+  .content { display: block; }
+  .scrollArea { overflow: visible; padding: 18px; }
+  .facts { grid-template-columns: 1fr; gap: 14px; border-radius: 16px; }
+  .fact { grid-template-columns: 64px 1fr; }
+  .factIcon,
+  .factIcon_calendar,
+  .factIcon_price { width: 64px; height: 64px; }
+  .factIcon_clock { width: 60px; height: 54px; }
+  .actionBar { position: sticky; bottom: 0; padding: 14px 18px 16px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .primary,
+  .remind { min-width: 0; padding: 0 12px; }
+  .chooser { padding: 24px 18px 20px; }
+  .chooser h3 { font-size: 25px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 1.6s; }
-  .primary, .remind, .retry, .platform, .cancel { transition: none; }
+  .primary,
+  .remind,
+  .retry,
+  .platform,
+  .cancel { transition: none; }
 }
