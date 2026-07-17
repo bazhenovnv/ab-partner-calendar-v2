@@ -6,6 +6,7 @@ import { formatEventDateParts } from '@/lib/format';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
 import styles from './events-runtime.module.css';
+import ui from './event-interactions.module.css';
 
 interface EventCardProps {
   event: PublicEvent;
@@ -28,14 +29,14 @@ export function EventCard({ event, className }: EventCardProps) {
   const actionUrl = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
 
   return (
-    <article className={cn(styles.eventCard, 'group', className)}>
+    <article className={cn(styles.eventCard, ui.cardShell, 'group', className)}>
       <button
         type="button"
-        className={styles.eventCardOpen}
+        className={ui.cardOpen}
         aria-label={`Открыть мероприятие: ${event.title}`}
         onClick={() => openEvent(event)}
       >
-        <span className={styles.eventCardMedia}>
+        <span className={cn(styles.eventCardMedia, ui.cardMedia)}>
           {imgUrl ? (
             <Image
               src={imgUrl}
@@ -52,15 +53,15 @@ export function EventCard({ event, className }: EventCardProps) {
           <span className={cn('pub-event-card-status', status.className)}>{status.label}</span>
         </span>
 
-        <span className={styles.infoPanel}>
+        <span className={cn(styles.infoPanel, ui.cardInfo)}>
           <span className={styles.dateBadge} aria-label={`${dateParts.day} ${dateParts.month}`}>
             <span className={styles.dateDay}>{dateParts.day}</span>
             <span className={styles.dateMonth}>{dateParts.month}</span>
           </span>
-          <span className={styles.eventBody}>
-            <span className={styles.eventTitle}>{event.title}</span>
-            {event.speaker && <strong className={styles.eventSpeaker}>Спикер: {event.speaker}</strong>}
-            <span className={styles.eventDetails}>Подробнее →</span>
+          <span className={cn(styles.eventBody, ui.cardBody)}>
+            <span className={cn(styles.eventTitle, ui.cardTitle)}>{event.title}</span>
+            {event.speaker && <strong className={ui.cardSpeaker}>Спикер: {event.speaker}</strong>}
+            <span className={ui.cardDetails}>Подробнее →</span>
           </span>
         </span>
       </button>
@@ -70,13 +71,13 @@ export function EventCard({ event, className }: EventCardProps) {
           href={actionUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.eventAction}
+          className={ui.cardAction}
           aria-label={`${actionLabel}: ${event.title}`}
         >
           {actionLabel}
         </a>
       ) : (
-        <span className={cn(styles.eventAction, styles.eventActionDisabled)} aria-disabled="true">
+        <span className={cn(ui.cardAction, ui.cardActionDisabled)} aria-disabled="true">
           {actionLabel}
         </span>
       )}
