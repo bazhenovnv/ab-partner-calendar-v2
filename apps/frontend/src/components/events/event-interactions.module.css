@@ -27,10 +27,7 @@
   outline-offset: 4px;
 }
 
-.cardMedia {
-  display: block;
-}
-
+.cardMedia,
 .cardInfo {
   display: block;
 }
@@ -75,52 +72,121 @@
   font-size: 11px;
   font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-}
-
-.cardAction {
-  position: absolute;
-  z-index: 7;
-  right: 126px;
-  bottom: 14px;
-  display: inline-flex;
-  min-height: 30px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  background: #7cd8b3;
-  padding: 0 13px;
-  color: #0d2344;
-  font-family: var(--font-montserrat), sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 2px 6px rgba(13, 35, 68, 0.16);
   transition: background 150ms ease, transform 150ms ease;
 }
 
-.cardAction:hover {
-  background: #65cda5;
+.cardOpen:hover .cardDetails {
+  background: #7cd8b3;
   transform: translateY(-1px);
 }
 
-.cardActionDisabled {
-  cursor: not-allowed;
-  opacity: 0.48;
+.modalFrame {
+  width: min(1496px, calc(100vw - 48px));
+  aspect-ratio: 1496 / 788;
+  grid-template-columns: 46% 54%;
+  border-radius: 27px;
+  font-family: var(--font-montserrat), sans-serif;
 }
 
-.modalFrame {
-  font-family: var(--font-montserrat), sans-serif;
+.modalClose {
+  top: 18px;
+  right: 20px;
+}
+
+.modalMedia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 34px 32px;
+  background: #f4f7f6;
+}
+
+.modalImageStage {
+  position: relative;
+  width: min(100%, 560px);
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid rgba(13, 35, 68, 0.22);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(13, 35, 68, 0.14);
+}
+
+.modalImage {
+  object-fit: contain;
+  object-position: center;
 }
 
 .modalContent {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 54px 58px 40px 42px;
   font-family: var(--font-montserrat), sans-serif;
 }
 
+.modalMeta {
+  gap: 9px;
+  margin-bottom: 18px;
+}
+
+.modalMeta span {
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
 .modalTitle {
+  max-width: 760px;
+  margin-bottom: 14px;
   font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(30px, 2.05vw, 40px);
   font-weight: 700;
+  line-height: 1.08;
   letter-spacing: -0.025em;
   text-transform: none;
+}
+
+.modalSpeaker {
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modalDescription {
+  max-width: 760px;
+  color: rgba(13, 35, 68, 0.74);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.modalDescription p {
+  margin-bottom: 12px;
+}
+
+.modalDetails {
+  margin-top: 12px;
+  gap: 7px;
+  color: rgba(13, 35, 68, 0.78);
+  font-size: 13px;
+}
+
+.modalActions {
+  margin-top: auto;
+  padding-top: 22px;
+}
+
+.modalPrimary,
+.modalReminder {
+  min-height: 42px;
+  border-radius: 6px;
+  padding: 0 20px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+}
+
+.modalPrimary {
+  background: #20ad83;
 }
 
 .modalActionDisabled {
@@ -130,17 +196,12 @@
 
 .modalReminder {
   display: inline-flex;
-  min-height: 42px;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: 1px solid rgba(13, 35, 68, 0.24);
-  border-radius: 6px;
   background: #fff;
-  padding: 0 20px;
   color: #0d2344;
-  font-family: var(--font-montserrat), sans-serif;
-  font-weight: 700;
   cursor: pointer;
   transition: background 150ms ease, transform 150ms ease;
 }
@@ -164,41 +225,51 @@
 
 .reminderDialog {
   position: relative;
-  width: min(420px, 100%);
-  border-radius: 22px;
+  width: min(240px, 100%);
+  min-height: 310px;
+  border-radius: 0;
   background: #fff;
-  padding: 34px 28px 24px;
+  padding: 72px 18px 22px;
   color: #0d2344;
   font-family: var(--font-montserrat), sans-serif;
-  box-shadow: 0 24px 64px rgba(13, 35, 68, 0.28);
+  box-shadow: 0 16px 42px rgba(13, 35, 68, 0.24);
+}
+
+.reminderDialog::before {
+  content: '📅 🔔';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  white-space: nowrap;
 }
 
 .reminderDialog h3 {
-  margin: 0 0 8px;
+  margin: 0 0 5px;
   text-align: center;
-  font-size: 25px;
+  font-size: 18px;
   font-weight: 700;
 }
 
 .reminderDialog p {
-  margin: 0 0 22px;
+  margin: 0 0 16px;
   color: rgba(13, 35, 68, 0.68);
   text-align: center;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .reminderClose {
   position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
+  top: 8px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
   border: 0;
-  border-radius: 50%;
   background: transparent;
-  color: #0d2344;
-  font-size: 24px;
+  color: rgba(13, 35, 68, 0.58);
+  font-size: 20px;
   cursor: pointer;
 }
 
@@ -209,18 +280,18 @@
 
 .reminderPlatform {
   display: flex;
-  min-height: 48px;
+  min-height: 38px;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid rgba(13, 35, 68, 0.15);
-  border-radius: 10px;
+  border: 1px solid rgba(13, 35, 68, 0.12);
+  border-radius: 9px;
   background: #fff;
-  padding: 0 16px;
+  padding: 0 12px;
   color: #0d2344;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 2px 7px rgba(13, 35, 68, 0.08);
+  box-shadow: 0 3px 9px rgba(13, 35, 68, 0.12);
   transition: background 150ms ease, border-color 150ms ease;
 }
 
@@ -236,14 +307,72 @@
 
 .reminderCancel {
   display: block;
-  margin: 18px auto 0;
+  margin: 16px auto 0;
   border: 0;
   background: transparent;
-  color: rgba(13, 35, 68, 0.58);
+  color: rgba(13, 35, 68, 0.45);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   cursor: pointer;
+}
+
+@media (max-width: 1439px) {
+  .modalFrame {
+    width: min(1154px, calc(100vw - 40px));
+    aspect-ratio: 1154 / 592;
+    border-radius: 27px;
+  }
+
+  .modalMedia {
+    padding: 28px 26px;
+  }
+
+  .modalImageStage {
+    width: min(100%, 430px);
+  }
+
+  .modalContent {
+    padding: 42px 44px 32px 34px;
+  }
+
+  .modalTitle {
+    font-size: clamp(25px, 2.05vw, 34px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .modalFrame {
+    width: min(894px, calc(100vw - 32px));
+    aspect-ratio: 894 / 458;
+    grid-template-columns: 44% 56%;
+    border-radius: 21px;
+  }
+
+  .modalMedia {
+    padding: 22px 20px;
+  }
+
+  .modalImageStage {
+    width: min(100%, 340px);
+    border-radius: 15px;
+  }
+
+  .modalContent {
+    padding: 34px 34px 26px 28px;
+  }
+
+  .modalTitle {
+    font-size: clamp(22px, 2.8vw, 29px);
+  }
+
+  .modalDescription {
+    font-size: 12px;
+  }
+
+  .modalDetails {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 767px) {
@@ -251,25 +380,57 @@
     font-size: 10px;
   }
 
-  .cardAction {
-    right: 112px;
-    bottom: 12px;
-    min-height: 27px;
-    padding: 0 9px;
-    font-size: 10px;
+  .modalFrame {
+    width: min(348px, calc(100vw - 24px));
+    aspect-ratio: auto;
+    grid-template-columns: 1fr;
+    border-radius: 0;
   }
 
+  .modalMedia {
+    min-height: auto;
+    padding: 14px 14px 0;
+    background: #fff;
+  }
+
+  .modalImageStage {
+    width: 100%;
+    max-width: none;
+    border-radius: 12px;
+  }
+
+  .modalContent {
+    padding: 16px 16px 22px;
+  }
+
+  .modalMeta {
+    margin-bottom: 10px;
+  }
+
+  .modalTitle {
+    font-size: 18px;
+    line-height: 1.15;
+  }
+
+  .modalSpeaker,
+  .modalDescription,
+  .modalDetails {
+    font-size: 11px;
+  }
+
+  .modalActions {
+    padding-top: 16px;
+  }
+
+  .modalPrimary,
   .modalReminder {
-    min-height: 40px;
-    padding: 0 16px;
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 11px;
   }
 
   .reminderOverlay {
     position: fixed;
     padding: 14px;
-  }
-
-  .reminderDialog {
-    padding: 32px 20px 22px;
   }
 }
