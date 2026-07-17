@@ -53,16 +53,23 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   );
 }
 
+function cleanSpeaker(value?: string | null): string | null {
+  if (!value) return null;
+  return value.split(/\s+[—–-]\s+/)[0]?.trim() || null;
+}
+
 function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: boolean; onClose: () => void }) {
+  const [reminderOpen, setReminderOpen] = useState(false);
   const image = event.images?.[0];
   const imageUrl = image?.originalUrl ?? image?.modalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
-  const registrationUrl = event.ticketUrl ?? event.eventUrl;
+  const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
+  const actionUrl = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Moscow',
   }).format(new Date(event.startDate));
   const format = event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
-  const speakerName = event.speaker?.split(/\s+[—–-]\s+/)[0]?.trim();
+  const speakerName = cleanSpeaker(event.speaker);
 
   const sourceDescription = event.fullDescription ?? event.shortDescription ?? '';
   const descriptionLines = sourceDescription
@@ -103,14 +110,58 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
           <dl className={styles.modalDetails}>
             <div><dt>Когда:</dt><dd>{date}{event.startTime ? `, ${event.startTime} (МСК)` : ''}</dd></div>
             <div><dt>Формат:</dt><dd>{format}</dd></div>
+            {event.venue && <div><dt>Место:</dt><dd>{event.venue}</dd></div>}
+            {event.address && <div><dt>Адрес:</dt><dd>{event.address}</dd></div>}
             <div><dt>Стоимость:</dt><dd>{price}</dd></div>
           </dl>
           <div className={styles.modalActions}>
-            {registrationUrl && <a href={registrationUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>Зарегистрироваться</a>}
+            {actionUrl ? (
+              <a href={actionUrl} target="_blank" rel="noopener noreferrer" className={styles.modalPrimary}>{actionLabel}</a>
+            ) : (
+              <span className={`${styles.modalPrimary} ${styles.modalActionDisabled}`} aria-disabled="true">{actionLabel}</span>
+            )}
+            <button type="button" className={styles.modalReminder} onClick={() => setReminderOpen(true)}>
+              <span aria-hidden="true">♧</span> Напомнить
+            </button>
           </div>
           {loading && <span className={styles.modalLoading}>Обновляем данные…</span>}
         </div>
+
+        {reminderOpen && (
+          <ReminderChooser event={event} onClose={() => setReminderOpen(false)} />
+        )}
       </article>
+    </div>
+  );
+}
+
+function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () => void }) {
+  const telegramUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, '').trim();
+  const maxUsername = process.env.NEXT_PUBLIC_MAX_BOT_USERNAME?.replace(/^@/, '').trim();
+  const payload = `remind_${event.id}`;
+  const telegramUrl = telegramUsername ? `https://t.me/${telegramUsername}?start=${encodeURIComponent(payload)}` : null;
+  const maxUrl = maxUsername ? `https://max.ru/${maxUsername}?start=${encodeURIComponent(payload)}` : null;
+
+  return (
+    <div className={styles.reminderOverlay} role="presentation" onMouseDown={onClose}>
+      <section className={styles.reminderDialog} role="dialog" aria-modal="true" aria-labelledby="reminder-title" onMouseDown={(e) => e.stopPropagation()}>
+        <button type="button" className={styles.reminderClose} onClick={onClose} aria-label="Закрыть выбор мессенджера">×</button>
+        <h3 id="reminder-title">Напомнить</h3>
+        <p>Выберите, куда отправить напоминание</p>
+        <div className={styles.reminderPlatforms}>
+          {telegramUrl ? (
+            <a href={telegramUrl} target="_blank" rel="noopener noreferrer" className={styles.reminderPlatform}>Telegram <span>›</span></a>
+          ) : (
+            <span className={`${styles.reminderPlatform} ${styles.reminderPlatformDisabled}`}>Telegram <span>›</span></span>
+          )}
+          {maxUrl ? (
+            <a href={maxUrl} target="_blank" rel="noopener noreferrer" className={styles.reminderPlatform}>MAX <span>›</span></a>
+          ) : (
+            <span className={`${styles.reminderPlatform} ${styles.reminderPlatformDisabled}`}>MAX <span>›</span></span>
+          )}
+        </div>
+        <button type="button" className={styles.reminderCancel} onClick={onClose}>Отмена</button>
+      </section>
     </div>
   );
 }
