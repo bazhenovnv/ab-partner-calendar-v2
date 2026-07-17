@@ -22,11 +22,9 @@ const EventModalContext = createContext<EventModalContextValue | null>(null);
 
 export function useEventModal(): EventModalContextValue {
   const context = useContext(EventModalContext);
-
   if (!context) {
     throw new Error('useEventModal must be used within EventModalProvider');
   }
-
   return context;
 }
 
@@ -34,17 +32,14 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   const [event, setEvent] = useState<PublicEvent | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-
   const abortControllerRef = useRef<AbortController | null>(null);
   const requestSequenceRef = useRef(0);
   const returnFocusRef = useRef<HTMLElement | null>(null);
 
   const loadEvent = useCallback(async (preview: PublicEvent) => {
     abortControllerRef.current?.abort();
-
     const controller = new AbortController();
     const requestSequence = ++requestSequenceRef.current;
-
     abortControllerRef.current = controller;
     setLoading(true);
     setLoadError(null);
@@ -54,21 +49,11 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
         cache: 'no-store',
         signal: controller.signal,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const loadedEvent = (await response.json()) as PublicEvent;
-
-      if (
-        controller.signal.aborted ||
-        requestSequence !== requestSequenceRef.current
-      ) {
-        return;
+      if (!controller.signal.aborted && requestSequence === requestSequenceRef.current) {
+        setEvent(loadedEvent);
       }
-
-      setEvent(loadedEvent);
     } catch (error) {
       if (
         controller.signal.aborted ||
@@ -76,17 +61,11 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
       ) {
         return;
       }
-
       if (requestSequence === requestSequenceRef.current) {
-        setLoadError(
-          'Не удалось загрузить полную информацию о мероприятии.',
-        );
+        setLoadError('Не удалось загрузить полную информацию о мероприятии.');
       }
     } finally {
-      if (
-        !controller.signal.aborted &&
-        requestSequence === requestSequenceRef.current
-      ) {
+      if (!controller.signal.aborted && requestSequence === requestSequenceRef.current) {
         setLoading(false);
       }
     }
@@ -95,10 +74,7 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   const openEvent = useCallback(
     (preview: PublicEvent) => {
       const activeElement = document.activeElement;
-
-      returnFocusRef.current =
-        activeElement instanceof HTMLElement ? activeElement : null;
-
+      returnFocusRef.current = activeElement instanceof HTMLElement ? activeElement : null;
       setEvent(preview);
       void loadEvent(preview);
     },
@@ -109,42 +85,21 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
     requestSequenceRef.current += 1;
-
     setEvent(null);
     setLoading(false);
     setLoadError(null);
-
     window.requestAnimationFrame(() => {
-      const returnTarget = returnFocusRef.current;
-
-      if (returnTarget?.isConnected) {
-        returnTarget.focus();
-      }
-
+      if (returnFocusRef.current?.isConnected) returnFocusRef.current.focus();
       returnFocusRef.current = null;
     });
   }, []);
 
-  const retry = useCallback(() => {
-    if (event) {
-      void loadEvent(event);
-    }
-  }, [event, loadEvent]);
+  useEffect(() => () => abortControllerRef.current?.abort(), []);
 
   useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!event) {
-      return;
-    }
-
+    if (!event) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-
     return () => {
       document.body.style.overflow = previousOverflow;
     };
@@ -155,13 +110,12 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   return (
     <EventModalContext.Provider value={value}>
       {children}
-
       {event && (
         <EventModal
           event={event}
           loading={loading}
           loadError={loadError}
-          onRetry={retry}
+          onRetry={() => void loadEvent(event)}
           onClose={close}
         />
       )}
@@ -170,208 +124,70 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
 }
 
 function cleanSpeaker(value?: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  return value.split(/\s+[—–-]\s+/)[0]?.trim() || null;
+  return value?.split(/\s+[—–-]\s+/)[0]?.trim() || null;
 }
 
-function safeOrganizerUrl(event: PublicEvent): string | null {
-  const candidate = event.ticketSalesEnabled
-    ? event.ticketUrl
-    : event.eventUrl;
-
-  if (!candidate) {
-    return null;
-  }
-
+function isAllowedWebsite(value?: string | null): value is string {
+  if (!value) return false;
   try {
-    const url = new URL(candidate);
-
-    if (
-      url.hostname === 'max.ru' &&
-      url.pathname.startsWith('/join/')
-    ) {
-      return null;
-    }
-
-    return candidate;
+    const url = new URL(value);
+    if (!['http:', 'https:'].includes(url.protocol)) return false;
+    const host = url.hostname.replace(/^www\./, '').toLowerCase();
+    return ![
+      'max.ru',
+      't.me',
+      'telegram.me',
+      'telegram.dog',
+      'vk.me',
+      'wa.me',
+    ].includes(host);
   } catch {
-    return null;
+    return false;
   }
 }
 
-function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  const selector = [
-    'a[href]',
-    'button:not([disabled])',
-    'input:not([disabled])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
-    '[tabindex]:not([tabindex="-1"])',
-  ].join(',');
-
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(selector),
-  ).filter((element) => {
-    return (
-      !element.hasAttribute('disabled') &&
-      element.getAttribute('aria-hidden') !== 'true' &&
-      element.offsetParent !== null
-    );
-  });
+function organizerActionUrl(event: PublicEvent): string | null {
+  const candidate = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
+  return isAllowedWebsite(candidate) ? candidate : null;
 }
 
-function CalendarIcon() {
+function sanitizeDescription(value?: string | null): string {
+  if (!value) return '';
+
+  return value
+    .replace(
+      /<(p|div|li)[^>]*>[\s\S]*?(?:зарегистрир|регистрац|для\s+участия|принять\s+участие|подать\s+заявку)[\s\S]*?<\/\1>/gi,
+      '',
+    )
+    .replace(
+      /<a\b[^>]*href=["'][^"']*(?:max\.ru\/join|t\.me\/|telegram\.me\/)[^"']*["'][^>]*>[\s\S]*?<\/a>/gi,
+      '',
+    )
+    .replace(/https?:\/\/(?:www\.)?(?:max\.ru\/join|t\.me|telegram\.me)\/[^\s<]+/gi, '')
+    .replace(/(?:зарегистрируйтесь|регистрация|для участия)[^.!?<]*(?:[.!?]|$)/gi, '')
+    .replace(/<p[^>]*>\s*(?:&nbsp;|<br\s*\/?\s*>)*\s*<\/p>/gi, '')
+    .trim();
+}
+
+function Icon({ name }: { name: 'calendar' | 'clock' | 'price' | 'location' | 'speaker' | 'bell' }) {
+  const paths = {
+    calendar: 'M7 3v3M17 3v3M4.5 9h15M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
+    clock: 'M12 7.5V12l3 2',
+    price: 'M8 5h5.2a4 4 0 1 1 0 8H8m0-4h7M8 13v6m0-3h6',
+    location: 'M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z',
+    speaker: 'M5.5 20c.6-4 3-6 6.5-6s5.9 2 6.5 6',
+    bell: 'M6.5 16.5h11l-1.2-1.7V10a4.3 4.3 0 0 0-8.6 0v4.8l-1.2 1.7Z',
+  } as const;
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width="17"
-      height="17"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M7 3v3M17 3v3M4.5 9h15M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+      {name === 'clock' && <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />}
+      {name === 'speaker' && <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />}
+      {name === 'location' && <circle cx="12" cy="10" r="2" stroke="currentColor" strokeWidth="1.8" />}
+      <path d={paths[name]} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      {name === 'bell' && <path d="M10 19a2.2 2.2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />}
     </svg>
   );
-}
-
-function ClockIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="17"
-      height="17"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="8.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M12 7.5V12l3 2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function PriceIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="17"
-      height="17"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M8 5h5.2a4 4 0 1 1 0 8H8m0-4h7M8 13v6m0-3h6"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function LocationIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="17"
-      height="17"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx="12"
-        cy="10"
-        r="2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
-function SpeakerIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="17"
-      height="17"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle
-        cx="12"
-        cy="8"
-        r="3.2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M5.5 20c.6-4 3-6 6.5-6s5.9 2 6.5 6"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function BellIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="19"
-      height="19"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M6.5 16.5h11l-1.2-1.7V10a4.3 4.3 0 0 0-8.6 0v4.8l-1.2 1.7Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10 19a2.2 2.2 0 0 0 4 0"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-interface EventModalProps {
-  event: PublicEvent;
-  loading: boolean;
-  loadError: string | null;
-  onRetry: () => void;
-  onClose: () => void;
 }
 
 function EventModal({
@@ -380,463 +196,170 @@ function EventModal({
   loadError,
   onRetry,
   onClose,
-}: EventModalProps) {
+}: {
+  event: PublicEvent;
+  loading: boolean;
+  loadError: string | null;
+  onRetry: () => void;
+  onClose: () => void;
+}) {
   const [reminderOpen, setReminderOpen] = useState(false);
-
   const modalRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const reminderTriggerRef = useRef<HTMLButtonElement>(null);
 
   const image = event.images?.[0];
-  const imageUrl =
-    image?.modalUrl ??
-    image?.originalUrl ??
-    image?.mainEventUrl ??
-    image?.eventCardUrl;
-
-  const actionLabel = event.ticketSalesEnabled
-    ? 'Купить билет'
-    : 'Участвовать';
-
-  const actionUrl = safeOrganizerUrl(event);
-
+  const imageUrl = image?.modalUrl ?? image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
+  const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
+  const actionUrl = organizerActionUrl(event);
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: 'Europe/Moscow',
   }).format(new Date(event.startDate));
-
-  const format =
-    event.format === 'ONLINE'
-      ? 'Онлайн'
-      : event.cityName ?? event.city?.name ?? 'Офлайн';
-
-  const price =
-    event.priceType === 'FREE'
-      ? 'Бесплатно'
-      : event.priceText ?? 'Платно';
-
+  const format = event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
+  const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
   const speaker = cleanSpeaker(event.speaker);
   const lead = event.shortDescription?.trim() ?? '';
-  const description = event.fullDescription?.trim() ?? '';
+  const description = sanitizeDescription(event.fullDescription);
+  const status = event.autoStatus === 'LIVE' ? 'Идёт сейчас' : event.autoStatus === 'COMPLETED' ? 'Завершено' : 'Запланировано';
 
-  const status =
-    event.autoStatus === 'LIVE'
-      ? 'Идёт сейчас'
-      : event.autoStatus === 'COMPLETED'
-        ? 'Завершено'
-        : 'Запланировано';
+  useEffect(() => closeButtonRef.current?.focus(), []);
 
   useEffect(() => {
-    closeButtonRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    const modal = modalRef.current;
-
-    if (!modal) {
-      return;
-    }
-
     const onKeyDown = (keyboardEvent: KeyboardEvent) => {
-      if (keyboardEvent.key === 'Escape') {
-        keyboardEvent.preventDefault();
-
-        if (reminderOpen) {
-          setReminderOpen(false);
-
-          window.requestAnimationFrame(() => {
-            reminderTriggerRef.current?.focus();
-          });
-        } else {
-          onClose();
-        }
-
-        return;
-      }
-
-      if (keyboardEvent.key !== 'Tab') {
-        return;
-      }
-
-      const focusableElements = getFocusableElements(modal);
-
-      if (focusableElements.length === 0) {
-        keyboardEvent.preventDefault();
-        modal.focus();
-        return;
-      }
-
-      const firstElement = focusableElements[0];
-      const lastElement =
-        focusableElements[focusableElements.length - 1];
-
-      if (
-        keyboardEvent.shiftKey &&
-        document.activeElement === firstElement
-      ) {
-        keyboardEvent.preventDefault();
-        lastElement.focus();
-      } else if (
-        !keyboardEvent.shiftKey &&
-        document.activeElement === lastElement
-      ) {
-        keyboardEvent.preventDefault();
-        firstElement.focus();
+      if (keyboardEvent.key !== 'Escape') return;
+      keyboardEvent.preventDefault();
+      if (reminderOpen) {
+        setReminderOpen(false);
+        window.requestAnimationFrame(() => reminderTriggerRef.current?.focus());
+      } else {
+        onClose();
       }
     };
-
     document.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-    };
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [onClose, reminderOpen]);
 
-  const closeReminder = useCallback(() => {
-    setReminderOpen(false);
-
-    window.requestAnimationFrame(() => {
-      reminderTriggerRef.current?.focus();
-    });
-  }, []);
-
-  const descriptionId =
-    description || lead ? 'event-modal-description' : undefined;
-
   return (
-    <div
-      className={v2.backdrop}
-      role="presentation"
-      onMouseDown={(mouseEvent) => {
-        if (mouseEvent.target === mouseEvent.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <article
-        ref={modalRef}
-        className={v2.modal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="event-modal-title"
-        aria-describedby={descriptionId}
-        aria-busy={loading}
-        tabIndex={-1}
-      >
-        <button
-          ref={closeButtonRef}
-          className={v2.close}
-          type="button"
-          onClick={onClose}
-          aria-label="Закрыть информацию о мероприятии"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="m6 6 12 12M18 6 6 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
+    <div className={v2.backdrop} role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <article ref={modalRef} className={v2.modal} role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+        <button ref={closeButtonRef} className={v2.close} type="button" onClick={onClose} aria-label="Закрыть">
+          ×
         </button>
 
         <div className={v2.media}>
           <div className={v2.imageStage}>
             {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={event.title}
-                fill
-                unoptimized
-                priority
-                className={v2.image}
-              />
+              <Image src={imageUrl} alt={event.title} fill unoptimized priority className={v2.image} />
             ) : (
-              <div
-                className={v2.imagePlaceholder}
-                aria-label="Изображение мероприятия отсутствует"
-              >
-                АБ
-              </div>
+              <div className={v2.imagePlaceholder}>АБ</div>
             )}
           </div>
         </div>
 
         <div className={v2.content}>
-          <span className={v2.status}>{status}</span>
+          <div className={v2.scrollArea}>
+            <span className={v2.status}>{status}</span>
+            <h2 id="event-modal-title" className={v2.title}>{event.title}</h2>
+            {lead && <p className={v2.lead}>{lead}</p>}
 
-          <h2 id="event-modal-title" className={v2.title}>
-            {event.title}
-          </h2>
-
-          {lead && (
-            <p
-              id={!description ? 'event-modal-description' : undefined}
-              className={v2.lead}
-            >
-              {lead}
-            </p>
-          )}
-
-          <div className={v2.facts}>
-            <div className={v2.fact}>
-              <span className={v2.icon}>
-                <CalendarIcon />
-              </span>
-              <span>
-                <small className={v2.label}>Дата</small>
-                <strong className={v2.value}>{date}</strong>
-              </span>
+            <div className={v2.facts}>
+              <Fact icon="calendar" label="Дата" value={date} />
+              <Fact icon="clock" label="Время" value={event.startTime ? `${event.startTime} (МСК)` : 'Уточняется'} />
+              <Fact icon="price" label="Стоимость" value={price} />
             </div>
 
-            <div className={v2.fact}>
-              <span className={v2.icon}>
-                <ClockIcon />
-              </span>
-              <span>
-                <small className={v2.label}>Время</small>
-                <strong className={v2.value}>
-                  {event.startTime
-                    ? `${event.startTime} (МСК)`
-                    : 'Уточняется'}
-                </strong>
-              </span>
+            <div className={v2.lines}>
+              <span className={v2.detailLine}><Icon name="location" />{format}</span>
+              {speaker && <strong className={v2.detailLine}><Icon name="speaker" />Спикер: {speaker}</strong>}
             </div>
 
-            <div className={v2.fact}>
-              <span className={v2.icon}>
-                <PriceIcon />
-              </span>
-              <span>
-                <small className={v2.label}>Стоимость</small>
-                <strong className={v2.value}>{price}</strong>
-              </span>
-            </div>
-          </div>
+            {description && <div className={v2.description} dangerouslySetInnerHTML={{ __html: description }} />}
 
-          <div className={v2.lines}>
-            <span className={v2.detailLine}>
-              <LocationIcon />
-              <span>{format}</span>
-            </span>
-
-            {speaker && (
-              <strong className={v2.detailLine}>
-                <SpeakerIcon />
-                <span>Спикер: {speaker}</span>
-              </strong>
+            {loadError && (
+              <div className={v2.loadError} role="alert">
+                <p>{loadError}</p>
+                <button type="button" className={v2.retry} onClick={onRetry} disabled={loading}>
+                  {loading ? 'Загрузка…' : 'Повторить'}
+                </button>
+              </div>
             )}
           </div>
 
-          {description && (
-            <div
-              id="event-modal-description"
-              className={v2.description}
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-          )}
-
-          {loadError && (
-            <div className={v2.loadError} role="alert">
-              <p>{loadError}</p>
-              <button
-                type="button"
-                className={v2.retry}
-                onClick={onRetry}
-                disabled={loading}
-              >
-                {loading ? 'Загрузка…' : 'Повторить'}
+          <div className={v2.actionBar}>
+            <div className={v2.actions}>
+              {actionUrl ? (
+                <a className={v2.primary} href={actionUrl} target="_blank" rel="noopener noreferrer">{actionLabel}</a>
+              ) : (
+                <button className={v2.primary} type="button" disabled title="Сайт организатора не указан">{actionLabel}</button>
+              )}
+              <button ref={reminderTriggerRef} className={v2.remind} type="button" onClick={() => setReminderOpen(true)}>
+                <Icon name="bell" /> Напомнить
               </button>
             </div>
-          )}
-
-          <div className={v2.actions}>
-            {actionUrl ? (
-              <a
-                className={v2.primary}
-                href={actionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {actionLabel}
-              </a>
-            ) : (
-              <button
-                className={v2.primary}
-                type="button"
-                disabled
-                title="Ссылка организатора не указана"
-              >
-                {actionLabel}
-              </button>
-            )}
-
-            <button
-              ref={reminderTriggerRef}
-              className={v2.remind}
-              type="button"
-              onClick={() => setReminderOpen(true)}
-              aria-haspopup="dialog"
-              aria-expanded={reminderOpen}
-            >
-              <BellIcon />
-              Напомнить
-            </button>
+            {loading && <div className={v2.loading}><span className={v2.spinner} />Обновляем данные…</div>}
           </div>
-
-          {loading && (
-            <div className={v2.loading} role="status" aria-live="polite">
-              <span className={v2.spinner} aria-hidden="true" />
-              <span>Обновляем данные…</span>
-            </div>
-          )}
         </div>
 
-        {reminderOpen && (
-          <ReminderChooser
-            event={event}
-            onClose={closeReminder}
-          />
-        )}
+        {reminderOpen && <ReminderChooser event={event} onClose={() => setReminderOpen(false)} />}
       </article>
     </div>
   );
 }
 
-function ReminderChooser({
-  event,
-  onClose,
-}: {
-  event: PublicEvent;
-  onClose: () => void;
-}) {
-  const chooserRef = useRef<HTMLElement>(null);
+function Fact({ icon, label, value }: { icon: 'calendar' | 'clock' | 'price'; label: string; value: string }) {
+  return (
+    <div className={v2.fact}>
+      <span className={v2.icon}><Icon name={icon} /></span>
+      <span><small className={v2.label}>{label}</small><strong className={v2.value}>{value}</strong></span>
+    </div>
+  );
+}
+
+function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () => void }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-
-  const telegramUsername =
-    process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
-      ?.replace(/^@/, '')
-      .trim();
-
-  const maxUsername =
-    process.env.NEXT_PUBLIC_MAX_BOT_USERNAME
-      ?.replace(/^@/, '')
-      .trim();
-
+  const telegramUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME?.replace(/^@/, '').trim();
+  const maxUsername = process.env.NEXT_PUBLIC_MAX_BOT_USERNAME?.replace(/^@/, '').trim();
   const payload = `remind_${event.id}`;
+  const telegramUrl = telegramUsername ? `https://t.me/${telegramUsername}?start=${encodeURIComponent(payload)}` : null;
+  const maxUrl = maxUsername ? `https://max.ru/${maxUsername}?start=${encodeURIComponent(payload)}` : null;
 
-  const telegramUrl = telegramUsername
-    ? `https://t.me/${telegramUsername}?start=${encodeURIComponent(payload)}`
-    : null;
-
-  const maxUrl = maxUsername
-    ? `https://max.ru/${maxUsername}?start=${encodeURIComponent(payload)}`
-    : null;
-
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-  }, []);
+  useEffect(() => closeButtonRef.current?.focus(), []);
 
   return (
-    <div
-      className={v2.chooserOverlay}
-      role="presentation"
-      onMouseDown={(mouseEvent) => {
-        if (mouseEvent.target === mouseEvent.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <section
-        ref={chooserRef}
-        className={v2.chooser}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="reminder-dialog-title"
-        aria-describedby="reminder-dialog-description"
-      >
-        <button
-          ref={closeButtonRef}
-          className={v2.chooserClose}
-          type="button"
-          onClick={onClose}
-          aria-label="Закрыть выбор сервиса напоминания"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="m6 6 12 12M18 6 6 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        <div className={v2.chooserGraphic} aria-hidden="true">
-          <CalendarIcon />
-          <BellIcon />
-        </div>
-
+    <div className={v2.chooserOverlay} role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <section className={v2.chooser} role="dialog" aria-modal="true" aria-labelledby="reminder-dialog-title">
+        <button ref={closeButtonRef} className={v2.chooserClose} type="button" onClick={onClose} aria-label="Закрыть">×</button>
+        <Image src="/ui-icons/reminder-header.png" width={107} height={59} alt="" className={v2.chooserHeaderImage} />
         <h3 id="reminder-dialog-title">Напомнить</h3>
-
-        <p id="reminder-dialog-description">
-          Выберите, куда отправить напоминание
-        </p>
+        <p>Выберите удобный способ получить напоминание</p>
 
         <div className={v2.platforms}>
-          {telegramUrl && (
-            <a
-              className={v2.platform}
-              href={telegramUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>Telegram</span>
-              <span aria-hidden="true">›</span>
-            </a>
-          )}
-
-          {maxUrl && (
-            <a
-              className={v2.platform}
-              href={maxUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>MAX</span>
-              <span aria-hidden="true">›</span>
-            </a>
-          )}
-
-          {!telegramUrl && !maxUrl && (
-            <p className={v2.platformError} role="status">
-              Сервисы напоминаний временно недоступны.
-            </p>
-          )}
+          <ReminderLink href={telegramUrl} image="/ui-icons/icon-telegram.png" title="Telegram" subtitle="Получить напоминание в боте" />
+          <ReminderLink href={maxUrl} image="/ui-icons/icon-max.png" title="MAX" subtitle="Получить напоминание в боте" />
+          <ReminderLink href="mailto:info-event@a-b.ru?subject=Стать партнёром АБ Афиши" image="/ui-icons/icon-partner.png" title="Стать партнёром" subtitle="Разместить своё мероприятие" />
         </div>
 
-        <button
-          className={v2.cancel}
-          type="button"
-          onClick={onClose}
-        >
-          Отмена
-        </button>
+        <button className={v2.cancel} type="button" onClick={onClose}>Отмена</button>
       </section>
     </div>
+  );
+}
+
+function ReminderLink({ href, image, title, subtitle }: { href: string | null; image: string; title: string; subtitle: string }) {
+  const content = (
+    <>
+      <Image src={image} width={56} height={56} alt="" />
+      <span className={v2.platformText}><strong>{title}</strong><small>{subtitle}</small></span>
+      <span className={v2.platformArrow} aria-hidden="true">›</span>
+    </>
+  );
+
+  return href ? (
+    <a className={v2.platform} href={href} target="_blank" rel="noopener noreferrer">{content}</a>
+  ) : (
+    <div className={`${v2.platform} ${v2.platformDisabled}`} aria-disabled="true">{content}</div>
   );
 }
