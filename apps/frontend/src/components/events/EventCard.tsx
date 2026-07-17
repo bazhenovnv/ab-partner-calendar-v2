@@ -25,15 +25,13 @@ export function EventCard({ event, className }: EventCardProps) {
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
   const dateParts = formatEventDateParts(event.startDate);
   const status = STATUS_LABEL[event.autoStatus] ?? STATUS_LABEL.PLANNED;
-  const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
-  const actionUrl = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
 
   return (
     <article className={cn(styles.eventCard, ui.cardShell, 'group', className)}>
       <button
         type="button"
         className={ui.cardOpen}
-        aria-label={`Открыть мероприятие: ${event.title}`}
+        aria-label={`Подробнее о мероприятии: ${event.title}`}
         onClick={() => openEvent(event)}
       >
         <span className={cn(styles.eventCardMedia, ui.cardMedia)}>
@@ -65,22 +63,6 @@ export function EventCard({ event, className }: EventCardProps) {
           </span>
         </span>
       </button>
-
-      {actionUrl ? (
-        <a
-          href={actionUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={ui.cardAction}
-          aria-label={`${actionLabel}: ${event.title}`}
-        >
-          {actionLabel}
-        </a>
-      ) : (
-        <span className={cn(ui.cardAction, ui.cardActionDisabled)} aria-disabled="true">
-          {actionLabel}
-        </span>
-      )}
     </article>
   );
 }
