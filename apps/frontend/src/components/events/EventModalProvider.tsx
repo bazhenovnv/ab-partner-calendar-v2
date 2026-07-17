@@ -42,7 +42,7 @@ function cleanSpeaker(value?: string | null): string | null {
   if (!value) return null;
   return value.split(/\s+[—–-]\s+/)[0]?.trim() || null;
 }
-function normalize(value: string): string { return value.replace(/\s+/g, ' ').trim().toLocaleLowerCase('ru-RU'); }
+
 function safeOrganizerUrl(event: PublicEvent): string | null {
   const candidate = event.ticketSalesEnabled ? event.ticketUrl : event.eventUrl;
   if (!candidate) return null;
@@ -64,13 +64,6 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
   const speaker = cleanSpeaker(event.speaker);
   const lead = (event.shortDescription ?? '').trim();
-  const leadNorm = normalize(lead);
-  const body = (event.fullDescription ?? '').split('\n').map((line) => line.trim()).filter(Boolean)
-    .filter((line) => normalize(line) !== normalize(event.title))
-    .filter((line) => !leadNorm || normalize(line) !== leadNorm)
-    .filter((line) => !/^(дата|когда|формат|стоимость|спикер)\s*:/i.test(line))
-    .filter((line) => !line.startsWith('🎙')).filter((line) => !/^зарегистрироваться/i.test(line))
-    .filter((line) => !/^https?:\/\//i.test(line)).filter((line) => !/^#/.test(line));
   const status = event.autoStatus === 'LIVE' ? 'Идёт сейчас' : event.autoStatus === 'COMPLETED' ? 'Завершено' : 'Запланировано';
 
   return <div className={v2.backdrop} role="presentation" onMouseDown={onClose}>
@@ -87,7 +80,6 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
           <div className={v2.fact}><span className={v2.icon}>₽</span><span><small className={v2.label}>Стоимость</small><strong className={v2.value}>{price}</strong></span></div>
         </div>
         <div className={v2.lines}><span>⌁ {format}</span>{speaker && <strong>♙ Спикер: {speaker}</strong>}</div>
-        {body.length > 0 && <div className={v2.description}>{body.map((line, i) => <p key={`${i}-${line.slice(0, 20)}`}>{line}</p>)}</div>}
         <div className={v2.actions}>
           {actionUrl ? <a className={v2.primary} href={actionUrl} target="_blank" rel="noopener noreferrer">{actionLabel}</a> : <span className={cn(v2.primary)} aria-disabled="true" title="Ссылка организатора не указана">{actionLabel}</span>}
           <button className={v2.remind} type="button" onClick={() => setReminderOpen(true)}><span className={v2.bell} aria-hidden="true">🔔</span>Напомнить</button>
