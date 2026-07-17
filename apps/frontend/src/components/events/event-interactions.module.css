@@ -1,0 +1,275 @@
+.cardShell {
+  position: relative;
+  overflow: visible;
+  cursor: default;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.cardOpen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cardOpen:focus-visible {
+  outline: 3px solid rgba(124, 216, 179, 0.78);
+  outline-offset: 4px;
+}
+
+.cardMedia {
+  display: block;
+}
+
+.cardInfo {
+  display: block;
+}
+
+.cardBody {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTitle {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.cardSpeaker {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 6px;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.cardDetails {
+  align-self: flex-end;
+  margin-top: auto;
+  border: 1px solid rgba(13, 35, 68, 0.2);
+  border-radius: 5px;
+  background: #fff;
+  padding: 6px 10px;
+  color: #0d2344;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.cardAction {
+  position: absolute;
+  z-index: 7;
+  right: 126px;
+  bottom: 14px;
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: #7cd8b3;
+  padding: 0 13px;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(13, 35, 68, 0.16);
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.cardAction:hover {
+  background: #65cda5;
+  transform: translateY(-1px);
+}
+
+.cardActionDisabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.modalFrame {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.modalContent {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.modalTitle {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-transform: none;
+}
+
+.modalActionDisabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.modalReminder {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(13, 35, 68, 0.24);
+  border-radius: 6px;
+  background: #fff;
+  padding: 0 20px;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.modalReminder:hover {
+  background: #eef9f5;
+  transform: translateY(-1px);
+}
+
+.reminderOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(13, 35, 68, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.reminderDialog {
+  position: relative;
+  width: min(420px, 100%);
+  border-radius: 22px;
+  background: #fff;
+  padding: 34px 28px 24px;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  box-shadow: 0 24px 64px rgba(13, 35, 68, 0.28);
+}
+
+.reminderDialog h3 {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.reminderDialog p {
+  margin: 0 0 22px;
+  color: rgba(13, 35, 68, 0.68);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.reminderClose {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #0d2344;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.reminderPlatforms {
+  display: grid;
+  gap: 10px;
+}
+
+.reminderPlatform {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(13, 35, 68, 0.15);
+  border-radius: 10px;
+  background: #fff;
+  padding: 0 16px;
+  color: #0d2344;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 7px rgba(13, 35, 68, 0.08);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.reminderPlatform:hover {
+  border-color: #7cd8b3;
+  background: #eef9f5;
+}
+
+.reminderPlatformDisabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.reminderCancel {
+  display: block;
+  margin: 18px auto 0;
+  border: 0;
+  background: transparent;
+  color: rgba(13, 35, 68, 0.58);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .cardSpeaker {
+    font-size: 10px;
+  }
+
+  .cardAction {
+    right: 112px;
+    bottom: 12px;
+    min-height: 27px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+  .modalReminder {
+    min-height: 40px;
+    padding: 0 16px;
+  }
+
+  .reminderOverlay {
+    position: fixed;
+    padding: 14px;
+  }
+
+  .reminderDialog {
+    padding: 32px 20px 22px;
+  }
+}
