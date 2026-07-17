@@ -12,8 +12,7 @@ function circularOffset(idx: number, active: number, total: number): number {
 }
 
 function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
-  const height = compact ? 270 : 347;
-  const maxWidth = compact ? 300 : 428;
+  const size = compact ? 270 : 347;
   const abs = Math.abs(offset);
   const direction = offset > 0 ? 1 : -1;
 
@@ -23,23 +22,22 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
   let opacity = 1;
 
   if (abs === 1) {
-    translateX = direction * (compact ? 142 : 282);
+    translateX = direction * (compact ? 150 : 300);
     scale = 0.88;
     zIndex = 4;
   } else if (abs === 2) {
-    translateX = direction * (compact ? 244 : 520);
+    translateX = direction * (compact ? 258 : 535);
     scale = 0.73;
     zIndex = 3;
   } else if (abs > 2) {
-    translateX = direction * (compact ? 350 : 735);
+    translateX = direction * (compact ? 360 : 760);
     scale = 0.6;
     zIndex = 1;
     opacity = 0;
   }
 
   return {
-    '--poster-height': `${height}px`,
-    '--poster-max-width': `${maxWidth}px`,
+    '--poster-size': `${size}px`,
     transform: `translate(-50%, -50%) translateX(${translateX}px) scale(${scale})`,
     zIndex,
     opacity,
@@ -118,7 +116,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                 if (Math.abs(offset) > 2) return null;
 
                 const image = event.images?.[0];
-                const imageUrl = image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
+                const imageUrl = image?.mainEventUrl ?? image?.originalUrl ?? image?.eventCardUrl ?? image?.thumbnailUrl;
                 const isCenter = offset === 0;
 
                 return (
