@@ -28,15 +28,8 @@
 }
 
 .cardMedia,
-.cardInfo {
-  display: block;
-}
-
-.cardBody {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
+.cardInfo { display: block; }
+.cardBody { position: relative; display: flex; flex-direction: column; }
 
 .cardTitle {
   display: -webkit-box;
@@ -74,142 +67,180 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   transition: background 150ms ease, transform 150ms ease;
 }
-
-.cardOpen:hover .cardDetails {
-  background: #7cd8b3;
-  transform: translateY(-1px);
-}
+.cardOpen:hover .cardDetails { background: #7cd8b3; transform: translateY(-1px); }
 
 .modalFrame {
-  width: min(1496px, calc(100vw - 48px));
-  aspect-ratio: 1496 / 788;
-  grid-template-columns: 46% 54%;
-  border-radius: 27px;
+  width: min(1194px, calc(100vw - 64px));
+  min-height: 620px;
+  max-height: calc(100vh - 64px);
+  grid-template-columns: 49% 51%;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #fff;
   font-family: var(--font-montserrat), sans-serif;
+  box-shadow: 0 30px 80px rgba(13, 35, 68, 0.28);
 }
 
 .modalClose {
   top: 18px;
-  right: 20px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  color: #0d2344;
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(13, 35, 68, 0.16);
 }
 
 .modalMedia {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: center;
-  padding: 34px 32px;
-  background: #f4f7f6;
+  padding: 34px 22px 34px 36px;
+  background: #fff;
 }
 
 .modalImageStage {
   position: relative;
-  width: min(100%, 560px);
+  width: min(100%, 520px);
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border: 1px solid rgba(13, 35, 68, 0.22);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 6px 16px rgba(13, 35, 68, 0.14);
+  border-radius: 20px;
+  background: #f5f7f6;
+  box-shadow: 0 8px 20px rgba(13, 35, 68, 0.18);
 }
 
-.modalImage {
-  object-fit: contain;
-  object-position: center;
-}
+.modalImage { object-fit: contain; object-position: center; }
 
 .modalContent {
   display: flex;
   min-width: 0;
   flex-direction: column;
   overflow-y: auto;
-  padding: 54px 58px 40px 42px;
+  padding: 42px 50px 34px 28px;
+  color: #0d2344;
   font-family: var(--font-montserrat), sans-serif;
 }
 
-.modalMeta {
-  gap: 9px;
-  margin-bottom: 18px;
-}
-
-.modalMeta span {
-  padding: 7px 12px;
+.modalStatus {
+  align-self: flex-start;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #f6d77d;
+  padding: 6px 12px;
+  color: #5c4100;
   font-size: 12px;
+  font-weight: 600;
 }
+.modalStatusLive { background: #ffd27b; }
+.modalStatusCompleted { background: #d9d9d9; color: #4a4a4a; }
 
 .modalTitle {
-  max-width: 760px;
-  margin-bottom: 14px;
-  font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(30px, 2.05vw, 40px);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-  text-transform: none;
+  margin: 0 0 10px;
+  color: #202020;
+  font-size: clamp(34px, 2.55vw, 48px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
 }
 
-.modalSpeaker {
-  margin-bottom: 16px;
+.modalLead {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0 0 16px;
+  color: #667085;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
+
+.modalFacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(13, 35, 68, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(13, 35, 68, 0.12);
+}
+
+.modalFact {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 15px;
+}
+.modalFact + .modalFact { border-left: 1px solid rgba(13, 35, 68, 0.1); }
+.modalFactIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #dff8ee;
+  color: #20ad83;
+  font-size: 16px;
+  font-weight: 700;
+}
+.modalFact > span:last-child { display: flex; min-width: 0; flex-direction: column; }
+.modalFact small { margin-bottom: 2px; color: #8a919e; font-size: 10px; line-height: 1.1; }
+.modalFact strong { overflow: hidden; color: #202020; font-size: 11px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+
+.modalSummary { margin-bottom: 10px; color: #202020; font-size: 13px; line-height: 1.45; }
+.modalSummary p { margin: 2px 0; }
+.modalSummary span { display: inline-block; width: 18px; color: #0d2344; text-align: center; }
 
 .modalDescription {
-  max-width: 760px;
-  color: rgba(13, 35, 68, 0.74);
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.modalDescription p {
-  margin-bottom: 12px;
-}
-
-.modalDetails {
-  margin-top: 12px;
-  gap: 7px;
-  color: rgba(13, 35, 68, 0.78);
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #667085;
   font-size: 13px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
 }
 
 .modalActions {
+  display: flex;
+  gap: 16px;
   margin-top: auto;
-  padding-top: 22px;
+  padding-top: 18px;
 }
 
 .modalPrimary,
 .modalReminder {
-  min-height: 42px;
-  border-radius: 6px;
-  padding: 0 20px;
-  font-family: var(--font-montserrat), sans-serif;
-  font-weight: 700;
-}
-
-.modalPrimary {
-  background: #20ad83;
-}
-
-.modalActionDisabled {
-  cursor: not-allowed;
-  opacity: 0.48;
-}
-
-.modalReminder {
   display: inline-flex;
+  min-width: 160px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
+  border-radius: 7px;
+  padding: 0 22px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.modalPrimary { background: #7cd8b3; color: #0d2344; box-shadow: 0 3px 8px rgba(13, 35, 68, 0.14); }
+.modalPrimary:hover { background: #65cda5; }
+.modalActionDisabled { cursor: not-allowed; opacity: 0.48; }
+.modalReminder {
   gap: 8px;
-  border: 1px solid rgba(13, 35, 68, 0.24);
+  border: 1px solid rgba(13, 35, 68, 0.2);
   background: #fff;
   color: #0d2344;
   cursor: pointer;
-  transition: background 150ms ease, transform 150ms ease;
+  box-shadow: 0 3px 8px rgba(13, 35, 68, 0.12);
 }
-
-.modalReminder:hover {
-  background: #eef9f5;
-  transform: translateY(-1px);
-}
+.modalReminder:hover { background: #eef9f5; }
 
 .reminderOverlay {
   position: absolute;
@@ -222,19 +253,16 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-
 .reminderDialog {
   position: relative;
   width: min(240px, 100%);
   min-height: 310px;
-  border-radius: 0;
   background: #fff;
   padding: 72px 18px 22px;
   color: #0d2344;
   font-family: var(--font-montserrat), sans-serif;
   box-shadow: 0 16px 42px rgba(13, 35, 68, 0.24);
 }
-
 .reminderDialog::before {
   content: '📅 🔔';
   position: absolute;
@@ -244,40 +272,10 @@
   font-size: 32px;
   white-space: nowrap;
 }
-
-.reminderDialog h3 {
-  margin: 0 0 5px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.reminderDialog p {
-  margin: 0 0 16px;
-  color: rgba(13, 35, 68, 0.68);
-  text-align: center;
-  font-size: 10px;
-  line-height: 1.35;
-}
-
-.reminderClose {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  width: 26px;
-  height: 26px;
-  border: 0;
-  background: transparent;
-  color: rgba(13, 35, 68, 0.58);
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.reminderPlatforms {
-  display: grid;
-  gap: 10px;
-}
-
+.reminderDialog h3 { margin: 0 0 5px; text-align: center; font-size: 18px; font-weight: 700; }
+.reminderDialog p { margin: 0 0 16px; color: rgba(13, 35, 68, 0.68); text-align: center; font-size: 10px; line-height: 1.35; }
+.reminderClose { position: absolute; top: 8px; right: 10px; width: 26px; height: 26px; border: 0; background: transparent; color: rgba(13, 35, 68, 0.58); font-size: 20px; cursor: pointer; }
+.reminderPlatforms { display: grid; gap: 10px; }
 .reminderPlatform {
   display: flex;
   min-height: 38px;
@@ -292,145 +290,43 @@
   font-weight: 600;
   text-decoration: none;
   box-shadow: 0 3px 9px rgba(13, 35, 68, 0.12);
-  transition: background 150ms ease, border-color 150ms ease;
 }
+.reminderPlatform:hover { border-color: #7cd8b3; background: #eef9f5; }
+.reminderPlatformDisabled { cursor: not-allowed; opacity: 0.45; }
+.reminderCancel { display: block; margin: 16px auto 0; border: 0; background: transparent; color: rgba(13, 35, 68, 0.45); font-family: inherit; font-size: 11px; cursor: pointer; }
 
-.reminderPlatform:hover {
-  border-color: #7cd8b3;
-  background: #eef9f5;
-}
-
-.reminderPlatformDisabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.reminderCancel {
-  display: block;
-  margin: 16px auto 0;
-  border: 0;
-  background: transparent;
-  color: rgba(13, 35, 68, 0.45);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-@media (max-width: 1439px) {
-  .modalFrame {
-    width: min(1154px, calc(100vw - 40px));
-    aspect-ratio: 1154 / 592;
-    border-radius: 27px;
-  }
-
-  .modalMedia {
-    padding: 28px 26px;
-  }
-
-  .modalImageStage {
-    width: min(100%, 430px);
-  }
-
-  .modalContent {
-    padding: 42px 44px 32px 34px;
-  }
-
-  .modalTitle {
-    font-size: clamp(25px, 2.05vw, 34px);
-  }
-}
-
-@media (max-width: 1023px) {
-  .modalFrame {
-    width: min(894px, calc(100vw - 32px));
-    aspect-ratio: 894 / 458;
-    grid-template-columns: 44% 56%;
-    border-radius: 21px;
-  }
-
-  .modalMedia {
-    padding: 22px 20px;
-  }
-
-  .modalImageStage {
-    width: min(100%, 340px);
-    border-radius: 15px;
-  }
-
-  .modalContent {
-    padding: 34px 34px 26px 28px;
-  }
-
-  .modalTitle {
-    font-size: clamp(22px, 2.8vw, 29px);
-  }
-
-  .modalDescription {
-    font-size: 12px;
-  }
-
-  .modalDetails {
-    font-size: 12px;
-  }
+@media (max-width: 1199px) {
+  .modalFrame { width: min(894px, calc(100vw - 32px)); min-height: 458px; grid-template-columns: 44% 56%; border-radius: 21px; }
+  .modalMedia { padding: 24px 18px 24px 24px; }
+  .modalImageStage { width: min(100%, 350px); border-radius: 16px; }
+  .modalContent { padding: 30px 34px 24px 24px; }
+  .modalTitle { font-size: clamp(25px, 3vw, 34px); }
+  .modalLead { font-size: 12px; -webkit-line-clamp: 2; }
+  .modalFact { padding: 10px; gap: 6px; }
+  .modalFactIcon { width: 28px; height: 28px; font-size: 13px; }
+  .modalFact strong { font-size: 9px; }
+  .modalSummary, .modalDescription { font-size: 11px; }
+  .modalDescription { -webkit-line-clamp: 3; }
+  .modalPrimary, .modalReminder { min-width: 126px; min-height: 40px; padding: 0 15px; font-size: 12px; }
 }
 
 @media (max-width: 767px) {
-  .cardSpeaker {
-    font-size: 10px;
-  }
-
-  .modalFrame {
-    width: min(348px, calc(100vw - 24px));
-    aspect-ratio: auto;
-    grid-template-columns: 1fr;
-    border-radius: 0;
-  }
-
-  .modalMedia {
-    min-height: auto;
-    padding: 14px 14px 0;
-    background: #fff;
-  }
-
-  .modalImageStage {
-    width: 100%;
-    max-width: none;
-    border-radius: 12px;
-  }
-
-  .modalContent {
-    padding: 16px 16px 22px;
-  }
-
-  .modalMeta {
-    margin-bottom: 10px;
-  }
-
-  .modalTitle {
-    font-size: 18px;
-    line-height: 1.15;
-  }
-
-  .modalSpeaker,
-  .modalDescription,
-  .modalDetails {
-    font-size: 11px;
-  }
-
-  .modalActions {
-    padding-top: 16px;
-  }
-
-  .modalPrimary,
-  .modalReminder {
-    min-height: 36px;
-    padding: 0 14px;
-    font-size: 11px;
-  }
-
-  .reminderOverlay {
-    position: fixed;
-    padding: 14px;
-  }
+  .cardSpeaker { font-size: 10px; }
+  .modalFrame { width: min(348px, calc(100vw - 24px)); max-height: calc(100vh - 24px); min-height: 0; grid-template-columns: 1fr; overflow-y: auto; border-radius: 14px; }
+  .modalClose { position: fixed; top: 18px; right: 18px; }
+  .modalMedia { padding: 14px 14px 0; }
+  .modalImageStage { width: 100%; max-width: none; border-radius: 12px; }
+  .modalContent { overflow: visible; padding: 14px 16px 20px; }
+  .modalStatus { margin-bottom: 8px; padding: 5px 9px; font-size: 9px; }
+  .modalTitle { margin-bottom: 7px; font-size: 20px; line-height: 1.08; }
+  .modalLead { margin-bottom: 10px; font-size: 10px; -webkit-line-clamp: 3; }
+  .modalFacts { grid-template-columns: 1fr; }
+  .modalFact + .modalFact { border-top: 1px solid rgba(13, 35, 68, 0.1); border-left: 0; }
+  .modalFact { padding: 8px 10px; }
+  .modalFact strong { font-size: 10px; }
+  .modalSummary, .modalDescription { font-size: 10px; }
+  .modalDescription { -webkit-line-clamp: 5; }
+  .modalActions { gap: 8px; padding-top: 14px; }
+  .modalPrimary, .modalReminder { min-width: 0; min-height: 36px; flex: 1 1 0; padding: 0 10px; font-size: 10px; }
+  .reminderOverlay { position: fixed; padding: 14px; }
 }
