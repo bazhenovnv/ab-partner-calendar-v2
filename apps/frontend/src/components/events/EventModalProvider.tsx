@@ -80,7 +80,7 @@ function EventModal({ event, loading, onClose }: { event: PublicEvent; loading: 
     .filter(Boolean)
     .filter((line) => line.toLocaleLowerCase('ru-RU') !== event.title.trim().toLocaleLowerCase('ru-RU'))
     .filter((line) => !/^(дата|когда|формат|стоимость|спикер)\s*:/i.test(line))
-    .filter((line) => !/^🎙/u.test(line))
+    .filter((line) => !line.startsWith('🎙'))
     .filter((line) => !/^зарегистрироваться/i.test(line))
     .filter((line) => !/^https?:\/\//i.test(line))
     .filter((line) => !/^#/.test(line));
