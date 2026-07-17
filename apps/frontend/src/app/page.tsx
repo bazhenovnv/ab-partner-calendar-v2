@@ -56,14 +56,6 @@ export default async function HomePage() {
     dirs = directions.status === 'fulfilled' ? directions.value : [];
     qs = quotes.status === 'fulfilled' ? quotes.value : [];
 
-    if (main.length === 0) {
-      try {
-        const completed = await fetchPublicEvents({ page: 1, limit: 5, autoStatus: 'COMPLETED' });
-        main = completed.events.slice(0, 5);
-      } catch {
-        main = [];
-      }
-    }
   }
 
   return (
