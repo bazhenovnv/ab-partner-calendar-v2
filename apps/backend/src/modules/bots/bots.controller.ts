@@ -9,20 +9,34 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { BotsService } from './bots.service';
 
 class UpsertBotUserDto {
+  @IsIn(['TELEGRAM', 'MAX'])
   channel!: 'TELEGRAM' | 'MAX';
+
+  @IsString()
+  @IsNotEmpty()
   externalId!: string;
+
+  @IsOptional()
+  @IsString()
   username?: string;
+
+  @IsOptional()
+  @IsString()
   firstName?: string;
 }
 
 class AcceptLegalDto {
+  @IsBoolean()
   acceptBroadcastConsent!: boolean;
 }
 
 class SavePhoneDto {
+  @IsString()
+  @IsNotEmpty()
   phone!: string;
 }
 
