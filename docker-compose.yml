@@ -74,6 +74,11 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:-}
+        NEXT_PUBLIC_TELEGRAM_BOT_URL: ${NEXT_PUBLIC_TELEGRAM_BOT_URL:-https://t.me/ab_afisha_buh}
+        NEXT_PUBLIC_MAX_BOT_USERNAME: ${NEXT_PUBLIC_MAX_BOT_USERNAME:-}
+        NEXT_PUBLIC_MAX_BOT_URL: ${NEXT_PUBLIC_MAX_BOT_URL:-https://max.ru/id2308283362_bot}
     restart: unless-stopped
     environment:
       NODE_ENV: development
