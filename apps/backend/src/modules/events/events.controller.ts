@@ -29,8 +29,15 @@ export class EventsController {
   }
 
   @Get('public/main')
-  getMainEvents() {
-    return this.eventsService.getMainEvents();
+  async getMainEvents() {
+    const events = await this.eventsService.getMainEvents();
+
+    // Defensive API boundary: the carousel must never receive ordinary events,
+    // even if an internal fallback query is changed incorrectly later.
+    return events
+      .filter((event) => event.status === 'PUBLISHED' && event.mainEvent === true)
+      .filter((event) => Boolean(event.images?.[0]?.mainEventUrl))
+      .slice(0, 5);
   }
 
   @Get('public/:id')
