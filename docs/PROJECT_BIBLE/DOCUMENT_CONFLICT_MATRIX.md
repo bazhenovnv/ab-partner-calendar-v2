@@ -26,6 +26,7 @@
 | MAX schedule | Historical integration notes treated webhook as the only production path and cron as a heartbeat | Active TZ explicitly requires checking the MAX source every hour | active TZ + BUSINESS_RULES | Keep webhook for immediate updates and run hourly `GET /updates` reconciliation through the same importer. |
 | MAX collection posts | Old code silently skipped weekly/multi-event posts | BR-003 requires sending them to `Требует внимания` without automatic splitting | BUSINESS_RULES BR-003 | Persist one source record as `NEEDS_ATTENTION` and notify an administrator. |
 | MAX publication | Old code stored every valid MAX import as `DRAFT`, so nothing appeared in the public calendar | BR-001/BR-002 require complete imports to appear in Calendar/Events and optionally Main Events | BUSINESS_RULES BR-001/BR-002 | Publish complete imports automatically; missing required fields remain `NEEDS_ATTENTION`. |
+| Working branch | Canonical docs name `claude/ab-afisha-architecture-plan-805f5o` as the working branch | Current release work and server commit `3f8ecdb` are on `codex/events-modal-carousel` | Current explicitly approved release workflow + actual server state, pending canonical update | Use `codex/events-modal-carousel` for the Monday release; update canonical branch references after repository/server synchronization is proven. |
 
 ## Status
 
