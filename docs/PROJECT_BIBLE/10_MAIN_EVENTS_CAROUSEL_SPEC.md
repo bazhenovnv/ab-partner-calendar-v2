@@ -14,6 +14,17 @@ Visual geometry is verified against the approved Figma node and approved desktop
 - Styles: `apps/frontend/src/components/events/main-events-carousel.module.css`
 - Data source: `GET /api/events/public/main`
 - Event eligibility: published event with `mainEvent=true`
+- Maximum API result: five events
+- The API must never substitute ordinary events with `mainEvent=false`
+
+## API selection contract
+
+1. The endpoint returns only records with `status=PUBLISHED` and `mainEvent=true`.
+2. Active featured events (`PLANNED`, `LIVE`) have priority and are ordered by `sortOrder`, then `startDate`.
+3. When no active featured events exist, the endpoint may return the latest completed featured events, but the `mainEvent=true` condition remains mandatory.
+4. Ordinary completed events must never be promoted implicitly to fill five positions.
+5. The response contains at most five records.
+6. If fewer than five eligible records exist, the carousel renders the available count without invented or duplicated cards.
 
 ## Image contract
 
@@ -27,7 +38,7 @@ Visual geometry is verified against the approved Figma node and approved desktop
 
 ## Five-card 3D composition
 
-The visible desktop state contains:
+The visible desktop state contains, when at least five eligible events exist:
 
 - one active centre card;
 - one near card on each side;
@@ -66,7 +77,7 @@ The composition must remain symmetrical. It must not use root scaling or CSS zoo
 
 ## Responsive behaviour
 
-- Desktop preserves all five visible positions where viewport width permits.
+- Desktop preserves all five visible positions where viewport width permits and where five eligible events exist.
 - Compact mode keeps the 3D hierarchy with reduced translations and card dimensions.
 - Mobile supports swipe and navigation controls.
 - Geometry is contained by the carousel viewport and must not create horizontal page overflow.
@@ -76,15 +87,17 @@ The composition must remain symmetrical. It must not use root scaling or CSS zoo
 - Missing dedicated cover: omit the invalid event from the carousel; do not render a fake placeholder.
 - Empty valid dataset: show the neutral message `Главные события пока не опубликованы`.
 - Broken production image is a release-blocking asset defect and must be recorded in `08_OPEN_ISSUES.md`.
+- An API record with `mainEvent=false` is a release-blocking data-contract defect.
 
 ## Acceptance evidence
 
 The block is accepted only when all evidence exists:
 
-1. frontend production build passes;
+1. frontend and backend production builds pass;
 2. API payload confirms `mainEvent=true` and dedicated `mainEventUrl` for every rendered item;
-3. all cover URLs return `200` with image content type;
-4. desktop 1920×1080 screenshot is compared with approved Figma/PDF;
-5. tablet and mobile interactions are verified, including swipe;
-6. keyboard and reduced-motion behaviour are verified;
-7. discrepancies and final status are recorded in `08_OPEN_ISSUES.md` and the release acceptance checklist.
+3. API payload contains no more than five records and no ordinary-event fallback;
+4. all cover URLs return `200` with image content type;
+5. desktop 1920×1080 screenshot is compared with approved Figma/PDF;
+6. tablet and mobile interactions are verified, including swipe;
+7. keyboard and reduced-motion behaviour are verified;
+8. discrepancies and final status are recorded in `08_OPEN_ISSUES.md` and the release acceptance checklist.
