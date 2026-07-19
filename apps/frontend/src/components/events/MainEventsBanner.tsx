@@ -22,11 +22,61 @@ type CardGeometry = {
 };
 
 const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
-  [-2]: { translateX: -520, translateY: 34, translateZ: -250, rotateY: 32, rotateZ: -4.5, scale: 0.74, opacity: 0.82, brightness: 0.78, zIndex: 1 },
-  [-1]: { translateX: -286, translateY: 12, translateZ: -105, rotateY: 20, rotateZ: -2.2, scale: 0.9, opacity: 0.94, brightness: 0.9, zIndex: 3 },
-  [0]: { translateX: 0, translateY: 0, translateZ: 40, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, zIndex: 5 },
-  [1]: { translateX: 286, translateY: 12, translateZ: -105, rotateY: -20, rotateZ: 2.2, scale: 0.9, opacity: 0.94, brightness: 0.9, zIndex: 3 },
-  [2]: { translateX: 520, translateY: 34, translateZ: -250, rotateY: -32, rotateZ: 4.5, scale: 0.74, opacity: 0.82, brightness: 0.78, zIndex: 1 },
+  [-2]: {
+    translateX: -405,
+    translateY: 14,
+    translateZ: -60,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: 0.74,
+    opacity: 0.82,
+    brightness: 0.72,
+    zIndex: 1,
+  },
+  [-1]: {
+    translateX: -205,
+    translateY: 6,
+    translateZ: -18,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: 0.89,
+    opacity: 0.95,
+    brightness: 0.90,
+    zIndex: 4,
+  },
+  [0]: {
+    translateX: 0,
+    translateY: 0,
+    translateZ: 0,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: 1,
+    opacity: 1,
+    brightness: 1,
+    zIndex: 10,
+  },
+  [1]: {
+    translateX: 205,
+    translateY: 6,
+    translateZ: -18,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: 0.89,
+    opacity: 0.95,
+    brightness: 0.90,
+    zIndex: 4,
+  },
+  [2]: {
+    translateX: 405,
+    translateY: 14,
+    translateZ: -60,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: 0.74,
+    opacity: 0.82,
+    brightness: 0.72,
+    zIndex: 1,
+  },
 };
 
 const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
@@ -79,6 +129,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const galleryRef = useRef<HTMLDivElement>(null);
   const pointerStartXRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | null>(null);
+  const dragStartedRef = useRef(false);
+  const suppressClickRef = useRef(false);
   const total = carouselEvents.length;
 
   const goTo = useCallback((index: number) => {
@@ -103,29 +155,50 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const finishPointerInteraction = useCallback((clientX?: number) => {
     const startX = pointerStartXRef.current;
+    const wasDragging = dragStartedRef.current;
+
     if (startX !== null && typeof clientX === 'number') {
       const delta = clientX - startX;
+
       if (Math.abs(delta) >= SWIPE_THRESHOLD_PX) {
         delta > 0 ? goPrevious() : goNext();
       }
     }
 
+    if (wasDragging) {
+      suppressClickRef.current = true;
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
+
     pointerStartXRef.current = null;
     pointerIdRef.current = null;
+    dragStartedRef.current = false;
     setDragOffset(0);
   }, [goNext, goPrevious]);
 
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+
     pointerStartXRef.current = event.clientX;
     pointerIdRef.current = event.pointerId;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    dragStartedRef.current = false;
   }, []);
 
   const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (pointerStartXRef.current === null || pointerIdRef.current !== event.pointerId) return;
+
     const delta = event.clientX - pointerStartXRef.current;
-    setDragOffset(Math.max(-72, Math.min(72, delta)));
+
+    if (!dragStartedRef.current && Math.abs(delta) >= 6) {
+      dragStartedRef.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    if (dragStartedRef.current) {
+      setDragOffset(Math.max(-96, Math.min(96, delta)));
+    }
   }, []);
 
   const onPointerUp = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -193,7 +266,18 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                     style={getCardStyle(offset, compact)}
                     aria-label={isCenter ? `Открыть событие: ${event.title}` : `Показать событие: ${event.title}`}
                     aria-current={isCenter ? 'true' : undefined}
-                    onClick={() => (isCenter ? openEvent(event) : goTo(index))}
+                    onClick={(clickEvent) => {
+                      if (suppressClickRef.current) {
+                        clickEvent.preventDefault();
+                        return;
+                      }
+
+                      if (isCenter) {
+                        openEvent(event);
+                      } else {
+                        goTo(index);
+                      }
+                    }}
                   >
                     <span className={styles.frame}>
                       <img

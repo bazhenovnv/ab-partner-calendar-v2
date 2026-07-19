@@ -22,10 +22,21 @@ function HeaderIcon({ src }: { src: string }) {
 export function SiteHeader() {
   return (
     <header className="bg-transparent">
-      <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-20 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3 group shrink-0" aria-label="АБ Афиша Бухгалтера — на главную">
-          <Image src={logoImg} alt="" width={62} height={67} className="shrink-0 object-contain" style={{ height: '67px' }} aria-hidden priority />
-          <span className="[font-family:var(--font-montserrat)] font-semibold text-[#1e1e1e] text-[18.69px] leading-normal">Афиша Бухгалтера</span>
+      <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-[88px] flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-4 group shrink-0" aria-label="АБ Афиша Бухгалтера — на главную">
+          <Image
+            src={logoImg}
+            alt=""
+            width={62}
+            height={67}
+            className="block shrink-0 object-contain"
+            style={{ width: '62px', height: '67px' }}
+            aria-hidden
+            priority
+          />
+          <span className="[font-family:var(--font-montserrat)] self-center whitespace-nowrap text-[23px] leading-none font-semibold tracking-[-0.01em] text-[#1e1e1e]">
+            Афиша Бухгалтера
+          </span>
         </Link>
         <nav aria-label="Внешние ссылки" className="flex items-center gap-2">
           <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" aria-label="Наш канал в Telegram" className={NAV_BTN}>

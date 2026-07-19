@@ -184,6 +184,8 @@ export class EventsService {
   }
 
   async getMainEvents() {
+    const limit = 5;
+
     const include = {
       images: {
         select: {
@@ -211,10 +213,21 @@ export class EventsService {
       },
     } satisfies Prisma.EventInclude;
 
+    const commonWhere: Prisma.EventWhereInput = {
+      status: EventStatus.PUBLISHED,
+      mainEvent: true,
+      images: {
+        some: {
+          mainEventUrl: {
+            not: null,
+          },
+        },
+      },
+    };
+
     const activeEvents = await this.prisma.event.findMany({
       where: {
-        status: EventStatus.PUBLISHED,
-        mainEvent: true,
+        ...commonWhere,
         autoStatus: {
           in: [
             EventAutoStatus.PLANNED,
@@ -226,28 +239,31 @@ export class EventsService {
         { sortOrder: 'asc' },
         { startDate: 'asc' },
       ],
-      take: 10,
+      take: limit,
       include,
     });
 
-    if (activeEvents.length > 0) {
-      return activeEvents;
+    if (activeEvents.length >= limit) {
+      return activeEvents.slice(0, limit);
     }
 
-    // If there are no active featured events, the carousel must still exist.
-    // Show the five latest completed events regardless of the mainEvent flag.
-    return this.prisma.event.findMany({
+    const completedEvents = await this.prisma.event.findMany({
       where: {
-        status: EventStatus.PUBLISHED,
+        ...commonWhere,
         autoStatus: EventAutoStatus.COMPLETED,
+        id: {
+          notIn: activeEvents.map((event) => event.id),
+        },
       },
       orderBy: [
         { startDate: 'desc' },
         { createdAt: 'desc' },
       ],
-      take: 5,
+      take: limit - activeEvents.length,
       include,
     });
+
+    return [...activeEvents, ...completedEvents].slice(0, limit);
   }
 
   async getPublicEventById(id: string) {

@@ -152,19 +152,64 @@ function organizerActionUrl(event: PublicEvent): string | null {
 
 function sanitizeDescription(value?: string | null): string {
   if (!value) return '';
-  return value
+
+  let result = value;
+
+  // Удаляем HTML-блоки, посвящённые регистрации.
+  result = result.replace(
+    /<(p|div|li)[^>]*>[\s\S]*?(?:зарегистрир|регистрац|записаться|для\s+участия|принять\s+участие|подать\s+заявку|ссылка\s+для\s+регистрации)[\s\S]*?<\/\1>/gi,
+    '',
+  );
+
+  // Удаляем регистрационные ссылки в тегах <a>.
+  result = result.replace(
+    /<a\b[^>]*href=["'][^"']*(?:max\.ru|t\.me|telegram\.me|telegram\.dog)[^"']*["'][^>]*>[\s\S]*?<\/a>/gi,
+    '',
+  );
+
+  // Удаляем фразу «зарегистрироваться...» вместе с URL,
+  // включая переносы строк и параметры вида ?mid=...
+  result = result.replace(
+    /(?:зарегистрир\w*|регистрац\w*|записаться|ссылка\s+для\s+регистрации|для\s+участия)[\s\S]{0,400}?https?:\/\/[^\s<>"']+(?:\s*[?&]?\s*mid\s*=\s*[A-Za-z0-9_-]+)?/gi,
+    '',
+  );
+
+  // Удаляем оставшиеся прямые URL MAX/Telegram.
+  result = result.replace(
+    /https?:\/\/(?:www\.)?(?:max\.ru|t\.me|telegram\.me|telegram\.dog)\/[^\s<>"']+/gi,
+    '',
+  );
+
+  // Удаляем отдельно оставшийся параметр mid.
+  result = result.replace(
+    /(?:\?|&|&amp;)?\s*mid\s*=\s*[A-Za-z0-9_-]+/gi,
+    '',
+  );
+
+  // Удаляем остаточные фразы регистрации без ссылки.
+  result = result.replace(
+    /(?:зарегистрир\w*|регистрац\w*|записаться|ссылка\s+для\s+регистрации|для\s+участия)[^.!?<]*(?:[.!?]|$)/gi,
+    '',
+  );
+
+  // Удаляем хвостовые служебные хештеги.
+  result = result.replace(
+    /(?:\s|&nbsp;|<br\s*\/?>)*(?:#[A-Za-zА-Яа-яЁё0-9_-]+(?:\s|&nbsp;|<br\s*\/?>)*){2,}$/gi,
+    '',
+  );
+
+  // Чистим пустые HTML-элементы и лишние пробелы.
+  result = result
     .replace(
-      /<(p|div|li)[^>]*>[\s\S]*?(?:зарегистрир|регистрац|для\s+участия|принять\s+участие|подать\s+заявку)[\s\S]*?<\/\1>/gi,
+      /<p[^>]*>\s*(?:&nbsp;|<br\s*\/?\s*>)*\s*<\/p>/gi,
       '',
     )
-    .replace(
-      /<a\b[^>]*href=["'][^"']*(?:max\.ru\/join|t\.me\/|telegram\.me\/)[^"']*["'][^>]*>[\s\S]*?<\/a>/gi,
-      '',
-    )
-    .replace(/https?:\/\/(?:www\.)?(?:max\.ru\/join|t\.me|telegram\.me)\/[^\s<]+/gi, '')
-    .replace(/(?:зарегистрируйтесь|регистрация|для участия)[^.!?<]*(?:[.!?]|$)/gi, '')
-    .replace(/<p[^>]*>\s*(?:&nbsp;|<br\s*\/?\s*>)*\s*<\/p>/gi, '')
+    .replace(/(?:<br\s*\/?\s*>[\s\u00a0]*){3,}/gi, '<br><br>')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
+
+  return result;
 }
 
 type LineIconName = 'location' | 'speaker';
@@ -194,18 +239,53 @@ function LineIcon({ name }: { name: LineIconName }) {
   );
 }
 
-const FACT_ICONS = {
-  calendar: '/ui-icons/event-calendar.png',
-  clock: '/ui-icons/event-clock.png',
-  price: '/ui-icons/event-price.png',
-} as const;
+type FactIconName = 'calendar' | 'clock' | 'price';
 
-const ACTION_ICONS = {
-  participate: '/ui-icons/event-action-participate.png',
-  remind: '/ui-icons/event-action-remind.png',
-} as const;
+function FactIcon({ name }: { name: FactIconName }) {
+  if (name === 'calendar') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true" className={v2.factIcon}>
+        <rect x="7" y="10" width="34" height="31" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" />
+        <path d="M15 6v8M33 6v8M7 19h34" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M15 26h5M28 26h5M15 33h5M28 33h5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      </svg>
+    );
+  }
 
-type FactIconName = keyof typeof FACT_ICONS;
+  if (name === 'clock') {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden="true" className={v2.factIcon}>
+        <circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" strokeWidth="2.5" />
+        <path d="M24 14v11l8 5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true" className={v2.factIcon}>
+      <path d="M9 15.5A5.5 5.5 0 0 1 14.5 10h19A5.5 5.5 0 0 1 39 15.5v17A5.5 5.5 0 0 1 33.5 38h-19A5.5 5.5 0 0 1 9 32.5z" fill="none" stroke="currentColor" strokeWidth="2.5" />
+      <path d="M9 19h30M17 29h8" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ActionIcon({ name }: { name: 'participate' | 'remind' }) {
+  if (name === 'participate') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className={v2.actionIcon}>
+        <path d="M8 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+        <path d="M12 8l4 4-4 4M4 12h12" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={v2.actionIcon}>
+      <path d="M6.5 9a5.5 5.5 0 0 1 11 0v3.2l1.6 2.5a1 1 0 0 1-.84 1.53H5.74a1 1 0 0 1-.84-1.53l1.6-2.5z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M9.5 18a2.7 2.7 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function EventModal({
   event,
@@ -239,8 +319,21 @@ function EventModal({
     event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
   const speaker = cleanSpeaker(event.speaker);
-  const lead = event.shortDescription?.trim() ?? '';
+  const rawLead = sanitizeDescription(event.shortDescription);
   const description = sanitizeDescription(event.fullDescription);
+  const normalizedLead = rawLead.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const normalizedDescription = description
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+  const lead =
+    normalizedLead &&
+    !normalizedDescription.startsWith(normalizedLead) &&
+    !normalizedDescription.includes(normalizedLead)
+      ? rawLead
+      : '';
   const status =
     event.autoStatus === 'LIVE'
       ? 'Идёт сейчас'
@@ -266,16 +359,7 @@ function EventModal({
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [onClose, reminderOpen]);
 
-  const actionIcon = (
-    <Image
-      src={ACTION_ICONS.participate}
-      width={31}
-      height={23}
-      alt=""
-      aria-hidden="true"
-      style={{ width: 20, height: 'auto', objectFit: 'contain', flex: '0 0 auto' }}
-    />
-  );
+  const actionIcon = <ActionIcon name="participate" />;
 
   return (
     <div
@@ -359,14 +443,7 @@ function EventModal({
                 type="button"
                 onClick={() => setReminderOpen(true)}
               >
-                <Image
-                  src={ACTION_ICONS.remind}
-                  width={33}
-                  height={33}
-                  alt=""
-                  aria-hidden="true"
-                  style={{ width: 20, height: 20, objectFit: 'contain', flex: '0 0 auto' }}
-                />
+                <ActionIcon name="remind" />
                 Напомнить
               </button>
             </div>
@@ -389,13 +466,9 @@ function EventModal({
 function Fact({ icon, label, value }: { icon: FactIconName; label: string; value: string }) {
   return (
     <div className={v2.fact}>
-      <Image
-        src={FACT_ICONS[icon]}
-        width={78}
-        height={78}
-        alt=""
-        className={`${v2.factIcon} ${v2[`factIcon_${icon}`]}`}
-      />
+      <span className={`${v2.factIconWrap} ${v2[`factIcon_${icon}`]}`}>
+        <FactIcon name={icon} />
+      </span>
       <span className={v2.factText}>
         <small className={v2.label}>{label}</small>
         <strong className={v2.value}>{value}</strong>

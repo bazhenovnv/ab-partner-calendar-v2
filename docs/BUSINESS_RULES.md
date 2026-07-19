@@ -105,3 +105,32 @@ SiteConfig key `broadcast.maxRecipients` (default: 0 = unlimited) caps the numbe
 
 ## BR-033: Internal bot API security
 All write endpoints called by bots (`POST /reminders`, `POST /bots/users/*`, `POST /broadcasts/unsubscribe`) must be authenticated via the `X-Bot-Internal-Token` header. The token value is set in `BOT_INTERNAL_TOKEN` environment variable and must match in both backend and bots services. Backend rejects requests with a missing or invalid token with HTTP 403.
+
+## BR-034: Main events carousel population
+
+The `Главные события` carousel displays up to five published main events.
+
+1. Include only events with `mainEvent = true`.
+2. Include only events with a valid `mainEventUrl`.
+3. First select `PLANNED` and `LIVE` main events.
+4. If fewer than five active main events exist, fill the remaining positions with the latest `COMPLETED` main events.
+5. Completed fallback events must also have `mainEvent = true`.
+6. Ordinary events must never be used as fallback.
+7. Duplicate events are prohibited.
+8. Main-event artwork must be displayed completely without cropping using `object-fit: contain`.
+9. The public API returns no more than five carousel events.
+
+## BR-035: Registration content in event modal
+
+Registration phrases and technical registration URLs must not be rendered inside the public event description.
+
+Remove:
+
+- `Зарегистрироваться можно здесь ...`;
+- `Регистрация по ссылке ...`;
+- `Ссылка для регистрации ...`;
+- direct MAX and Telegram registration URLs;
+- technical `mid` parameters;
+- trailing import hashtags.
+
+The public registration action is provided through the `Участвовать` button when a valid organizer or ticket URL exists.
