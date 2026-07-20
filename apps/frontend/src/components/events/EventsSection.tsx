@@ -153,10 +153,6 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
                   onPageChange={handlePageChange}
                 />
               )}
-
-              <p className="text-xs text-primary/40 text-right">
-                Найдено: {total} мероприятий
-              </p>
             </>
           )}
         </div>
