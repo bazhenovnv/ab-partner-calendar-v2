@@ -517,7 +517,7 @@ export class MaxImportService {
       const source = sharp(buffer, { animated: false }).rotate();
       await Promise.all([
         source.clone().resize(1200, 675, { fit: 'cover', position: 'attention' }).webp({ quality: 88 }).toFile(join(uploadsDir, cardName)),
-        source.clone().resize(900, 1200, { fit: 'cover', position: 'attention' }).webp({ quality: 90 }).toFile(join(uploadsDir, mainName)),
+        source.clone().resize(1200, 1200, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } }).webp({ quality: 90 }).toFile(join(uploadsDir, mainName)),
         source.clone().resize(1600, 900, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 90 }).toFile(join(uploadsDir, modalName)),
         source.clone().resize(480, 270, { fit: 'cover', position: 'attention' }).webp({ quality: 82 }).toFile(join(uploadsDir, thumbName)),
       ]);
