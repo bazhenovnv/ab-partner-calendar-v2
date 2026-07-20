@@ -9,6 +9,8 @@ import styles from './main-events-carousel.module.css';
 const MAX_VISIBLE_OFFSET = 2;
 const SWIPE_THRESHOLD_PX = 44;
 
+type DirectionIndicator = -1 | 0 | 1;
+
 type CardGeometry = {
   translateX: number;
   translateY: number;
@@ -22,61 +24,11 @@ type CardGeometry = {
 };
 
 const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
-  [-2]: {
-    translateX: -405,
-    translateY: 14,
-    translateZ: -60,
-    rotateY: 0,
-    rotateZ: 0,
-    scale: 0.74,
-    opacity: 0.82,
-    brightness: 0.72,
-    zIndex: 1,
-  },
-  [-1]: {
-    translateX: -205,
-    translateY: 6,
-    translateZ: -18,
-    rotateY: 0,
-    rotateZ: 0,
-    scale: 0.89,
-    opacity: 0.95,
-    brightness: 0.90,
-    zIndex: 4,
-  },
-  [0]: {
-    translateX: 0,
-    translateY: 0,
-    translateZ: 0,
-    rotateY: 0,
-    rotateZ: 0,
-    scale: 1,
-    opacity: 1,
-    brightness: 1,
-    zIndex: 10,
-  },
-  [1]: {
-    translateX: 205,
-    translateY: 6,
-    translateZ: -18,
-    rotateY: 0,
-    rotateZ: 0,
-    scale: 0.89,
-    opacity: 0.95,
-    brightness: 0.90,
-    zIndex: 4,
-  },
-  [2]: {
-    translateX: 405,
-    translateY: 14,
-    translateZ: -60,
-    rotateY: 0,
-    rotateZ: 0,
-    scale: 0.74,
-    opacity: 0.82,
-    brightness: 0.72,
-    zIndex: 1,
-  },
+  [-2]: { translateX: -405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, zIndex: 1 },
+  [-1]: { translateX: -205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, zIndex: 4 },
+  [0]: { translateX: 0, translateY: 0, translateZ: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, zIndex: 10 },
+  [1]: { translateX: 205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, zIndex: 4 },
+  [2]: { translateX: 405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, zIndex: 1 },
 };
 
 const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
@@ -124,6 +76,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     [events],
   );
   const [active, setActive] = useState(0);
+  const [directionIndicator, setDirectionIndicator] = useState<DirectionIndicator>(0);
   const [compact, setCompact] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -138,8 +91,15 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     setActive(((index % total) + total) % total);
   }, [total]);
 
-  const goPrevious = useCallback(() => goTo(active - 1), [active, goTo]);
-  const goNext = useCallback(() => goTo(active + 1), [active, goTo]);
+  const goPrevious = useCallback(() => {
+    setDirectionIndicator(-1);
+    goTo(active - 1);
+  }, [active, goTo]);
+
+  const goNext = useCallback(() => {
+    setDirectionIndicator(1);
+    goTo(active + 1);
+  }, [active, goTo]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
@@ -159,7 +119,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
     if (startX !== null && typeof clientX === 'number') {
       const delta = clientX - startX;
-
       if (Math.abs(delta) >= SWIPE_THRESHOLD_PX) {
         delta > 0 ? goPrevious() : goNext();
       }
@@ -180,7 +139,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-
     pointerStartXRef.current = event.clientX;
     pointerIdRef.current = event.pointerId;
     dragStartedRef.current = false;
@@ -188,7 +146,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (pointerStartXRef.current === null || pointerIdRef.current !== event.pointerId) return;
-
     const delta = event.clientX - pointerStartXRef.current;
 
     if (!dragStartedRef.current && Math.abs(delta) >= 6) {
@@ -217,9 +174,11 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
       goNext();
     } else if (event.key === 'Home') {
       event.preventDefault();
+      setDirectionIndicator(0);
       goTo(0);
     } else if (event.key === 'End') {
       event.preventDefault();
+      setDirectionIndicator(0);
       goTo(total - 1);
     }
   }, [goNext, goPrevious, goTo, total]);
@@ -275,6 +234,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                       if (isCenter) {
                         openEvent(event);
                       } else {
+                        setDirectionIndicator(offset < 0 ? -1 : 1);
                         goTo(index);
                       }
                     }}
@@ -288,7 +248,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                         draggable={false}
                         className={styles.poster}
                       />
-                      <span className={styles.sheen} aria-hidden="true" />
                     </span>
                   </button>
                 );
@@ -298,17 +257,28 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
             {total > 1 && (
               <nav className={styles.nav} aria-label="Навигация по главным событиям">
                 <button type="button" onClick={goPrevious} className={styles.navButton} aria-label="Предыдущее событие">‹</button>
-                <div className={styles.dots} role="group" aria-label="Выбор события">
-                  {carouselEvents.map((event, index) => (
-                    <button
-                      key={event.id}
-                      type="button"
-                      onClick={() => goTo(index)}
-                      aria-label={`Событие ${index + 1}: ${event.title}`}
-                      aria-current={index === active ? 'true' : undefined}
-                      className={cn(styles.dot, index === active && styles.dotActive)}
-                    />
-                  ))}
+                <div className={styles.dots} role="group" aria-label="Направление перемещения карусели">
+                  <button
+                    type="button"
+                    onClick={goPrevious}
+                    aria-label="Переместить карусель влево"
+                    aria-current={directionIndicator === -1 ? 'true' : undefined}
+                    className={cn(styles.dot, directionIndicator === -1 && styles.dotActive)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setDirectionIndicator(0)}
+                    aria-label="Текущее положение карусели"
+                    aria-current={directionIndicator === 0 ? 'true' : undefined}
+                    className={cn(styles.dot, directionIndicator === 0 && styles.dotActive)}
+                  />
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    aria-label="Переместить карусель вправо"
+                    aria-current={directionIndicator === 1 ? 'true' : undefined}
+                    className={cn(styles.dot, directionIndicator === 1 && styles.dotActive)}
+                  />
                 </div>
                 <button type="button" onClick={goNext} className={styles.navButton} aria-label="Следующее событие">›</button>
               </nav>
