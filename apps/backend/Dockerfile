@@ -30,10 +30,10 @@ RUN npm install -g pnpm@9.15.0
 RUN apk add --no-cache openssl ca-certificates
 COPY apps/backend/certs/russian-trusted-root-ca.crt /usr/local/share/ca-certificates/russian-trusted-root-ca.crt
 RUN update-ca-certificates
-# Node's bundled Mozilla CA set does not include the Russian Trusted Root CA.
-# Force Node/undici fetch to use OpenSSL's system CA store, which was updated above.
+# curl verifies MAX through Alpine's generated system CA bundle. Point Node/undici
+# at that complete bundle as well, rather than loading only one root certificate.
 ENV NODE_OPTIONS=--use-openssl-ca
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/russian-trusted-root-ca.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 WORKDIR /app
 
 COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
