@@ -8,6 +8,7 @@ import styles from './main-events-carousel.module.css';
 
 const MAX_VISIBLE_OFFSET = 2;
 const SWIPE_THRESHOLD_PX = 44;
+const MOTION_INDICATOR_MS = 560;
 
 type DirectionIndicator = -1 | 0 | 1;
 
@@ -20,23 +21,24 @@ type CardGeometry = {
   scale: number;
   opacity: number;
   brightness: number;
+  blur: number;
   zIndex: number;
 };
 
 const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
-  [-2]: { translateX: -405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, zIndex: 1 },
-  [-1]: { translateX: -205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, zIndex: 4 },
-  [0]: { translateX: 0, translateY: 0, translateZ: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, zIndex: 10 },
-  [1]: { translateX: 205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, zIndex: 4 },
-  [2]: { translateX: 405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, zIndex: 1 },
+  [-2]: { translateX: -405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, blur: 3.2, zIndex: 1 },
+  [-1]: { translateX: -205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, blur: 2.1, zIndex: 4 },
+  [0]: { translateX: 0, translateY: 0, translateZ: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, blur: 0, zIndex: 10 },
+  [1]: { translateX: 205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, blur: 2.1, zIndex: 4 },
+  [2]: { translateX: 405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, blur: 3.2, zIndex: 1 },
 };
 
 const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
-  [-2]: { translateX: -250, translateY: 24, translateZ: -210, rotateY: 34, rotateZ: -4, scale: 0.68, opacity: 0.7, brightness: 0.76, zIndex: 1 },
-  [-1]: { translateX: -142, translateY: 10, translateZ: -90, rotateY: 22, rotateZ: -2, scale: 0.86, opacity: 0.92, brightness: 0.88, zIndex: 3 },
-  [0]: { translateX: 0, translateY: 0, translateZ: 30, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, zIndex: 5 },
-  [1]: { translateX: 142, translateY: 10, translateZ: -90, rotateY: -22, rotateZ: 2, scale: 0.86, opacity: 0.92, brightness: 0.88, zIndex: 3 },
-  [2]: { translateX: 250, translateY: 24, translateZ: -210, rotateY: -34, rotateZ: 4, scale: 0.68, opacity: 0.7, brightness: 0.76, zIndex: 1 },
+  [-2]: { translateX: -250, translateY: 24, translateZ: -210, rotateY: 34, rotateZ: -4, scale: 0.68, opacity: 0.7, brightness: 0.76, blur: 3.2, zIndex: 1 },
+  [-1]: { translateX: -142, translateY: 10, translateZ: -90, rotateY: 22, rotateZ: -2, scale: 0.86, opacity: 0.92, brightness: 0.88, blur: 2.1, zIndex: 3 },
+  [0]: { translateX: 0, translateY: 0, translateZ: 30, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, blur: 0, zIndex: 5 },
+  [1]: { translateX: 142, translateY: 10, translateZ: -90, rotateY: -22, rotateZ: 2, scale: 0.86, opacity: 0.92, brightness: 0.88, blur: 2.1, zIndex: 3 },
+  [2]: { translateX: 250, translateY: 24, translateZ: -210, rotateY: -34, rotateZ: 4, scale: 0.68, opacity: 0.7, brightness: 0.76, blur: 3.2, zIndex: 1 },
 };
 
 function circularOffset(index: number, active: number, total: number): number {
@@ -56,6 +58,7 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
     '--card-scale': geometry.scale,
     '--card-opacity': geometry.opacity,
     '--card-brightness': geometry.brightness,
+    '--card-blur': `${geometry.blur}px`,
     zIndex: geometry.zIndex,
   } as React.CSSProperties;
 }
@@ -84,7 +87,24 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const pointerIdRef = useRef<number | null>(null);
   const dragStartedRef = useRef(false);
   const suppressClickRef = useRef(false);
+  const indicatorTimerRef = useRef<number | null>(null);
   const total = carouselEvents.length;
+
+  const resetIndicatorTimer = useCallback(() => {
+    if (indicatorTimerRef.current !== null) {
+      window.clearTimeout(indicatorTimerRef.current);
+    }
+
+    indicatorTimerRef.current = window.setTimeout(() => {
+      setDirectionIndicator(0);
+      indicatorTimerRef.current = null;
+    }, MOTION_INDICATOR_MS);
+  }, []);
+
+  const showMovementDirection = useCallback((direction: Exclude<DirectionIndicator, 0>) => {
+    setDirectionIndicator(direction);
+    resetIndicatorTimer();
+  }, [resetIndicatorTimer]);
 
   const goTo = useCallback((index: number) => {
     if (!total) return;
@@ -92,14 +112,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   }, [total]);
 
   const goPrevious = useCallback(() => {
-    setDirectionIndicator(-1);
+    showMovementDirection(-1);
     goTo(active - 1);
-  }, [active, goTo]);
+  }, [active, goTo, showMovementDirection]);
 
   const goNext = useCallback(() => {
-    setDirectionIndicator(1);
+    showMovementDirection(1);
     goTo(active + 1);
-  }, [active, goTo]);
+  }, [active, goTo, showMovementDirection]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
@@ -112,6 +132,12 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   useEffect(() => {
     if (active >= total && total > 0) setActive(0);
   }, [active, total]);
+
+  useEffect(() => () => {
+    if (indicatorTimerRef.current !== null) {
+      window.clearTimeout(indicatorTimerRef.current);
+    }
+  }, []);
 
   const finishPointerInteraction = useCallback((clientX?: number) => {
     const startX = pointerStartXRef.current;
@@ -234,7 +260,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                       if (isCenter) {
                         openEvent(event);
                       } else {
-                        setDirectionIndicator(offset < 0 ? -1 : 1);
+                        showMovementDirection(offset < 0 ? -1 : 1);
                         goTo(index);
                       }
                     }}
