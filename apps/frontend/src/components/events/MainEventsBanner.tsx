@@ -9,6 +9,7 @@ import styles from './main-events-carousel.module.css';
 const MAX_VISIBLE_OFFSET = 2;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
+const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/iu;
 
 type DirectionIndicator = -1 | 0 | 1;
 
@@ -63,9 +64,21 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
   } as React.CSSProperties;
 }
 
+function hasHitMarker(event: PublicEvent): boolean {
+  const sourceText = [event.title, event.shortDescription, event.fullDescription]
+    .filter((value): value is string => Boolean(value))
+    .join('\n');
+
+  return HIT_MARKER.test(sourceText);
+}
+
 function getMainEventImage(event: PublicEvent): string | null {
-  const url = event.images?.[0]?.mainEventUrl?.trim();
-  return url || null;
+  const image = event.images?.[0];
+  if (!image) return null;
+
+  // Posts marked #Хит use the untouched square source image.
+  // mainEventUrl remains a compatibility fallback for older records.
+  return image.originalUrl?.trim() || image.mainEventUrl?.trim() || null;
 }
 
 interface MainEventsBannerProps {
@@ -75,7 +88,7 @@ interface MainEventsBannerProps {
 export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const { openEvent } = useEventModal();
   const carouselEvents = useMemo(
-    () => events.filter((event) => event.mainEvent && getMainEventImage(event)),
+    () => events.filter((event) => event.mainEvent && hasHitMarker(event) && getMainEventImage(event)),
     [events],
   );
   const [active, setActive] = useState(0);
