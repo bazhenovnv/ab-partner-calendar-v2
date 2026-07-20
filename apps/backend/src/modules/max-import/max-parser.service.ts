@@ -64,12 +64,13 @@ export class MaxParserService {
     };
 
     const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
+    const normalizedText = lines.map((line) => this.normalizeStructuredLine(line)).join('\n');
 
     result.title = this.extractTitle(lines);
     this.parseHashtags(text, result);
-    this.parseDate(text, postDate, result);
-    this.parseFormatLocation(text, result);
-    this.parsePrice(text, result);
+    this.parseDate(normalizedText, postDate, result);
+    this.parseFormatLocation(normalizedText, result);
+    this.parsePrice(normalizedText, result);
     this.parseSpeaker(lines, result);
     this.parseEventUrl(text, result);
     result.shortDescription = this.extractDescription(lines);
@@ -78,10 +79,19 @@ export class MaxParserService {
     return result;
   }
 
+  private normalizeStructuredLine(line: string): string {
+    return line
+      .replace(/^\s*[📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎙]+\s*/u, '')
+      .replace(/\*\*|__|~~|`/g, '')
+      .replace(/：/g, ':')
+      .trim();
+  }
+
   private extractTitle(lines: string[]): string | null {
     return lines.find((line) => {
-      if (line.startsWith('#')) return false;
-      return !/^(Когда|Дата|Время|Начало|Формат|Где|Стоимость|Спикер):/i.test(line);
+      const normalized = this.normalizeStructuredLine(line);
+      if (normalized.startsWith('#')) return false;
+      return !/^(Когда|Дата|Время|Начало|Формат|Где|Стоимость|Спикер(?:ы)?):/i.test(normalized);
     }) ?? null;
   }
 
@@ -155,6 +165,16 @@ export class MaxParserService {
   }
 
   private parseFormatLocation(text: string, result: ParsedMaxPost) {
+    const hybrid = text.match(/(?:Формат|Где):\s*([^\n]*(?:онлайн\s*[\/+]|[\/+ ]\s*офлайн|очно\s*[\/+]|[\/+ ]\s*online)[^\n]*)/i);
+    if (hybrid) {
+      // EventFormat has no HYBRID value yet. Preserve the source wording and force manual review
+      // instead of silently publishing a hybrid event as a regular online event.
+      result.format = 'ONLINE';
+      result.city = hybrid[1].trim();
+      this.addAttention(result, 'Гибридный формат требует ручной проверки');
+      return;
+    }
+
     if (/Формат:\s*(?:Онлайн|Online)/i.test(text) || /Где:\s*(?:Онлайн|Online)/i.test(text)) {
       result.format = 'ONLINE';
       result.city = 'Онлайн';
@@ -199,30 +219,61 @@ export class MaxParserService {
   }
 
   private parsePrice(text: string, result: ParsedMaxPost) {
-    const priceMatch = text.match(/Стоимость:\s*([^\n]+)/i);
+    const priceMatch = text.match(/(?:Стоимость|Цена|Участие)\s*:\s*([^\n]+)/i);
     if (!priceMatch) return;
 
-    const raw = priceMatch[1].trim();
-    if (/бесплатно|0\s*(?:₽|руб)/i.test(raw)) {
+    const raw = priceMatch[1]
+      .replace(/\*\*|__|~~|`/g, '')
+      .replace(/^[\s—–-]+|[\s—–-]+$/g, '')
+      .trim();
+
+    if (!raw) {
+      this.addAttention(result, 'Стоимость указана без значения');
+      return;
+    }
+
+    if (/^(?:бесплатно|без оплаты|свободный вход)$/i.test(raw) || /^0(?:[\s.,]0+)?\s*(?:₽|руб(?:\.|лей)?)?$/i.test(raw)) {
       result.priceType = 'FREE';
       result.priceText = 'Бесплатно';
-    } else {
-      result.priceType = 'PAID';
-      result.priceText = raw;
+      return;
     }
+
+    result.priceType = 'PAID';
+    result.priceText = raw;
   }
 
   private parseSpeaker(lines: string[], result: ParsedMaxPost) {
-    const speakerLine = lines.find(
-      (line) => line.startsWith('🎙') || /\[микрофон\]/i.test(line) || /^Спикер:/i.test(line),
-    );
-    if (speakerLine) {
-      result.speaker = speakerLine
-        .replace(/^🎙\s*/, '')
-        .replace(/\[микрофон\]\s*/i, '')
-        .replace(/^Спикер:\s*/i, '')
-        .trim();
+    const speakers: string[] = [];
+    let collectFollowingLines = false;
+
+    for (const sourceLine of lines) {
+      const normalized = this.normalizeStructuredLine(sourceLine);
+      const isMicrophoneLine = /^🎙/u.test(sourceLine) || /\[микрофон\]/i.test(sourceLine);
+      const labelMatch = normalized.match(/^Спикер(?:ы)?\s*:\s*(.*)$/i);
+
+      if (isMicrophoneLine || labelMatch) {
+        const value = (labelMatch?.[1] ?? sourceLine)
+          .replace(/^\s*🎙️?\s*/u, '')
+          .replace(/\[микрофон\]\s*/i, '')
+          .replace(/^\s*Спикер(?:ы)?\s*:\s*/i, '')
+          .replace(/\*\*|__|~~|`/g, '')
+          .trim();
+
+        if (value) speakers.push(value);
+        collectFollowingLines = Boolean(labelMatch && !labelMatch[1].trim());
+        continue;
+      }
+
+      if (collectFollowingLines && /^[-–—•]\s+/.test(normalized)) {
+        speakers.push(normalized.replace(/^[-–—•]\s+/, '').trim());
+        continue;
+      }
+
+      if (collectFollowingLines) collectFollowingLines = false;
     }
+
+    const uniqueSpeakers = [...new Set(speakers.filter(Boolean))];
+    if (uniqueSpeakers.length > 0) result.speaker = uniqueSpeakers.join(' • ');
   }
 
   private parseEventUrl(text: string, result: ParsedMaxPost) {
@@ -244,10 +295,15 @@ export class MaxParserService {
   }
 
   private extractDescription(lines: string[]): string | null {
-    const structuredPrefixes = ['Когда:', 'Дата:', 'Время:', 'Начало:', 'Формат:', 'Где:', 'Стоимость:', 'Спикер:', '#'];
     const description = lines
       .slice(1)
-      .filter((line) => !structuredPrefixes.some((prefix) => line.startsWith(prefix)) && !line.startsWith('🎙'))
+      .filter((line) => {
+        const normalized = this.normalizeStructuredLine(line);
+        return !/^(Когда|Дата|Время|Начало|Формат|Где|Стоимость|Цена|Участие|Спикер(?:ы)?):/i.test(normalized)
+          && !normalized.startsWith('#')
+          && !/^🎙/u.test(line)
+          && !/\[микрофон\]/i.test(line);
+      })
       .join(' ')
       .trim();
     return description || null;
@@ -278,6 +334,8 @@ export class MaxParserService {
   }
 
   private safeDate(year: number, month: number, day: number): Date | null {
+    // startDate is a date-only carrier. Noon UTC prevents the calendar day from shifting
+    // when the value is serialized or rendered in positive/negative UTC offsets.
     const date = new Date(Date.UTC(year, month, day, 12, 0, 0));
     if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) {
       this.logger.warn(`Invalid MAX event date: ${day}.${month + 1}.${year}`);
