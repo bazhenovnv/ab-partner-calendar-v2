@@ -12,14 +12,15 @@
   },
   "dependencies": {
     "@ab-afisha/shared": "workspace:*",
+    "clsx": "^2.1.1",
+    "dompurify": "^3.4.12",
     "next": "14.2.15",
+    "nuqs": "^1.19.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "nuqs": "^1.19.0",
-    "zustand": "^4.5.4",
-    "clsx": "^2.1.1",
+    "sharp": "^0.33.4",
     "tailwind-merge": "^2.3.0",
-    "sharp": "^0.33.4"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

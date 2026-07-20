@@ -7,6 +7,7 @@ import { formatEventDate, formatFormat, formatPrice } from '@/lib/format';
 import { EventDetailActions } from '@/components/events/EventDetailActions';
 import { EventViewTracker } from '@/components/events/EventViewTracker';
 import { PublicShell } from '@/components/layout/PublicShell';
+import { SanitizedHtml } from '@/components/common/SanitizedHtml';
 
 const HERO_BLUR =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTAwIiBoZWlnaHQ9IjUwNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMEQyMzQ0IiBmaWxsLW9wYWNpdHk9IjAuMDgiLz48L3N2Zz4=';
@@ -236,9 +237,9 @@ export default async function EventPage({ params }: Props) {
         {/* Full description */}
         {event.fullDescription && (
           <div className="mt-8 pt-8 border-t border-dropdown-border">
-            <div
+            <SanitizedHtml
               className="prose prose-slate max-w-none text-primary/80 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: event.fullDescription }}
+              html={event.fullDescription}
             />
           </div>
         )}

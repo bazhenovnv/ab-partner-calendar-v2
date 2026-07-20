@@ -11,6 +11,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { sanitizeEventHtml } from '@/lib/html';
 import type { PublicEvent } from '@/types/event';
 import v2 from './event-modal-v2.module.css';
 
@@ -319,8 +320,12 @@ function EventModal({
     event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
   const speaker = cleanSpeaker(event.speaker);
-  const rawLead = sanitizeDescription(event.shortDescription);
-  const description = sanitizeDescription(event.fullDescription);
+  const rawLead = sanitizeEventHtml(
+    sanitizeDescription(event.shortDescription),
+  );
+  const description = sanitizeEventHtml(
+    sanitizeDescription(event.fullDescription),
+  );
   const normalizedLead = rawLead.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
   const normalizedDescription = description
     .replace(/<[^>]*>/g, '')
