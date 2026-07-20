@@ -31,9 +31,11 @@ RUN apk add --no-cache openssl ca-certificates
 COPY apps/backend/certs/russian-trusted-root-ca.crt /usr/local/share/ca-certificates/russian-trusted-root-ca.crt
 RUN update-ca-certificates
 # curl verifies MAX through Alpine's generated system CA bundle. Point Node/undici
-# at that complete bundle as well, rather than loading only one root certificate.
+# and OpenSSL explicitly at that complete bundle and certificate directory.
 ENV NODE_OPTIONS=--use-openssl-ca
 ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_DIR=/etc/ssl/certs
 WORKDIR /app
 
 COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
