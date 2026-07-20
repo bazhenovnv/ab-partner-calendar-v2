@@ -48,6 +48,7 @@
   --card-scale: 1;
   --card-opacity: 1;
   --card-brightness: 1;
+  --card-blur: 0px;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -59,7 +60,10 @@
   background: transparent;
   cursor: pointer;
   opacity: var(--card-opacity);
-  filter: brightness(var(--card-brightness)) saturate(0.94);
+  filter:
+    brightness(var(--card-brightness))
+    saturate(0.92)
+    blur(var(--card-blur));
   transform:
     translate3d(
       calc(-50% + var(--card-x) + var(--drag-offset)),
@@ -92,14 +96,14 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 0;
   border-radius: 18px;
   background: transparent;
-  box-shadow: 0 8px 20px rgba(13, 35, 68, 0.14);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.34),
+    0 4px 10px rgba(0, 0, 0, 0.24);
   transform: translateZ(0);
-  transition:
-    box-shadow 260ms ease,
-    border-color 260ms ease;
+  transition: box-shadow 260ms ease;
 }
 
 .cardActive {
@@ -107,23 +111,23 @@
 }
 
 .cardActive .frame {
-  border-color: rgba(255, 255, 255, 0.32);
-  box-shadow: 0 12px 28px rgba(13, 35, 68, 0.18);
+  box-shadow:
+    0 22px 46px rgba(0, 0, 0, 0.5),
+    0 8px 18px rgba(0, 0, 0, 0.34);
 }
 
 .card:hover .frame,
 .card:focus-visible .frame {
-  border-color: rgba(124, 216, 179, 0.9);
   box-shadow:
-    0 14px 30px rgba(13, 35, 68, 0.18),
-    0 0 0 3px rgba(124, 216, 179, 0.14);
+    0 24px 50px rgba(0, 0, 0, 0.52),
+    0 8px 20px rgba(0, 0, 0, 0.36);
 }
 
 .poster {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   border-radius: inherit;
   background: transparent;
@@ -136,7 +140,9 @@
   align-items: center;
   justify-content: center;
   gap: 25px;
+  min-height: 15px;
   margin-top: 18px;
+  line-height: 1;
 }
 
 .dots {
@@ -144,24 +150,28 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
+  height: 15px;
+  line-height: 1;
 }
 
 .navButton {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 15px;
   height: 15px;
   border: 0;
   border-radius: 0;
-  padding: 0;
+  padding: 0 0 2px;
   background: transparent;
   color: #515151;
   box-shadow: none;
   font-family: Arial, sans-serif;
   font-size: 28px;
   font-weight: 400;
-  line-height: 0.55;
+  line-height: 15px;
   cursor: pointer;
+  appearance: none;
   transition:
     color 180ms ease,
     transform 180ms ease;
@@ -181,6 +191,7 @@
 }
 
 .dot {
+  display: block;
   width: 15px;
   height: 15px;
   flex: 0 0 15px;
@@ -189,6 +200,7 @@
   padding: 0;
   background: #a1a1a1;
   cursor: pointer;
+  appearance: none;
   transition: background-color 180ms ease;
 }
 
@@ -272,7 +284,9 @@
   .navButton {
     width: 14px;
     height: 14px;
+    padding-bottom: 2px;
     font-size: 25px;
+    line-height: 14px;
   }
 
   .dot,
