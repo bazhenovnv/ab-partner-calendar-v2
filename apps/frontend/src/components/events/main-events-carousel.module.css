@@ -95,10 +95,7 @@
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 18px;
   background: transparent;
-  box-shadow:
-    0 24px 52px rgba(13, 35, 68, 0.18),
-    0 8px 18px rgba(13, 35, 68, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 20px rgba(13, 35, 68, 0.14);
   transform: translateZ(0);
   transition:
     box-shadow 260ms ease,
@@ -111,18 +108,15 @@
 
 .cardActive .frame {
   border-color: rgba(255, 255, 255, 0.32);
-  box-shadow:
-    0 28px 60px rgba(13, 35, 68, 0.28),
-    0 10px 24px rgba(13, 35, 68, 0.18);
+  box-shadow: 0 12px 28px rgba(13, 35, 68, 0.18);
 }
 
 .card:hover .frame,
 .card:focus-visible .frame {
   border-color: rgba(124, 216, 179, 0.9);
   box-shadow:
-    0 36px 78px rgba(13, 35, 68, 0.24),
-    0 14px 30px rgba(13, 35, 68, 0.16),
-    0 0 0 4px rgba(124, 216, 179, 0.16);
+    0 14px 30px rgba(13, 35, 68, 0.18),
+    0 0 0 3px rgba(124, 216, 179, 0.14);
 }
 
 .poster {
@@ -137,15 +131,11 @@
   -webkit-user-drag: none;
 }
 
-.sheen {
-  display: none;
-}
-
 .nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 25px;
   margin-top: 18px;
 }
 
@@ -153,67 +143,67 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 14px;
 }
 
 .navButton {
-  width: 32px;
-  height: 32px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(13, 35, 68, 0.08);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
-  color: rgba(13, 35, 68, 0.62);
-  box-shadow: 0 6px 16px rgba(13, 35, 68, 0.08);
-  font-size: 24px;
-  line-height: 1;
+  width: 15px;
+  height: 15px;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: #515151;
+  box-shadow: none;
+  font-family: Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 0.55;
   cursor: pointer;
   transition:
-    transform 180ms ease,
     color 180ms ease,
-    background 180ms ease,
-    box-shadow 180ms ease;
+    transform 180ms ease;
 }
 
 .navButton:hover,
 .navButton:focus-visible {
-  color: #0d2344;
-  background: #fff;
-  box-shadow: 0 9px 22px rgba(13, 35, 68, 0.13);
-  transform: translateY(-1px);
+  color: #1f1f1f;
+  background: transparent;
+  box-shadow: none;
+  transform: scale(1.08);
   outline: none;
 }
 
 .navButton:active {
-  transform: translateY(0) scale(0.96);
+  transform: scale(0.94);
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
   border: 0;
   border-radius: 50%;
   padding: 0;
-  background: rgba(13, 35, 68, 0.2);
+  background: #a1a1a1;
   cursor: pointer;
-  transition:
-    width 220ms ease,
-    background 220ms ease,
-    transform 220ms ease;
+  transition: background-color 180ms ease;
 }
 
 .dot:hover,
 .dot:focus-visible {
-  background: rgba(13, 35, 68, 0.4);
-  transform: scale(1.18);
+  background: #777;
   outline: none;
 }
 
-.dotActive {
-  width: 10px;
-  height: 10px;
-  background: #20ad83;
+.dotActive,
+.dotActive:hover,
+.dotActive:focus-visible {
+  width: 15px;
+  height: 15px;
+  background: #515151;
   transform: none;
 }
 
@@ -250,12 +240,6 @@
   .card {
     width: 270px;
   }
-
-  .gallery::before {
-    bottom: 12px;
-    width: min(520px, 86vw);
-    height: 58px;
-  }
 }
 
 @media (max-width: 767px) {
@@ -278,12 +262,26 @@
   }
 
   .nav {
+    gap: 18px;
+  }
+
+  .dots {
     gap: 10px;
   }
 
   .navButton {
-    width: 34px;
-    height: 34px;
+    width: 14px;
+    height: 14px;
+    font-size: 25px;
+  }
+
+  .dot,
+  .dotActive,
+  .dotActive:hover,
+  .dotActive:focus-visible {
+    width: 13px;
+    height: 13px;
+    flex-basis: 13px;
   }
 }
 
