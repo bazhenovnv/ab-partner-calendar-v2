@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# backup.sh — Verified PostgreSQL + uploads backup
+# backup.sh — Verified production PostgreSQL + uploads backup
 set -Eeuo pipefail
 
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/ab-afisha}"
@@ -9,9 +9,6 @@ STAMP="$(date -u +%Y%m%d_%H%M%S)"
 LOCK_FILE="${BACKUP_DIR}/.backup.lock"
 
 COMPOSE=(docker compose -f docker-compose.prod.yml)
-if [[ -f docker-compose.staging.yml ]]; then
-  COMPOSE+=(-f docker-compose.staging.yml)
-fi
 
 DB_FILE="${BACKUP_DIR}/db_${STAMP}.sql.gz"
 UPLOADS_FILE="${BACKUP_DIR}/uploads_${STAMP}.tar.gz"
@@ -53,21 +50,17 @@ flock -n 9 || fail "another backup is already running"
 "${COMPOSE[@]}" ps --status running postgres >/dev/null
 "${COMPOSE[@]}" ps --status running backend >/dev/null
 
-log "Backing up PostgreSQL"
+log "Backing up production PostgreSQL"
 "${COMPOSE[@]}" exec -T postgres \
   pg_dump -U ab_afisha -d ab_afisha \
   | gzip -9 >"$DB_TMP"
 
 gzip -t "$DB_TMP"
-
-# Read the entire decompressed stream. Unlike grep -q/zgrep -q, awk does not
-# terminate the pipeline after the first match, so pipefail cannot turn the
-# expected early close into a false "Broken pipe" failure.
 gzip -dc "$DB_TMP" \
   | awk '/^(CREATE TABLE|COPY )/ { found=1 } END { exit(found ? 0 : 1) }' \
   || fail "database dump does not contain expected SQL statements"
 
-log "Backing up uploads from backend:${UPLOADS_PATH}"
+log "Backing up production uploads from backend:${UPLOADS_PATH}"
 "${COMPOSE[@]}" exec -T backend \
   tar -czf - -C "$UPLOADS_PATH" . \
   >"$UPLOADS_TMP"
@@ -96,5 +89,5 @@ find "$BACKUP_DIR" -type f \
 
 COMPLETE=1
 trap - EXIT
-log "Backup complete: ${STAMP}"
+log "Production backup complete: ${STAMP}"
 ls -lh "$DB_FILE" "$UPLOADS_FILE" "$CHECKSUM_FILE"
