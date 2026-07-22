@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
-# deploy.sh — Production/staging deploy script for Timeweb Cloud VPS
+# deploy.sh — Production deploy script for Timeweb Cloud VPS
 set -Eeuo pipefail
 
 VERSION="${1:-latest}"
 export APP_VERSION="$VERSION"
 
-COMPOSE=(
-  docker compose
-  -f docker-compose.prod.yml
-  -f docker-compose.staging.yml
-)
+COMPOSE=(docker compose -f docker-compose.prod.yml)
 
 log() {
   printf '==> %s\n' "$*"
@@ -22,28 +18,33 @@ fail() {
 
 command -v docker >/dev/null 2>&1 || fail "docker is not installed"
 
-log "Validating Compose configuration"
+docker network inspect ab-afisha-proxy >/dev/null 2>&1 \
+  || fail "external network ab-afisha-proxy is missing"
+docker volume inspect ab-afisha-staging_uploads >/dev/null 2>&1 \
+  || fail "external volume ab-afisha-staging_uploads is missing"
+
+log "Validating production Compose configuration"
 "${COMPOSE[@]}" config --quiet
 
-log "Deploying AB Afisha v${VERSION}"
+log "Deploying production AB Afisha v${VERSION}"
 "${COMPOSE[@]}" pull
 
-log "Applying database migrations"
+log "Applying production database migrations"
 "${COMPOSE[@]}" run --rm backend sh -c '
   cd /app/apps/backend &&
   npx prisma migrate deploy
 '
 
-log "Starting services"
+log "Starting production services"
 "${COMPOSE[@]}" up -d --remove-orphans
 
-log "Waiting for backend health"
+log "Waiting for production backend health"
 healthy=false
 for i in $(seq 1 30); do
   if "${COMPOSE[@]}" exec -T backend \
     wget -qO- http://localhost:3001/api/health >/dev/null 2>&1; then
     healthy=true
-    log "Backend is healthy"
+    log "Production backend is healthy"
     break
   fi
 
@@ -54,8 +55,8 @@ done
 if [[ "$healthy" != "true" ]]; then
   "${COMPOSE[@]}" ps
   "${COMPOSE[@]}" logs --tail=100 backend
-  fail "backend did not become healthy"
+  fail "production backend did not become healthy"
 fi
 
-log "Deploy complete: v${VERSION}"
+log "Production deploy complete: v${VERSION}"
 "${COMPOSE[@]}" ps
