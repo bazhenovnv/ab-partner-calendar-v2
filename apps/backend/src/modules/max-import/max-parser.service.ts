@@ -38,7 +38,11 @@ export class MaxParserService {
     return collectionMarkers.some((re) => re.test(text));
   }
 
-  parse(text: string, postDate?: Date): ParsedMaxPost {
+  parse(
+    text: string,
+    postDate?: Date,
+    supplementalUrls: string[] = [],
+  ): ParsedMaxPost {
     const result: ParsedMaxPost = {
       title: null,
       shortDescription: null,
@@ -72,7 +76,7 @@ export class MaxParserService {
     this.parseFormatLocation(normalizedText, result);
     this.parsePrice(normalizedText, result);
     this.parseSpeaker(lines, result);
-    this.parseEventUrl(text, result);
+    this.parseEventUrl(text, supplementalUrls, result);
     result.shortDescription = this.extractDescription(lines);
     this.validate(result);
 
@@ -97,6 +101,10 @@ export class MaxParserService {
 
   private parseHashtags(text: string, result: ParsedMaxPost) {
     const hashtags = text.match(/#[\wА-Яа-яЁё]+/g) ?? [];
+
+    this.logger.warn(
+      `MAX PARSED HASHTAGS: ${JSON.stringify(hashtags)}`,
+    );
     const mappingEntries = Object.entries(HASHTAG_TO_DIRECTIONS);
 
     for (const rawTag of hashtags) {
@@ -276,22 +284,52 @@ export class MaxParserService {
     if (uniqueSpeakers.length > 0) result.speaker = uniqueSpeakers.join(' • ');
   }
 
-  private parseEventUrl(text: string, result: ParsedMaxPost) {
-    const markdownLink = text.match(/\[(здесь|тут|зарегистрироваться|регистрация|подробнее|участвовать)\]\((https?:\/\/[^)]+)\)/i);
+  private parseEventUrl(
+    text: string,
+    supplementalUrls: string[],
+    result: ParsedMaxPost,
+  ) {
+    const cleanUrl = (url: string): string =>
+      url.trim().replace(/[.,;!?]+$/, '');
+
+    const isExternalEventUrl = (url: string): boolean =>
+      /^https?:\/\//i.test(url) &&
+      !/max\.ru\/(?:join|id)/i.test(url);
+
+    const markdownLink = text.match(
+      /\[(здесь|тут|зарегистрироваться|регистрация|подробнее|участвовать)\]\((https?:\/\/[^)]+)\)/i,
+    );
     if (markdownLink) {
-      result.eventUrl = markdownLink[2];
+      result.eventUrl = cleanUrl(markdownLink[2]);
       return;
     }
 
-    const keywordUrl = text.match(/(?:здесь|тут|зарегистрироваться|регистрация|подробнее|участвовать)[\s\S]*?(https?:\/\/[^\s)\]}]+)/i);
+    const keywordUrl = text.match(
+      /(?:здесь|тут|зарегистрироваться|регистрация|подробнее|участвовать)[\s\S]*?(https?:\/\/[^\s)\]}]+)/i,
+    );
     if (keywordUrl) {
-      result.eventUrl = keywordUrl[1].replace(/[.,;!?]+$/, '');
+      result.eventUrl = cleanUrl(keywordUrl[1]);
       return;
     }
 
-    const allUrls = text.match(/https?:\/\/[^\s)\]}]+/gi) ?? [];
-    const externalUrl = allUrls.find((url) => !/max\.ru\/(?:join|id)/i.test(url));
-    if (externalUrl) result.eventUrl = externalUrl.replace(/[.,;!?]+$/, '');
+    const textUrls = text.match(/https?:\/\/[^\s)\]}]+/gi) ?? [];
+    const textExternalUrl = textUrls
+      .map(cleanUrl)
+      .find(isExternalEventUrl);
+
+    if (textExternalUrl) {
+      result.eventUrl = textExternalUrl;
+      return;
+    }
+
+    const markupExternalUrl = supplementalUrls
+      .filter((url): url is string => typeof url === 'string')
+      .map(cleanUrl)
+      .find(isExternalEventUrl);
+
+    if (markupExternalUrl) {
+      result.eventUrl = markupExternalUrl;
+    }
   }
 
   private extractDescription(lines: string[]): string | null {

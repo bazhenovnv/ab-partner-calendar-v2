@@ -30,10 +30,16 @@ export interface RawMaxAttachment {
   payload?: RawMaxAttachmentPayload;
 }
 
+export interface RawMaxMarkupItem {
+  type: string;
+  url?: string;
+}
+
 export interface RawMaxMessageBody {
   mid: string;
   text?: string;
   attachments?: RawMaxAttachment[];
+  markup?: RawMaxMarkupItem[];
 }
 
 export interface RawMaxRecipient {
@@ -132,10 +138,16 @@ export interface MaxAttachment {
   payload?: MaxAttachmentPayload;
 }
 
+export interface MaxMarkupItem {
+  type: string;
+  url?: string;
+}
+
 export interface MaxMessageBody {
   mid: string;
   text?: string;
   attachments?: MaxAttachment[];
+  markup?: MaxMarkupItem[];
 }
 
 export interface MaxRecipient {
@@ -222,7 +234,11 @@ function normalizeMessage(raw: RawMaxMessage): MaxMessage {
       mid: raw.body.mid,
       text: raw.body.text,
       attachments: raw.body.attachments?.map(normalizeAttachment),
-    },
+      markup: raw.body.markup?.map((m) => ({
+        type: m.type,
+        url: m.url,
+      })),
+    }
   };
 }
 
