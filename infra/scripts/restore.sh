@@ -51,9 +51,6 @@ restore_db() {
   [[ -f "$DB_FILE" ]] || fail "database backup not found: $DB_FILE"
   gzip -t "$DB_FILE"
 
-  printf '==> Stopping application writers\n'
-  "${COMPOSE[@]}" stop backend bots
-
   printf '==> Recreating public schema\n'
   "${COMPOSE[@]}" exec -T postgres \
     psql -v ON_ERROR_STOP=1 -U ab_afisha -d ab_afisha \
@@ -63,9 +60,6 @@ restore_db() {
   gzip -dc "$DB_FILE" \
     | "${COMPOSE[@]}" exec -T postgres \
       psql -v ON_ERROR_STOP=1 -U ab_afisha -d ab_afisha
-
-  printf '==> Starting application services\n'
-  "${COMPOSE[@]}" up -d backend bots
 }
 
 restore_uploads() {
@@ -82,6 +76,9 @@ restore_uploads() {
     'find /target -mindepth 1 -maxdepth 1 -exec rm -rf {} +; tar -xzf "/backup/'"$(basename "$UPLOADS_FILE")"'" -C /target'
 }
 
+printf '==> Stopping application writers\n'
+"${COMPOSE[@]}" stop backend bots
+
 case "$MODE" in
   db)
     restore_db
@@ -94,6 +91,9 @@ case "$MODE" in
     restore_uploads
     ;;
 esac
+
+printf '==> Starting application services\n'
+"${COMPOSE[@]}" up -d backend bots
 
 printf '==> Restore complete: %s (%s)\n' "$STAMP" "$MODE"
 "${COMPOSE[@]}" ps
