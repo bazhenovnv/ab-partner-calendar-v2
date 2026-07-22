@@ -18,20 +18,29 @@ docker network inspect ab-afisha-proxy >/dev/null 2>&1 \
 log "Validating isolated staging Compose configuration"
 "${COMPOSE[@]}" config --quiet
 
-log "Pulling staging images v${VERSION}"
-"${COMPOSE[@]}" pull
+log "Refreshing infrastructure images (best effort)"
+if ! "${COMPOSE[@]}" pull postgres redis; then
+  log "Docker Hub unavailable or rate limited; using local infrastructure images"
+fi
+
+log "Checking local application images v${VERSION}"
+docker image inspect \
+  "ab-afisha/backend:${VERSION}" \
+  "ab-afisha/frontend:${VERSION}" \
+  >/dev/null 2>&1 \
+  || fail "local backend/frontend images v${VERSION} are missing"
 
 log "Starting staging data services"
 "${COMPOSE[@]}" up -d postgres redis
 
 log "Applying staging database migrations"
-"${COMPOSE[@]}" run --rm backend sh -c '
+"${COMPOSE[@]}" run --rm --pull never backend sh -c '
   cd /app/apps/backend &&
   npx prisma migrate deploy
 '
 
 log "Starting isolated staging application"
-"${COMPOSE[@]}" up -d --remove-orphans backend frontend
+"${COMPOSE[@]}" up -d --pull never --remove-orphans backend frontend
 
 log "Waiting for staging backend health"
 healthy=false
