@@ -4,7 +4,7 @@ set -Eeuo pipefail
 
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/ab-afisha}"
 RETENTION_DAYS="${RETENTION_DAYS:-14}"
-UPLOADS_VOLUME="${UPLOADS_VOLUME:-ab-afisha_uploads}"
+UPLOADS_PATH="${UPLOADS_PATH:-/app/apps/backend/uploads}"
 STAMP="$(date -u +%Y%m%d_%H%M%S)"
 LOCK_FILE="${BACKUP_DIR}/.backup.lock"
 
@@ -43,6 +43,7 @@ command -v gzip >/dev/null 2>&1 || fail "gzip is not installed"
 command -v sha256sum >/dev/null 2>&1 || fail "sha256sum is not installed"
 command -v awk >/dev/null 2>&1 || fail "awk is not installed"
 command -v flock >/dev/null 2>&1 || fail "flock is not installed"
+command -v tar >/dev/null 2>&1 || fail "tar is not installed"
 
 install -d -m 0700 "$BACKUP_DIR"
 exec 9>"$LOCK_FILE"
@@ -50,9 +51,7 @@ flock -n 9 || fail "another backup is already running"
 
 "${COMPOSE[@]}" config --quiet
 "${COMPOSE[@]}" ps --status running postgres >/dev/null
-
-docker volume inspect "$UPLOADS_VOLUME" >/dev/null 2>&1 \
-  || fail "Docker volume not found: ${UPLOADS_VOLUME}"
+"${COMPOSE[@]}" ps --status running backend >/dev/null
 
 log "Backing up PostgreSQL"
 "${COMPOSE[@]}" exec -T postgres \
@@ -68,12 +67,10 @@ gzip -dc "$DB_TMP" \
   | awk '/^(CREATE TABLE|COPY )/ { found=1 } END { exit(found ? 0 : 1) }' \
   || fail "database dump does not contain expected SQL statements"
 
-log "Backing up uploads volume ${UPLOADS_VOLUME}"
-docker run --rm \
-  -v "${UPLOADS_VOLUME}:/source:ro" \
-  -v "${BACKUP_DIR}:/backup" \
-  alpine:3.20 \
-  tar -czf "/backup/$(basename "$UPLOADS_TMP")" -C /source .
+log "Backing up uploads from backend:${UPLOADS_PATH}"
+"${COMPOSE[@]}" exec -T backend \
+  tar -czf - -C "$UPLOADS_PATH" . \
+  >"$UPLOADS_TMP"
 
 tar -tzf "$UPLOADS_TMP" >/dev/null
 
