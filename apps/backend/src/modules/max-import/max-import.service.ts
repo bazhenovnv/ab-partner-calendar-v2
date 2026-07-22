@@ -80,13 +80,17 @@ export class MaxImportService {
   /** Called by the public webhook controller for each inbound MAX update. */
   async processWebhookUpdate(rawPayload: unknown): Promise<void> {
     const update = normalizeMaxUpdate(rawPayload);
+
     if (!update) {
-      this.logger.warn('Webhook: missing or invalid update_type in payload, ignoring');
+      this.logger.warn(
+        'Webhook: missing or invalid update_type in payload, ignoring',
+      );
       return;
     }
 
     const log = this.emptyLog();
     log.postsFound = 1;
+
     await this.dispatchUpdate(update, log);
     await this.persistLog(log);
   }
@@ -180,7 +184,7 @@ export class MaxImportService {
 
     const response = await fetch(`${MAX_API_BASE}/updates?${params.toString()}`, {
       headers: this.maxHeaders(token),
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(Number(this.config.get<string>('MAX_IMPORT_TIMEOUT_MS') ?? '60000')),
     });
 
     if (response.status === 401 || response.status === 403) {
@@ -246,6 +250,7 @@ export class MaxImportService {
     const sourceChannelId = this.sourceChannelId();
     const chatId = update.message?.recipient?.chatId;
 
+
     if (sourceChannelId === null) {
       log.errors++;
       log.errorDetail.push({ type: 'SOURCE_NOT_FOUND', detail: 'MAX_SOURCE_CHANNEL_ID not configured' });
@@ -262,6 +267,44 @@ export class MaxImportService {
 
     const externalId = update.message?.body?.mid ?? '';
     const text = update.message?.body?.text ?? '';
+
+    const markup = (
+      update.message?.body as unknown as {
+        markup?: Array<{
+          type?: string;
+          url?: string;
+          link?: string;
+          href?: string;
+        }>;
+      }
+    )?.markup ?? [];
+
+    const markupUrls: string[] = Array.isArray(markup)
+      ? Array.from(
+          new Set(
+            markup
+              .filter(
+                (
+                  item,
+                ): item is {
+                  type: string;
+                  url: string;
+                } =>
+                  typeof item === 'object' &&
+                  item !== null &&
+                  item.type === 'link' &&
+                  typeof item.url === 'string',
+              )
+              .map((item) => item.url.trim())
+              .filter((url) => /^https?:\/\//i.test(url)),
+          ),
+        )
+      : [];
+
+    this.logger.warn(
+      `MAX MARKUP URLS: ${JSON.stringify(markupUrls)}`,
+    );
+
     const timestamp = update.message?.timestamp;
     const postDate = timestamp ? new Date(timestamp) : undefined;
 
@@ -273,7 +316,11 @@ export class MaxImportService {
 
     let parsed: ParsedMaxPost;
     try {
-      parsed = this.parser.parse(text, postDate);
+      parsed = this.parser.parse(
+        text,
+        postDate,
+        markupUrls,
+      );
     } catch (error) {
       log.errors++;
       log.errorDetail.push({ type: 'PARSE_ERROR', detail: String(error) });
@@ -407,6 +454,21 @@ export class MaxImportService {
         );
         if (!hasValidImage) this.addAttention(parsed, 'Изображение не удалось загрузить или обработать');
       }
+
+      this.logger.warn(
+        `MAX ATTENTION: ${JSON.stringify(parsed.attentionReasons)}`,
+      );
+
+      this.logger.warn(
+        `MAX NEEDS_ATTENTION: ${parsed.needsAttention}`,
+      );
+
+
+
+
+      this.logger.warn(
+        `MAX PARSED DIRECTION SLUGS: ${JSON.stringify(parsed.directionSlugs)}`,
+      );
 
       const finalStatus = parsed.needsAttention || !hasValidImage ? 'NEEDS_ATTENTION' : 'PUBLISHED';
       await this.prisma.event.update({

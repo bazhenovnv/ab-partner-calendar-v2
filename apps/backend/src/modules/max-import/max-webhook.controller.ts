@@ -38,37 +38,57 @@ export class MaxWebhookController {
     const expected = this.config.get<string>('MAX_WEBHOOK_SECRET');
 
     if (!expected) {
-      this.logger.warn('MAX_WEBHOOK_SECRET not configured — rejecting webhook');
+      this.logger.warn(
+        'MAX_WEBHOOK_SECRET not configured — rejecting webhook',
+      );
       throw new ForbiddenException('Webhook not configured');
     }
 
     if (!this.secretValid(expected, secret ?? '')) {
-      this.logger.warn('Webhook: invalid X-Max-Bot-Api-Secret');
+      this.logger.warn(
+        'Webhook: invalid X-Max-Bot-Api-Secret',
+      );
       throw new ForbiddenException('Invalid secret');
     }
 
-    const enabled = this.config.get<string>('MAX_IMPORT_ENABLED') === 'true';
+    const enabled =
+      this.config.get<string>('MAX_IMPORT_ENABLED') === 'true';
+
     if (!enabled) {
-      this.logger.debug('MAX_IMPORT_ENABLED=false — webhook payload acknowledged but not processed');
+      this.logger.debug(
+        'MAX_IMPORT_ENABLED=false — webhook payload acknowledged but not processed',
+      );
+
       return { ok: true };
     }
 
     try {
-      // Pass raw body to service — normalization happens inside processWebhookUpdate
       await this.maxImportService.processWebhookUpdate(body);
     } catch (err) {
-      // Return 200 so MAX does not retry; error is logged and stored in MaxImportLog
-      this.logger.error(`Webhook processing error: ${err}`);
+      this.logger.error(
+        `Webhook processing error: ${
+          err instanceof Error
+            ? err.stack
+            : String(err)
+        }`,
+      );
     }
 
     return { ok: true };
   }
 
-  private secretValid(expected: string, actual: string): boolean {
+  private secretValid(
+    expected: string,
+    actual: string,
+  ): boolean {
     try {
       const a = Buffer.from(expected);
       const b = Buffer.from(actual);
-      if (a.length !== b.length) return false;
+
+      if (a.length !== b.length) {
+        return false;
+      }
+
       return timingSafeEqual(a, b);
     } catch {
       return false;
