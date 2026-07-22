@@ -1,24 +1,97 @@
-# Staging overlay — test.ab-event.pro
-#
-# Adds:
-#   1. staging-ssl.conf for nginx (HTTPS; requires Let's Encrypt cert)
-#   2. MAINTENANCE_BYPASS=true for frontend (skips maintenance redirect
-#      only when host == test.ab-event.pro — see middleware.ts)
-#
-# First-run (cert not yet issued):
-#   docker compose -f docker-compose.prod.yml up -d --no-deps nginx
-#   certbot certonly --webroot -d test.ab-event.pro ...
-#
-# After cert is issued:
-#   docker compose -f docker-compose.prod.yml -f docker-compose.staging.yml up -d --no-deps nginx frontend
-#
-# See: docs/PROJECT_BIBLE/STAGING_SSL_SETUP.md
-
 services:
-  nginx:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ab_afisha_staging
+      POSTGRES_USER: ab_afisha_staging
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:?set STAGING_POSTGRES_PASSWORD}
     volumes:
-      - ./infra/nginx/conf.d/staging-ssl.conf:/etc/nginx/conf.d/staging-ssl.conf:ro
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ab_afisha_staging -d ab_afisha_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --requirepass ${STAGING_REDIS_PASSWORD:?set STAGING_REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${STAGING_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ab-afisha/backend:${APP_VERSION:-latest}
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://ab_afisha_staging:${STAGING_POSTGRES_PASSWORD}@postgres:5432/ab_afisha_staging
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${STAGING_REDIS_PASSWORD}
+      JWT_SECRET: ${STAGING_JWT_SECRET:?set STAGING_JWT_SECRET}
+      JWT_EXPIRES_IN: 8h
+      NEXT_PUBLIC_SITE_URL: https://test.ab-event.pro
+      TELEGRAM_BOT_TOKEN: ""
+      MAX_BOT_TOKEN: ""
+      ADMIN_TELEGRAM_CHAT_ID: ""
+      BOT_INTERNAL_TOKEN: ${STAGING_BOT_INTERNAL_TOKEN:?set STAGING_BOT_INTERNAL_TOKEN}
+      THROTTLE_LIMIT: 200
+    volumes:
+      - uploads:/app/apps/backend/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      default: {}
+      proxy:
+        aliases:
+          - staging-backend
 
   frontend:
+    image: ab-afisha/frontend:${APP_VERSION:-latest}
+    restart: always
     environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_SITE_URL: https://test.ab-event.pro
+      NEXT_PUBLIC_YANDEX_METRIKA_ID: ""
+      NEXT_PUBLIC_CONTACT_EMAIL: info-event@a-b.ru
+      NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ""
+      BACKEND_URL: http://backend:3001
       MAINTENANCE_BYPASS: "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      default: {}
+      proxy:
+        aliases:
+          - staging-frontend
+
+volumes:
+  postgres-data:
+    name: ab-afisha-staging_postgres-data
+  redis-data:
+    name: ab-afisha-staging_redis-data
+  uploads:
+    name: ab-afisha-staging_uploads
+
+networks:
+  proxy:
+    external: true
+    name: ab-afisha-proxy
