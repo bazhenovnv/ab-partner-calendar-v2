@@ -7,7 +7,10 @@
 ## Canonical repository
 - Current: `bazhenovnv/ab-partner-calendar-v2`.
 - Historical/forbidden for current work: `bazhenovnv/ab-partner-calendar`.
-- Working branch: `claude/ab-afisha-architecture-plan-805f5o`.
+- Canonical integration branch: `main`.
+- New work is performed in short-lived feature branches created from current `main` and merged back only after acceptance.
+- Verified design-phase baseline: commit `b6c333a`, tag `release-20260723`.
+- Historical removed branch tips are preserved by tags matching `archive-20260723-*`.
 
 ## Domains and environment
 - Production: `https://ab-event.pro`.
@@ -32,6 +35,11 @@
 - Bots: Telegram and MAX services.
 - Deployment: Docker, Docker Compose, Nginx, Timeweb Cloud.
 - Analytics: Yandex Metrika `110270689`.
+
+## Current phase
+- Documentation stabilization precedes UI code changes.
+- The active product scope after documentation stabilization is the public homepage design remediation described by `12_DESIGN_AUDIT_2026-07.md`.
+- Acceptance evidence is recorded in `09B_RELEASE_ACCEPTANCE_CHECKLIST.md`.
 
 ## Security
 Never store production secrets, passwords, tokens, private `.env`, or SSH private keys in GitHub. Repository may contain only examples and documented variable names.
