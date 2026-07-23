@@ -14,7 +14,6 @@ Only current unresolved issues belong here. Historical closed work belongs in `d
 | `FUNC-001` | Event modal and reminders | Current participation, ticket fallback, Telegram/MAX reminder and close/focus behaviour require runtime verification on the assessed commit | build, staging interaction matrix and desktop/mobile evidence | PARTIAL |
 | `DOC-001` | Historical documents | Historical stage/audit documents contain completion claims that may be read as current status | completed document inventory and deprecation/classification headers where required | OPEN |
 | `DOC-002` | Asset naming | Several historical Figma frames and source archives use unclear names | canonical copies, source mapping and updated `MIGRATION_MAP.md` | OPEN |
-| `DOC-003` | PROJECT_BIBLE structure | Canonical documents currently contain a duplicate numeric prefix (`09`) and stale cross-references | unique numbering, corrected filenames, navigation, inventory, migration map and link verification | IN PROGRESS |
 
 ## Resolved or superseded items
 
@@ -22,7 +21,8 @@ The following former blockers are no longer current open issues and must not be 
 
 - the historical unpushed-server-commit blocker tied to commit `3f8ecdb`;
 - the former requirement for five missing event-modal PNG icons, because the active modal implementation uses current approved/local imagery and inline interface icons instead of those obsolete paths;
-- closed quote and footer asset-discovery tasks already recorded in the Asset Registry.
+- closed quote and footer asset-discovery tasks already recorded in the Asset Registry;
+- the duplicate PROJECT_BIBLE numeric identifier: the release checklist is now `09B_RELEASE_ACCEPTANCE_CHECKLIST.md`, and the rename is recorded in `MIGRATION_MAP.md`.
 
 ## Closure rule
 
