@@ -7,6 +7,7 @@
     "prebuild": "prisma generate",
     "build": "nest build",
     "start": "node dist/main",
+    "test": "node --test test/smoke.test.mjs",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "prisma": "prisma",

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -47,6 +45,12 @@ services:
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
+      MAX_IMPORT_ENABLED: ${MAX_IMPORT_ENABLED:-false}
+      MAX_IMPORT_TIMEOUT_MS: ${MAX_IMPORT_TIMEOUT_MS:-60000}
+      MAX_SOURCE_CHANNEL_ID: ${MAX_SOURCE_CHANNEL_ID:-}
+      MAX_SOURCE_CHANNEL_URL: ${MAX_SOURCE_CHANNEL_URL:-}
+      MAX_WEBHOOK_SECRET: ${MAX_WEBHOOK_SECRET:-}
+      MAX_WEBHOOK_PUBLIC_URL: ${MAX_WEBHOOK_PUBLIC_URL:-}
       ADMIN_TELEGRAM_CHAT_ID: ${ADMIN_TELEGRAM_CHAT_ID:-}
       BOT_INTERNAL_TOKEN: ${BOT_INTERNAL_TOKEN:-dev_bot_token_change_me}
     ports:
@@ -69,6 +73,11 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:-PartnersTogether_bot}
+        NEXT_PUBLIC_TELEGRAM_BOT_URL: ${NEXT_PUBLIC_TELEGRAM_BOT_URL:-https://t.me/PartnersTogether_bot}
+        NEXT_PUBLIC_MAX_BOT_USERNAME: ${NEXT_PUBLIC_MAX_BOT_USERNAME:-}
+        NEXT_PUBLIC_MAX_BOT_URL: ${NEXT_PUBLIC_MAX_BOT_URL:-https://max.ru/id2308283362_bot}
     restart: unless-stopped
     environment:
       NODE_ENV: development

@@ -330,14 +330,30 @@ async function handleMaxUpdate(token: string, update: any) {
 }
 
 // ── polling loop ────────────────────────────────────────────────────────────
+//
+// Graceful degradation: if the MAX polling endpoint returns 404 the API is
+// unavailable or the token is invalid. In that case we stop retrying to avoid
+// log spam and let Telegram + Reminder bots continue unaffected.
 
-async function pollMaxUpdates(token: string, offset = 0) {
+const POLL_INTERVAL_MS = 3_000;
+const POLL_RETRY_AFTER_ERROR_MS = 60_000; // back off on non-404 errors
+
+async function pollMaxUpdates(token: string, offset = 0): Promise<void> {
+  let delay = POLL_INTERVAL_MS;
   try {
     const res = await fetch(`${MAX_API}/bots/updates?offset=${offset}&limit=20`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      console.warn('[max-bot] Poll error:', res.status, res.statusText);
+      if (res.status === 404) {
+        console.warn(
+          '[max-bot] Poll returned 404 — MAX polling API unavailable or endpoint changed.',
+          'MAX bot disabled. Telegram bot and Reminder bot continue normally.',
+        );
+        return; // stop polling — do not reschedule
+      }
+      console.warn('[max-bot] Poll error:', res.status, res.statusText, '— retrying in 60s');
+      delay = POLL_RETRY_AFTER_ERROR_MS;
     } else {
       const data = await res.json() as any;
       const updates: any[] = data.updates ?? [];
@@ -347,9 +363,10 @@ async function pollMaxUpdates(token: string, offset = 0) {
       }
     }
   } catch (err) {
-    console.error('[max-bot] Poll failed:', err);
+    console.error('[max-bot] Poll failed:', err, '— retrying in 60s');
+    delay = POLL_RETRY_AFTER_ERROR_MS;
   }
-  setTimeout(() => pollMaxUpdates(token, offset), 3000);
+  setTimeout(() => pollMaxUpdates(token, offset), delay);
 }
 
 export function startMaxBot(token: string) {

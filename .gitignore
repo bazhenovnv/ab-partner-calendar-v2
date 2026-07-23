@@ -25,3 +25,4 @@ apps/backend/uploads/
 apps/backend/prisma/dev.db
 *.patch
 tmp/
+backups/

@@ -1,0 +1,6 @@
+/* Stage 72 — final quote-corner alignment */
+@media (min-width: 1024px) {
+  .quotes-person {
+    bottom: -32px !important;
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CalendarHeader } from '@/components/ui/CalendarHeader';
 import type { CalendarMarker } from '@/types/event';
@@ -25,12 +25,41 @@ function toDateString(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+function pluralizeEvents(value: number): string {
+  const mod100 = value % 100;
+  const mod10 = value % 10;
+
+  if (mod100 >= 11 && mod100 <= 14) return 'мероприятий';
+  if (mod10 === 1) return 'мероприятие';
+  if (mod10 >= 2 && mod10 <= 4) return 'мероприятия';
+  return 'мероприятий';
+}
+
+function getMarkerTotal(marker?: CalendarMarker): number {
+  if (!marker) return 0;
+  return marker.planned + marker.live + marker.completed;
+}
+
+function getCalendarTooltip(marker?: CalendarMarker): string {
+  const total = getMarkerTotal(marker);
+  if (total === 0) return 'Мероприятий нет';
+
+  const details = [
+    marker!.planned > 0 ? `Запланировано: ${marker!.planned}` : null,
+    marker!.live > 0 ? `Идёт сейчас: ${marker!.live}` : null,
+    marker!.completed > 0 ? `Завершено: ${marker!.completed}` : null,
+  ].filter(Boolean);
+
+  return `${total} ${pluralizeEvents(total)} · ${details.join(' · ')}`;
+}
+
 export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps) {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth());
+  const [today] = useState(() => new Date());
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
   const [markers, setMarkers] = useState<CalendarMarker[]>([]);
   const [loading, setLoading] = useState(false);
+  const initializedToday = useRef(false);
 
   const loadMarkers = useCallback(async (y: number, m: number) => {
     setLoading(true);
@@ -41,7 +70,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
         setMarkers(data);
       }
     } catch {
-      // ignore
+      // The displayed month remains selectable if marker loading fails.
     } finally {
       setLoading(false);
     }
@@ -51,113 +80,185 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
     void loadMarkers(year, month);
   }, [year, month, loadMarkers]);
 
+  useEffect(() => {
+    if (initializedToday.current || selectedDate) return;
+    initializedToday.current = true;
+    onSelectDate(toDateString(today.getFullYear(), today.getMonth(), today.getDate()));
+  }, [onSelectDate, selectedDate, today]);
+
+  const scrollToSelectedDateResults = () => {
+    window.setTimeout(() => {
+      const target =
+        document.querySelector<HTMLElement>('.pub-events-date-heading, .empty-state-card') ??
+        document.getElementById('events');
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 260);
+  };
+
+  const selectDate = (date: string | null) => {
+    onSelectDate(date);
+    if (date) scrollToSelectedDateResults();
+  };
+
   const goToPrev = () => {
-    if (month === 0) { setYear((y) => y - 1); setMonth(11); }
-    else setMonth((m) => m - 1);
+    if (month === 0) {
+      setYear((value) => value - 1);
+      setMonth(11);
+    } else {
+      setMonth((value) => value - 1);
+    }
   };
 
   const goToNext = () => {
-    if (month === 11) { setYear((y) => y + 1); setMonth(0); }
-    else setMonth((m) => m + 1);
+    if (month === 11) {
+      setYear((value) => value + 1);
+      setMonth(0);
+    } else {
+      setMonth((value) => value + 1);
+    }
   };
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDow = getFirstDayOfWeek(year, month);
-  const markerMap = new Map(markers.map((m) => [m.date, m]));
-
-  const todayStr = toDateString(now.getFullYear(), now.getMonth(), now.getDate());
+  const occupiedCells = firstDow + daysInMonth;
+  const totalCells = Math.ceil(occupiedCells / 7) * 7;
+  const trailingCells = totalCells - occupiedCells;
+  const markerMap = useMemo(
+    () => new Map(markers.map((marker) => [marker.date, marker])),
+    [markers],
+  );
 
   return (
-    <div className="bg-white rounded-2xl shadow-base border border-dropdown-border p-4 tablet:p-5 select-none">
-      <CalendarHeader
-        year={year}
-        month={month}
-        onPrev={goToPrev}
-        onNext={goToNext}
-        className="mb-4"
-      />
+    <div className="pub-calendar select-none">
+      <CalendarHeader year={year} month={month} onPrev={goToPrev} onNext={goToNext} />
 
-      <div
-        className="grid grid-cols-7 gap-0.5 mb-1"
-        role="row"
-        aria-label="Дни недели"
-      >
-        {DAYS_RU.map((d) => (
-          <div key={d} className="text-center text-xs font-medium text-primary/40 py-1">
-            {d}
-          </div>
-        ))}
-      </div>
-
-      <div
-        className={cn('grid grid-cols-7 gap-0.5 transition-opacity', loading && 'opacity-40')}
-        role="grid"
-        aria-label="Календарь мероприятий"
-      >
-        {Array.from({ length: firstDow }).map((_, i) => (
-          <div key={`empty-${i}`} role="gridcell" />
-        ))}
-
-        {Array.from({ length: daysInMonth }).map((_, i) => {
-          const day = i + 1;
-          const dateStr = toDateString(year, month, day);
-          const marker = markerMap.get(dateStr);
-          const isSelected = selectedDate === dateStr;
-          const isToday = dateStr === todayStr;
-          const hasEvents = !!marker;
-
-          return (
-            <button
+      <div className="pub-calendar-table">
+        <div className="pub-calendar-weekdays" role="row" aria-label="Дни недели">
+          {DAYS_RU.map((day, index) => (
+            <div
               key={day}
-              type="button"
-              role="gridcell"
-              aria-label={`${day} числа${hasEvents ? ', есть мероприятия' : ''}${isSelected ? ', выбрано' : ''}`}
-              aria-selected={isSelected}
-              onClick={() => onSelectDate(isSelected ? null : dateStr)}
               className={cn(
-                'relative flex flex-col items-center justify-center aspect-square rounded-lg text-sm font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-1',
-                isSelected
-                  ? 'bg-selected-day text-white'
-                  : isToday
-                  ? 'bg-primary/10 text-primary'
-                  : hasEvents
-                  ? 'hover:bg-date-hover text-primary cursor-pointer'
-                  : 'text-primary/30 cursor-default',
+                'pub-calendar-weekday',
+                index >= 5 && 'pub-calendar-weekday--weekend',
               )}
-              disabled={!hasEvents && !isSelected}
             >
               {day}
-              {hasEvents && !isSelected && (
-                <span className="absolute bottom-1 flex gap-0.5" aria-hidden="true">
-                  {marker!.live > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-live-status" />
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={cn('pub-calendar-grid', loading && 'pub-calendar-grid--loading')}
+          role="grid"
+          aria-label="Календарь мероприятий"
+          aria-busy={loading}
+        >
+          {Array.from({ length: firstDow }).map((_, index) => {
+            const previousMonth = month === 0 ? 11 : month - 1;
+            const previousYear = month === 0 ? year - 1 : year;
+            const previousMonthDays = getDaysInMonth(previousYear, previousMonth);
+            const previousDay = previousMonthDays - firstDow + index + 1;
+            const isWeekend = index >= 5;
+
+            return (
+              <div
+                key={`previous-${index}`}
+                role="gridcell"
+                aria-disabled="true"
+                className={cn(
+                  'pub-calendar-cell pub-calendar-cell--outside',
+                  isWeekend && 'pub-calendar-cell--weekend',
+                )}
+              >
+                {previousDay}
+              </div>
+            );
+          })}
+
+          {Array.from({ length: daysInMonth }).map((_, index) => {
+            const day = index + 1;
+            const dateStr = toDateString(year, month, day);
+            const marker = markerMap.get(dateStr);
+            const isSelected = selectedDate === dateStr;
+            const hasEvents = getMarkerTotal(marker) > 0;
+            const columnIndex = (firstDow + index) % 7;
+            const isWeekend = columnIndex >= 5;
+            const tooltip = getCalendarTooltip(marker);
+            const tooltipId = `calendar-tooltip-${dateStr}`;
+
+            return (
+              <div
+                key={day}
+                role="gridcell"
+                className={cn(
+                  'pub-calendar-cell',
+                  isWeekend && !isSelected && 'pub-calendar-cell--weekend',
+                  isSelected && 'pub-calendar-cell--selected',
+                )}
+              >
+                <button
+                  type="button"
+                  aria-label={`${day} числа, ${tooltip.toLowerCase()}${isSelected ? ', выбрано' : ''}`}
+                  aria-describedby={tooltipId}
+                  aria-selected={isSelected}
+                  onClick={() => selectDate(isSelected ? null : dateStr)}
+                  className={cn(
+                    'pub-calendar-day',
+                    isSelected && 'pub-calendar-day--selected',
+                    hasEvents && !isSelected && 'pub-calendar-day--event',
                   )}
-                  {marker!.planned > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-green-marker" />
+                >
+                  <span className="pub-calendar-day-number">{day}</span>
+                  {hasEvents && !isSelected && (
+                    <span
+                      className="pub-calendar-marker"
+                      aria-hidden="true"
+                      style={{
+                        borderTopColor:
+                          marker!.live > 0
+                            ? 'var(--color-live-status)'
+                            : marker!.planned > 0
+                              ? 'var(--color-green-marker)'
+                              : 'var(--color-completed-marker)',
+                      }}
+                    />
                   )}
-                  {marker!.completed > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-completed-marker" />
-                  )}
-                </span>
-              )}
-            </button>
-          );
-        })}
+                  <span id={tooltipId} className="pub-calendar-tooltip" role="tooltip">
+                    {tooltip}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+
+          {Array.from({ length: trailingCells }).map((_, index) => {
+            const columnIndex = (occupiedCells + index) % 7;
+            return (
+              <div
+                key={`next-${index}`}
+                role="gridcell"
+                aria-disabled="true"
+                className={cn(
+                  'pub-calendar-cell pub-calendar-cell--outside',
+                  columnIndex >= 5 && 'pub-calendar-cell--weekend',
+                )}
+              >
+                {index + 1}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-dropdown-border flex flex-wrap gap-3 text-xs text-primary/60">
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-green-marker inline-block" aria-hidden="true" />
-          Запланировано
+      <div className="pub-calendar-legend">
+        <span>
+          <i className="pub-calendar-legend-dot bg-green-marker" />Запланировано
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-live-status inline-block" aria-hidden="true" />
-          Идёт сейчас
+        <span>
+          <i className="pub-calendar-legend-dot bg-live-status" />Идёт сейчас
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-completed-marker inline-block" aria-hidden="true" />
-          Завершено
+        <span>
+          <i className="pub-calendar-legend-dot bg-completed-marker" />Завершено
         </span>
       </div>
     </div>

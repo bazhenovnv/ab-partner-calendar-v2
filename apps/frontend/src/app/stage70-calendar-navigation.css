@@ -1,0 +1,100 @@
+/* Calendar interaction, keyboard focus and date tooltips. */
+
+#main-events {
+  scroll-margin-top: 28px;
+}
+
+.pub-calendar-grid,
+.pub-calendar-cell {
+  overflow: visible;
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside) {
+  z-index: 0;
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside):hover,
+.pub-calendar-cell:not(.pub-calendar-cell--outside):focus-within {
+  z-index: 10;
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside) .pub-calendar-day {
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease;
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside)
+  .pub-calendar-day:hover:not(.pub-calendar-day--selected) {
+  background-color: rgba(124, 216, 179, 0.28);
+  color: #0d2344;
+  box-shadow: inset 0 0 0 1px rgba(54, 125, 103, 0.24);
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside) .pub-calendar-day:active {
+  transform: scale(0.97);
+}
+
+.pub-calendar-cell:not(.pub-calendar-cell--outside) .pub-calendar-day:focus-visible {
+  outline: 2px solid #367d67;
+  outline-offset: -2px;
+}
+
+.pub-calendar-day-number {
+  position: relative;
+  z-index: 1;
+}
+
+.pub-calendar-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 5px);
+  z-index: 30;
+  width: max-content;
+  max-width: 260px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: #0d2344;
+  color: #ffffff;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 7px 18px rgba(13, 35, 68, 0.22);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 140ms ease,
+    visibility 140ms ease,
+    transform 140ms ease;
+}
+
+.pub-calendar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #0d2344;
+}
+
+.pub-calendar-day:hover .pub-calendar-tooltip,
+.pub-calendar-day:focus-visible .pub-calendar-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+@media (hover: none) {
+  .pub-calendar-tooltip {
+    display: none;
+  }
+}

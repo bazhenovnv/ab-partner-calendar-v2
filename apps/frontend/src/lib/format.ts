@@ -47,6 +47,11 @@ export function formatPrice(priceType: 'FREE' | 'PAID', priceText?: string | nul
   return priceText ?? 'Платно';
 }
 
+export function formatEventDateParts(startDate: string): { day: number; month: string } {
+  const d = new Date(startDate);
+  return { day: d.getDate(), month: MONTHS_RU_GEN[d.getMonth()] };
+}
+
 export function formatFormat(format: 'ONLINE' | 'OFFLINE'): string {
   return format === 'ONLINE' ? 'Онлайн' : 'Офлайн';
 }

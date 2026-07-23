@@ -1,0 +1,103 @@
+/* Stage 66 — use the exact transparent quote-frame asset supplied by the owner.
+   The raster frame owns all mint strokes and quote marks; no CSS redraws. */
+
+.quotes-card--approved-frame {
+  position: relative;
+  width: min(58%, 744px);
+  aspect-ratio: 744 / 214;
+  min-height: 0;
+  height: auto;
+  margin: 34px auto 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.quotes-card--approved-frame::before,
+.quotes-card--approved-frame::after {
+  content: none !important;
+  display: none !important;
+}
+
+.quotes-frame-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+
+.quotes-card--approved-frame .quotes-body {
+  position: absolute;
+  inset: 44px 82px 30px 82px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.quotes-card--approved-frame .quotes-blockquote {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.quotes-card--approved-frame .quotes-text {
+  max-width: 570px;
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.quotes-card--approved-frame .quotes-author {
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.quotes-card--approved-frame .quotes-header,
+.quotes-card--approved-frame .quotes-eyebrow,
+.quotes-card--approved-frame .quotes-mark {
+  display: none !important;
+}
+
+@media (min-width: 1440px) {
+  .quotes-person-img--left {
+    width: 315px;
+    max-width: 315px;
+  }
+
+  .quotes-person-img--right {
+    width: 300px;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .quotes-card--approved-frame {
+    width: min(72%, 744px);
+  }
+}
+
+@media (max-width: 767px) {
+  .quotes-card--approved-frame {
+    width: 100%;
+    margin-top: 18px;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    inset: 34px 52px 24px;
+  }
+
+  .quotes-card--approved-frame .quotes-text {
+    font-size: 13px;
+  }
+}

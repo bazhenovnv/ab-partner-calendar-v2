@@ -1,20 +1,93 @@
 #!/usr/bin/env bash
-# backup.sh — PostgreSQL + uploads backup
-set -euo pipefail
+# backup.sh — Verified production PostgreSQL + uploads backup
+set -Eeuo pipefail
 
-BACKUP_DIR="/var/backups/ab-afisha"
-DATE=$(date +%Y%m%d_%H%M%S)
-mkdir -p "$BACKUP_DIR"
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/ab-afisha}"
+RETENTION_DAYS="${RETENTION_DAYS:-14}"
+UPLOADS_PATH="${UPLOADS_PATH:-/app/apps/backend/uploads}"
+STAMP="$(date -u +%Y%m%d_%H%M%S)"
+LOCK_FILE="${BACKUP_DIR}/.backup.lock"
 
-echo "==> Backing up PostgreSQL..."
-docker compose -f docker-compose.prod.yml exec -T postgres \
-  pg_dump -U ab_afisha ab_afisha | gzip > "$BACKUP_DIR/db_${DATE}.sql.gz"
+COMPOSE=(docker compose -f docker-compose.prod.yml)
 
-echo "==> Backing up uploads..."
-tar -czf "$BACKUP_DIR/uploads_${DATE}.tar.gz" -C /var/lib/docker/volumes/ ab-partner-calendar-v2_uploads
+DB_FILE="${BACKUP_DIR}/db_${STAMP}.sql.gz"
+UPLOADS_FILE="${BACKUP_DIR}/uploads_${STAMP}.tar.gz"
+CHECKSUM_FILE="${BACKUP_DIR}/checksums_${STAMP}.sha256"
+DB_TMP="${DB_FILE}.tmp"
+UPLOADS_TMP="${UPLOADS_FILE}.tmp"
+CHECKSUM_TMP="${CHECKSUM_FILE}.tmp"
+COMPLETE=0
 
-find "$BACKUP_DIR" -name "db_*.sql.gz" -mtime +14 -delete
-find "$BACKUP_DIR" -name "uploads_*.tar.gz" -mtime +14 -delete
+log() {
+  printf '==> %s\n' "$*"
+}
 
-echo "==> Backup complete: $DATE"
-ls -lh "$BACKUP_DIR" | tail -5
+fail() {
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+cleanup_partial() {
+  rm -f "$DB_TMP" "$UPLOADS_TMP" "$CHECKSUM_TMP"
+  if [[ "$COMPLETE" -ne 1 ]]; then
+    rm -f "$DB_FILE" "$UPLOADS_FILE" "$CHECKSUM_FILE"
+  fi
+}
+trap cleanup_partial EXIT
+
+command -v docker >/dev/null 2>&1 || fail "docker is not installed"
+command -v gzip >/dev/null 2>&1 || fail "gzip is not installed"
+command -v sha256sum >/dev/null 2>&1 || fail "sha256sum is not installed"
+command -v awk >/dev/null 2>&1 || fail "awk is not installed"
+command -v flock >/dev/null 2>&1 || fail "flock is not installed"
+command -v tar >/dev/null 2>&1 || fail "tar is not installed"
+
+install -d -m 0700 "$BACKUP_DIR"
+exec 9>"$LOCK_FILE"
+flock -n 9 || fail "another backup is already running"
+
+"${COMPOSE[@]}" config --quiet
+"${COMPOSE[@]}" ps --status running postgres >/dev/null
+"${COMPOSE[@]}" ps --status running backend >/dev/null
+
+log "Backing up production PostgreSQL"
+"${COMPOSE[@]}" exec -T postgres \
+  pg_dump -U ab_afisha -d ab_afisha \
+  | gzip -9 >"$DB_TMP"
+
+gzip -t "$DB_TMP"
+gzip -dc "$DB_TMP" \
+  | awk '/^(CREATE TABLE|COPY )/ { found=1 } END { exit(found ? 0 : 1) }' \
+  || fail "database dump does not contain expected SQL statements"
+
+log "Backing up production uploads from backend:${UPLOADS_PATH}"
+"${COMPOSE[@]}" exec -T backend \
+  tar -czf - -C "$UPLOADS_PATH" . \
+  >"$UPLOADS_TMP"
+
+tar -tzf "$UPLOADS_TMP" >/dev/null
+
+log "Writing checksums"
+{
+  printf '%s  %s\n' "$(sha256sum "$DB_TMP" | awk '{print $1}')" "$(basename "$DB_FILE")"
+  printf '%s  %s\n' "$(sha256sum "$UPLOADS_TMP" | awk '{print $1}')" "$(basename "$UPLOADS_FILE")"
+} >"$CHECKSUM_TMP"
+
+mv "$DB_TMP" "$DB_FILE"
+mv "$UPLOADS_TMP" "$UPLOADS_FILE"
+mv "$CHECKSUM_TMP" "$CHECKSUM_FILE"
+
+(
+  cd "$BACKUP_DIR"
+  sha256sum -c "$(basename "$CHECKSUM_FILE")"
+)
+
+log "Removing backups older than ${RETENTION_DAYS} days"
+find "$BACKUP_DIR" -type f \
+  \( -name 'db_*.sql.gz' -o -name 'uploads_*.tar.gz' -o -name 'checksums_*.sha256' \) \
+  -mtime "+${RETENTION_DAYS}" -delete
+
+COMPLETE=1
+trap - EXIT
+log "Production backup complete: ${STAMP}"
+ls -lh "$DB_FILE" "$UPLOADS_FILE" "$CHECKSUM_FILE"

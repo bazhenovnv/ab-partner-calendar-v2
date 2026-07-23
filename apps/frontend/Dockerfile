@@ -13,6 +13,14 @@ COPY packages/shared ./packages/shared
 RUN pnpm --filter @ab-afisha/shared build
 
 FROM shared-build AS build
+ARG NEXT_PUBLIC_TELEGRAM_BOT_USERNAME
+ARG NEXT_PUBLIC_TELEGRAM_BOT_URL
+ARG NEXT_PUBLIC_MAX_BOT_USERNAME
+ARG NEXT_PUBLIC_MAX_BOT_URL
+ENV NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}
+ENV NEXT_PUBLIC_TELEGRAM_BOT_URL=${NEXT_PUBLIC_TELEGRAM_BOT_URL}
+ENV NEXT_PUBLIC_MAX_BOT_USERNAME=${NEXT_PUBLIC_MAX_BOT_USERNAME}
+ENV NEXT_PUBLIC_MAX_BOT_URL=${NEXT_PUBLIC_MAX_BOT_URL}
 COPY apps/frontend ./apps/frontend
 # Ensure public dir exists even if empty (Docker COPY --from fails on missing source)
 RUN mkdir -p /app/apps/frontend/public

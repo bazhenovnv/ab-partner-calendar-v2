@@ -1,0 +1,33 @@
+# Document Conflict Matrix
+
+| Topic | Document A / statement | Document B / statement | Winning source | Correction |
+|---|---|---|---|---|
+| Repository | Current work sometimes references `ab-partner-calendar` | Current project is `ab-partner-calendar-v2` | `00_SOURCE_OF_TRUTH.md` | Old repo is historical/forbidden for current work |
+| VPS IP | Main TZ lists `77.232.136.248` as production VPS | README/current deployment uses `5.129.243.179` | current infrastructure + ADR-014 | Mark old IP historical; use current IP only in deployment docs |
+| Runtime IP usage | Old docs contain literal server IP | ADR-014 requires domain-first runtime | ADR-014 | Runtime must use domains; IP only in deployment documentation |
+| Contact email | Approved visual reference may show legacy address | Current requirements use `info-event@a-b.ru` | BUSINESS_RULES BR-014 + current TZ additions | Runtime and legal docs use `info-event@a-b.ru`; visual legacy content is not copied |
+| Hero CTA | Some reports/code use `Главные события`/other labels | Approved reference uses `Важные события →` | approved design + canonical design docs | Hero CTA fixed to `Важные события →` |
+| Carousel title | Older wording may use `Важные события` | Main section is `Главные события` | current TZ + approved design | Keep `Главные события` only for carousel heading |
+| Completed status | Legacy wording `Проведено` | BR-009 requires `Завершено` | BUSINESS_RULES | Use `Завершено` everywhere |
+| Design completion | Historical reports state `97%`, `complete`, `pixel-perfect` | Current staging visibly differs from approved design | approved design + current staging | Treat reports as historical evidence only |
+| Frontend build | Some instructions say `docker compose build frontend` | Current compose has image references without frontend `build:` | actual compose/Docker architecture | Use direct `docker build -f apps/frontend/Dockerfile ...` |
+| Images | Stage work created custom SVGs/gradients/placeholders | User rule requires only approved assets | approved design + asset registry | Remove invented assets; mark missing approved assets |
+| Missing event image | UI may show AB/gradient placeholder | BR-005 says missing image blocks publication | BUSINESS_RULES | Do not publish/finalize cards without approved image |
+| Main events membership | Ad hoc display logic | BR-001/BR-002 define `#Хит` and `mainEvent` | BUSINESS_RULES | Main carousel uses `mainEvent=true` only |
+| Legal pages | Older TZ may list fewer pages | BR-027 requires five legal routes | BUSINESS_RULES v11 | Footer and site expose all five routes |
+| Calendar heading | Implementations may omit year | BR-019 requires month + year | BUSINESS_RULES | Always render month and year |
+| Dropdown arrow | Custom decorative arrow behaviour | BR-020 defines open/closed rotation | BUSINESS_RULES | Use state-only chevron behaviour |
+| Overall desktop size | Physical screenshot of Figma prototype appears narrower because URL uses `scaling=min-zoom` | Raw Figma nodes and canonical docs define centered panels at `1496–1497px` in a `1920px` CSS viewport | raw Figma geometry + approved PDF + `09_PAGE_CANVAS_AND_SCALE.md` | Never copy Figma viewer zoom into CSS; verify CSS viewport and devicePixelRatio before comparing physical screenshots |
+| Main page background | Figma viewer shows black side areas around the prototype | Approved website canvas is light grey `#F1F1F1` with white panels | raw design frame + `02_DESIGN_SYSTEM.md` + `09_PAGE_CANVAS_AND_SCALE.md` | Do not add black side bars; black areas are Figma viewer chrome |
+| Historical visual QA | `HOMEPAGE_COMPARISON.md` contains Stage 52 statuses that later changed | Current branch/staging may differ | current code + current staging + canonical specs | Treat Stage 52 comparison as historical; do not use old status rows as current truth |
+| Canonical desktop scale | Some agents/reports attempted to shrink widths after comparing to Figma prototype displayed with `scaling=min-zoom` | Stage 58.2 Playwright audit confirms all panel widths match actual Figma node dimensions to ≤1px | raw Figma node geometry (MCP) + `09_PAGE_CANVAS_AND_SCALE.md` | Scale is LOCKED. Do not reduce `max-width` values. Figma editor zoom is not a CSS target. |
+| Global background | Some older CSS drafts applied `background: #ffffff` to section wrapper elements | Required: `html`, `body`, `PublicShell` root = `#F1F1F1`; section wrappers = transparent; content panels = `#FFFFFF` | Stage 58.3 background audit + `09_PAGE_CANVAS_AND_SCALE.md` | VERIFIED. All backgrounds correct as of Stage 58.3. Do not add full-width white wrappers between sections. |
+| Figma editor workspace vs frame canvas | The medium-gray visible around the design in Figma editor screenshots was confused with the page canvas | The page canvas `#F1F1F1` is the fill inside the selected frame; the darker gray is editor UI | Direct color verification inside the selected frame | Never implement the editor workspace color. |
+| MAX schedule | Historical integration notes treated webhook as the only production path and cron as a heartbeat | Active TZ explicitly requires checking the MAX source every hour | active TZ + BUSINESS_RULES | Keep webhook for immediate updates and run hourly `GET /updates` reconciliation through the same importer. |
+| MAX collection posts | Old code silently skipped weekly/multi-event posts | BR-003 requires sending them to `Требует внимания` without automatic splitting | BUSINESS_RULES BR-003 | Persist one source record as `NEEDS_ATTENTION` and notify an administrator. |
+| MAX publication | Old code stored every valid MAX import as `DRAFT`, so nothing appeared in the public calendar | BR-001/BR-002 require complete imports to appear in Calendar/Events and optionally Main Events | BUSINESS_RULES BR-001/BR-002 | Publish complete imports automatically; missing required fields remain `NEEDS_ATTENTION`. |
+| Working branch | Canonical docs name `claude/ab-afisha-architecture-plan-805f5o` as the working branch | Current release work and server commit `3f8ecdb` are on `codex/events-modal-carousel` | Current explicitly approved release workflow + actual server state, pending canonical update | Use `codex/events-modal-carousel` for the Monday release; update canonical branch references after repository/server synchronization is proven. |
+
+## Status
+
+This matrix records known conflicts confirmed during governance reset. A full repository inventory may add more entries. No conflict should be resolved silently; update this table and the canonical document together.

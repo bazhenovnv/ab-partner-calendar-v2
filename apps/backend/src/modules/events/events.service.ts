@@ -51,7 +51,18 @@ export class EventsService {
     const { date, city, directions, format, autoStatus, priceType, page = 1, limit = 6 } = query;
 
     const where: Prisma.EventWhereInput = {
-      status: 'PUBLISHED',
+      status: EventStatus.PUBLISHED,
+      // By default the public catalogue shows only current and upcoming events.
+      // Completed events are available through an explicit status filter
+      // or through the unfiltered fallback when no active events exist.
+      autoStatus: autoStatus
+        ? autoStatus
+        : {
+            in: [
+              EventAutoStatus.PLANNED,
+              EventAutoStatus.LIVE,
+            ],
+          },
     };
 
     if (date) {
@@ -73,7 +84,6 @@ export class EventsService {
     }
 
     if (format) where.format = format;
-    if (autoStatus) where.autoStatus = autoStatus;
     if (priceType) where.priceType = priceType;
 
     const [total, events] = await Promise.all([
@@ -91,19 +101,57 @@ export class EventsService {
       }),
     ]);
 
-    // Fallback: if no active events, return last 6 completed
-    if (events.length === 0 && !date) {
+    // Fallback is allowed only for the unfiltered first page when
+    // the public catalogue contains no matching events at all.
+    const hasFilters = Boolean(
+      date ||
+      city ||
+      format ||
+      autoStatus ||
+      priceType ||
+      directions?.length,
+    );
+
+    if (events.length === 0 && page === 1 && !hasFilters) {
       const completed = await this.prisma.event.findMany({
-        where: { status: 'PUBLISHED', autoStatus: 'COMPLETED' },
+        where: {
+          status: 'PUBLISHED',
+          autoStatus: EventAutoStatus.COMPLETED,
+        },
         take: 6,
         orderBy: { startDate: 'desc' },
         include: {
-          images: { select: { eventCardUrl: true, thumbnailUrl: true } },
-          directions: { include: { direction: { select: { name: true, slug: true } } } },
-          city: { select: { name: true, region: true } },
+          images: {
+            select: {
+              eventCardUrl: true,
+              thumbnailUrl: true,
+              originalUrl: true,
+            },
+          },
+          directions: {
+            include: {
+              direction: {
+                select: {
+                  name: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+          city: {
+            select: {
+              name: true,
+              region: true,
+            },
+          },
         },
       });
-      return { events: completed, total: completed.length, isFallback: true };
+
+      return {
+        events: completed,
+        total: completed.length,
+        isFallback: true,
+      };
     }
 
     return { events, total, isFallback: false };
@@ -136,34 +184,86 @@ export class EventsService {
   }
 
   async getMainEvents() {
-    const events = await this.prisma.event.findMany({
-      where: { status: 'PUBLISHED', mainEvent: true },
-      orderBy: [{ sortOrder: 'asc' }, { startDate: 'asc' }],
-      take: 10,
-      include: {
-        images: { select: { mainEventUrl: true } },
-        city: { select: { name: true } },
+    const limit = 5;
+
+    const include = {
+      images: {
+        select: {
+          mainEventUrl: true,
+          originalUrl: true,
+          eventCardUrl: true,
+          thumbnailUrl: true,
+        },
       },
+      directions: {
+        include: {
+          direction: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      },
+      city: {
+        select: {
+          name: true,
+          region: true,
+        },
+      },
+    } satisfies Prisma.EventInclude;
+
+    const commonWhere: Prisma.EventWhereInput = {
+      status: EventStatus.PUBLISHED,
+      mainEvent: true,
+      images: {
+        some: {
+          mainEventUrl: {
+            not: null,
+          },
+        },
+      },
+    };
+
+    const activeEvents = await this.prisma.event.findMany({
+      where: {
+        ...commonWhere,
+        autoStatus: {
+          in: [
+            EventAutoStatus.PLANNED,
+            EventAutoStatus.LIVE,
+          ],
+        },
+      },
+      orderBy: [
+        { sortOrder: 'asc' },
+        { startDate: 'asc' },
+      ],
+      take: limit,
+      include,
     });
 
-    // Fallback to completed if no active main events
-    const activeCount = events.filter(
-      (e: { autoStatus: string }) => e.autoStatus === 'PLANNED' || e.autoStatus === 'LIVE',
-    ).length;
-
-    if (activeCount === 0) {
-      return this.prisma.event.findMany({
-        where: { status: 'PUBLISHED', mainEvent: true, autoStatus: 'COMPLETED' },
-        orderBy: { startDate: 'desc' },
-        take: 5,
-        include: {
-          images: { select: { mainEventUrl: true } },
-          city: { select: { name: true } },
-        },
-      });
+    if (activeEvents.length >= limit) {
+      return activeEvents.slice(0, limit);
     }
 
-    return events;
+    const completedEvents = await this.prisma.event.findMany({
+      where: {
+        ...commonWhere,
+        autoStatus: EventAutoStatus.COMPLETED,
+        id: {
+          notIn: activeEvents.map((event) => event.id),
+        },
+      },
+      orderBy: [
+        { startDate: 'desc' },
+        { createdAt: 'desc' },
+      ],
+      take: limit - activeEvents.length,
+      include,
+    });
+
+    return [...activeEvents, ...completedEvents].slice(0, limit);
   }
 
   async getPublicEventById(id: string) {

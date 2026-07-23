@@ -1,7 +1,12 @@
 FROM node:20-alpine AS base
 RUN npm install -g pnpm@9.15.0
-# openssl required by Prisma schema engine (prisma generate + prisma migrate deploy)
-RUN apk add --no-cache openssl
+# openssl is required by Prisma; ca-certificates is required for outbound HTTPS.
+RUN apk add --no-cache openssl ca-certificates
+# MAX platform-api2.max.ru is signed by the Russian Trusted Root CA, which is
+# not included in Alpine's default trust store. Add the approved root certificate
+# and rebuild the generated CA bundle without disabling TLS verification.
+COPY apps/backend/certs/russian-trusted-root-ca.crt /usr/local/share/ca-certificates/russian-trusted-root-ca.crt
+RUN update-ca-certificates
 WORKDIR /app
 
 FROM base AS deps
@@ -21,8 +26,16 @@ RUN pnpm --filter backend run build
 
 FROM node:20-alpine AS runner
 RUN npm install -g pnpm@9.15.0
-# openssl required by Prisma schema engine at runtime (prisma migrate deploy)
-RUN apk add --no-cache openssl
+# openssl is required by Prisma; ca-certificates is required for outbound HTTPS.
+RUN apk add --no-cache openssl ca-certificates
+COPY apps/backend/certs/russian-trusted-root-ca.crt /usr/local/share/ca-certificates/russian-trusted-root-ca.crt
+RUN update-ca-certificates
+# curl verifies MAX through Alpine's generated system CA bundle. Point Node/undici
+# and OpenSSL explicitly at that complete bundle and certificate directory.
+ENV NODE_OPTIONS=--use-openssl-ca
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_DIR=/etc/ssl/certs
 WORKDIR /app
 
 COPY --from=build /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./

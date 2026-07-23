@@ -4,7 +4,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReminderDto } from './create-reminder.dto';
 
 const TG_API = 'https://api.telegram.org';
-const MAX_API = 'https://api.max.ru/v1';
+const MAX_API = 'https://platform-api2.max.ru';
 
 function formatMsk(date: Date): string {
   return date.toLocaleString('ru-RU', {
@@ -137,7 +137,7 @@ export class RemindersService {
     const res = await fetch(`${MAX_API}/messages`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: token, // MAX API: bare token, no "Bearer" prefix
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ chat_id: externalId, text }),

@@ -21,11 +21,12 @@ export function CalendarHeader({ year, month, onPrev, onNext, className }: Calen
   return (
     <div className={cn('flex items-center justify-between', className)}>
       <span
-        className="font-montserrat font-semibold text-primary text-[30px] leading-tight tablet:text-[30px] text-2xl"
+        className="font-montserrat text-primary text-[30px] leading-tight"
         aria-live="polite"
         aria-atomic="true"
       >
-        {monthName} {year}
+        <span className="font-semibold">{monthName}</span>{' '}
+        <span className="font-normal">{year}</span>
       </span>
 
       <div className="flex items-center gap-1">
@@ -66,4 +67,3 @@ export function CalendarHeader({ year, month, onPrev, onNext, className }: Calen
     </div>
   );
 }
-

@@ -1,0 +1,20 @@
+[Unit]
+Description=AB Afisha verified backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/srv/ab-afisha
+Environment=BACKUP_DIR=/var/backups/ab-afisha
+Environment=RETENTION_DAYS=14
+ExecStart=/srv/ab-afisha/infra/scripts/backup.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

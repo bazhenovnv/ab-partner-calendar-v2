@@ -1,0 +1,82 @@
+/* Stage 61 — approved visual composite assets and panel rhythm.
+   Loads after stage60-visual.css. Content and business logic are unchanged. */
+
+/* The approved staging images event-card-1..6 are complete Figma card exports.
+   They already contain the status, date, title and CTA, so they must be rendered
+   as a single visual asset instead of receiving a second generated overlay. */
+.pub-event-card--composite {
+  display: block;
+  height: auto;
+  aspect-ratio: 428 / 246;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.pub-event-card--composite .pub-event-card-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+}
+
+.pub-event-card--composite .pub-event-card-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.pub-event-card--composite:hover .pub-event-card-image {
+  transform: none;
+}
+
+/* Match the denser approved two-row event grid. */
+.pub-events-outer > .flex.flex-col {
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.pub-events-date-heading {
+  min-height: 28px;
+  font-size: 20px;
+}
+
+/* The approved carousel/quotes panel has less empty vertical space. */
+.pub-main-events-section {
+  padding-bottom: 14px;
+}
+
+.pub-carousel-gallery {
+  height: 405px;
+}
+
+.pub-carousel-nav {
+  margin-top: 12px;
+}
+
+.quotes-section {
+  padding-top: 18px;
+}
+
+/* Footer remains on the shared grey canvas and is optically tighter. */
+.pub-footer-inner {
+  padding-top: 2.5rem;
+}
+
+@media (max-width: 1439px) {
+  .pub-event-card--composite {
+    height: auto;
+    aspect-ratio: 428 / 246;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-event-card--composite {
+    height: auto;
+    aspect-ratio: 428 / 246;
+  }
+
+  .pub-carousel-gallery {
+    height: 320px;
+  }
+}

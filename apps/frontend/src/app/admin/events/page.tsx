@@ -35,6 +35,7 @@ export default function EventsListPage() {
   const [city, setCity] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [attentionCount, setAttentionCount] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -55,6 +56,12 @@ export default function EventsListPage() {
   }, [page, search, status, format, city]);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    adminApi.get<{ events: unknown[] }>('/events/admin/needs-attention')
+      .then((res) => setAttentionCount(res.events.length))
+      .catch(() => undefined);
+  }, []);
 
   function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -91,6 +98,31 @@ export default function EventsListPage() {
         <Link href="/admin/events/new" className="adm-btn adm-btn--primary">
           + Создать
         </Link>
+      </div>
+
+      {/* Quick-filter tabs */}
+      <div className="adm-tabs" role="tablist" aria-label="Фильтр мероприятий">
+        <button
+          role="tab"
+          type="button"
+          aria-selected={status !== 'NEEDS_ATTENTION'}
+          className={`adm-tab${status !== 'NEEDS_ATTENTION' ? ' adm-tab--active' : ''}`}
+          onClick={() => { setStatus(''); setPage(1); }}
+        >
+          Все мероприятия
+        </button>
+        <button
+          role="tab"
+          type="button"
+          aria-selected={status === 'NEEDS_ATTENTION'}
+          className={`adm-tab${status === 'NEEDS_ATTENTION' ? ' adm-tab--active' : ''}`}
+          onClick={() => { setStatus('NEEDS_ATTENTION'); setPage(1); }}
+        >
+          Требует внимания
+          {attentionCount > 0 && (
+            <span className="adm-tab__badge">{attentionCount}</span>
+          )}
+        </button>
       </div>
 
       <form className="adm-toolbar" onSubmit={handleSearch}>

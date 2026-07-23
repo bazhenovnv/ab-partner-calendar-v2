@@ -1,7 +1,22 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Montserrat } from 'next/font/google';
 import './globals.css';
+import './stage60-visual.css';
+import './stage61-visual.css';
+import './stage62-scale-quotes-footer.css';
+import './stage63-final-alignment.css';
+import './stage64-figma-lock.css';
+import './stage65-centering-carousel-footer.css';
+import './stage66-approved-quote-frame.css';
+import './stage67-final-spacing-footer.css';
+import './stage68-header-quotes-footer.css';
+import './stage69-canvas-calendar-footer.css';
+import './stage70-calendar-navigation.css';
+import './stage71-figma-exact-sizes.css';
+import './stage72-quote-corners.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
+import { MetrikaPageview } from '@/components/MetrikaPageview';
 
 const montserrat = Montserrat({
   subsets: ['cyrillic', 'latin'],
@@ -25,6 +40,21 @@ export const metadata: Metadata = {
     locale: 'ru_RU',
     url: SITE_URL,
     siteName: 'АБ Афиша Бухгалтера',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'АБ Афиша Бухгалтера — Главные мероприятия для бухгалтеров',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'АБ Афиша Бухгалтера',
+    description:
+      'Онлайн и офлайн события для профессионального роста бухгалтеров по всей России.',
+    images: ['/opengraph-image'],
   },
   robots: { index: true, follow: true },
 };
@@ -48,10 +78,7 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
         />
       </head>
       <body>
-        <a
-          href="#main-content"
-          className="skip-to-content"
-        >
+        <a href="#main-content" className="skip-to-content">
           Перейти к содержимому
         </a>
         <noscript>
@@ -64,6 +91,9 @@ ym(${METRIKA_ID},'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:'dataLay
           </div>
         </noscript>
         {children}
+        <Suspense fallback={null}>
+          <MetrikaPageview />
+        </Suspense>
         <CookieBannerGate />
       </body>
     </html>

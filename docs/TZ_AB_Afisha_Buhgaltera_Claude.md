@@ -1,8 +1,16 @@
 # ТЗ для Claude.ai / Claude Code — АБ Афиша Бухгалтера
 
-Проект нужно разработать с нуля в репозитории `bazhenovnv/ab-partner-calendar-v2`.
+> **STATUS: ACTIVE SUPPLEMENT**  
+> **AUTHORITY:** ниже `docs/PROJECT_BIBLE/` и `docs/BUSINESS_RULES.md`.  
+> При конфликте использовать `docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md`.
+
+Проект нужно разрабатывать в репозитории `bazhenovnv/ab-partner-calendar-v2`.
+
+Старый репозиторий `bazhenovnv/ab-partner-calendar` является историческим и не используется для текущей разработки.
 
 Production-домен: `ab-event.pro`.
+
+Staging-домен: `test.ab-event.pro`.
 
 Контактная почта на период запуска: `info-event@a-b.ru`.
 
@@ -27,18 +35,24 @@ Production-домен: `ab-event.pro`.
 
 ## Сервер
 
-Production VPS:
+Current VPS:
 
 - Provider: Timeweb Cloud.
-- Domain: `ab-event.pro`.
-- IPv4: `77.232.136.248`.
-- Host: `kvnvm-277`.
-- CPU: 2 × 3.3 GHz.
-- Disk: 50 GB.
+- Production domain: `ab-event.pro`.
+- Staging domain: `test.ab-event.pro`.
+- IPv4: `5.129.243.179`.
+- Deploy path: `/srv/ab-afisha`.
+
+Historical server:
+
+- IPv4 `77.232.136.248` удалён и не должен использоваться.
+- Runtime-конфигурация использует домены, а не IP.
 
 На сервере должны работать frontend, backend, PostgreSQL, Redis, job queue, Sharp, Telegram/MAX-боты, MAX/API-импорт, Nginx/reverse proxy и SSL.
 
 Для постоянной работы использовать отдельного deploy-пользователя, SSH-ключи и открытые только необходимые порты 22/80/443. Production-переменные окружения и приватные данные в GitHub не хранить.
+
+Актуальную процедуру деплоя брать только из `docs/PROJECT_BIBLE/06_DEPLOYMENT_CURRENT.md`.
 
 ## Публичная страница
 
@@ -52,9 +66,14 @@ Production VPS:
 6. Footer.
 7. CopyrightBlock.
 
-Адаптивы: 1920, 1440, 1024, 390. Нельзя получать 1440/1024/390 простым сжатием 1920. Для 1440 использовать макет `АБ Афиша main(4).pdf`.
+Адаптивы: 1920, 1440, 1024, 390. Нельзя получать 1440/1024/390 простым сжатием 1920. Для каждого разрешения использовать утверждённый макет или адаптивную спецификацию.
 
-Везде использовать финальное название `Главные события`, не `Важные события`.
+Канонические названия:
+
+- Hero CTA: `Важные события →`.
+- Название секции-карусели: `Главные события`.
+
+Не смешивать эти два текста.
 
 ## Header
 
@@ -104,6 +123,8 @@ Next.js/React SPA requirements:
 
 Если `#Хит` нет, событие показывается в календаре и обычных событиях, но не в `Главных событиях`.
 
+Полные актуальные правила импорта и публикации находятся в `docs/BUSINESS_RULES.md`.
+
 ## Админка
 
 Меню: Dashboard, Events, Requires attention, Main events, Quotes, Filters, Cities and regions, MAX import, Integrations/API sources, Bots and reminders, Contacts, Analytics, Site builder, Site settings, Users and roles, Archive/deleted, Action log, Technical error log.
@@ -114,10 +135,18 @@ Next.js/React SPA requirements:
 
 Оператор: ООО «АБ ГРУПП», ОГРН 1212300074766, ИНН 2308283450, адрес: 350049, Краснодарский край, г. Краснодар, ул. Красных Партизан, д. 164, помещение 5.
 
-Документы: Политика конфиденциальности, Пользовательское соглашение, Согласие на обработку персональных данных.
+Публичные страницы:
+
+- `/legal/privacy`;
+- `/legal/terms`;
+- `/legal/consent`;
+- `/legal/cookies`;
+- `/legal/broadcast-consent`.
+
+Footer должен содержать ссылки на все пять документов согласно BR-027.
 
 Во всех документах использовать email: `info-event@a-b.ru`.
 
 ## Примечание
 
-Полная версия v6 с PDF, customer-версией, макетами и assets находится в архиве `AB_Afisha_Claude_transfer_package_v6.zip`, подготовленном отдельно для передачи Claude/Claude Code.
+Архивы, старые PDF, customer-версии и Stage-отчёты являются историческими материалами. Для текущей реализации сначала использовать `docs/PROJECT_BIBLE/README.md` и `docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md`.

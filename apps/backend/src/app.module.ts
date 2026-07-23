@@ -22,6 +22,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BuilderModule } from './modules/builder/builder.module';
 import { LegalModule } from './modules/legal/legal.module';
 import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
+import { DirectionsModule } from './modules/directions/directions.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
     BuilderModule,
     LegalModule,
     BroadcastsModule,
+    DirectionsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

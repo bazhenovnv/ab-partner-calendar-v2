@@ -1,0 +1,206 @@
+/* Stage 71 — exact approved Figma dimensions (desktop)
+   This file is imported last and intentionally overrides earlier visual stages. */
+
+@media (min-width: 1024px) {
+  /* Main-events carousel: approved card sizes */
+  .pub-carousel-gallery {
+    height: 460px;
+    overflow: hidden;
+  }
+
+  .pub-carousel-card {
+    width: 427.25px;
+    height: 427.25px;
+    margin-left: -213.625px;
+    margin-top: -213.625px;
+    border-radius: 18.26px;
+  }
+
+  .pub-carousel-card-link {
+    border-radius: 18.26px;
+  }
+
+  /* Approved quote composition.
+     Use one positioned canvas so older grid/flex rules cannot displace the text or people. */
+  .quotes-section {
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .quotes-layout {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 362px !important;
+    min-height: 362px !important;
+    margin: 0 !important;
+  }
+
+  .quotes-person {
+    position: absolute !important;
+    bottom: -18px !important;
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    z-index: 2;
+  }
+
+  .quotes-person-left {
+    left: 0 !important;
+    width: 302px !important;
+    height: 362px !important;
+  }
+
+  .quotes-person-right {
+    right: 0 !important;
+    width: 287px !important;
+    height: 359px !important;
+  }
+
+  .quotes-person-img--left {
+    display: block !important;
+    width: 302px !important;
+    max-width: none !important;
+    height: 362px !important;
+    object-fit: contain !important;
+    object-position: left bottom !important;
+  }
+
+  .quotes-person-img--right {
+    display: block !important;
+    width: 287px !important;
+    max-width: none !important;
+    height: 359px !important;
+    object-fit: contain !important;
+    object-position: right bottom !important;
+  }
+
+  .quotes-card--approved-frame {
+    position: absolute !important;
+    top: 72px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 744px !important;
+    height: 214px !important;
+    min-width: 744px !important;
+    min-height: 214px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    z-index: 3;
+  }
+
+  .quotes-card--approved-frame::before,
+  .quotes-card--approved-frame::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .quotes-frame-art {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 744px !important;
+    height: 214px !important;
+    object-fit: fill !important;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 744px !important;
+    height: 214px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 36px 76px 30px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 1;
+  }
+
+  .quotes-card--approved-frame .quotes-body.quotes-visible {
+    transform: none !important;
+  }
+
+  .quotes-card--approved-frame .quotes-body.quotes-hidden {
+    transform: translateY(4px) !important;
+  }
+
+  .quotes-card--approved-frame .quotes-blockquote {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+  }
+
+  .quotes-card--approved-frame .quotes-text {
+    width: 100% !important;
+    max-width: 590px !important;
+    margin: 0 auto !important;
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+  }
+
+  .quotes-card--approved-frame .quotes-author {
+    margin-top: 8px !important;
+    text-align: center !important;
+  }
+
+  /* Footer stationery — approved 450×427 artwork */
+  .pub-footer-stationery {
+    width: 450px;
+    height: 427px;
+    align-items: flex-end;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+
+  .pub-footer-stationery-img {
+    width: 450px !important;
+    height: 427px !important;
+    max-width: none;
+    object-fit: contain;
+    object-position: right bottom;
+  }
+
+  /* Event cards — approved 428×300 */
+  .pub-event-card {
+    width: 428px;
+    height: 300px;
+    min-width: 428px;
+    min-height: 300px;
+    max-width: 428px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .pub-event-card-media,
+  .pub-event-card--composite .pub-event-card-media {
+    width: 428px;
+    height: 300px;
+  }
+
+  .pub-event-card--composite .pub-event-card-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  .pub-events-outer .grid.desktop\:grid-cols-3 {
+    grid-template-columns: repeat(3, 428px);
+    column-gap: 53px;
+    row-gap: 53px;
+  }
+}
