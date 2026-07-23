@@ -14,11 +14,12 @@
 
 1. [`docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md`](docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md) — какой источник побеждает при конфликте.
 2. [`docs/PROJECT_BIBLE/README.md`](docs/PROJECT_BIBLE/README.md) — навигация по проектной книге.
-3. Спецификацию нужного блока.
-4. [`docs/BUSINESS_RULES.md`](docs/BUSINESS_RULES.md).
-5. [`docs/ADR.md`](docs/ADR.md).
-6. [`docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md`](docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md).
-7. [`docs/PROJECT_BIBLE/08_OPEN_ISSUES.md`](docs/PROJECT_BIBLE/08_OPEN_ISSUES.md).
+3. [`docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md`](docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md) — утверждённый процесс текущего этапа дизайна.
+4. Спецификацию нужного блока.
+5. [`docs/BUSINESS_RULES.md`](docs/BUSINESS_RULES.md).
+6. [`docs/ADR.md`](docs/ADR.md).
+7. [`docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md`](docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md).
+8. [`docs/PROJECT_BIBLE/08_OPEN_ISSUES.md`](docs/PROJECT_BIBLE/08_OPEN_ISSUES.md).
 
 Stage/audit/release reports являются историческими свидетельствами и не могут переопределять утверждённый дизайн или канонические документы PROJECT_BIBLE.
 
@@ -29,14 +30,18 @@ Stage/audit/release reports являются историческими свид
 - `docs/TZ_AB_Afisha_Buhgaltera_customer.md` — версия для заказчика.
 - `docs/TZ_v7_additions.md` … `docs/TZ_v11_legal_documents_and_locations.md` — утверждённые дополнения.
 - `docs/BUSINESS_RULES.md` — единый реестр функциональных правил.
-- `docs/ADR.md` — журнал архитектурных решений.
+- `docs/ADR.md` — журнал архитектурных и процессных решений.
 - `docs/CHANGELOG.md` — история изменений, не спецификация.
+- `docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md` — рамки, порядок и критерии приёмки этапа дизайна.
 
 ## Ключевые параметры
 
 - Production: `https://ab-event.pro`.
 - Staging: `https://test.ab-event.pro`.
-- Рабочая ветка: `claude/ab-afisha-architecture-plan-805f5o`.
+- Каноническая интеграционная ветка: `main`.
+- Новые изменения выполняются в короткоживущих feature-ветках от актуальной `main` и после приёмки сливаются обратно.
+- Проверенная исходная точка дизайн-этапа: commit `b6c333a`, tag `release-20260723`.
+- Исторические вершины удалённых веток сохранены 39 тегами `archive-20260723-*`.
 - Путь проекта на сервере: `/srv/ab-afisha`.
 - Рабочая почта: `info-event@a-b.ru`.
 - Яндекс.Метрика: `110270689`.
@@ -44,6 +49,10 @@ Stage/audit/release reports являются историческими свид
 - Старый сервер `77.232.136.248` удалён и не должен использоваться.
 - Runtime-конфигурация использует домены, а не IP.
 - Стек: Next.js, React, TypeScript, NestJS, PostgreSQL, Redis, Docker, Nginx.
+
+## Текущий этап
+
+Утверждён переход к UI/UX-дизайну сайта. Первая область работ — публичная главная страница. Разработка ведётся последовательно: аудит → спецификация → реализация → build и smoke checks → визуальная проверка → утверждение → документирование → merge.
 
 ## Деплой
 
