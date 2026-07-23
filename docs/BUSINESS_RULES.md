@@ -1,6 +1,6 @@
 # Business Rules Registry — АБ Афиша Бухгалтера
 
-This registry is the single source of truth for business rules. Latest additions v7-v9 have priority over older conflicting requirements.
+This registry is the single source of truth for business rules below `docs/PROJECT_BIBLE/`. Approved additions v7–v11 have priority over older conflicting requirements. Historical implementation reports and current code do not override this registry.
 
 ## BR-001: #Хит
 If a MAX post contains `#Хит`, import the event into Calendar, Events and Main Events. Set `mainEvent = true`.
