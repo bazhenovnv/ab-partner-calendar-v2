@@ -109,9 +109,14 @@ services:
       - "443:443"
     volumes:
       - ./infra/nginx/conf.d/prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./infra/nginx/conf.d/staging-ssl.conf:/etc/nginx/conf.d/staging-ssl.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot:ro
       - uploads:/app/uploads:ro
+      - staging-uploads:/app/staging-uploads:ro
+    networks:
+      - default
+      - proxy
     depends_on:
       - frontend
       - backend
@@ -120,3 +125,11 @@ volumes:
   postgres-data:
   redis-data:
   uploads:
+  staging-uploads:
+    external: true
+    name: ab-afisha-staging_uploads
+
+networks:
+  proxy:
+    external: true
+    name: ab-afisha-proxy
