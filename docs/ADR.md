@@ -43,3 +43,13 @@ Content-Security-Policy is added at the nginx level (not in Next.js headers conf
 
 ## ADR-014: Domain-first deployment — no server IP hardcoded in runtime
 All runtime configuration (nginx `server_name`, CORS origins, `NEXT_PUBLIC_SITE_URL`, bot webhook URLs) uses domain names (`ab-event.pro`, `www.ab-event.pro`, `test.ab-event.pro`), never a server IP. Server IPs are allowed only in deployment documentation and DNS instructions. Current VPS IPv4 is `5.129.243.179`; old server `77.232.136.248` is historical, removed and must not be reused. Server migration requires DNS/deployment-document updates, not runtime code changes.
+
+## ADR-015: Controlled screen-by-screen design workflow
+
+The UI/UX redesign proceeds screen by screen, beginning with the public homepage. Each design scope must start from current `main` in a short-lived feature branch and include the implementation, canonical documentation updates and QA evidence for that scope.
+
+A screen is not considered accepted because it builds successfully. Acceptance requires functional smoke checks, current desktop/mobile screenshots, visual comparison with approved sources, recorded residual differences and explicit project-owner approval. Only then may the branch be merged into `main`.
+
+Design work must not silently alter business rules, API contracts, legal behaviour, data processing or deployment configuration. Such changes require a separate decision and approval.
+
+The complete operational procedure and Definition of Done are canonical in `docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md`.
