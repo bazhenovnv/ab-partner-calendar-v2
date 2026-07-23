@@ -6,98 +6,94 @@ Canonical implementation and acceptance rules for the `Главные событ
 
 ## Authority
 
-Visual geometry is verified against the approved Figma node and approved desktop PDF. This specification defines the runtime and asset contract and must not be used to override measured approved geometry.
+Visual geometry is verified against the approved Figma node and approved desktop PDF. This specification defines the runtime, data and asset contract and must not override measured approved geometry.
 
 ## Active implementation
 
-- Component: `apps/frontend/src/components/events/MainEventsBanner.tsx`
-- Styles: `apps/frontend/src/components/events/main-events-carousel.module.css`
-- Data source: `GET /api/events/public/main`
-- Event eligibility: published event with `mainEvent=true`
-- Maximum API result: five events
-- The API must never substitute ordinary events with `mainEvent=false`
+- Component: `apps/frontend/src/components/events/MainEventsBanner.tsx`.
+- Styles: `apps/frontend/src/components/events/main-events-carousel.module.css`.
+- Data source: `GET /api/events/public/main`.
+- Event eligibility: `status=PUBLISHED` and `mainEvent=true`.
+- Maximum API result: five events.
+- Ordinary events with `mainEvent=false` are never eligible.
 
 ## API selection contract
 
-1. The endpoint returns only records with `status=PUBLISHED` and `mainEvent=true`.
-2. Active featured events (`PLANNED`, `LIVE`) have priority and are ordered by `sortOrder`, then `startDate`.
-3. When no active featured events exist, the endpoint may return the latest completed featured events, but the `mainEvent=true` condition remains mandatory.
-4. Ordinary completed events must never be promoted implicitly to fill five positions.
-5. The response contains at most five records.
-6. If fewer than five eligible records exist, the carousel renders the available count without invented or duplicated cards.
+1. Select active featured events (`PLANNED`, `LIVE`) first.
+2. Order active featured events by `sortOrder`, then `startDate`.
+3. If fewer than five active featured events exist, fill only the remaining positions with the latest `COMPLETED` featured events.
+4. Completed fallback records must still have `mainEvent=true`.
+5. Ordinary completed events must never be promoted implicitly.
+6. Duplicate events are prohibited.
+7. The public API returns no more than five records.
+8. If fewer than five eligible records exist, render only the available records without invented or duplicated cards.
 
 ## Image contract
 
-1. Every public main event must contain a dedicated `images[0].mainEventUrl`.
-2. The carousel must not fall back to `originalUrl`, `eventCardUrl`, `thumbnailUrl`, gradients or invented artwork.
-3. A main event without `mainEventUrl` is not rendered in the public carousel and must be returned to the administration workflow as requiring attention.
-4. The approved carousel cover is a square asset with the complete approved composition and safe zones already applied.
-5. Runtime presentation uses `object-fit: cover`; therefore text, logos and faces must remain inside the approved safe zone.
-6. Every production asset must be registered in `05_ASSET_REGISTRY.md` with path, dimensions, format, SHA256 and source approval.
-7. Required HTTP verification: `200` and an image content type.
+1. Every public main event must have a valid dedicated carousel image.
+2. The canonical API eligibility check is a non-empty `images[0].mainEventUrl`.
+3. The active frontend currently prefers the approved untouched square source (`originalUrl`) for `#Хит` artwork and uses `mainEventUrl` as compatibility fallback. This behaviour must be validated against approved assets before acceptance.
+4. Generic event-card images, thumbnails, gradients and invented artwork are not acceptable final carousel substitutes.
+5. Main-event artwork must be displayed completely without cropping; runtime uses `object-fit: contain`.
+6. A main event without an eligible image is omitted from the public carousel and must return to the administration workflow for correction.
+7. Every production asset must be registered in `05_ASSET_REGISTRY.md` with path, dimensions, format, SHA256 and source approval.
+8. Required HTTP verification: status `200` and an image content type.
 
-## Five-card 3D composition
+## Five-card composition
 
-The visible desktop state contains, when at least five eligible events exist:
+When at least five eligible events exist, the desktop state contains:
 
 - one active centre card;
 - one near card on each side;
 - one outer card on each side.
 
-The centre card is front-facing and dominant. Side cards use mirrored combinations of:
-
-- horizontal translation;
-- small vertical offset;
-- negative Z translation;
-- `rotateY` depth angle;
-- subtle `rotateZ` fan angle;
-- reduced scale, brightness and opacity;
-- lower stacking order.
+The centre card is front-facing and dominant. Side cards use mirrored combinations of horizontal translation, vertical offset, negative Z translation, angle, scale, brightness, opacity and stacking order.
 
 The composition must remain symmetrical. It must not use root scaling or CSS zoom.
 
 ## Interaction
 
-- Click active card: open event modal.
-- Click side card: make it active.
-- Previous/next buttons: move by one event with circular wrapping.
-- Dots: one dot per event; selecting a dot activates that event.
+- Click the active card: open the event modal.
+- Click a side card: make it active.
+- Previous/next controls: move by one event with circular wrapping.
+- Approved navigation indicators: reproduce the approved reference; the current implementation uses three directional/current-position indicators and must not be described as one dot per event.
 - Keyboard: Left, Right, Home and End.
-- Pointer/touch: horizontal swipe; vertical page scrolling remains available.
+- Pointer/touch: horizontal swipe while vertical page scrolling remains available.
 - Reduced motion: transitions are effectively disabled when requested by the operating system.
 
 ## Accessibility
 
 - The carousel is a named region.
-- Current event position is announced as `N из total`.
+- Current position is announced as `N из total`.
 - Every card has a meaningful action label.
 - The active card uses `aria-current=true`.
 - Controls have visible keyboard focus.
-- Side cards remain available to assistive technology because they are interactive.
+- Interactive side cards remain available to assistive technology.
 
 ## Responsive behaviour
 
-- Desktop preserves all five visible positions where viewport width permits and where five eligible events exist.
-- Compact mode keeps the 3D hierarchy with reduced translations and card dimensions.
-- Mobile supports swipe and navigation controls.
-- Geometry is contained by the carousel viewport and must not create horizontal page overflow.
+- Desktop preserves all five visible positions when the viewport and eligible record count permit it.
+- Compact mode keeps the hierarchy with reduced translations and card dimensions.
+- Mobile supports swipe and explicit navigation controls.
+- Geometry must remain contained by the carousel viewport and must not create horizontal page overflow.
 
 ## Failure behaviour
 
-- Missing dedicated cover: omit the invalid event from the carousel; do not render a fake placeholder.
-- Empty valid dataset: show the neutral message `Главные события пока не опубликованы`.
+- Missing eligible cover: omit the invalid event; do not render a fake placeholder.
+- Empty valid dataset: show `Главные события пока не опубликованы`.
 - Broken production image is a release-blocking asset defect and must be recorded in `08_OPEN_ISSUES.md`.
 - An API record with `mainEvent=false` is a release-blocking data-contract defect.
 
 ## Acceptance evidence
 
-The block is accepted only when all evidence exists:
+The block is accepted only when all applicable evidence exists:
 
 1. frontend and backend production builds pass;
-2. API payload confirms `mainEvent=true` and dedicated `mainEventUrl` for every rendered item;
-3. API payload contains no more than five records and no ordinary-event fallback;
-4. all cover URLs return `200` with image content type;
-5. desktop 1920×1080 screenshot is compared with approved Figma/PDF;
-6. tablet and mobile interactions are verified, including swipe;
-7. keyboard and reduced-motion behaviour are verified;
-8. discrepancies and final status are recorded in `08_OPEN_ISSUES.md` and the release acceptance checklist.
+2. API payload confirms `status=PUBLISHED`, `mainEvent=true` and an eligible image for every rendered item;
+3. API payload contains no more than five records, no duplicates and no ordinary-event fallback;
+4. active records precede completed fallback records;
+5. all rendered image URLs return `200` with an image content type;
+6. desktop `1920×1080` screenshot is compared with approved Figma/PDF;
+7. tablet and mobile interactions are verified, including swipe;
+8. keyboard and reduced-motion behaviour are verified;
+9. discrepancies and status are recorded in `08_OPEN_ISSUES.md` and the release acceptance checklist.
