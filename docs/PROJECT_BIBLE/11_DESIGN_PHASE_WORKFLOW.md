@@ -2,9 +2,9 @@
 
 ## Status
 
-Approved by project owner on 2026-07-23.
+Approved by the project owner on 2026-07-23.
 
-The repository cleanup and release consolidation stage is complete. The active development branch is `main`. The verified baseline is commit `b6c333a` with release tag `release-20260723`. Historical branch tips are preserved by 39 tags matching `archive-20260723-*`.
+The repository cleanup and release consolidation stage is complete. `main` is the canonical integration branch. Historical branch and release references are preserved as repository history and must not be treated as the current working branch.
 
 ## Objective
 
@@ -22,7 +22,7 @@ The design phase starts with the public homepage and establishes the reusable vi
 6. Run build, functional smoke checks and visual QA.
 7. Present current screenshots for owner approval.
 8. Update canonical documentation, asset registry, open issues and acceptance evidence.
-9. Only after approval, proceed to the next screen.
+9. Only after approval, proceed to the next dependent screen or block.
 
 ## First design scope — public homepage
 
@@ -30,16 +30,17 @@ The first controlled design scope includes:
 
 - header and navigation;
 - hero section and primary CTA;
-- search and filters;
+- filters;
 - calendar;
 - event cards and selected-day content;
-- «Главные события» carousel;
-- supporting benefit/instruction blocks;
-- reminders and partner actions;
+- `Главные события` carousel;
 - rotating quotes;
-- footer;
+- footer and legal area;
+- cookie banner where it overlaps the homepage result;
 - desktop, tablet and mobile behaviour;
 - hover, focus, active, disabled, loading, empty and error states.
+
+Supporting or instructional blocks may be added only when they are present in the approved homepage source or separately approved by the project owner. They must not be invented merely to fill space.
 
 ## Mandatory design principles
 
@@ -54,16 +55,17 @@ The first controlled design scope includes:
 
 ## Approval gates
 
-A screen is accepted only when all items below are satisfied:
+A screen or bounded design block is accepted only when all applicable items below are satisfied:
 
-- implementation matches approved references and current specification;
-- desktop and mobile screenshots are reviewed;
+- implementation matches approved references and the current canonical specification;
+- controlled desktop and mobile screenshots are reviewed;
 - no unintended functional regressions are found;
 - frontend build passes;
 - affected routes complete smoke checks;
 - unresolved visual differences are recorded in `08_OPEN_ISSUES.md`;
 - approved values are written into the relevant PROJECT_BIBLE specification;
-- evidence is added to `09_RELEASE_ACCEPTANCE_CHECKLIST.md`.
+- evidence is added to `09B_RELEASE_ACCEPTANCE_CHECKLIST.md`;
+- owner approval is recorded when required.
 
 ## Change control
 
@@ -78,7 +80,7 @@ Any proposal that changes functionality, legal behaviour, data processing, API c
 - One branch should cover one approved screen or tightly bounded design block.
 - Each branch must include code, documentation and QA evidence for its scope.
 - Merge only after owner approval and required checks.
-- Delete the feature branch after merge; retain releases through annotated release tags.
+- Delete the feature branch after merge; retain releases through tags.
 - Never commit secrets, credentials, production `.env` files or private access tokens.
 
 Recommended branch naming:
@@ -98,7 +100,8 @@ The homepage design stage is complete when:
 2. shared tokens and components are documented in `02_DESIGN_SYSTEM.md`;
 3. homepage structure is current in `03_HOMEPAGE_STRUCTURE.md`;
 4. calendar-specific behaviour is current in `04_CALENDAR_SPEC.md`;
-5. all used assets are registered in `05_ASSET_REGISTRY.md`;
-6. desktop and mobile visual QA evidence is accepted;
-7. critical and high-priority open issues for the homepage are closed;
-8. the accepted implementation is merged into `main` and tagged as a verified release when deployed.
+5. carousel behaviour is current in `10_MAIN_EVENTS_CAROUSEL_SPEC.md`;
+6. all used assets are registered in `05_ASSET_REGISTRY.md`;
+7. desktop and mobile visual QA evidence is accepted;
+8. critical and high-priority homepage issues are closed;
+9. the accepted implementation is merged into `main` and deployed through the current release process.
