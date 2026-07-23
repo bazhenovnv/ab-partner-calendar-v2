@@ -1,33 +1,41 @@
 # 00 — Source of Truth
 
 ## Purpose
+
 This document defines which source wins when project documents, code, screenshots, or historical reports conflict.
 
 ## Authority order
+
 1. Approved Figma design.
 2. Approved homepage PDF/reference screenshots.
 3. Canonical documents in `docs/PROJECT_BIBLE/`.
 4. `docs/BUSINESS_RULES.md`.
 5. `docs/ADR.md`.
 6. Main TZ and approved additions v7–v11.
-7. Current code.
-8. Stage reports, audit reports, release reports.
+7. Current code in `main`.
+8. Stage reports, audit reports and release reports.
 9. `docs/CHANGELOG.md` and other historical material.
 
 ## Proof rules
-A statement such as `COMPLETE`, `FINAL`, `97%`, `PIXEL-PERFECT`, or `APPROVED` in an old report is not proof of current compliance.
+
+A statement such as `COMPLETE`, `FINAL`, `97%`, `PIXEL-PERFECT` or `APPROVED` in an old report is not proof of current compliance.
 
 Current compliance is proven only by:
+
 - the current approved design source;
 - explicit measurements;
-- current code paths;
-- build result;
-- current staging screenshot/comparison.
+- current code paths in `main`;
+- a successful build for the assessed commit;
+- current staging verification;
+- desktop/mobile screenshots when visual behaviour changed.
 
 ## Canonical project facts
+
 - Repository: `bazhenovnv/ab-partner-calendar-v2`.
+- Default and integration branch: `main`.
+- Development workflow: short-lived feature branches created from current `main`, reviewed and merged back into `main`.
 - Historical repository: `bazhenovnv/ab-partner-calendar` — do not use for current work.
-- Working branch: `claude/ab-afisha-architecture-plan-805f5o`.
+- Historical long-lived branch: `claude/ab-afisha-architecture-plan-805f5o` — no longer the canonical working branch.
 - Production: `ab-event.pro`.
 - Staging: `test.ab-event.pro`.
 - Deploy path: `/srv/ab-afisha`.
@@ -39,12 +47,16 @@ Current compliance is proven only by:
 - Human-readable completed status: `Завершено`; never use `Проведено`.
 
 ## Conflict handling
+
 When a conflict is found:
+
 1. Record it in `DOCUMENT_CONFLICT_MATRIX.md`.
 2. Identify the winning source by the authority order above.
 3. Correct the current canonical document.
 4. Preserve historical documents; add a deprecation header instead of erasing history.
 5. Update `MIGRATION_MAP.md` for moved or renamed files.
+6. Update `08_OPEN_ISSUES.md` only when an unresolved current issue remains.
 
 ## Design restrictions
-Do not invent text, images, SVG illustrations, dimensions, shadows, or spacing. Use only approved assets and registered design references. Missing approved assets must be recorded in `08_OPEN_ISSUES.md` and must not be replaced by self-created artwork.
+
+Do not invent text, images, SVG illustrations, dimensions, shadows or spacing. Use only approved assets and registered design references. Missing approved assets must be recorded in `08_OPEN_ISSUES.md` and must not be replaced by self-created artwork.
