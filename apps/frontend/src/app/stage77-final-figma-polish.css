@@ -63,15 +63,20 @@
 .pub-calendar-weekday::after { content: ''; position: absolute; right: 0; bottom: 0; width: 1px; height: 18px; background: rgba(17,17,17,.28); }
 .pub-calendar-weekday:last-child::after { display: none; }
 .pub-calendar-weekday--weekend { color: #111 !important; }
-.pub-calendar-grid { grid-auto-rows: 63px; border: 0 !important; }
-.pub-calendar-cell { width: 100%; height: 63px !important; aspect-ratio: auto !important; color: #111; border-top: 0 !important; border-left: 0 !important; border-right: 1px solid rgba(17,17,17,.28) !important; border-bottom: 1px solid rgba(17,17,17,.28) !important; font-family: var(--font-montserrat), sans-serif; font-size: 20px; font-weight: 600; line-height: 1; }
+.pub-calendar-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); grid-auto-rows: 63px; border: 0 !important; transition: opacity 160ms ease; }
+.pub-calendar-grid--loading { opacity: .45; }
+.pub-calendar-cell { position: relative; display: flex; width: 100%; height: 63px !important; aspect-ratio: auto !important; align-items: center; justify-content: center; overflow: hidden; color: #111; border-top: 0 !important; border-left: 0 !important; border-right: 1px solid rgba(17,17,17,.28) !important; border-bottom: 1px solid rgba(17,17,17,.28) !important; font-family: var(--font-montserrat), sans-serif; font-size: 20px; font-weight: 600; line-height: 1; }
 .pub-calendar-cell:nth-child(7n) { border-right: 0 !important; }
 .pub-calendar-cell:nth-last-child(-n + 7) { border-bottom: 0 !important; }
 .pub-calendar-cell--weekend { background: rgba(124,216,179,.13); }
 .pub-calendar-cell--outside { color: rgba(17,17,17,.42); }
 .pub-calendar-cell--selected { background: #8ed8bf; color: #111; }
+.pub-calendar-day { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: inherit; font: inherit; }
 .pub-calendar-day--selected { color: #111; }
-.pub-calendar-marker { top: 0; right: 0; border-top-width: 18px !important; border-left-width: 18px !important; }
+.pub-calendar-marker { position: absolute; top: 0; right: 0; width: 0; height: 0; border-top-width: 18px !important; border-left-width: 18px !important; }
+.pub-calendar-tooltip { position: absolute; opacity: 0; visibility: hidden; pointer-events: none; }
+.pub-calendar-day:hover .pub-calendar-tooltip,
+.pub-calendar-day:focus-visible .pub-calendar-tooltip { opacity: 1; visibility: visible; }
 .pub-calendar-legend { display: none; }
 
 #events-results { margin-top: 27px; }
