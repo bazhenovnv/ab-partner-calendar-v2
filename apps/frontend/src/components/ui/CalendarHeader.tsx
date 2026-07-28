@@ -19,22 +19,22 @@ export function CalendarHeader({ year, month, onPrev, onNext, className }: Calen
   const monthName = MONTHS_RU[month];
 
   return (
-    <div className={cn('flex items-center justify-between', className)}>
+    <div className={cn('pub-calendar-header', className)}>
       <span
-        className="font-montserrat text-primary text-[30px] leading-tight"
+        className="pub-calendar-heading"
         aria-live="polite"
         aria-atomic="true"
       >
-        <span className="font-semibold">{monthName}</span>{' '}
-        <span className="font-normal">{year}</span>
+        <span className="pub-calendar-heading-month">{monthName}</span>{' '}
+        <span className="pub-calendar-heading-year">{year}</span>
       </span>
 
-      <div className="flex items-center gap-1">
+      <div className="pub-calendar-nav">
         <button
           type="button"
           onClick={onPrev}
           aria-label="Предыдущий месяц"
-          className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-date-hover transition-colors text-primary"
+          className="pub-calendar-nav-button"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <path
@@ -51,7 +51,7 @@ export function CalendarHeader({ year, month, onPrev, onNext, className }: Calen
           type="button"
           onClick={onNext}
           aria-label="Следующий месяц"
-          className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-date-hover transition-colors text-primary"
+          className="pub-calendar-nav-button"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <path
