@@ -2,7 +2,7 @@
 
 .pub-header-inner {
   width: min(1496px, calc(100% - 32px));
-  min-height: 104px;
+  min-height: 84px;
   margin: 0 auto;
   padding: 0;
   gap: 16px;
@@ -12,11 +12,48 @@
 .pub-header-brand-title { margin: 0; color: #1e1e1e; font-family: var(--font-montserrat), sans-serif; font-size: 34px !important; font-weight: 600; line-height: 1; letter-spacing: -0.015em; white-space: nowrap; }
 .pub-header-actions { gap: 8px; }
 .pub-header-action { height: 38px; gap: 7px; padding: 0 14px; border-radius: 8px; box-shadow: 0 4px 4px rgba(0,0,0,.18); font-family: var(--font-montserrat), sans-serif; font-size: 13px; font-weight: 500; line-height: 1; }
+.pub-header-action-icon-wrap { display: inline-flex; align-items: center; justify-content: center; overflow: visible; }
 .pub-header-action-icon-wrap, .pub-header-action-icon { width: 27px; height: 27px; flex: 0 0 27px; }
 .pub-header-action-icon { display: block; object-fit: contain; background: transparent; }
 
-.pub-hero-visual { background: #fff; }
-.pub-hero-visual .pub-hero-img { width: 100%; height: 100%; object-fit: contain !important; object-position: right center !important; display: block; }
+/* Reduce the empty band between the brand row and the hero panel. */
+.pub-hero { padding-top: 8px !important; }
+
+/* Approved hero composition: books at the right edge, calendar close to the text/image seam. */
+.pub-hero-visual {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+.pub-hero-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 3;
+  width: 115px;
+  pointer-events: none;
+  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.92) 28%, rgba(255,255,255,0) 100%);
+}
+.pub-hero-books {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+}
+.pub-hero-calendar {
+  position: absolute;
+  left: -96px;
+  bottom: 5px;
+  z-index: 2;
+  width: 252px;
+  height: 249px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgba(13,35,68,.08));
+}
 
 .pub-events-controls { align-items: stretch; gap: 40px; }
 .pub-events-filters-col, .pub-events-calendar-col { height: 632px; min-height: 632px; }
@@ -41,7 +78,7 @@
 .pub-filter-check-text { flex: none; color: #0d2344; font-family: var(--font-montserrat), sans-serif; font-size: 14px; font-weight: 400; line-height: 21px; }
 .pub-filter-status-label { display: inline-flex; align-items: center; gap: 8px; width: max-content; }
 .pub-filter-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; }
-.pub-filter-actions { margin-top: 28px; }
+.pub-filter-actions { margin-top: 58px; }
 .pub-filter-apply-btn { display: block; width: 231px; height: 46px; margin: 0 auto; border-radius: 8px; font-family: var(--font-montserrat), sans-serif; font-size: 13px; font-weight: 600; }
 .pub-filter-reset-link { display: block; margin: 12px auto 0; }
 
@@ -91,7 +128,7 @@
 #events-results > .min-h-\[309px\] > p { font-size: 23px !important; line-height: 1.25; }
 
 @media (max-width: 1399px) {
-  .pub-header-inner { width: calc(100% - 32px); min-height: 96px; }
+  .pub-header-inner { width: calc(100% - 32px); min-height: 88px; }
   .pub-header-brand-mark { width: 60px !important; height: 64px !important; flex-basis: 60px; }
   .pub-header-brand-title { font-size: 31px !important; }
   .pub-events-controls { flex-direction: column; gap: 24px; }
@@ -108,6 +145,7 @@
   .pub-header-actions { gap: 5px; }
   .pub-header-action { width: 38px; padding: 0; justify-content: center; }
   .pub-header-action-icon-wrap, .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
+  .pub-hero-calendar { left: -42px; width: 180px; height: auto; }
   .pub-filter-two-col { flex-direction: column; }
   .pub-filter-left-col { width: 100%; padding-right: 0; }
   .pub-filter-divider-v { display: none; }
