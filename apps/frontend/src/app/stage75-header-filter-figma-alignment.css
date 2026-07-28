@@ -1,0 +1,181 @@
+/* Stage 75 — Figma alignment: header brand, action icons and event filter */
+
+/* Header brand: Figma group uses a larger mark and 29.95px Montserrat SemiBold title. */
+.pub-header-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.pub-header-brand-mark {
+  display: block;
+  width: 68px;
+  height: 72px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.pub-header-brand-title {
+  margin: 0;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 29.95px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #1e1e1e;
+  white-space: nowrap;
+}
+
+/* The previous bitmap icons contained a visible pale square. Icons are now SVGs,
+   and their boxes must remain fully transparent. */
+.pub-header-action-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  overflow: visible;
+  flex: 0 0 auto;
+}
+
+.pub-header-action-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+}
+
+/* Event filter: fixed rhythm based on the approved Figma measurements. */
+.pub-filter-title {
+  margin: 0 0 24px;
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.pub-filter-two-col {
+  align-items: stretch;
+}
+
+.pub-filter-left-col {
+  width: 236px;
+  padding-right: 28px;
+}
+
+.pub-filter-right-col {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.pub-filter-section {
+  margin: 0 0 18px;
+}
+
+.pub-filter-label {
+  margin: 0 0 9px;
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.pub-filter-select {
+  min-height: 48px;
+  padding: 14px 36px 14px 16px;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.pub-filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pub-filter-check-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 8px;
+  align-items: center;
+  column-gap: 9px;
+  min-height: 20px;
+  margin: 0;
+}
+
+.pub-filter-check-row--without-dot {
+  grid-template-columns: 16px minmax(0, 1fr);
+}
+
+.pub-filter-checkbox {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.pub-filter-check-text {
+  display: block;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.pub-filter-dot {
+  width: 8px;
+  height: 8px;
+  margin: 0;
+  align-self: center;
+  justify-self: end;
+}
+
+.pub-filter-divider-v {
+  margin: 0 28px;
+}
+
+.pub-filter-divider-h {
+  margin: 18px 0;
+}
+
+.pub-filter-apply-btn {
+  margin-top: 18px;
+}
+
+@media (max-width: 1399px) {
+  .pub-header-brand-mark {
+    width: 58px;
+    height: 62px;
+  }
+
+  .pub-header-brand-title {
+    font-size: 25px;
+  }
+
+  .pub-filter-left-col {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .pub-filter-right-col {
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-header-brand {
+    gap: 10px;
+  }
+
+  .pub-header-brand-mark {
+    width: 42px;
+    height: 46px;
+  }
+
+  .pub-header-brand-title {
+    font-size: 18px;
+  }
+}
