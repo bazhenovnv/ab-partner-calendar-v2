@@ -1,52 +1,113 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import logoImg from '../../../public/ab-logo-mark-cropped.png';
 
-const TG_CHANNEL  = 'https://t.me/ab_afisha_buh';
+const TG_CHANNEL = 'https://t.me/ab_afisha_buh';
 const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0';
 const PARTNER_URL = 'https://ab-buhpartner.ru/';
 
-const MAX_ICON = 'data:image/png;base64,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';
-const PARTNER_ICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFW0lEQVR42sWXW4id1RXHf2vv/Z3LnDmZycyEGCUXDV6ihCj2QaQoalofLA2IVR/EG6gggtBn++aLCHkR9KVYaKG0RqjYPphYQmkjta1UA1rFS4SgZnKZOWdO5pzzXfbeqw/fmUzmljlTofng4/vYrL3///1fa6+1tmRZV8FxOR4RwYhcHnAAVcWoLh/9/5Iwi3os+/5vW9rwFCcLmx5i7oKtqqIIugAoYEp/blhAN+wEAYIqUSGxQmIFzEDAqPig5EExAzJDExjWsAiRkaoFI6SF8PUczKSlIlNVYUcTRmqgPpB6xQqIMYsqLVNxpQsuCR5o1B3TXeHQl8KxaTjVE/IAUcEa2FJVfrhNeeR6w5Wj0E8DJkZkmRrLsSTLskviFz7QqFv+fFI4eNxwLjXUEsVJCR4iBIUsQCeDqZrywg8i910DvTSWSlzCJZckkBeB0brhjyeEFz901B04UwL2PfgAdkBEFUTK8fkCXrqt4KEbhG4vkjizMQKCUIRA1cFnLeHpvyUkVtCoFBFaGYxVBINypgfNakkg9yUJBfKgvHlvwd5JJS0gcXadPLDET0qMEVBe+8SQhhI8D3CuD/fvFt68N/DGjwNP3gjttDwBdadUrKJRSYPw8r8FEQZrrZaKVyEgIvgQqZnIpzPwjzOGilFSD50cdjTh53sDzx/u8PifzvPUnsC+KfjmvPLoHuWnu2A2U5pJ5L1pw/Ezymgi+BBWBuRaVSjEiKsI/zornC+EMVF8hNQL4y5QROGvrSadXJkvhJp4ntmjPLjbkfvIfBr4/VeGPMJ7p+CWLRFfCIkbMg/EUEp2ogNFhDyUb9Uo/zwV+Gg6cvT+Gn0PZzopH0zDX7LANaOe2X7k158I440q87nyRbsMsbXc4ERWpnDVCNHQy8EHxRslRPBRaeWGx48UPHZti6qFX31mORdrNKuOV47neCymkpCHiI9CL1dQ0LUIlJlKVrgAEeqJ4qMSNJKF0mkH70zYv93R6iaowhO3Jrx/WvjFsZzTuaNiwEks80OM1AfJPq5RrNwi+CIRoZRldzNShHKxTqb8cr9jU+zy8Bs9zuWCImyykRdur/H6jxoceDsHEYKCkVK968ZKBUQHYb+MhGNFPQZnDf3Mc9tWQ8NG5lJh1ygcuFp4+h3DxNQEO6ulfbdQfvtlxqEDhn1bhPdPRZoVIYvQsIE7roJ+FrDWDVuMlErF0W732bPZcdcVOb87UWXUev7wacFzNxtE8wtFRgYH+sjnXU7OKlYsqpF2X3hgt2fvlON0u2B8U31FYQKQPMtWDIsI7fYc9cTwXerY/5ah7S0hyyh8GKRevfCWkyzVWoWqE/oeRqzn7z8Tto8E+l4ZH2uu2q+skYohhMDZmVmunGzy7snAw4cdOY4RpxeKUBysuBA9qpFuBhUJHLov8pOrHd/OzrNlcgJrzfAEFlRI+31mWnPs3DrOsW89zx6Fj2ccWMFaxQARJQQglKF+3eaCV+8R7t7hOHm2w8T4GLVabVX5VxBY3huICL1ej9Zch20To/SD4Tf/CRz6Aj5uQScvA7HplJs2Kw9cC4/d5KibwHRrnonxMeojI2uCD9UPiAh5ljHTauOMsHWsRsDy3bwyk5Y2kzXY1oBEIqfnUvIYmdw8TrVa7vzijYnIRQEsSJ7nqut0syJCjJFut8t8rw8xUnVCxZUtVxGUtIiIsTRHR2g0GsuA1u661lVgibExaIx4X5AXnhACANZaKklCkrgBWV23s15KYKlG6/b3C2V1sbwqOjiaG7uagbtYqmEvFwv2qt/vGqUKZiFILtdjLsN1cCmBi9ukJf9DXhk3op6s4sr/ArM58tjFRRIAAAAAAElFTkSuQmCC';
-const TG_ICON = 'data:image/png;base64,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';
-
 const NAV_BTN =
-  'flex items-center gap-2 border border-black/[0.12] rounded-lg px-4 h-[38px] ' +
-  'text-sm font-medium text-primary bg-white shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' +
-  'hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint';
+  'flex h-[38px] items-center gap-2 rounded-lg border border-black/[0.12] bg-white px-4 ' +
+  'text-sm font-medium text-primary shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' +
+  'transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint';
 
-function HeaderIcon({ src }: { src: string }) {
-  return <Image src={src} alt="" width={26} height={26} unoptimized className="pub-header-action-icon" aria-hidden />;
+function TelegramIcon() {
+  return (
+    <span className="pub-header-action-icon-wrap" aria-hidden="true">
+      <svg className="pub-header-action-icon" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" fill="#2AABEE" />
+        <path
+          d="M23.8 9.5 21.4 22c-.18.88-.66 1.1-1.34.68l-3.66-2.7-1.77 1.7c-.2.2-.36.36-.74.36l.26-3.73 6.8-6.14c.3-.26-.06-.41-.46-.15l-8.4 5.3-3.62-1.14c-.79-.25-.8-.79.16-1.17l14.16-5.46c.66-.24 1.24.16 1.02.95Z"
+          fill="white"
+        />
+      </svg>
+    </span>
+  );
+}
+
+function MaxIcon() {
+  return (
+    <span className="pub-header-action-icon-wrap" aria-hidden="true">
+      <svg className="pub-header-action-icon" viewBox="0 0 32 32" fill="none">
+        <defs>
+          <linearGradient id="max-gradient" x1="6" y1="5" x2="26" y2="27" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#5B35F2" />
+            <stop offset="1" stopColor="#8B2BE2" />
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="15" fill="url(#max-gradient)" />
+        <path
+          d="M10.3 10.5h3.2l2.5 4.1 2.5-4.1h3.2v11h-3v-6.3l-2.7 4.1-2.7-4.1v6.3h-3v-11Z"
+          fill="white"
+        />
+      </svg>
+    </span>
+  );
+}
+
+function PartnerIcon() {
+  return (
+    <span className="pub-header-action-icon-wrap" aria-hidden="true">
+      <svg className="pub-header-action-icon" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" fill="#2AABEE" />
+        <circle cx="14" cy="12" r="3" stroke="white" strokeWidth="1.8" />
+        <path d="M8.8 22c.5-3.4 2.5-5.1 5.2-5.1s4.7 1.7 5.2 5.1" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M23 11v6M20 14h6" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    </span>
+  );
 }
 
 export function SiteHeader() {
   return (
     <header className="bg-transparent">
-      <div className="max-w-[1496px] mx-auto px-4 tablet:px-8 h-[88px] flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-4 group shrink-0" aria-label="АБ Афиша Бухгалтера — на главную">
+      <div className="mx-auto flex h-[88px] max-w-[1496px] items-center justify-between gap-4 px-4 tablet:px-8">
+        <Link href="/" className="pub-header-brand group" aria-label="АБ Афиша Бухгалтера — на главную">
           <Image
             src={logoImg}
             alt=""
-            width={62}
-            height={67}
-            className="block shrink-0 object-contain"
-            style={{ width: '62px', height: '67px' }}
-            aria-hidden
+            width={68}
+            height={72}
+            className="pub-header-brand-mark"
+            aria-hidden="true"
             priority
           />
-          <span className="[font-family:var(--font-montserrat)] self-center whitespace-nowrap text-[23px] leading-none font-semibold tracking-[-0.01em] text-[#1e1e1e]">
-            Афиша Бухгалтера
-          </span>
+          <span className="pub-header-brand-title">Афиша Бухгалтера</span>
         </Link>
+
         <nav aria-label="Внешние ссылки" className="flex items-center gap-2">
-          <a href={TG_CHANNEL} target="_blank" rel="noopener noreferrer" aria-label="Наш канал в Telegram" className={NAV_BTN}>
-            <HeaderIcon src={TG_ICON} /><span className="hidden tablet:inline">Telegram</span>
+          <a
+            href={TG_CHANNEL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Наш канал в Telegram"
+            className={NAV_BTN}
+          >
+            <TelegramIcon />
+            <span className="hidden tablet:inline">Telegram</span>
           </a>
-          <a href={MAX_CHANNEL} target="_blank" rel="noopener noreferrer" aria-label="Наш канал в MAX" className={NAV_BTN}>
-            <HeaderIcon src={MAX_ICON} /><span className="hidden tablet:inline">MAX</span>
+
+          <a
+            href={MAX_CHANNEL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Наш канал в MAX"
+            className={NAV_BTN}
+          >
+            <MaxIcon />
+            <span className="hidden tablet:inline">MAX</span>
           </a>
-          <a href={PARTNER_URL} target="_blank" rel="noopener noreferrer" aria-label="Стать партнёром АБ Афиша" className={NAV_BTN}>
-            <HeaderIcon src={PARTNER_ICON} /><span className="hidden tablet:inline">Стать партнёром</span><span className="tablet:hidden">Партнёр</span>
+
+          <a
+            href={PARTNER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Стать партнёром АБ Афиша"
+            className={NAV_BTN}
+          >
+            <PartnerIcon />
+            <span className="hidden tablet:inline">Стать партнёром</span>
+            <span className="tablet:hidden">Партнёр</span>
           </a>
         </nav>
       </div>
