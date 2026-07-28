@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { DirectionOption, EventAutoStatus, EventFormat, PriceType } from '@/types/event';
 
 export interface ActiveFilters {
@@ -47,22 +47,20 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
     pending.priceType !== '' ||
     pending.autoStatus !== '';
 
-  const toggleFormat = (val: EventFormat) =>
-    setPending((p) => ({ ...p, format: p.format === val ? '' : val }));
+  const toggleFormat = (value: EventFormat) =>
+    setPending((current) => ({ ...current, format: current.format === value ? '' : value }));
 
-  const toggleStatus = (val: EventAutoStatus) =>
-    setPending((p) => ({ ...p, autoStatus: p.autoStatus === val ? '' : val }));
+  const toggleStatus = (value: EventAutoStatus) =>
+    setPending((current) => ({ ...current, autoStatus: current.autoStatus === value ? '' : value }));
 
-  const togglePrice = (val: PriceType) =>
-    setPending((p) => ({ ...p, priceType: p.priceType === val ? '' : val }));
+  const togglePrice = (value: PriceType) =>
+    setPending((current) => ({ ...current, priceType: current.priceType === value ? '' : value }));
 
   return (
-    <div role="search" aria-label="Фильтры мероприятий" className="flex flex-col h-full">
+    <div role="search" aria-label="Фильтры мероприятий" className="flex h-full flex-col">
       <h3 className="pub-filter-title">Фильтр мероприятий</h3>
 
-      {/* Two-col layout with vertical divider */}
       <div className="pub-filter-two-col">
-        {/* LEFT: Регион / Направление / Формат */}
         <div className="pub-filter-left-col">
           <div className="pub-filter-section">
             <label className="pub-filter-label" htmlFor="filter-region">
@@ -87,15 +85,15 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
               id="filter-direction"
               className="pub-filter-select"
               value={pending.directions[0] ?? ''}
-              onChange={(e) => {
-                const v = e.target.value;
-                setPending((p) => ({ ...p, directions: v ? [v] : [] }));
+              onChange={(event) => {
+                const value = event.target.value;
+                setPending((current) => ({ ...current, directions: value ? [value] : [] }));
               }}
             >
               <option value="">Все направления</option>
-              {directions.map((d) => (
-                <option key={d.id} value={d.slug}>
-                  {d.name}
+              {directions.map((direction) => (
+                <option key={direction.id} value={direction.slug}>
+                  {direction.name}
                 </option>
               ))}
             </select>
@@ -103,39 +101,40 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
 
           <div>
             <p className="pub-filter-label">Формат</p>
-            <div>
-              {FORMAT_OPTIONS.map((opt) => (
-                <label key={opt.value} className="pub-filter-check-row">
+            <div className="pub-filter-options">
+              {FORMAT_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className="pub-filter-check-row pub-filter-check-row--without-dot"
+                >
                   <input
                     type="checkbox"
                     className="pub-filter-checkbox"
-                    checked={pending.format === opt.value}
-                    onChange={() => toggleFormat(opt.value)}
+                    checked={pending.format === option.value}
+                    onChange={() => toggleFormat(option.value)}
                   />
-                  <span className="pub-filter-check-text">{opt.label}</span>
+                  <span className="pub-filter-check-text">{option.label}</span>
                 </label>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Vertical divider */}
         <div className="pub-filter-divider-v" aria-hidden="true" />
 
-        {/* RIGHT: Статус + Стоимость */}
         <div className="pub-filter-right-col">
           <p className="pub-filter-label">Статус</p>
-          <div>
-            {STATUS_OPTIONS.map((opt) => (
-              <label key={opt.value} className="pub-filter-check-row">
+          <div className="pub-filter-options">
+            {STATUS_OPTIONS.map((option) => (
+              <label key={option.value} className="pub-filter-check-row">
                 <input
                   type="checkbox"
                   className="pub-filter-checkbox"
-                  checked={pending.autoStatus === opt.value}
-                  onChange={() => toggleStatus(opt.value)}
+                  checked={pending.autoStatus === option.value}
+                  onChange={() => toggleStatus(option.value)}
                 />
-                <span className="pub-filter-check-text">{opt.label}</span>
-                <span className={`pub-filter-dot ${opt.dotClass}`} aria-hidden="true" />
+                <span className="pub-filter-check-text">{option.label}</span>
+                <span className={`pub-filter-dot ${option.dotClass}`} aria-hidden="true" />
               </label>
             ))}
           </div>
@@ -143,16 +142,19 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
           <div className="pub-filter-divider-h" aria-hidden="true" />
 
           <p className="pub-filter-label">Стоимость</p>
-          <div>
-            {PRICE_OPTIONS.map((opt) => (
-              <label key={opt.value} className="pub-filter-check-row">
+          <div className="pub-filter-options">
+            {PRICE_OPTIONS.map((option) => (
+              <label
+                key={option.value}
+                className="pub-filter-check-row pub-filter-check-row--without-dot"
+              >
                 <input
                   type="checkbox"
                   className="pub-filter-checkbox"
-                  checked={pending.priceType === opt.value}
-                  onChange={() => togglePrice(opt.value)}
+                  checked={pending.priceType === option.value}
+                  onChange={() => togglePrice(option.value)}
                 />
-                <span className="pub-filter-check-text">{opt.label}</span>
+                <span className="pub-filter-check-text">{option.label}</span>
               </label>
             ))}
           </div>
