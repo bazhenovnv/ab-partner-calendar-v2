@@ -1,0 +1,324 @@
+/* Stage 77 — consolidated final Figma polish.
+   This file replaces the overlapping Stage 75/76 header, filter and calendar overrides. */
+
+.pub-header-inner {
+  height: 88px;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.pub-header-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.pub-header-brand-mark {
+  display: block;
+  width: 52px;
+  height: 55px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.pub-header-brand-title {
+  margin: 0;
+  color: #1e1e1e;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.pub-header-actions { gap: 8px; }
+
+.pub-header-action {
+  height: 38px;
+  gap: 7px;
+  padding: 0 14px;
+  border-radius: 8px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.18);
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.pub-header-action-icon-wrap {
+  display: inline-flex;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.pub-header-action-icon {
+  display: block;
+  width: 27px;
+  height: 27px;
+  object-fit: contain;
+  background: transparent;
+}
+
+@media (min-width: 1440px) {
+  .pub-events-controls {
+    align-items: stretch;
+    gap: 40px;
+  }
+
+  .pub-events-filters-col,
+  .pub-events-calendar-col {
+    height: 632px;
+    min-height: 632px;
+  }
+
+  .pub-events-filters-col {
+    width: 588px;
+    padding: 39px 25px 24px;
+  }
+
+  .pub-events-calendar-col {
+    width: 760.866px;
+    padding: 28px 27px 28px 41px;
+  }
+
+  .pub-calendar {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .pub-calendar-header {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pub-calendar-heading {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 9px;
+    color: #0d2344;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .pub-calendar-heading-month { font-weight: 600; }
+  .pub-calendar-heading-year { font-weight: 400; }
+
+  .pub-calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .pub-calendar-nav-button {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #0d2344;
+    cursor: pointer;
+  }
+
+  .pub-calendar-nav-button:hover { background: rgba(124, 216, 179, 0.2); }
+  .pub-calendar-nav-button:focus-visible { outline: 2px solid #367d67; outline-offset: 2px; }
+
+  .pub-calendar-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pub-calendar-weekday {
+    height: 30px;
+    color: rgba(13, 35, 68, 0.68);
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .pub-calendar-weekday--weekend { color: rgba(13, 35, 68, 0.6); }
+
+  .pub-calendar-grid {
+    grid-auto-rows: 63px;
+  }
+
+  .pub-calendar-cell {
+    width: 100%;
+    height: 63px !important;
+    aspect-ratio: auto !important;
+    color: #0d2344;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .pub-calendar-cell--weekend { background: rgba(124, 216, 179, 0.13); }
+  .pub-calendar-cell--outside { color: rgba(13, 35, 68, 0.28); }
+  .pub-calendar-cell--selected { background: #8ed8bf; color: #0d2344; }
+  .pub-calendar-day--selected { color: #0d2344; }
+
+  .pub-calendar-marker {
+    top: 0;
+    right: 0;
+    border-top-width: 12px;
+    border-left-width: 12px;
+  }
+
+  .pub-calendar-legend { display: none; }
+
+  .pub-filter-title {
+    margin: 0 0 23px;
+    color: #0d2344;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .pub-filter-two-col { align-items: stretch; }
+
+  .pub-filter-left-col {
+    width: 236px;
+    padding-right: 27px;
+  }
+
+  .pub-filter-divider-v {
+    margin: 0 27px;
+    background: rgba(13, 35, 68, 0.09);
+  }
+
+  .pub-filter-divider-h {
+    margin: 17px 0;
+    background: rgba(13, 35, 68, 0.09);
+  }
+
+  .pub-filter-section { margin-bottom: 17px; }
+
+  .pub-filter-label {
+    margin: 0 0 8px;
+    color: #0d2344;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .pub-filter-select {
+    width: 100%;
+    height: 46px;
+    min-height: 46px;
+    padding: 0 35px 0 15px;
+    border-color: #e8e3dc;
+    border-radius: 8px;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .pub-filter-options { gap: 10px; }
+
+  .pub-filter-check-row {
+    min-height: 19px;
+    margin: 0;
+    grid-template-columns: 15px minmax(0, 1fr) 7px;
+    column-gap: 8px;
+  }
+
+  .pub-filter-check-row--without-dot {
+    grid-template-columns: 15px minmax(0, 1fr);
+  }
+
+  .pub-filter-checkbox {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    border-radius: 3px;
+  }
+
+  .pub-filter-check-text {
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 19px;
+  }
+
+  .pub-filter-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .pub-filter-apply-btn {
+    width: 231px;
+    height: 46px;
+    margin-top: 16px;
+    border-radius: 8px;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #events-results { margin-top: 27px; }
+  #events-results > .min-h-\[309px\] { min-height: 210px !important; }
+  #events-results > .min-h-\[309px\] > p {
+    font-size: 25px !important;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 1439px) {
+  .pub-header-brand { gap: 10px; }
+  .pub-header-brand-mark { width: 44px; height: 47px; }
+  .pub-header-brand-title { font-size: 22px; }
+  .pub-header-action { padding: 0 10px; }
+  .pub-calendar-header { display: flex; align-items: center; justify-content: space-between; }
+  .pub-calendar-heading {
+    color: #0d2344;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: clamp(22px, 3vw, 28px);
+    line-height: 1.2;
+  }
+  .pub-calendar-heading-month { font-weight: 600; }
+  .pub-calendar-heading-year { font-weight: 400; }
+  .pub-calendar-nav { display: flex; gap: 2px; }
+  .pub-calendar-nav-button {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #0d2344;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-header-inner { height: 72px; padding: 0 12px; }
+  .pub-header-brand-mark { width: 38px; height: 40px; }
+  .pub-header-brand-title { font-size: 17px; }
+  .pub-header-actions { gap: 5px; }
+  .pub-header-action { width: 38px; padding: 0; justify-content: center; }
+  .pub-header-action-icon-wrap,
+  .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
+}
