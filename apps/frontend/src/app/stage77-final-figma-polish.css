@@ -48,12 +48,12 @@
 }
 .pub-hero-calendar {
   position: absolute;
-  left: -8px;
+  left: -46px;
   bottom: 7px;
   z-index: 4;
   width: auto !important;
   max-width: none !important;
-  height: 82% !important;
+  height: 70% !important;
   object-fit: contain;
   object-position: left bottom;
   filter: drop-shadow(0 8px 10px rgba(13,35,68,.08));
@@ -149,7 +149,7 @@
   .pub-header-actions { gap: 5px; }
   .pub-header-action { width: 38px; padding: 0; justify-content: center; }
   .pub-header-action-icon-wrap, .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
-  .pub-hero-calendar { left: -4px; bottom: 3px; height: 78% !important; }
+  .pub-hero-calendar { left: -24px; bottom: 3px; height: 66% !important; }
   .pub-filter-two-col { flex-direction: column; }
   .pub-filter-left-col { width: 100%; padding-right: 0; }
   .pub-filter-divider-v { display: none; }
