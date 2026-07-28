@@ -1,10 +1,12 @@
-/* Stage 77 — consolidated final Figma polish.
-   This file replaces the overlapping Stage 75/76 header, filter and calendar overrides. */
+/* Stage 77 — authoritative final styles for header, hero, filter and calendar.
+   Legacy visual layers that conflicted with these blocks are no longer imported. */
 
 .pub-header-inner {
+  width: min(1496px, calc(100% - 32px));
   height: 104px;
+  margin: 0 auto;
+  padding: 0;
   gap: 16px;
-  padding: 0 16px;
 }
 
 .pub-header-brand {
@@ -16,17 +18,17 @@
 
 .pub-header-brand-mark {
   display: block;
-  width: 68px;
-  height: 72px;
+  width: 68px !important;
+  height: 72px !important;
   object-fit: contain;
-  flex: 0 0 auto;
+  flex: 0 0 68px;
 }
 
 .pub-header-brand-title {
   margin: 0;
   color: #1e1e1e;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 34px;
+  font-size: 34px !important;
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.015em;
@@ -47,33 +49,28 @@
   line-height: 1;
 }
 
-.pub-header-action-icon-wrap {
-  display: inline-flex;
+.pub-header-action-icon-wrap,
+.pub-header-action-icon {
   width: 27px;
   height: 27px;
   flex: 0 0 27px;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  overflow: visible;
 }
 
 .pub-header-action-icon {
   display: block;
-  width: 27px;
-  height: 27px;
   object-fit: contain;
   background: transparent;
 }
 
-@media (min-width: 1440px) {
-  .pub-header-inner {
-    padding-left: 0;
-    padding-right: 0;
-  }
+/* Keep the complete right edge of the books visible. */
+.pub-hero-visual .pub-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center !important;
+}
 
+@media (min-width: 1440px) {
   .pub-events-controls {
     align-items: stretch;
     gap: 40px;
@@ -143,7 +140,6 @@
   }
 
   .pub-calendar-nav-button:hover { background: rgba(124, 216, 179, 0.2); }
-  .pub-calendar-nav-button:focus-visible { outline: 2px solid #367d67; outline-offset: 2px; }
 
   .pub-calendar-table {
     display: flex;
@@ -154,7 +150,7 @@
   .pub-calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    border-bottom: 1px solid rgba(17, 17, 17, 0.24);
+    border-bottom: 1px solid rgba(17, 17, 17, 0.28);
   }
 
   .pub-calendar-weekday {
@@ -163,7 +159,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #111;
+    color: #111 !important;
     font-family: var(--font-montserrat), sans-serif;
     font-size: 17px;
     font-weight: 600;
@@ -177,15 +173,15 @@
     bottom: 0;
     width: 1px;
     height: 18px;
-    background: rgba(17, 17, 17, 0.24);
+    background: rgba(17, 17, 17, 0.28);
   }
 
   .pub-calendar-weekday:last-child::after { display: none; }
-  .pub-calendar-weekday--weekend { color: #111; }
+  .pub-calendar-weekday--weekend { color: #111 !important; }
 
   .pub-calendar-grid {
     grid-auto-rows: 63px;
-    border: 0;
+    border: 0 !important;
   }
 
   .pub-calendar-cell {
@@ -195,8 +191,8 @@
     color: #111;
     border-top: 0 !important;
     border-left: 0 !important;
-    border-right: 1px solid rgba(17, 17, 17, 0.24) !important;
-    border-bottom: 1px solid rgba(17, 17, 17, 0.24) !important;
+    border-right: 1px solid rgba(17, 17, 17, 0.28) !important;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.28) !important;
     font-family: var(--font-montserrat), sans-serif;
     font-size: 20px;
     font-weight: 600;
@@ -213,8 +209,8 @@
   .pub-calendar-marker {
     top: 0;
     right: 0;
-    border-top-width: 18px;
-    border-left-width: 18px;
+    border-top-width: 18px !important;
+    border-left-width: 18px !important;
   }
 
   .pub-calendar-legend { display: none; }
@@ -228,7 +224,10 @@
     line-height: 1.2;
   }
 
-  .pub-filter-two-col { align-items: stretch; }
+  .pub-filter-two-col {
+    align-items: stretch;
+    flex: 0 0 auto;
+  }
 
   .pub-filter-left-col {
     width: 236px;
@@ -269,14 +268,19 @@
     line-height: 1.2;
   }
 
-  .pub-filter-options { gap: 15px; }
+  .pub-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
 
   .pub-filter-check-row {
     min-height: 21px;
-    margin: 0;
+    margin: 0 !important;
     display: grid;
     grid-template-columns: 15px max-content 7px;
     justify-content: start;
+    align-items: center;
     column-gap: 9px;
   }
 
@@ -287,11 +291,12 @@
   .pub-filter-checkbox {
     width: 15px;
     height: 15px;
-    margin: 2px 0 0;
+    margin: 0;
     border-radius: 3px;
   }
 
   .pub-filter-check-text {
+    flex: none;
     font-family: var(--font-montserrat), sans-serif;
     font-size: 14px;
     font-weight: 400;
@@ -308,7 +313,7 @@
   .pub-filter-apply-btn {
     width: 231px;
     height: 46px;
-    margin-top: 28px;
+    margin: 28px auto 0;
     border-radius: 8px;
     font-family: var(--font-montserrat), sans-serif;
     font-size: 13px;
@@ -324,9 +329,13 @@
 }
 
 @media (max-width: 1439px) {
+  .pub-header-inner {
+    width: calc(100% - 32px);
+    height: 88px;
+  }
   .pub-header-brand { gap: 12px; }
-  .pub-header-brand-mark { width: 52px; height: 55px; }
-  .pub-header-brand-title { font-size: 27px; }
+  .pub-header-brand-mark { width: 52px !important; height: 55px !important; flex-basis: 52px; }
+  .pub-header-brand-title { font-size: 27px !important; }
   .pub-header-action { padding: 0 10px; }
   .pub-calendar-header { display: flex; align-items: center; justify-content: space-between; }
   .pub-calendar-heading {
@@ -335,26 +344,12 @@
     font-size: clamp(22px, 3vw, 28px);
     line-height: 1.2;
   }
-  .pub-calendar-heading-month { font-weight: 600; }
-  .pub-calendar-heading-year { font-weight: 400; }
-  .pub-calendar-nav { display: flex; gap: 2px; }
-  .pub-calendar-nav-button {
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: #111;
-  }
 }
 
 @media (max-width: 767px) {
-  .pub-header-inner { height: 72px; padding: 0 12px; }
-  .pub-header-brand-mark { width: 38px; height: 40px; }
-  .pub-header-brand-title { font-size: 17px; }
+  .pub-header-inner { width: calc(100% - 24px); height: 72px; }
+  .pub-header-brand-mark { width: 38px !important; height: 40px !important; flex-basis: 38px; }
+  .pub-header-brand-title { font-size: 17px !important; }
   .pub-header-actions { gap: 5px; }
   .pub-header-action { width: 38px; padding: 0; justify-content: center; }
   .pub-header-action-icon-wrap,
