@@ -1,357 +1,102 @@
-/* Stage 77 — authoritative final styles for header, hero, filter and calendar.
-   Legacy visual layers that conflicted with these blocks are no longer imported. */
+/* Authoritative homepage styles: header, hero, filters and calendar. */
 
 .pub-header-inner {
   width: min(1496px, calc(100% - 32px));
-  height: 104px;
+  min-height: 104px;
   margin: 0 auto;
   padding: 0;
   gap: 16px;
 }
 
-.pub-header-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-  flex-shrink: 0;
-}
-
-.pub-header-brand-mark {
-  display: block;
-  width: 68px !important;
-  height: 72px !important;
-  object-fit: contain;
-  flex: 0 0 68px;
-}
-
-.pub-header-brand-title {
-  margin: 0;
-  color: #1e1e1e;
-  font-family: var(--font-montserrat), sans-serif;
-  font-size: 34px !important;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.015em;
-  white-space: nowrap;
-}
-
+.pub-header-brand { display: inline-flex; align-items: center; gap: 18px; flex-shrink: 0; }
+.pub-header-brand-mark { display: block; width: 68px !important; height: 72px !important; flex: 0 0 68px; object-fit: contain; }
+.pub-header-brand-title { margin: 0; color: #1e1e1e; font-family: var(--font-montserrat), sans-serif; font-size: 34px !important; font-weight: 600; line-height: 1; letter-spacing: -0.015em; white-space: nowrap; }
 .pub-header-actions { gap: 8px; }
+.pub-header-action { height: 38px; gap: 7px; padding: 0 14px; border-radius: 8px; box-shadow: 0 4px 4px rgba(0,0,0,.18); font-family: var(--font-montserrat), sans-serif; font-size: 13px; font-weight: 500; line-height: 1; }
+.pub-header-action-icon-wrap, .pub-header-action-icon { width: 27px; height: 27px; flex: 0 0 27px; }
+.pub-header-action-icon { display: block; object-fit: contain; background: transparent; }
 
-.pub-header-action {
-  height: 38px;
-  gap: 7px;
-  padding: 0 14px;
-  border-radius: 8px;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.18);
-  font-family: var(--font-montserrat), sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-}
+/* Show the complete book composition; preserve approved text and CTA wording. */
+.pub-hero-visual { background: #fff; }
+.pub-hero-visual .pub-hero-img { width: 100%; height: 100%; object-fit: contain !important; object-position: right center !important; display: block; }
 
-.pub-header-action-icon-wrap,
-.pub-header-action-icon {
-  width: 27px;
-  height: 27px;
-  flex: 0 0 27px;
-}
+.pub-events-controls { align-items: stretch; gap: 40px; }
+.pub-events-filters-col, .pub-events-calendar-col { height: 632px; min-height: 632px; }
+.pub-events-filters-col { width: 588px; padding: 39px 25px 28px; }
+.pub-events-calendar-col { width: 760.866px; padding: 28px 27px 28px 41px; }
 
-.pub-header-action-icon {
-  display: block;
-  object-fit: contain;
-  background: transparent;
-}
+/* Filter */
+.pub-filter-root { display: flex; height: 100%; flex-direction: column; }
+.pub-filter-title { margin: 0 0 28px; color: #0d2344; font-family: var(--font-montserrat), sans-serif; font-size: 20px; font-weight: 700; line-height: 1.2; }
+.pub-filter-two-col { display: flex; flex: 0 0 auto; align-items: stretch; }
+.pub-filter-left-col { width: 236px; flex-shrink: 0; padding-right: 27px; }
+.pub-filter-right-col { flex: 1; min-width: 0; }
+.pub-filter-divider-v { width: 1px; flex-shrink: 0; align-self: stretch; margin: 0 27px; background: rgba(13,35,68,.09); }
+.pub-filter-divider-h { height: 1px; margin: 22px 0; background: rgba(13,35,68,.09); }
+.pub-filter-section { margin-bottom: 24px; }
+.pub-filter-section--last { margin-bottom: 0; }
+.pub-filter-label { display: block; margin: 0 0 12px; color: #0d2344; font-family: var(--font-montserrat), sans-serif; font-size: 15px; font-weight: 600; line-height: 1.3; }
+.pub-filter-select { width: 100%; height: 46px; min-height: 46px; padding: 0 35px 0 15px; border: 1px solid #e8e3dc; border-radius: 8px; font-family: var(--font-montserrat), sans-serif; font-size: 13px; line-height: 1.2; }
+.pub-filter-options { display: flex; flex-direction: column; gap: 15px; }
+.pub-filter-check-row { display: grid; grid-template-columns: 15px max-content; align-items: center; justify-content: start; min-height: 21px; margin: 0 !important; column-gap: 9px; cursor: pointer; }
+.pub-filter-check-row--without-dot { grid-template-columns: 15px max-content; }
+.pub-filter-checkbox { width: 15px; height: 15px; margin: 0; border-radius: 3px; flex-shrink: 0; }
+.pub-filter-check-text { flex: none; color: #0d2344; font-family: var(--font-montserrat), sans-serif; font-size: 14px; font-weight: 400; line-height: 21px; }
+.pub-filter-status-label { display: inline-flex; align-items: center; gap: 8px; width: max-content; }
+.pub-filter-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; }
+.pub-filter-actions { margin-top: 28px; }
+.pub-filter-apply-btn { display: block; width: 231px; height: 46px; margin: 0 auto; border-radius: 8px; font-family: var(--font-montserrat), sans-serif; font-size: 13px; font-weight: 600; }
+.pub-filter-reset-link { display: block; margin: 12px auto 0; }
 
-/* Keep the complete right edge of the books visible. */
-.pub-hero-visual .pub-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: right center !important;
-}
+/* Calendar */
+.pub-calendar { display: flex; height: 100%; flex-direction: column; gap: 20px; }
+.pub-calendar-header { display: flex; min-height: 42px; align-items: center; justify-content: space-between; }
+.pub-calendar-heading { display: inline-flex; align-items: baseline; gap: 9px; color: #111; font-family: var(--font-montserrat), sans-serif; font-size: 28px; line-height: 1.15; letter-spacing: -.01em; }
+.pub-calendar-heading-month { font-weight: 600; }
+.pub-calendar-heading-year { font-weight: 400; }
+.pub-calendar-nav { display: flex; align-items: center; gap: 2px; }
+.pub-calendar-nav-button { display: inline-flex; width: 36px; height: 36px; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: #111; cursor: pointer; }
+.pub-calendar-nav-button:hover { background: rgba(124,216,179,.2); }
+.pub-calendar-table { display: flex; flex-direction: column; gap: 0; }
+.pub-calendar-weekdays { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); border-bottom: 1px solid rgba(17,17,17,.28); }
+.pub-calendar-weekday { position: relative; display: flex; height: 44px; align-items: center; justify-content: center; color: #111 !important; font-family: var(--font-montserrat), sans-serif; font-size: 17px; font-weight: 600; line-height: 1; }
+.pub-calendar-weekday::after { content: ''; position: absolute; right: 0; bottom: 0; width: 1px; height: 18px; background: rgba(17,17,17,.28); }
+.pub-calendar-weekday:last-child::after { display: none; }
+.pub-calendar-weekday--weekend { color: #111 !important; }
+.pub-calendar-grid { grid-auto-rows: 63px; border: 0 !important; }
+.pub-calendar-cell { width: 100%; height: 63px !important; aspect-ratio: auto !important; color: #111; border-top: 0 !important; border-left: 0 !important; border-right: 1px solid rgba(17,17,17,.28) !important; border-bottom: 1px solid rgba(17,17,17,.28) !important; font-family: var(--font-montserrat), sans-serif; font-size: 20px; font-weight: 600; line-height: 1; }
+.pub-calendar-cell:nth-child(7n) { border-right: 0 !important; }
+.pub-calendar-cell:nth-last-child(-n + 7) { border-bottom: 0 !important; }
+.pub-calendar-cell--weekend { background: rgba(124,216,179,.13); }
+.pub-calendar-cell--outside { color: rgba(17,17,17,.42); }
+.pub-calendar-cell--selected { background: #8ed8bf; color: #111; }
+.pub-calendar-day--selected { color: #111; }
+.pub-calendar-marker { top: 0; right: 0; border-top-width: 18px !important; border-left-width: 18px !important; }
+.pub-calendar-legend { display: none; }
 
-@media (min-width: 1440px) {
-  .pub-events-controls {
-    align-items: stretch;
-    gap: 40px;
-  }
+#events-results { margin-top: 27px; }
+#events-results > .min-h-\[309px\] { min-height: 210px !important; }
+#events-results > .min-h-\[309px\] > p { font-size: 25px !important; line-height: 1.25; }
 
-  .pub-events-filters-col,
-  .pub-events-calendar-col {
-    height: 632px;
-    min-height: 632px;
-  }
-
-  .pub-events-filters-col {
-    width: 588px;
-    padding: 39px 25px 28px;
-  }
-
-  .pub-events-calendar-col {
-    width: 760.866px;
-    padding: 28px 27px 28px 41px;
-  }
-
-  .pub-calendar {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .pub-calendar-header {
-    min-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .pub-calendar-heading {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 9px;
-    color: #111;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 28px;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-  }
-
-  .pub-calendar-heading-month { font-weight: 600; }
-  .pub-calendar-heading-year { font-weight: 400; }
-
-  .pub-calendar-nav {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .pub-calendar-nav-button {
-    display: inline-flex;
-    width: 36px;
-    height: 36px;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: #111;
-    cursor: pointer;
-  }
-
-  .pub-calendar-nav-button:hover { background: rgba(124, 216, 179, 0.2); }
-
-  .pub-calendar-table {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .pub-calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    border-bottom: 1px solid rgba(17, 17, 17, 0.28);
-  }
-
-  .pub-calendar-weekday {
-    position: relative;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #111 !important;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1;
-  }
-
-  .pub-calendar-weekday::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 1px;
-    height: 18px;
-    background: rgba(17, 17, 17, 0.28);
-  }
-
-  .pub-calendar-weekday:last-child::after { display: none; }
-  .pub-calendar-weekday--weekend { color: #111 !important; }
-
-  .pub-calendar-grid {
-    grid-auto-rows: 63px;
-    border: 0 !important;
-  }
-
-  .pub-calendar-cell {
-    width: 100%;
-    height: 63px !important;
-    aspect-ratio: auto !important;
-    color: #111;
-    border-top: 0 !important;
-    border-left: 0 !important;
-    border-right: 1px solid rgba(17, 17, 17, 0.28) !important;
-    border-bottom: 1px solid rgba(17, 17, 17, 0.28) !important;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1;
-  }
-
-  .pub-calendar-cell:nth-child(7n) { border-right: 0 !important; }
-  .pub-calendar-cell:nth-last-child(-n + 7) { border-bottom: 0 !important; }
-  .pub-calendar-cell--weekend { background: rgba(124, 216, 179, 0.13); }
-  .pub-calendar-cell--outside { color: rgba(17, 17, 17, 0.42); }
-  .pub-calendar-cell--selected { background: #8ed8bf; color: #111; }
-  .pub-calendar-day--selected { color: #111; }
-
-  .pub-calendar-marker {
-    top: 0;
-    right: 0;
-    border-top-width: 18px !important;
-    border-left-width: 18px !important;
-  }
-
-  .pub-calendar-legend { display: none; }
-
-  .pub-filter-title {
-    margin: 0 0 28px;
-    color: #0d2344;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .pub-filter-two-col {
-    align-items: stretch;
-    flex: 0 0 auto;
-  }
-
-  .pub-filter-left-col {
-    width: 236px;
-    padding-right: 27px;
-  }
-
-  .pub-filter-divider-v {
-    margin: 0 27px;
-    background: rgba(13, 35, 68, 0.09);
-  }
-
-  .pub-filter-divider-h {
-    margin: 22px 0;
-    background: rgba(13, 35, 68, 0.09);
-  }
-
-  .pub-filter-section { margin-bottom: 24px; }
-  .pub-filter-section:last-child { margin-bottom: 0; }
-
-  .pub-filter-label {
-    margin: 0 0 12px;
-    color: #0d2344;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-
-  .pub-filter-select {
-    width: 100%;
-    height: 46px;
-    min-height: 46px;
-    padding: 0 35px 0 15px;
-    border-color: #e8e3dc;
-    border-radius: 8px;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 13px;
-    line-height: 1.2;
-  }
-
-  .pub-filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .pub-filter-check-row {
-    min-height: 21px;
-    margin: 0 !important;
-    display: grid;
-    grid-template-columns: 15px max-content 7px;
-    justify-content: start;
-    align-items: center;
-    column-gap: 9px;
-  }
-
-  .pub-filter-check-row--without-dot {
-    grid-template-columns: 15px max-content;
-  }
-
-  .pub-filter-checkbox {
-    width: 15px;
-    height: 15px;
-    margin: 0;
-    border-radius: 3px;
-  }
-
-  .pub-filter-check-text {
-    flex: none;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 21px;
-  }
-
-  .pub-filter-dot {
-    width: 7px;
-    height: 7px;
-    align-self: center;
-    margin-left: 0;
-  }
-
-  .pub-filter-apply-btn {
-    width: 231px;
-    height: 46px;
-    margin: 28px auto 0;
-    border-radius: 8px;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  #events-results { margin-top: 27px; }
-  #events-results > .min-h-\[309px\] { min-height: 210px !important; }
-  #events-results > .min-h-\[309px\] > p {
-    font-size: 25px !important;
-    line-height: 1.25;
-  }
-}
-
-@media (max-width: 1439px) {
-  .pub-header-inner {
-    width: calc(100% - 32px);
-    height: 88px;
-  }
-  .pub-header-brand { gap: 12px; }
-  .pub-header-brand-mark { width: 52px !important; height: 55px !important; flex-basis: 52px; }
-  .pub-header-brand-title { font-size: 27px !important; }
-  .pub-header-action { padding: 0 10px; }
-  .pub-calendar-header { display: flex; align-items: center; justify-content: space-between; }
-  .pub-calendar-heading {
-    color: #111;
-    font-family: var(--font-montserrat), sans-serif;
-    font-size: clamp(22px, 3vw, 28px);
-    line-height: 1.2;
-  }
+@media (max-width: 1399px) {
+  .pub-header-inner { width: calc(100% - 32px); min-height: 96px; }
+  .pub-header-brand-mark { width: 60px !important; height: 64px !important; flex-basis: 60px; }
+  .pub-header-brand-title { font-size: 31px !important; }
+  .pub-events-controls { flex-direction: column; gap: 24px; }
+  .pub-events-filters-col, .pub-events-calendar-col { width: 100%; height: auto; min-height: 0; }
+  .pub-filter-root { height: auto; }
 }
 
 @media (max-width: 767px) {
-  .pub-header-inner { width: calc(100% - 24px); height: 72px; }
+  .pub-header-inner { width: calc(100% - 24px); min-height: 72px; }
+  .pub-header-brand { gap: 10px; }
   .pub-header-brand-mark { width: 38px !important; height: 40px !important; flex-basis: 38px; }
   .pub-header-brand-title { font-size: 17px !important; }
   .pub-header-actions { gap: 5px; }
   .pub-header-action { width: 38px; padding: 0; justify-content: center; }
-  .pub-header-action-icon-wrap,
-  .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
+  .pub-header-action-icon-wrap, .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
+  .pub-filter-two-col { flex-direction: column; }
+  .pub-filter-left-col { width: 100%; padding-right: 0; }
+  .pub-filter-divider-v { display: none; }
+  .pub-filter-right-col { width: 100%; margin-top: 24px; }
 }
