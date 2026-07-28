@@ -21,8 +21,10 @@ export class EventsQueryDto {
   format?: 'ONLINE' | 'OFFLINE';
 
   @IsOptional()
-  @IsEnum(['PLANNED', 'LIVE', 'COMPLETED'])
-  autoStatus?: 'PLANNED' | 'LIVE' | 'COMPLETED';
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
+  @IsArray()
+  @IsEnum(['PLANNED', 'LIVE', 'COMPLETED'], { each: true })
+  autoStatus?: Array<'PLANNED' | 'LIVE' | 'COMPLETED'>;
 
   @IsOptional()
   @IsEnum(['FREE', 'PAID'])

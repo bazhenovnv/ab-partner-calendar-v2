@@ -16,6 +16,7 @@ import './stage70-calendar-navigation.css';
 import './stage71-figma-exact-sizes.css';
 import './stage72-quote-corners.css';
 import './stage73-header-brand-title.css';
+import './stage74-carousel-footer-final.css';
 import './stage75-header-filter-figma-alignment.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';

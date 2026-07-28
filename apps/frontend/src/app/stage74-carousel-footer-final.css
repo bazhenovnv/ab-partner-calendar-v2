@@ -1,0 +1,942 @@
+/*
+ * Stage 74 — approved carousel blur and footer composition.
+ * Loaded last to override previous visual stages.
+ */
+
+@media (min-width: 1024px) {
+  /* Footer: exact four-zone desktop composition. */
+  .pub-footer-inner {
+    padding-top: 38px;
+  }
+
+  .pub-footer-top {
+    grid-template-columns:
+      minmax(360px, 1.15fr)
+      220px
+      310px
+      minmax(390px, 470px);
+    column-gap: 0;
+    align-items: center;
+    min-height: 300px;
+  }
+
+  /*
+   * Brand, projects and contacts share one vertical rhythm.
+   * Both content columns receive the Figma divider.
+   */
+  .pub-footer-brand,
+  .pub-footer-col {
+    position: relative;
+    align-self: center;
+    min-height: 170px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .pub-footer-col {
+    border-left: 1px solid rgba(13, 35, 68, 0.18);
+    padding-left: 54px;
+  }
+
+  .pub-footer-brand {
+    padding-right: 54px;
+  }
+
+  .pub-footer-col-title {
+    margin-top: 0;
+  }
+
+  /*
+   * Artwork remains the approved 450 × 427 composition,
+   * but moves 20 px lower as in the Figma reference.
+   */
+  .pub-footer-stationery {
+    width: 450px;
+    height: 427px;
+    min-height: 427px;
+    align-self: end;
+    justify-self: end;
+    overflow: visible;
+    transform: translateY(98px);
+  }
+
+  .pub-footer-stationery-img {
+    width: 450px !important;
+    height: 427px !important;
+    max-width: none;
+    object-fit: contain;
+    object-position: right bottom;
+    transform: translate(26px, 22px);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top {
+    grid-template-columns:
+      minmax(280px, 1fr)
+      180px
+      235px
+      minmax(290px, 350px);
+  }
+
+  .pub-footer-brand {
+    padding-right: 30px;
+  }
+
+  .pub-footer-col {
+    padding-left: 30px;
+  }
+
+  .pub-footer-stationery {
+    width: 350px;
+    height: 332px;
+    min-height: 332px;
+    transform: translateY(62px);
+  }
+
+  .pub-footer-stationery-img {
+    width: 350px !important;
+    height: 332px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pub-footer-col {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+
+/* Stage 74.1 — final footer alignment and contact icons. */
+
+@media (min-width: 1024px) {
+  /*
+   * All textual footer columns start from one horizontal line.
+   */
+  .pub-footer-top {
+    align-items: start;
+  }
+
+  .pub-footer-brand,
+  .pub-footer-col {
+    align-self: start;
+    justify-content: flex-start;
+    min-height: 170px;
+    padding-top: 0;
+  }
+
+  .pub-footer-logo,
+  .pub-footer-col-title {
+    margin-top: 0;
+  }
+
+  /*
+   * Artwork was previously translated 98 px down.
+   * Raising by 13 px gives the final 85 px translation.
+   */
+  .pub-footer-stationery {
+    transform: translateY(85px);
+  }
+
+  /* Contact rows from the approved Figma layout. */
+  .pub-footer-contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .pub-footer-contact-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 14px;
+    min-height: 29px;
+    margin: 0;
+  }
+
+  .pub-footer-contact-row--phone {
+    align-items: start;
+  }
+
+  .pub-footer-contact-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .pub-footer-contact-icon {
+    display: block;
+    object-fit: contain;
+    object-position: center;
+    justify-self: center;
+  }
+
+  .pub-footer-contact-icon--phone {
+    width: 30px;
+    height: 29px;
+  }
+
+  .pub-footer-contact-icon--email {
+    width: 22px;
+    height: 27px;
+  }
+
+  .pub-footer-contact-icon--location {
+    width: 22px;
+    height: 28px;
+  }
+
+  /*
+   * Increase contrast without changing approved font dimensions.
+   */
+  .pub-footer-link {
+    color: rgba(13, 35, 68, 0.78);
+  }
+
+  .pub-footer-link--strong,
+  .pub-footer-col-title {
+    color: #0d2344;
+  }
+
+  .pub-footer-contact-secondary {
+    color: rgba(13, 35, 68, 0.7);
+  }
+
+  .pub-footer-legal-link,
+  .pub-footer-copy {
+    color: rgba(13, 35, 68, 0.62);
+  }
+
+  .pub-footer-disclaimer {
+    color: rgba(13, 35, 68, 0.66);
+  }
+
+  .pub-footer-operator {
+    color: rgba(13, 35, 68, 0.58);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  /*
+   * Previous responsive translation was 62 px.
+   * Raise artwork by the same approved 13 px.
+   */
+  .pub-footer-stationery {
+    transform: translateY(49px);
+  }
+
+  .pub-footer-contact-row {
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 10px;
+  }
+
+  .pub-footer-contact-icon--phone {
+    width: 26px;
+    height: 25px;
+  }
+
+  .pub-footer-contact-icon--email,
+  .pub-footer-contact-icon--location {
+    width: 20px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pub-footer-contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pub-footer-contact-row {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+  }
+
+  .pub-footer-contact-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .pub-footer-contact-icon {
+    display: block;
+    object-fit: contain;
+    justify-self: center;
+  }
+}
+
+/* Stage 74.2 — final footer optical alignment. */
+
+@media (min-width: 1024px) {
+  /*
+   * Brand stays on the current top line.
+   * Projects and contacts move slightly lower.
+   */
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(4px);
+  }
+
+  /*
+   * Raise the complete notebook / plant / cup composition.
+   * Previous desktop value was translateY(85px).
+   */
+  .pub-footer-stationery {
+    transform: translateY(52px) !important;
+  }
+
+  /*
+   * Equal visual icon boxes.
+   * Images may contain different transparent margins,
+   * therefore each PNG uses the same outer box and individual inner scale.
+   */
+  .pub-footer-contact-icon {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .pub-footer-contact-icon--phone {
+    transform: scale(1.15);
+  }
+
+  .pub-footer-contact-icon--email {
+    transform: scale(1);
+  }
+
+  .pub-footer-contact-icon--location {
+    transform: scale(0.94);
+  }
+
+  .pub-footer-contact-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(10px);
+  }
+
+  .pub-footer-stationery {
+    transform: translateY(18px) !important;
+  }
+
+  .pub-footer-contact-icon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pub-footer-top > .pub-footer-col {
+    transform: none;
+  }
+
+  .pub-footer-contact-icon {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain;
+  }
+}
+
+/* Stage 74.2 — final footer optical alignment. */
+
+@media (min-width: 1024px) {
+  /*
+   * Brand stays on the current top line.
+   * Projects and contacts move slightly lower.
+   */
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(4px);
+  }
+
+  /*
+   * Raise the complete notebook / plant / cup composition.
+   * Previous desktop value was translateY(85px).
+   */
+  .pub-footer-stationery {
+    transform: translateY(52px) !important;
+  }
+
+  /*
+   * Equal visual icon boxes.
+   * Images may contain different transparent margins,
+   * therefore each PNG uses the same outer box and individual inner scale.
+   */
+  .pub-footer-contact-icon {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .pub-footer-contact-icon--phone {
+    transform: scale(1.15);
+  }
+
+  .pub-footer-contact-icon--email {
+    transform: scale(1);
+  }
+
+  .pub-footer-contact-icon--location {
+    transform: scale(0.94);
+  }
+
+  .pub-footer-contact-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(10px);
+  }
+
+  .pub-footer-stationery {
+    transform: translateY(18px) !important;
+  }
+
+  .pub-footer-contact-icon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pub-footer-top > .pub-footer-col {
+    transform: none;
+  }
+
+  .pub-footer-contact-icon {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain;
+  }
+}
+
+
+/* Stage 74.3 — final Figma footer scale and contrast. */
+
+@media (min-width: 1440px) {
+  /*
+   * Figma composition: larger notebook / plant / cup group,
+   * positioned higher relative to the legal divider.
+   */
+  .pub-footer-stationery {
+    width: 520px !important;
+    height: 494px !important;
+    min-height: 494px !important;
+    transform: translateY(8px) !important;
+  }
+
+  .pub-footer-stationery-img {
+    width: 520px !important;
+    height: 494px !important;
+    max-width: none !important;
+    transform: translate(20px, 8px) !important;
+    object-fit: contain !important;
+    object-position: right bottom !important;
+  }
+
+  /*
+   * Reserve enough vertical room so the larger artwork
+   * does not collide with the legal section.
+   */
+  .pub-footer-top {
+    min-height: 360px !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-stationery {
+    width: 410px !important;
+    height: 389px !important;
+    min-height: 389px !important;
+    transform: translateY(2px) !important;
+  }
+
+  .pub-footer-stationery-img {
+    width: 410px !important;
+    height: 389px !important;
+    transform: translate(14px, 6px) !important;
+  }
+
+  .pub-footer-top {
+    min-height: 310px !important;
+  }
+}
+
+/*
+ * Footer typography contrast.
+ * Match the visual density of the quote typography without changing sizes.
+ */
+.pub-footer-desc,
+.pub-footer-link,
+.pub-footer-contact-secondary,
+.pub-footer-legal-link,
+.pub-footer-copy,
+.pub-footer-disclaimer,
+.pub-footer-operator {
+  color: rgba(13, 35, 68, 0.82) !important;
+}
+
+.pub-footer-col-title,
+.pub-footer-link--strong,
+.pub-footer-logo-text {
+  color: #0d2344 !important;
+}
+
+.pub-footer-disclaimer,
+.pub-footer-operator {
+  font-weight: 400;
+}
+
+.pub-footer-legal-link:hover,
+.pub-footer-link:hover {
+  color: #0d2344 !important;
+}
+
+/* Stage 74.4 — larger and higher footer stationery composition. */
+
+@media (min-width: 1440px) {
+  .pub-footer-stationery {
+    width: 590px !important;
+    height: 560px !important;
+    min-height: 560px !important;
+    align-self: start !important;
+    transform: translateY(-54px) !important;
+  }
+
+  .pub-footer-stationery-img {
+    width: 590px !important;
+    height: 560px !important;
+    max-width: none !important;
+    transform: translate(10px, 0) !important;
+    object-fit: contain !important;
+    object-position: right top !important;
+  }
+
+  .pub-footer-top {
+    min-height: 390px !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-stationery {
+    width: 455px !important;
+    height: 432px !important;
+    min-height: 432px !important;
+    align-self: start !important;
+    transform: translateY(-28px) !important;
+  }
+
+  .pub-footer-stationery-img {
+    width: 455px !important;
+    height: 432px !important;
+    transform: translate(8px, 0) !important;
+    object-position: right top !important;
+  }
+
+  .pub-footer-top {
+    min-height: 330px !important;
+  }
+}
+
+/* Stage 74.5 — fixed footer artwork positioning.
+   The artwork is positioned independently from the grid cell. */
+
+@media (min-width: 1440px) {
+  .pub-footer-top {
+    position: relative !important;
+    min-height: 420px !important;
+    padding-right: 610px !important;
+  }
+
+  .pub-footer-stationery {
+    position: absolute !important;
+    z-index: 2;
+    top: -38px !important;
+    right: -18px !important;
+
+    width: 610px !important;
+    height: 580px !important;
+    min-height: 0 !important;
+
+    display: block !important;
+    align-self: auto !important;
+    justify-self: auto !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    pointer-events: none;
+  }
+
+  .pub-footer-stationery-img {
+    display: block !important;
+
+    width: 610px !important;
+    height: auto !important;
+    max-width: none !important;
+    min-width: 610px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    object-fit: initial !important;
+    object-position: initial !important;
+
+    transform: scale(1.12) !important;
+    transform-origin: right top !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top {
+    position: relative !important;
+    min-height: 340px !important;
+    padding-right: 440px !important;
+  }
+
+  .pub-footer-stationery {
+    position: absolute !important;
+    z-index: 2;
+    top: -22px !important;
+    right: -10px !important;
+
+    width: 455px !important;
+    height: 435px !important;
+    min-height: 0 !important;
+
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+    pointer-events: none;
+  }
+
+  .pub-footer-stationery-img {
+    display: block !important;
+    width: 455px !important;
+    height: auto !important;
+    max-width: none !important;
+    min-width: 455px !important;
+    margin: 0 !important;
+    transform: scale(1.1) !important;
+    transform-origin: right top !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pub-footer-top {
+    padding-right: 0 !important;
+  }
+
+  .pub-footer-stationery {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+
+  .pub-footer-stationery-img {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    transform: none !important;
+  }
+}
+
+/* Stage 74.6 — exact Figma stationery geometry: 450 × 427, rotation -4.07°. */
+
+@media (min-width: 1440px) {
+  .pub-footer-top {
+    position: relative !important;
+    min-height: 330px !important;
+    padding-right: 470px !important;
+  }
+
+  .pub-footer-stationery {
+    position: absolute !important;
+    z-index: 2 !important;
+
+    top: 0 !important;
+    right: 0 !important;
+
+    width: 450px !important;
+    height: 427px !important;
+    min-width: 450px !important;
+    min-height: 427px !important;
+    max-width: 450px !important;
+    max-height: 427px !important;
+
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    transform: none !important;
+    perspective: none !important;
+    overflow: visible !important;
+    pointer-events: none;
+  }
+
+  .pub-footer-stationery-img {
+    display: block !important;
+
+    width: 450px !important;
+    height: 427px !important;
+    min-width: 450px !important;
+    min-height: 427px !important;
+    max-width: 450px !important;
+    max-height: 427px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    object-fit: contain !important;
+    object-position: center !important;
+
+    transform: rotate(-4.07deg) !important;
+    transform-origin: center center !important;
+    perspective: none !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top {
+    position: relative !important;
+    min-height: 300px !important;
+    padding-right: 390px !important;
+  }
+
+  .pub-footer-stationery {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+
+    width: 370px !important;
+    height: 351px !important;
+    min-width: 370px !important;
+    min-height: 351px !important;
+    max-width: 370px !important;
+    max-height: 351px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .pub-footer-stationery-img {
+    width: 370px !important;
+    height: 351px !important;
+    min-width: 370px !important;
+    min-height: 351px !important;
+    max-width: 370px !important;
+    max-height: 351px !important;
+
+    object-fit: contain !important;
+    transform: rotate(-4.07deg) !important;
+    transform-origin: center center !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pub-footer-stationery,
+  .pub-footer-stationery-img {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+  }
+}
+
+/* Stage 75 — final footer geometry */
+
+@media (min-width:1440px){
+
+  /*
+   * Контейнер = размеру композиции.
+   */
+  .pub-footer-stationery{
+      width:450px !important;
+      height:427px !important;
+      min-width:450px !important;
+      min-height:427px !important;
+      max-width:450px !important;
+      max-height:427px !important;
+
+      top:-8px !important;
+      right:0 !important;
+
+      overflow:visible !important;
+  }
+
+  .pub-footer-stationery-img{
+      width:450px !important;
+      height:427px !important;
+      max-width:none !important;
+      min-width:450px !important;
+
+      transform:rotate(-4.07deg) !important;
+      transform-origin:center center !important;
+  }
+
+  /*
+   * Юридический блок немного ниже.
+   */
+  .pub-footer-bottom,
+  .pub-footer-disclaimer,
+  .pub-footer-legal,
+  .pub-footer-copy{
+      position:relative;
+      top:5px;
+  }
+
+  .pub-footer-divider{
+      margin-top:5px !important;
+  }
+}
+
+
+/* Stage 75.1 — reserve space below stationery artwork */
+
+@media (min-width: 1440px) {
+  /*
+   * Оставляем изображение на текущем месте,
+   * но увеличиваем высоту верхней зоны footer.
+   */
+  .pub-footer-top {
+    min-height: 410px !important;
+  }
+
+  /*
+   * Линия начинается ниже изображения.
+   * Небольшое перекрытие растения с линией сохраняется.
+   */
+  .pub-footer-divider {
+    position: relative !important;
+    z-index: 1 !important;
+    margin-top: 18px !important;
+  }
+
+  /*
+   * Юридический блок размещаем ниже линии
+   * и убираем предыдущие относительные сдвиги.
+   */
+  .pub-footer-bottom,
+  .pub-footer-legal,
+  .pub-footer-copy,
+  .pub-footer-disclaimer,
+  .pub-footer-operator {
+    position: relative !important;
+    top: 0 !important;
+  }
+
+  .pub-footer-bottom {
+    margin-top: 8px !important;
+  }
+
+  .pub-footer-disclaimer {
+    margin-top: 18px !important;
+  }
+
+  .pub-footer-operator {
+    margin-top: 8px !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top {
+    min-height: 360px !important;
+  }
+
+  .pub-footer-divider {
+    margin-top: 14px !important;
+  }
+
+  .pub-footer-bottom {
+    margin-top: 7px !important;
+  }
+
+  .pub-footer-disclaimer {
+    margin-top: 15px !important;
+  }
+}
+
+/* Stage 75.2 — bring legal section back to the artwork */
+
+@media (min-width: 1440px) {
+  .pub-footer-top {
+    min-height: 365px !important;
+  }
+
+  .pub-footer-divider {
+    margin-top: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .pub-footer-bottom {
+    margin-top: 6px !important;
+  }
+
+  .pub-footer-disclaimer {
+    margin-top: 12px !important;
+  }
+
+  .pub-footer-operator {
+    margin-top: 6px !important;
+  }
+
+  /*
+   * Artwork stays above the line so the leaves
+   * overlap the divider slightly.
+   */
+  .pub-footer-stationery {
+    z-index: 2 !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-top {
+    min-height: 325px !important;
+  }
+
+  .pub-footer-divider {
+    margin-top: 0 !important;
+  }
+
+  .pub-footer-bottom {
+    margin-top: 5px !important;
+  }
+
+  .pub-footer-disclaimer {
+    margin-top: 10px !important;
+  }
+}
+
+/* Stage 75.3 — raise footer stationery slightly */
+
+@media (min-width: 1440px) {
+  .pub-footer-stationery {
+    top: -20px !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-stationery {
+    top: -12px !important;
+  }
+}

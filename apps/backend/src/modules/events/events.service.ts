@@ -52,18 +52,21 @@ export class EventsService {
 
     const where: Prisma.EventWhereInput = {
       status: EventStatus.PUBLISHED,
-      // By default the public catalogue shows only current and upcoming events.
-      // Completed events are available through an explicit status filter
-      // or through the unfiltered fallback when no active events exist.
-      autoStatus: autoStatus
-        ? autoStatus
-        : {
-            in: [
-              EventAutoStatus.PLANNED,
-              EventAutoStatus.LIVE,
-            ],
-          },
     };
+
+    // Without a selected date, show only current and upcoming events.
+    // When a specific calendar date is selected, include all published
+    // events for that date, including completed ones.
+    if (autoStatus?.length) {
+      where.autoStatus = { in: autoStatus };
+    } else if (!date) {
+      where.autoStatus = {
+        in: [
+          EventAutoStatus.PLANNED,
+          EventAutoStatus.LIVE,
+        ],
+      };
+    }
 
     if (date) {
       const d = new Date(date);
@@ -86,6 +89,11 @@ export class EventsService {
     if (format) where.format = format;
     if (priceType) where.priceType = priceType;
 
+    console.log('PUBLIC EVENTS QUERY', {
+      query,
+      where,
+    });
+
     const [total, events] = await Promise.all([
       this.prisma.event.count({ where }),
       this.prisma.event.findMany({
@@ -107,7 +115,7 @@ export class EventsService {
       date ||
       city ||
       format ||
-      autoStatus ||
+      autoStatus?.length ||
       priceType ||
       directions?.length,
     );

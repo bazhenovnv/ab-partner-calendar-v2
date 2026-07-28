@@ -9,6 +9,7 @@ import styles from './main-events-carousel.module.css';
 const MAX_VISIBLE_OFFSET = 2;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
+const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
 type DirectionIndicator = -1 | 0 | 1;
@@ -27,11 +28,11 @@ type CardGeometry = {
 };
 
 const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
-  [-2]: { translateX: -405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, blur: 3.2, zIndex: 1 },
-  [-1]: { translateX: -205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, blur: 2.1, zIndex: 4 },
-  [0]: { translateX: 0, translateY: 0, translateZ: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, blur: 0, zIndex: 10 },
-  [1]: { translateX: 205, translateY: 6, translateZ: -18, rotateY: 0, rotateZ: 0, scale: 0.89, opacity: 0.95, brightness: 0.9, blur: 2.1, zIndex: 4 },
-  [2]: { translateX: 405, translateY: 14, translateZ: -60, rotateY: 0, rotateZ: 0, scale: 0.74, opacity: 0.82, brightness: 0.72, blur: 3.2, zIndex: 1 },
+  [-2]: { translateX: -528, translateY: 18, translateZ: -80, rotateY: 0, rotateZ: 0, scale: 0.8, opacity: 0.8, brightness: 0.82, blur: 2.5, zIndex: 20 },
+  [-1]: { translateX: -264, translateY: 8, translateZ: -28, rotateY: 0, rotateZ: 0, scale: 0.9, opacity: 0.95, brightness: 0.92, blur: 1, zIndex: 60 },
+  [0]: { translateX: 0, translateY: 0, translateZ: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, blur: 0, zIndex: 100 },
+  [1]: { translateX: 264, translateY: 8, translateZ: -28, rotateY: 0, rotateZ: 0, scale: 0.9, opacity: 0.95, brightness: 0.92, blur: 1, zIndex: 60 },
+  [2]: { translateX: 528, translateY: 18, translateZ: -80, rotateY: 0, rotateZ: 0, scale: 0.8, opacity: 0.8, brightness: 0.82, blur: 2.5, zIndex: 20 },
 };
 
 const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
@@ -95,6 +96,9 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const [directionIndicator, setDirectionIndicator] = useState<DirectionIndicator>(0);
   const [compact, setCompact] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocusWithin, setIsFocusWithin] = useState(false);
+  const [isPointerActive, setIsPointerActive] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const pointerStartXRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | null>(null);
@@ -102,6 +106,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const suppressClickRef = useRef(false);
   const indicatorTimerRef = useRef<number | null>(null);
   const total = carouselEvents.length;
+  const isAutoScrollPaused = isHovered || isFocusWithin || isPointerActive;
 
   const resetIndicatorTimer = useCallback(() => {
     if (indicatorTimerRef.current !== null) {
@@ -146,6 +151,17 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     if (active >= total && total > 0) setActive(0);
   }, [active, total]);
 
+  useEffect(() => {
+    if (total <= 1 || isAutoScrollPaused) return;
+
+    const timer = window.setTimeout(() => {
+      showMovementDirection(1);
+      setActive((current) => (current + 1) % total);
+    }, AUTO_SCROLL_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [active, total, isAutoScrollPaused, showMovementDirection]);
+
   useEffect(() => () => {
     if (indicatorTimerRef.current !== null) {
       window.clearTimeout(indicatorTimerRef.current);
@@ -174,10 +190,12 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     pointerIdRef.current = null;
     dragStartedRef.current = false;
     setDragOffset(0);
+    setIsPointerActive(false);
   }, [goNext, goPrevious]);
 
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    setIsPointerActive(true);
     pointerStartXRef.current = event.clientX;
     pointerIdRef.current = event.pointerId;
     dragStartedRef.current = false;
@@ -247,6 +265,15 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerCancel}
               onLostPointerCapture={onPointerCancel}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onFocusCapture={() => setIsFocusWithin(true)}
+              onBlurCapture={(event) => {
+                const nextTarget = event.relatedTarget;
+                if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+                  setIsFocusWithin(false);
+                }
+              }}
             >
               {carouselEvents.map((event, index) => {
                 const offset = circularOffset(index, active, total);

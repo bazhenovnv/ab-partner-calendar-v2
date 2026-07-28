@@ -156,6 +156,21 @@ function sanitizeDescription(value?: string | null): string {
 
   let result = value;
 
+  /*
+   * Дата, время, место, формат, стоимость и спикер выводятся
+   * отдельными элементами модального окна. Удаляем только явно
+   * маркированные служебные строки, не затрагивая обычный текст.
+   */
+  result = result.replace(
+    /<(p|div|li)[^>]*>\s*(?:<[^>]+>\s*)*(?:дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][\s\S]*?<\/\1>/gi,
+    '',
+  );
+
+  result = result.replace(
+    /(?:^|\n)\s*(?:дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][^\n]*(?=\n|$)/gim,
+    '',
+  );
+
   // Удаляем HTML-блоки, посвящённые регистрации.
   result = result.replace(
     /<(p|div|li)[^>]*>[\s\S]*?(?:зарегистрир|регистрац|записаться|для\s+участия|принять\s+участие|подать\s+заявку|ссылка\s+для\s+регистрации)[\s\S]*?<\/\1>/gi,
@@ -242,31 +257,22 @@ function LineIcon({ name }: { name: LineIconName }) {
 
 type FactIconName = 'calendar' | 'clock' | 'price';
 
+const FACT_ICON_PATHS: Record<FactIconName, string> = {
+  calendar: '/ui-icons/event-modal/calendar.png',
+  clock: '/ui-icons/event-modal/clock.png',
+  price: '/ui-icons/event-modal/price.png',
+};
+
 function FactIcon({ name }: { name: FactIconName }) {
-  if (name === 'calendar') {
-    return (
-      <svg viewBox="0 0 48 48" aria-hidden="true" className={v2.factIcon}>
-        <rect x="7" y="10" width="34" height="31" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" />
-        <path d="M15 6v8M33 6v8M7 19h34" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M15 26h5M28 26h5M15 33h5M28 33h5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (name === 'clock') {
-    return (
-      <svg viewBox="0 0 48 48" aria-hidden="true" className={v2.factIcon}>
-        <circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" strokeWidth="2.5" />
-        <path d="M24 14v11l8 5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
   return (
-    <svg viewBox="0 0 48 48" aria-hidden="true" className={v2.factIcon}>
-      <path d="M9 15.5A5.5 5.5 0 0 1 14.5 10h19A5.5 5.5 0 0 1 39 15.5v17A5.5 5.5 0 0 1 33.5 38h-19A5.5 5.5 0 0 1 9 32.5z" fill="none" stroke="currentColor" strokeWidth="2.5" />
-      <path d="M9 19h30M17 29h8" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
+    <Image
+      src={FACT_ICON_PATHS[name]}
+      alt=""
+      width={78}
+      height={78}
+      className={v2.factIcon}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -282,8 +288,22 @@ function ActionIcon({ name }: { name: 'participate' | 'remind' }) {
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={v2.actionIcon}>
-      <path d="M6.5 9a5.5 5.5 0 0 1 11 0v3.2l1.6 2.5a1 1 0 0 1-.84 1.53H5.74a1 1 0 0 1-.84-1.53l1.6-2.5z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M9.5 18a2.7 2.7 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        className={v2.remindBellBody}
+        d="M6.5 9a5.5 5.5 0 0 1 11 0v3.2l1.6 2.5a1 1 0 0 1-.84 1.53H5.74a1 1 0 0 1-.84-1.53l1.6-2.5z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        className={v2.remindBellClapper}
+        d="M9.5 18a2.7 2.7 0 0 0 5 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -308,14 +328,17 @@ function EventModal({
   const image = event.images?.[0];
   const imageUrl =
     image?.modalUrl ?? image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
-  const actionLabel = 'Участвовать';
+  const actionLabel =
+    event.priceType === 'PAID' ? 'Купить билет' : 'Участвовать';
   const actionUrl = organizerActionUrl(event);
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: 'Europe/Moscow',
-  }).format(new Date(event.startDate));
+  })
+    .format(new Date(event.startDate))
+    .replace(/\s*г\.$/, '');
   const format =
     event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
@@ -391,20 +414,59 @@ function EventModal({
           <div className={v2.scrollArea}>
             <span className={v2.status}>{status}</span>
             <h2 id="event-modal-title" className={v2.title}>{event.title}</h2>
-            {lead && <p className={v2.lead}>{lead}</p>}
+
+            <div className={v2.eventText}>
+              {lead && (
+                <div
+                  className={v2.lead}
+                  dangerouslySetInnerHTML={{ __html: lead }}
+                />
+              )}
+
+              {description && (
+                <div
+                  className={v2.description}
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
+              )}
+            </div>
 
             <div className={v2.facts}>
               <Fact icon="calendar" label="Дата" value={date} />
-              <Fact icon="clock" label="Время" value={event.startTime ? `${event.startTime} (МСК)` : 'Уточняется'} />
+              <Fact
+                icon="clock"
+                label="Время"
+                value={
+                  event.startTime
+                    ? `${event.startTime} (МСК)`
+                    : 'Уточняется'
+                }
+              />
               <Fact icon="price" label="Стоимость" value={price} />
             </div>
 
             <div className={v2.lines}>
-              <span className={v2.detailLine}><LineIcon name="location" />{format}</span>
-              {speaker && <strong className={v2.detailLine}><LineIcon name="speaker" />Спикер: {speaker}</strong>}
-            </div>
+              {event.format === 'ONLINE' ? (
+                <span className={v2.detailLine}>
+                  <LineIcon name="location" />
+                  <span className={v2.detailLabel}>Онлайн</span>
+                </span>
+              ) : (
+                <span className={v2.detailLine}>
+                  <LineIcon name="location" />
+                  <span className={v2.detailLabel}>Место:</span>
+                  <span className={v2.detailValue}>{format}</span>
+                </span>
+              )}
 
-            {description && <div className={v2.description} dangerouslySetInnerHTML={{ __html: description }} />}
+              {speaker && (
+                <span className={v2.detailLine}>
+                  <LineIcon name="speaker" />
+                  <span className={v2.detailLabel}>Спикер:</span>
+                  <span className={v2.detailValue}>{speaker}</span>
+                </span>
+              )}
+            </div>
 
             {loadError && (
               <div className={v2.loadError} role="alert">

@@ -1,5 +1,5 @@
 .section {
-  padding: 24px 38px 16px;
+  padding: 24px 54px 16px;
 }
 
 .outer {
@@ -18,8 +18,9 @@
 .gallery {
   --drag-offset: 0px;
   position: relative;
-  height: 448px;
-  overflow: hidden;
+  height: 520px;
+  overflow: visible;
+  background: transparent;
   perspective: 2200px;
   perspective-origin: 50% 50%;
   outline: none;
@@ -48,18 +49,22 @@
   --card-scale: 1;
   --card-opacity: 1;
   --card-brightness: 1;
+  --card-blur: 0px;
   position: absolute;
   left: 50%;
   top: 50%;
   display: block;
-  width: clamp(350px, 22.25vw, 427px);
+  width: clamp(420px, 25vw, 480px);
   aspect-ratio: 1 / 1;
   border: 0;
   padding: 0;
   background: transparent;
   cursor: pointer;
   opacity: var(--card-opacity);
-  filter: brightness(var(--card-brightness)) saturate(0.94);
+  filter:
+    blur(var(--card-blur))
+    brightness(var(--card-brightness))
+    saturate(0.94);
   transform:
     translate3d(
       calc(-50% + var(--card-x) + var(--drag-offset)),
@@ -95,7 +100,9 @@
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 18px;
   background: transparent;
-  box-shadow: 0 8px 20px rgba(13, 35, 68, 0.14);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.52),
+    0 4px 10px rgba(0, 0, 0, 0.38);
   transform: translateZ(0);
   transition:
     box-shadow 260ms ease,
@@ -108,15 +115,18 @@
 
 .cardActive .frame {
   border-color: rgba(255, 255, 255, 0.32);
-  box-shadow: 0 12px 28px rgba(13, 35, 68, 0.18);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.56),
+    0 5px 12px rgba(0, 0, 0, 0.42);
 }
 
 .card:hover .frame,
 .card:focus-visible .frame {
   border-color: rgba(124, 216, 179, 0.9);
   box-shadow:
-    0 14px 30px rgba(13, 35, 68, 0.18),
-    0 0 0 3px rgba(124, 216, 179, 0.14);
+    0 15px 30px rgba(0, 0, 0, 0.58),
+    0 5px 12px rgba(0, 0, 0, 0.44),
+    0 0 0 3px rgba(124, 216, 179, 0.16);
 }
 
 .poster {

@@ -1732,3 +1732,48 @@ body {
   text-align: left;
   line-height: 1.7;
 }
+
+/* Ссылки проектов в подвале */
+.pub-footer-project-link {
+  display: inline-block;
+  transform-origin: left center;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+  will-change: transform;
+}
+
+.pub-footer-project-link:hover,
+.pub-footer-project-link:focus-visible {
+  color: #7cd8b3;
+  transform: scale(1.06);
+}
+
+.pub-footer-project-link:focus-visible {
+  outline: 2px solid rgba(124, 216, 179, 0.55);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pub-footer-project-link {
+    transition: color 180ms ease;
+  }
+
+  .pub-footer-project-link:hover,
+  .pub-footer-project-link:focus-visible {
+    transform: none;
+  }
+}
+
+
+/* Единый размер значков в блоке «Контакты» */
+.pub-footer-contact-icon {
+  display: block;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px;
+  flex: 0 0 30px;
+  object-fit: contain;
+  object-position: center;
+}

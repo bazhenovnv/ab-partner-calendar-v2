@@ -10,10 +10,11 @@ import type { PublicEvent, PublicEventsResponse, DirectionOption } from '@/types
 
 const LIMIT = 6;
 const EMPTY_FILTERS: ActiveFilters = {
+  city: '',
   directions: [],
   format: '',
   priceType: '',
-  autoStatus: '',
+  autoStatus: [],
 };
 
 interface EventsSectionProps {
@@ -39,10 +40,15 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
         qs.set('page', String(currentPage));
         qs.set('limit', String(LIMIT));
         if (currentDate) qs.set('date', currentDate);
+        if (currentFilters.city) qs.set('city', currentFilters.city);
         if (currentFilters.format) qs.set('format', currentFilters.format);
         if (currentFilters.priceType) qs.set('priceType', currentFilters.priceType);
-        if (currentFilters.autoStatus) qs.set('autoStatus', currentFilters.autoStatus);
-        currentFilters.directions.forEach((direction) => qs.append('directions', direction));
+        currentFilters.autoStatus.forEach((status) =>
+          qs.append('autoStatus', status),
+        );
+        currentFilters.directions.forEach((direction) =>
+          qs.append('directions', direction),
+        );
 
         const response = await fetch(`/api/events/public?${qs.toString()}`);
         if (!response.ok) throw new Error(`Events request failed: ${response.status}`);
@@ -90,9 +96,10 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
   const totalPages = Math.ceil(total / LIMIT);
   const loading = isPending || isLoading;
   const hasNonDateFilters = Boolean(
+    filters.city ||
     filters.format ||
     filters.priceType ||
-    filters.autoStatus ||
+    filters.autoStatus.length ||
     filters.directions.length,
   );
 

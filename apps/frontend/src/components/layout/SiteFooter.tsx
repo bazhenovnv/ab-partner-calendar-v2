@@ -15,9 +15,9 @@ const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'info-event@a-b.r
 const PROJECT_LINKS = [
   { label: 'АБ Партнёр', href: PARTNER_URL },
   { label: 'АБ Онлайн-касса', href: 'https://a-b.ru/' },
-  { label: 'АБ Ресторан', href: 'https://a-b.ru/' },
-  { label: 'АБ Сервис', href: 'https://a-b.ru/' },
-  { label: 'АБ Креатив', href: 'https://a-b.ru/' },
+  { label: 'АБ Ресторан', href: 'https://krasnodar.ab-restoran.ru' },
+  { label: 'АБ Сервис', href: 'https://service-ab.ru' },
+  { label: 'АБ Креатив', href: 'https://ab-creative.ru' },
 ];
 
 export function SiteFooter() {
@@ -64,7 +64,7 @@ export function SiteFooter() {
             <ul className="pub-footer-links">
               {PROJECT_LINKS.map((project) => (
                 <li key={project.label}>
-                  <a href={project.href} target="_blank" rel="noopener noreferrer" className="pub-footer-link">
+                  <a href={project.href} target="_blank" rel="noopener noreferrer" className="pub-footer-link pub-footer-project-link">
                     {project.label}
                   </a>
                 </li>
@@ -74,10 +74,44 @@ export function SiteFooter() {
 
           <div className="pub-footer-col">
             <p className="pub-footer-col-title">Контакты</p>
-            <ul className="pub-footer-links">
-              <li><a href="tel:+79298386482" className="pub-footer-link pub-footer-link--strong">+7 (929) 838 64 82</a></li>
-              <li><span className="pub-footer-link" style={{ cursor: 'default' }}>Пн–Пт, 9:00–18:00 (МСК)</span></li>
-              <li className="relative">
+            <ul className="pub-footer-links pub-footer-contact-list">
+              <li className="pub-footer-contact-row pub-footer-contact-row--phone">
+                <Image
+                  src="/ui-icons/footer/phone.png"
+                  alt=""
+                  width={30}
+                  height={29}
+                  className="pub-footer-contact-icon pub-footer-contact-icon--phone"
+                  aria-hidden
+                />
+
+                <div className="pub-footer-contact-content">
+                  <a
+                    href="tel:+79298386482"
+                    className="pub-footer-link pub-footer-link--strong"
+                  >
+                    +7 (929) 838 64 82
+                  </a>
+
+                  <span
+                    className="pub-footer-link pub-footer-contact-secondary"
+                    style={{ cursor: 'default' }}
+                  >
+                    Пн–Пт, 9:00–18:00 (МСК)
+                  </span>
+                </div>
+              </li>
+
+              <li className="pub-footer-contact-row relative">
+                <Image
+                  src="/ui-icons/footer/email.png"
+                  alt=""
+                  width={22}
+                  height={27}
+                  className="pub-footer-contact-icon pub-footer-contact-icon--email"
+                  aria-hidden
+                />
+
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
                   onClick={handleEmailClick}
@@ -86,6 +120,7 @@ export function SiteFooter() {
                 >
                   {CONTACT_EMAIL}
                 </a>
+
                 {toast && (
                   <div
                     role="status"
@@ -96,7 +131,24 @@ export function SiteFooter() {
                   </div>
                 )}
               </li>
-              <li><span className="pub-footer-link" style={{ cursor: 'default' }}>Россия, г. Краснодар</span></li>
+
+              <li className="pub-footer-contact-row">
+                <Image
+                  src="/ui-icons/footer/location.png"
+                  alt=""
+                  width={22}
+                  height={28}
+                  className="pub-footer-contact-icon pub-footer-contact-icon--location"
+                  aria-hidden
+                />
+
+                <span
+                  className="pub-footer-link"
+                  style={{ cursor: 'default' }}
+                >
+                  Россия, г. Краснодар
+                </span>
+              </li>
             </ul>
           </div>
 
