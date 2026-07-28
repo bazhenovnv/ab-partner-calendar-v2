@@ -3,7 +3,6 @@ import Image from 'next/image';
 export function HeroSection() {
   return (
     <section className="pub-hero" aria-label="Главные мероприятия для бухгалтеров">
-      {/* pub-hero-panel: Figma {DB7079EA} 1495×323px, radius 28.3, border 1px Inside, shadow 0/4/4/0 25% */}
       <div className="pub-hero-panel">
         <div className="pub-hero-content">
           <h1 className="pub-hero-title">
@@ -17,14 +16,23 @@ export function HeroSection() {
             Главные события →
           </a>
         </div>
+
         <div className="pub-hero-visual" aria-hidden="true">
           <Image
-            src="/hero-composition.png"
+            src="/hero-books-approved.png"
             alt=""
-            width={693}
+            width={738}
             height={323}
             priority
-            className="pub-hero-img"
+            className="pub-hero-books"
+          />
+          <Image
+            src="/hero-calendar-approved.png"
+            alt=""
+            width={252}
+            height={249}
+            priority
+            className="pub-hero-calendar"
           />
         </div>
       </div>
