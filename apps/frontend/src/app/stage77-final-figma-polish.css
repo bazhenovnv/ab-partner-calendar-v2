@@ -16,13 +16,12 @@
 .pub-header-action-icon-wrap, .pub-header-action-icon { width: 27px; height: 27px; flex: 0 0 27px; }
 .pub-header-action-icon { display: block; object-fit: contain; background: transparent; }
 
-/* Reduce the empty band between the brand row and the hero panel. */
 .pub-hero { padding-top: 8px !important; }
 
-/* Hero composition order:
-   1) books/vase photo spans into the left side of the panel;
-   2) the white blend sits above that photo;
-   3) the upright desk calendar sits above both layers, matching Figma. */
+/* Hero composition:
+   1) books/vase photo is confined to the right visual zone;
+   2) a white blend softens only the left edge of that photo;
+   3) the upright desk calendar is overlaid at the seam without entering the title. */
 .pub-hero-panel {
   position: relative;
   overflow: hidden;
@@ -33,7 +32,7 @@
 }
 .pub-hero-visual {
   position: absolute !important;
-  inset: 0 0 0 38% !important;
+  inset: 0 0 0 49% !important;
   z-index: 1;
   width: auto !important;
   height: 100%;
@@ -45,36 +44,36 @@
   position: absolute;
   inset: 0 auto 0 0;
   z-index: 2;
-  width: 260px;
+  width: 190px;
   pointer-events: none;
   background: linear-gradient(
     90deg,
     #fff 0%,
-    rgba(255,255,255,.98) 18%,
-    rgba(255,255,255,.86) 38%,
-    rgba(255,255,255,.46) 68%,
+    rgba(255,255,255,.98) 24%,
+    rgba(255,255,255,.80) 48%,
+    rgba(255,255,255,.34) 76%,
     rgba(255,255,255,0) 100%
   );
 }
 .pub-hero-books {
   position: absolute;
-  inset: 0 0 0 auto;
+  inset: 0 0 0 0;
   z-index: 1;
-  width: auto !important;
+  width: 100% !important;
   max-width: none !important;
   height: 100% !important;
-  object-fit: contain;
+  object-fit: cover;
   object-position: right center;
   transform: none !important;
 }
 .pub-hero-calendar {
   position: absolute;
-  left: 34px;
-  bottom: 7px;
+  left: 20px;
+  bottom: 8px;
   z-index: 4;
   width: auto !important;
   max-width: none !important;
-  height: 66% !important;
+  height: 68% !important;
   object-fit: contain;
   object-position: left bottom;
   transform: none !important;
@@ -172,8 +171,8 @@
   .pub-header-actions { gap: 5px; }
   .pub-header-action { width: 38px; padding: 0; justify-content: center; }
   .pub-header-action-icon-wrap, .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
-  .pub-hero-visual { inset-left: 34% !important; }
-  .pub-hero-calendar { left: 18px; bottom: 3px; height: 62% !important; }
+  .pub-hero-visual { inset: 0 0 0 46% !important; }
+  .pub-hero-calendar { left: 12px; bottom: 3px; height: 60% !important; }
   .pub-filter-two-col { flex-direction: column; }
   .pub-filter-left-col { width: 100%; padding-right: 0; }
   .pub-filter-divider-v { display: none; }
