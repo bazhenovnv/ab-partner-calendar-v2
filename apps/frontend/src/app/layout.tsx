@@ -8,6 +8,7 @@ import './stage64-figma-lock.css';
 import './stage65-centering-carousel-footer.css';
 import './stage66-approved-quote-frame.css';
 import './stage67-final-spacing-footer.css';
+import './stage70-calendar-navigation.css';
 import './stage72-quote-corners.css';
 import './stage74-carousel-footer-final.css';
 import './stage77-final-figma-polish.css';
