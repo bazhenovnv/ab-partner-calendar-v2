@@ -19,7 +19,8 @@
 /* Reduce the empty band between the brand row and the hero panel. */
 .pub-hero { padding-top: 8px !important; }
 
-/* Approved hero composition. Both source images retain the full panel height. */
+/* Approved hero composition: books are the base layer, the blend sits above them,
+   and the desk calendar is placed above the blend at the text/image seam. */
 .pub-hero-visual {
   position: relative;
   height: 100%;
@@ -30,10 +31,10 @@
   content: '';
   position: absolute;
   inset: 0 auto 0 0;
-  z-index: 4;
-  width: 150px;
+  z-index: 2;
+  width: 178px;
   pointer-events: none;
-  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.96) 24%, rgba(255,255,255,.62) 54%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.97) 22%, rgba(255,255,255,.68) 55%, rgba(255,255,255,0) 100%);
 }
 .pub-hero-books {
   position: absolute;
@@ -47,12 +48,12 @@
 }
 .pub-hero-calendar {
   position: absolute;
-  left: -18px;
-  bottom: -2px;
-  z-index: 3;
+  left: -8px;
+  bottom: 7px;
+  z-index: 4;
   width: auto !important;
   max-width: none !important;
-  height: 96% !important;
+  height: 82% !important;
   object-fit: contain;
   object-position: left bottom;
   filter: drop-shadow(0 8px 10px rgba(13,35,68,.08));
@@ -148,7 +149,7 @@
   .pub-header-actions { gap: 5px; }
   .pub-header-action { width: 38px; padding: 0; justify-content: center; }
   .pub-header-action-icon-wrap, .pub-header-action-icon { width: 25px; height: 25px; flex-basis: 25px; }
-  .pub-hero-calendar { left: -10px; height: 90% !important; }
+  .pub-hero-calendar { left: -4px; bottom: 3px; height: 78% !important; }
   .pub-filter-two-col { flex-direction: column; }
   .pub-filter-left-col { width: 100%; padding-right: 0; }
   .pub-filter-divider-v { display: none; }
