@@ -25,6 +25,66 @@
   mix-blend-mode: multiply;
 }
 
+/* Filter geometry and dividers from the approved Figma frame. */
+.pub-events-filters-col {
+  padding: 38px 40px 28px !important;
+}
+
+.pub-filter-title {
+  margin: 0 0 38px !important;
+}
+
+.pub-filter-two-col {
+  align-items: stretch !important;
+}
+
+.pub-filter-left-col {
+  width: 238px !important;
+  padding-right: 0 !important;
+}
+
+.pub-filter-divider-v {
+  width: 1px !important;
+  min-height: 286px;
+  align-self: stretch !important;
+  margin: 0 42px !important;
+  background: rgba(13, 35, 68, 0.18) !important;
+}
+
+.pub-filter-right-col {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.pub-filter-section {
+  margin-bottom: 30px !important;
+}
+
+.pub-filter-label {
+  margin-bottom: 15px !important;
+}
+
+.pub-filter-options {
+  gap: 18px !important;
+}
+
+.pub-filter-divider-h {
+  width: 100%;
+  height: 1px !important;
+  margin: 29px 0 28px !important;
+  background: rgba(13, 35, 68, 0.18) !important;
+}
+
+.pub-filter-actions {
+  margin-top: 54px !important;
+}
+
+.pub-filter-apply-btn {
+  width: 231px !important;
+}
+
 /* Quote copy must be optically centred inside the supplied raster frame. */
 .quotes-card--approved-frame .quotes-body {
   inset: 0 82px !important;
@@ -64,11 +124,45 @@
   margin-bottom: 0 !important;
 }
 
-/* Lower only textual footer columns. Keep stationery artwork and legal strip unchanged. */
+/* Footer: lower text groups, keep artwork and legal strip unchanged. */
+.pub-footer-logo,
+.pub-footer-logo *,
+.pub-footer-brand-title,
+.pub-footer-brand-title * {
+  color: #111111 !important;
+}
+
 @media (min-width: 1024px) {
   .pub-footer-brand,
   .pub-footer-top > .pub-footer-col {
-    transform: translateY(28px) !important;
+    transform: translateY(40px) !important;
+  }
+
+  /* Equal external boxes and optical scale for the three contact icons. */
+  .pub-footer-contact-icon {
+    width: 32px !important;
+    height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
+  .pub-footer-contact-icon--phone {
+    transform: scale(1) !important;
+  }
+
+  .pub-footer-contact-icon--email {
+    transform: scale(1.08) !important;
+  }
+
+  .pub-footer-contact-icon--location {
+    transform: scale(1) !important;
+  }
+
+  .pub-footer-contact-row {
+    grid-template-columns: 36px minmax(0, 1fr) !important;
+    column-gap: 16px !important;
   }
 }
 
@@ -85,7 +179,19 @@
 
   .pub-footer-brand,
   .pub-footer-top > .pub-footer-col {
-    transform: translateY(22px) !important;
+    transform: translateY(32px) !important;
+  }
+
+  .pub-footer-contact-icon {
+    width: 28px !important;
+    height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+  }
+
+  .pub-footer-contact-row {
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+    column-gap: 12px !important;
   }
 }
 
