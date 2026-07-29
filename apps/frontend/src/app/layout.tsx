@@ -19,6 +19,7 @@ import './homepage-shadow-buttons-final.css';
 import './homepage-buttons-shadows-interaction-final.css';
 import './reminder-figma-final.css';
 import './event-modal-figma-final.css';
+import './close-button-interactions-final.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
