@@ -1,0 +1,21 @@
+/* Final carousel card shadows: darker and evenly distributed in every direction. */
+
+[class*="main-events-carousel_frame"] {
+  box-shadow:
+    0 0 24px 5px rgba(0, 0, 0, 0.46),
+    0 0 10px 2px rgba(0, 0, 0, 0.34) !important;
+}
+
+[class*="main-events-carousel_cardActive"] [class*="main-events-carousel_frame"] {
+  box-shadow:
+    0 0 28px 6px rgba(0, 0, 0, 0.52),
+    0 0 12px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+[class*="main-events-carousel_card"]:hover [class*="main-events-carousel_frame"],
+[class*="main-events-carousel_card"]:focus-visible [class*="main-events-carousel_frame"] {
+  box-shadow:
+    0 0 32px 7px rgba(0, 0, 0, 0.56),
+    0 0 14px 3px rgba(0, 0, 0, 0.44),
+    0 0 0 3px rgba(124, 216, 179, 0.16) !important;
+}
