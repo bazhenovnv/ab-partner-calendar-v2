@@ -13,6 +13,7 @@ import './stage72-quote-corners.css';
 import './stage74-carousel-footer-final.css';
 import './stage77-final-figma-polish.css';
 import './homepage-final-overrides.css';
+import './footer-lower-final.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
