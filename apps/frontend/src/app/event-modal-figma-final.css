@@ -96,7 +96,7 @@
   }
 
   [class*="event-modal-v2_facts__"] {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: minmax(0, .9fr) minmax(0, .9fr) minmax(210px, 1.35fr) !important;
     gap: clamp(8px, 1.2vw, 18px) !important;
     margin-bottom: clamp(12px, 1.55vw, 24px) !important;
     padding: clamp(10px, 1.15vw, 18px) clamp(12px, 1.45vw, 22px) !important;
@@ -106,6 +106,10 @@
   [class*="event-modal-v2_fact__"] {
     grid-template-columns: clamp(38px, 3.5vw, 54px) minmax(0, 1fr) !important;
     gap: clamp(7px, .8vw, 12px) !important;
+  }
+
+  [class*="event-modal-v2_fact__"]:last-child {
+    min-width: 210px !important;
   }
 
   [class*="event-modal-v2_factIconWrap__"],
@@ -127,6 +131,12 @@
 
   [class*="event-modal-v2_value__"] {
     font-size: clamp(11px, 1.02vw, 16px) !important;
+  }
+
+  [class*="event-modal-v2_fact__"]:last-child [class*="event-modal-v2_value__"] {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
   }
 
   [class*="event-modal-v2_lines__"] {
