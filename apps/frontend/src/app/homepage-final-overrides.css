@@ -1,0 +1,106 @@
+/* Final approved homepage overrides. Loaded after all legacy stage files. */
+
+/* Header: retain the larger mark, reduce the adjacent title to the Figma proportion. */
+.pub-header-brand-mark {
+  width: 78px !important;
+  height: 82px !important;
+  flex: 0 0 78px !important;
+}
+
+.pub-header-brand-title {
+  font-size: 28px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+/* Approved PNG icons contain pale square pixels. Multiply removes that pale box on the white button. */
+.pub-header-action-icon-wrap {
+  background: inherit !important;
+  border-radius: 999px;
+}
+
+.pub-header-action-icon {
+  background: inherit !important;
+  border-radius: 999px;
+  mix-blend-mode: multiply;
+}
+
+/* Quote copy must be optically centred inside the supplied raster frame. */
+.quotes-card--approved-frame .quotes-body {
+  inset: 0 82px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.quotes-card--approved-frame .quotes-blockquote {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.quotes-card--approved-frame .quotes-text,
+.quotes-card--approved-frame .quotes-author {
+  text-align: center !important;
+}
+
+/* People artwork is anchored exactly to the lower card corners. */
+.quotes-person {
+  bottom: 0 !important;
+}
+
+.quotes-person--left {
+  left: 0 !important;
+}
+
+.quotes-person--right {
+  right: 0 !important;
+}
+
+.quotes-person-img {
+  display: block;
+  margin-bottom: 0 !important;
+}
+
+/* Lower only textual footer columns. Keep stationery artwork and legal strip unchanged. */
+@media (min-width: 1024px) {
+  .pub-footer-brand,
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(28px) !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .pub-header-brand-mark {
+    width: 70px !important;
+    height: 74px !important;
+    flex-basis: 70px !important;
+  }
+
+  .pub-header-brand-title {
+    font-size: 25px !important;
+  }
+
+  .pub-footer-brand,
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(22px) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-header-brand-mark {
+    width: 38px !important;
+    height: 40px !important;
+    flex-basis: 38px !important;
+  }
+
+  .pub-header-brand-title {
+    font-size: 17px !important;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    inset: 0 52px !important;
+  }
+}
