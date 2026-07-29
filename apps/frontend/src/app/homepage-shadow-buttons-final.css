@@ -1,0 +1,62 @@
+/* Final desktop polish: equal header action widths and one shadow system for homepage cards. */
+
+:root {
+  --pub-card-shadow: 0 8px 18px rgba(13, 35, 68, 0.16), 0 2px 5px rgba(13, 35, 68, 0.08);
+}
+
+@media (min-width: 768px) {
+  /* Telegram is the approved reference width. All three actions use the same box. */
+  .pub-header-action {
+    width: 154px !important;
+    min-width: 154px !important;
+    max-width: 154px !important;
+    padding: 0 14px !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .pub-header-action-icon-wrap {
+    flex: 0 0 27px !important;
+  }
+}
+
+/* One consistent shadow around every primary white homepage window. */
+.pub-hero-panel,
+.pub-events-panel,
+.pub-events-shell,
+.pub-events-container,
+.pub-events-filters-col,
+.pub-events-calendar-col,
+.pub-main-events,
+.pub-main-events-panel,
+.pub-featured-events,
+.pub-featured-panel,
+.pub-carousel-section,
+.quotes-section,
+.quotes-panel {
+  box-shadow: var(--pub-card-shadow) !important;
+}
+
+/* Nested filter/calendar cards keep the same shadow strength and edge softness. */
+.pub-events-filters-col,
+.pub-events-calendar-col {
+  box-shadow: var(--pub-card-shadow) !important;
+}
+
+@media (min-width: 768px) and (max-width: 1399px) {
+  .pub-header-action {
+    width: 132px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+    padding-inline: 10px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-header-action {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    padding: 0 !important;
+  }
+}
