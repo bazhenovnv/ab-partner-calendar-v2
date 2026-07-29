@@ -93,28 +93,60 @@
   box-shadow: var(--pub-card-shadow-hover) !important;
 }
 
-/* The complete carousel/quote window with the people artwork must remain flat. */
-.pub-featured-section,
-.pub-main-events,
-.pub-main-quotes-inner,
-.quotes-card--approved-frame,
-.pub-featured-section:hover,
-.pub-main-events:hover,
-.pub-main-quotes-inner:hover,
-.quotes-card--approved-frame:hover {
-  box-shadow: none !important;
+/* The complete Main Events + Quotes window receives one outer shadow. */
+.pub-main-quotes-inner {
+  box-shadow: var(--pub-card-shadow) !important;
+  filter: none !important;
 }
 
-/* Remove the horizontal separator shadow between carousel and quotes. */
+.pub-main-quotes-inner:hover {
+  box-shadow: var(--pub-card-shadow-hover) !important;
+}
+
+/* Everything inside that outer window must remain flat. */
 .pub-main-events-section,
 .pub-main-events-outer,
+.pub-featured-section,
+.pub-main-events,
+.quotes-section,
+.quotes-layout,
+.quotes-card--approved-frame,
+.pub-main-events-section:hover,
+.pub-main-events-outer:hover,
+.pub-featured-section:hover,
+.pub-main-events:hover,
+.quotes-section:hover,
+.quotes-layout:hover,
+.quotes-card--approved-frame:hover {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Remove any internal separator shadow between carousel and quote artwork. */
+.pub-main-events-section,
+.pub-main-events-outer,
+.pub-featured-section,
+.pub-main-events,
+.quotes-section,
+.quotes-layout {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+
 .pub-main-events-section::before,
 .pub-main-events-section::after,
 .pub-main-events-outer::before,
-.pub-main-events-outer::after {
+.pub-main-events-outer::after,
+.pub-featured-section::before,
+.pub-featured-section::after,
+.pub-main-events::before,
+.pub-main-events::after,
+.quotes-section::before,
+.quotes-section::after,
+.quotes-layout::before,
+.quotes-layout::after {
   box-shadow: none !important;
   filter: none !important;
-  border-bottom: 0 !important;
 }
 
 /* Do not animate disabled controls. */
