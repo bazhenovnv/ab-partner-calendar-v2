@@ -31,7 +31,7 @@
   }
 }
 
-/* Restrained scale animation for interface buttons only. Carousel controls are excluded. */
+/* Restrained scale animation for interface buttons only. Carousel is completely untouched. */
 .pub-header-action,
 .pub-hero-content a,
 .pub-hero-content button,
@@ -65,20 +65,6 @@
   transform: scale(0.985) !important;
 }
 
-/* Explicitly restore carousel controls to their original geometry and motion. */
-button[class*='carousel'],
-a[class*='carousel'] {
-  transform: none !important;
-  transition: none !important;
-}
-
-button[class*='carousel']:hover,
-button[class*='carousel']:active,
-a[class*='carousel']:hover,
-a[class*='carousel']:active {
-  transform: none !important;
-}
-
 /* Approved hero CTA: mint at rest, white on hover. */
 .pub-hero-content a,
 .pub-hero-content button {
@@ -97,23 +83,22 @@ a[class*='carousel']:active {
 .pub-events-shell,
 .pub-events-filters-col,
 .pub-events-calendar-col,
-.pub-featured-section,
-.pub-main-events,
-[class*='pub-events'][class*='panel'],
-[class*='pub-featured'][class*='panel'] {
+[class*='pub-events'][class*='panel'] {
   box-shadow: var(--pub-card-shadow) !important;
 }
 
 .pub-hero-panel:hover,
 .pub-events-filters-col:hover,
-.pub-events-calendar-col:hover,
-.pub-featured-section:hover,
-.pub-main-events:hover {
+.pub-events-calendar-col:hover {
   box-shadow: var(--pub-card-shadow-hover) !important;
 }
 
-/* The mint quote frame must remain flat, without a surrounding card shadow. */
+/* The complete carousel/quote window with the people artwork must remain flat. */
+.pub-featured-section,
+.pub-main-events,
 .quotes-card--approved-frame,
+.pub-featured-section:hover,
+.pub-main-events:hover,
 .quotes-card--approved-frame:hover {
   box-shadow: none !important;
 }
