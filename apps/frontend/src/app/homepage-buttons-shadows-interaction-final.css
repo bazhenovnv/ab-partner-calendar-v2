@@ -1,0 +1,149 @@
+/* Final interaction pass: approved button sizing, hover states and balanced shadows. */
+
+:root {
+  --pub-card-shadow: 0 0 14px rgba(13, 35, 68, 0.16);
+  --pub-card-shadow-hover: 0 0 18px rgba(13, 35, 68, 0.20);
+  --pub-button-shadow: 0 0 9px rgba(13, 35, 68, 0.18);
+}
+
+/* Header actions: Telegram and MAX share Telegram width; partner keeps one-line content. */
+@media (min-width: 768px) {
+  .pub-header-action {
+    box-sizing: border-box !important;
+    height: 40px !important;
+    padding: 0 15px !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-shadow: var(--pub-button-shadow) !important;
+  }
+
+  .pub-header-action:nth-child(1),
+  .pub-header-action:nth-child(2) {
+    width: 132px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+  }
+
+  .pub-header-action:nth-child(3) {
+    width: auto !important;
+    min-width: 184px !important;
+    max-width: none !important;
+  }
+}
+
+/* A restrained scale animation for every real button on the homepage. */
+.pub-header-action,
+.pub-hero-content a,
+.pub-hero-content button,
+.pub-filter-apply-btn,
+.pub-filter-reset-link,
+.pub-calendar-nav-button,
+.pub-calendar-day,
+button[class*='carousel'],
+a[class*='carousel'] {
+  transform-origin: center !important;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+.pub-header-action:hover,
+.pub-hero-content a:hover,
+.pub-hero-content button:hover,
+.pub-filter-apply-btn:hover:not(:disabled),
+.pub-filter-reset-link:hover,
+.pub-calendar-nav-button:hover,
+button[class*='carousel']:hover,
+a[class*='carousel']:hover {
+  transform: scale(1.035) !important;
+}
+
+.pub-header-action:active,
+.pub-hero-content a:active,
+.pub-hero-content button:active,
+.pub-filter-apply-btn:active:not(:disabled),
+.pub-filter-reset-link:active,
+.pub-calendar-nav-button:active,
+button[class*='carousel']:active,
+a[class*='carousel']:active {
+  transform: scale(0.985) !important;
+}
+
+/* Approved hero CTA: mint at rest, white on hover. */
+.pub-hero-content a,
+.pub-hero-content button {
+  box-shadow: var(--pub-button-shadow) !important;
+}
+
+.pub-hero-content a:hover,
+.pub-hero-content button:hover {
+  background: #ffffff !important;
+  color: #0d2344 !important;
+  box-shadow: 0 0 12px rgba(13, 35, 68, 0.22) !important;
+}
+
+/* Balanced shadows spread equally on all four sides. */
+.pub-hero-panel,
+.pub-events-shell,
+.pub-events-filters-col,
+.pub-events-calendar-col,
+.pub-featured-section,
+.pub-main-events,
+.quotes-card--approved-frame,
+[class*='pub-events'][class*='panel'],
+[class*='pub-featured'][class*='panel'] {
+  box-shadow: var(--pub-card-shadow) !important;
+}
+
+.pub-hero-panel:hover,
+.pub-events-filters-col:hover,
+.pub-events-calendar-col:hover,
+.pub-featured-section:hover,
+.pub-main-events:hover,
+.quotes-card--approved-frame:hover {
+  box-shadow: var(--pub-card-shadow-hover) !important;
+}
+
+/* Do not animate disabled controls. */
+button:disabled,
+[aria-disabled='true'] {
+  transform: none !important;
+}
+
+@media (min-width: 768px) and (max-width: 1399px) {
+  .pub-header-action:nth-child(1),
+  .pub-header-action:nth-child(2) {
+    width: 116px !important;
+    min-width: 116px !important;
+    max-width: 116px !important;
+  }
+
+  .pub-header-action:nth-child(3) {
+    min-width: 164px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-header-action {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    padding: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pub-header-action,
+  .pub-hero-content a,
+  .pub-hero-content button,
+  .pub-filter-apply-btn,
+  .pub-filter-reset-link,
+  .pub-calendar-nav-button,
+  .pub-calendar-day,
+  button[class*='carousel'],
+  a[class*='carousel'] {
+    transition: none !important;
+  }
+}
