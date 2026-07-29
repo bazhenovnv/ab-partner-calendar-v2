@@ -1,0 +1,52 @@
+/* Final approved reminder chooser alignment. */
+
+[class*='event-modal-v2_module__chooserHeaderImage'] {
+  width: 192px !important;
+  height: 106px !important;
+  margin: 0 auto 8px !important;
+  object-fit: contain !important;
+}
+
+[class*='event-modal-v2_module__chooser'] h3 {
+  margin: 0 0 8px !important;
+  font-size: 0 !important;
+  line-height: 1.15 !important;
+}
+
+[class*='event-modal-v2_module__chooser'] h3::before {
+  content: 'Напомнить о событии';
+  display: block;
+  color: #0d2344;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+[class*='event-modal-v2_module__chooser'] > p {
+  margin: 0 0 20px !important;
+  font-size: 0 !important;
+  line-height: 1.35 !important;
+}
+
+[class*='event-modal-v2_module__chooser'] > p::before {
+  content: 'Выберите, куда отправить напоминание';
+  display: block;
+  color: rgba(13, 35, 68, 0.72);
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+@media (max-width: 767px) {
+  [class*='event-modal-v2_module__chooserHeaderImage'] {
+    width: 150px !important;
+    height: 83px !important;
+  }
+
+  [class*='event-modal-v2_module__chooser'] h3::before {
+    font-size: 25px;
+  }
+
+  [class*='event-modal-v2_module__chooser'] > p::before {
+    font-size: 15px;
+  }
+}
