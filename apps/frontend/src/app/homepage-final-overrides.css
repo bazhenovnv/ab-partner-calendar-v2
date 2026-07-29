@@ -85,24 +85,38 @@
   width: 231px !important;
 }
 
-/* Quote copy must be optically centred inside the supplied raster frame. */
+/* Quote copy: centre the complete text block in the usable opening of the raster frame. */
 .quotes-card--approved-frame .quotes-body {
   inset: 0 82px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  transform: translateY(8px);
 }
 
 .quotes-card--approved-frame .quotes-blockquote {
   display: flex;
+  width: 100%;
   min-height: 100%;
+  margin: 0 !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.quotes-card--approved-frame .quotes-text,
+.quotes-card--approved-frame .quotes-text {
+  width: 100%;
+  max-width: 610px !important;
+  margin: 0 auto !important;
+  font-size: 17px !important;
+  line-height: 1.45 !important;
+  text-align: center !important;
+}
+
 .quotes-card--approved-frame .quotes-author {
+  margin-top: 8px !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
   text-align: center !important;
 }
 
@@ -138,14 +152,16 @@
     transform: translateY(40px) !important;
   }
 
-  /* Equal external boxes and optical scale for the three contact icons. */
+  /* Equal layout boxes, with smaller optical artwork for email and location. */
   .pub-footer-contact-icon {
+    display: block !important;
     width: 32px !important;
     height: 32px !important;
     max-width: 32px !important;
     max-height: 32px !important;
     object-fit: contain !important;
     object-position: center !important;
+    transform-origin: center !important;
   }
 
   .pub-footer-contact-icon--phone {
@@ -153,11 +169,11 @@
   }
 
   .pub-footer-contact-icon--email {
-    transform: scale(1.08) !important;
+    transform: scale(0.78) !important;
   }
 
   .pub-footer-contact-icon--location {
-    transform: scale(1) !important;
+    transform: scale(0.76) !important;
   }
 
   .pub-footer-contact-row {
@@ -208,5 +224,10 @@
 
   .quotes-card--approved-frame .quotes-body {
     inset: 0 52px !important;
+    transform: translateY(4px);
+  }
+
+  .quotes-card--approved-frame .quotes-text {
+    font-size: 14px !important;
   }
 }
