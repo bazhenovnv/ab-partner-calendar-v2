@@ -96,11 +96,25 @@
 /* The complete carousel/quote window with the people artwork must remain flat. */
 .pub-featured-section,
 .pub-main-events,
+.pub-main-quotes-inner,
 .quotes-card--approved-frame,
 .pub-featured-section:hover,
 .pub-main-events:hover,
+.pub-main-quotes-inner:hover,
 .quotes-card--approved-frame:hover {
   box-shadow: none !important;
+}
+
+/* Remove the horizontal separator shadow between carousel and quotes. */
+.pub-main-events-section,
+.pub-main-events-outer,
+.pub-main-events-section::before,
+.pub-main-events-section::after,
+.pub-main-events-outer::before,
+.pub-main-events-outer::after {
+  box-shadow: none !important;
+  filter: none !important;
+  border-bottom: 0 !important;
 }
 
 /* Do not animate disabled controls. */
