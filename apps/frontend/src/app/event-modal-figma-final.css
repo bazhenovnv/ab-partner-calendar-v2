@@ -7,23 +7,28 @@
     backdrop-filter: blur(12px) !important;
   }
 
+  /* Preserve the 1496 × 788 Figma proportion and always fit inside the viewport. */
   [class*="event-modal-v2_modal__"] {
-    width: min(1496px, calc(100vw - 64px)) !important;
-    height: min(768px, calc(100vh - 64px)) !important;
-    grid-template-columns: minmax(500px, 46%) minmax(0, 54%) !important;
-    border-radius: 35px !important;
+    width: min(1496px, calc(100vw - 64px), calc((100vh - 64px) * 1.8985)) !important;
+    height: auto !important;
+    max-height: calc(100vh - 64px) !important;
+    aspect-ratio: 1496 / 788 !important;
+    grid-template-columns: minmax(0, 46%) minmax(0, 54%) !important;
+    border-radius: clamp(22px, 2.35vw, 35px) !important;
     overflow: hidden !important;
   }
 
   [class*="event-modal-v2_media__"] {
-    padding: 64px 54px !important;
+    min-width: 0 !important;
+    padding: clamp(34px, 3.9vw, 60px) clamp(30px, 4.25vw, 65px) !important;
     background: #f7faf9 !important;
   }
 
   [class*="event-modal-v2_imageStage__"] {
-    width: min(100%, 560px) !important;
+    width: 100% !important;
+    max-width: 560px !important;
     aspect-ratio: 1 / 1 !important;
-    border-radius: 24px !important;
+    border-radius: clamp(18px, 1.8vw, 27px) !important;
     box-shadow: none !important;
   }
 
@@ -31,97 +36,121 @@
     object-fit: contain !important;
   }
 
+  [class*="event-modal-v2_content__"] {
+    min-height: 0 !important;
+    grid-template-rows: minmax(0, 1fr) auto !important;
+    overflow: hidden !important;
+  }
+
+  /* No internal scrollbar: text is compacted to the approved fixed composition. */
   [class*="event-modal-v2_scrollArea__"] {
-    padding: 64px 72px 20px 54px !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: clamp(28px, 3.9vw, 60px) clamp(38px, 4.2vw, 65px) 8px clamp(30px, 4vw, 62px) !important;
+    scrollbar-width: none !important;
+  }
+
+  [class*="event-modal-v2_scrollArea__"]::-webkit-scrollbar {
+    display: none !important;
   }
 
   [class*="event-modal-v2_close__"] {
-    top: 26px !important;
-    right: 30px !important;
-    width: 40px !important;
-    height: 40px !important;
-    font-size: 34px !important;
+    top: clamp(14px, 1.35vw, 20px) !important;
+    right: clamp(18px, 1.7vw, 26px) !important;
+    width: clamp(34px, 2.7vw, 40px) !important;
+    height: clamp(34px, 2.7vw, 40px) !important;
+    font-size: clamp(28px, 2.3vw, 34px) !important;
   }
 
   [class*="event-modal-v2_status__"] {
-    margin-bottom: 28px !important;
-    padding: 8px 18px !important;
+    margin-bottom: clamp(14px, 1.8vw, 28px) !important;
+    padding: clamp(5px, .55vw, 8px) clamp(12px, 1.2vw, 18px) !important;
     border-radius: 9px !important;
-    font-size: 15px !important;
+    font-size: clamp(11px, 1vw, 15px) !important;
   }
 
   [class*="event-modal-v2_title__"] {
-    margin-bottom: 20px !important;
-    font-size: clamp(34px, 2.2vw, 48px) !important;
+    margin-bottom: clamp(10px, 1.3vw, 20px) !important;
+    font-size: clamp(25px, 2.55vw, 48px) !important;
     line-height: 1.03 !important;
   }
 
   [class*="event-modal-v2_eventText__"] {
-    gap: 12px !important;
-    margin-bottom: 26px !important;
+    gap: 8px !important;
+    max-height: clamp(96px, 13vh, 160px) !important;
+    margin-bottom: clamp(12px, 1.7vw, 26px) !important;
+    overflow: hidden !important;
   }
 
   [class*="event-modal-v2_lead__"],
   [class*="event-modal-v2_description__"] {
-    font-size: 17px !important;
-    line-height: 1.48 !important;
+    font-size: clamp(12px, 1.05vw, 17px) !important;
+    line-height: 1.42 !important;
+  }
+
+  [class*="event-modal-v2_description__"] {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 6 !important;
   }
 
   [class*="event-modal-v2_facts__"] {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 18px !important;
-    margin-bottom: 24px !important;
-    padding: 18px 22px !important;
-    border-radius: 18px !important;
+    gap: clamp(8px, 1.2vw, 18px) !important;
+    margin-bottom: clamp(12px, 1.55vw, 24px) !important;
+    padding: clamp(10px, 1.15vw, 18px) clamp(12px, 1.45vw, 22px) !important;
+    border-radius: clamp(14px, 1.2vw, 18px) !important;
   }
 
   [class*="event-modal-v2_fact__"] {
-    grid-template-columns: 54px minmax(0, 1fr) !important;
-    gap: 12px !important;
+    grid-template-columns: clamp(38px, 3.5vw, 54px) minmax(0, 1fr) !important;
+    gap: clamp(7px, .8vw, 12px) !important;
   }
 
   [class*="event-modal-v2_factIconWrap__"],
   [class*="event-modal-v2_factIcon_calendar__"],
   [class*="event-modal-v2_factIcon_clock__"],
   [class*="event-modal-v2_factIcon_price__"] {
-    width: 52px !important;
-    height: 52px !important;
+    width: clamp(38px, 3.4vw, 52px) !important;
+    height: clamp(38px, 3.4vw, 52px) !important;
   }
 
   [class*="event-modal-v2_factIcon__"] {
-    width: 50px !important;
-    height: 50px !important;
+    width: clamp(36px, 3.25vw, 50px) !important;
+    height: clamp(36px, 3.25vw, 50px) !important;
   }
 
   [class*="event-modal-v2_label__"] {
-    font-size: 14px !important;
+    font-size: clamp(10px, .9vw, 14px) !important;
   }
 
   [class*="event-modal-v2_value__"] {
-    font-size: 16px !important;
+    font-size: clamp(11px, 1.02vw, 16px) !important;
   }
 
   [class*="event-modal-v2_lines__"] {
-    gap: 10px !important;
-    margin-bottom: 18px !important;
-    font-size: 15px !important;
+    gap: clamp(5px, .65vw, 10px) !important;
+    margin-bottom: 0 !important;
+    font-size: clamp(11px, .98vw, 15px) !important;
   }
 
   [class*="event-modal-v2_actionBar__"] {
-    padding: 18px 72px 54px 54px !important;
+    flex: 0 0 auto !important;
+    padding: 8px clamp(38px, 4.2vw, 65px) clamp(28px, 3.9vw, 60px) clamp(30px, 4vw, 62px) !important;
   }
 
   [class*="event-modal-v2_actions__"] {
-    gap: 24px !important;
+    gap: clamp(14px, 2.3vw, 35px) !important;
   }
 
   [class*="event-modal-v2_primary__"],
   [class*="event-modal-v2_remind__"] {
-    min-width: 210px !important;
-    min-height: 62px !important;
+    min-width: clamp(150px, 14vw, 210px) !important;
+    min-height: clamp(44px, 4.15vw, 62px) !important;
     border-radius: 10px !important;
-    padding: 0 28px !important;
-    font-size: 18px !important;
+    padding: 0 clamp(18px, 1.85vw, 28px) !important;
+    font-size: clamp(14px, 1.2vw, 18px) !important;
   }
 
   /* Reminder chooser: approved proportions and measured spacing. */
