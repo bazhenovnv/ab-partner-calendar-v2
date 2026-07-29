@@ -15,6 +15,7 @@ import './stage77-final-figma-polish.css';
 import './homepage-final-overrides.css';
 import './footer-lower-final.css';
 import './footer-figma-typography.css';
+import './homepage-shadow-buttons-final.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
