@@ -31,16 +31,14 @@
   }
 }
 
-/* A restrained scale animation for every real button on the homepage. */
+/* Restrained scale animation for interface buttons only. Carousel controls are excluded. */
 .pub-header-action,
 .pub-hero-content a,
 .pub-hero-content button,
 .pub-filter-apply-btn,
 .pub-filter-reset-link,
 .pub-calendar-nav-button,
-.pub-calendar-day,
-button[class*='carousel'],
-a[class*='carousel'] {
+.pub-calendar-day {
   transform-origin: center !important;
   transition:
     transform 160ms ease,
@@ -54,9 +52,7 @@ a[class*='carousel'] {
 .pub-hero-content button:hover,
 .pub-filter-apply-btn:hover:not(:disabled),
 .pub-filter-reset-link:hover,
-.pub-calendar-nav-button:hover,
-button[class*='carousel']:hover,
-a[class*='carousel']:hover {
+.pub-calendar-nav-button:hover {
   transform: scale(1.035) !important;
 }
 
@@ -65,10 +61,22 @@ a[class*='carousel']:hover {
 .pub-hero-content button:active,
 .pub-filter-apply-btn:active:not(:disabled),
 .pub-filter-reset-link:active,
-.pub-calendar-nav-button:active,
-button[class*='carousel']:active,
-a[class*='carousel']:active {
+.pub-calendar-nav-button:active {
   transform: scale(0.985) !important;
+}
+
+/* Explicitly restore carousel controls to their original geometry and motion. */
+button[class*='carousel'],
+a[class*='carousel'] {
+  transform: none !important;
+  transition: none !important;
+}
+
+button[class*='carousel']:hover,
+button[class*='carousel']:active,
+a[class*='carousel']:hover,
+a[class*='carousel']:active {
+  transform: none !important;
 }
 
 /* Approved hero CTA: mint at rest, white on hover. */
@@ -91,7 +99,6 @@ a[class*='carousel']:active {
 .pub-events-calendar-col,
 .pub-featured-section,
 .pub-main-events,
-.quotes-card--approved-frame,
 [class*='pub-events'][class*='panel'],
 [class*='pub-featured'][class*='panel'] {
   box-shadow: var(--pub-card-shadow) !important;
@@ -101,9 +108,14 @@ a[class*='carousel']:active {
 .pub-events-filters-col:hover,
 .pub-events-calendar-col:hover,
 .pub-featured-section:hover,
-.pub-main-events:hover,
-.quotes-card--approved-frame:hover {
+.pub-main-events:hover {
   box-shadow: var(--pub-card-shadow-hover) !important;
+}
+
+/* The mint quote frame must remain flat, without a surrounding card shadow. */
+.quotes-card--approved-frame,
+.quotes-card--approved-frame:hover {
+  box-shadow: none !important;
 }
 
 /* Do not animate disabled controls. */
@@ -141,9 +153,7 @@ button:disabled,
   .pub-filter-apply-btn,
   .pub-filter-reset-link,
   .pub-calendar-nav-button,
-  .pub-calendar-day,
-  button[class*='carousel'],
-  a[class*='carousel'] {
+  .pub-calendar-day {
     transition: none !important;
   }
 }
