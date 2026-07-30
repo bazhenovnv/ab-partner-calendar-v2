@@ -1,4 +1,4 @@
-import type { LegalDocType } from '@ab-afisha/shared';
+import { LEGAL_DOCUMENTS, type LegalDocType } from '@ab-afisha/shared';
 
 export interface LegalDocItem {
   type: LegalDocType;
@@ -25,29 +25,9 @@ export const SLUG_TO_TYPE: Record<string, LegalDocType> = {
   'broadcast-consent':'BROADCAST_CONSENT',
 };
 
-/** Fallback content shown when API is unavailable */
-export const FALLBACK_CONTENT: Record<LegalDocType, { title: string; content: string }> = {
-  PRIVACY_POLICY: {
-    title: 'Политика конфиденциальности',
-    content: '<p>Документ временно недоступен. Пожалуйста, попробуйте позже или обратитесь по адресу <a href="mailto:info-event@a-b.ru">info-event@a-b.ru</a>.</p>',
-  },
-  USER_AGREEMENT: {
-    title: 'Пользовательское соглашение',
-    content: '<p>Документ временно недоступен. Пожалуйста, попробуйте позже или обратитесь по адресу <a href="mailto:info-event@a-b.ru">info-event@a-b.ru</a>.</p>',
-  },
-  PERSONAL_DATA_CONSENT: {
-    title: 'Согласие на обработку персональных данных',
-    content: '<p>Документ временно недоступен. Пожалуйста, попробуйте позже или обратитесь по адресу <a href="mailto:info-event@a-b.ru">info-event@a-b.ru</a>.</p>',
-  },
-  COOKIE_POLICY: {
-    title: 'Политика Cookie и аналитики',
-    content: '<p>Документ временно недоступен. Пожалуйста, попробуйте позже или обратитесь по адресу <a href="mailto:info-event@a-b.ru">info-event@a-b.ru</a>.</p>',
-  },
-  BROADCAST_CONSENT: {
-    title: 'Согласие на информационные рассылки',
-    content: '<p>Документ временно недоступен. Пожалуйста, попробуйте позже или обратитесь по адресу <a href="mailto:info-event@a-b.ru">info-event@a-b.ru</a>.</p>',
-  },
-};
+/** Canonical content remains available when the backend is unavailable. */
+export const FALLBACK_CONTENT: Record<LegalDocType, { title: string; content: string }> =
+  LEGAL_DOCUMENTS;
 
 /** Fetch legal doc from backend; returns null on any error (caller uses fallback) */
 export async function fetchLegalDoc(type: LegalDocType): Promise<LegalDocItem | null> {

@@ -32,7 +32,7 @@ The medium-gray area (~`#BBBBBB`) visible in Figma editor screenshots surrounds 
 - Reference viewport: `1920 × 1080` CSS pixels.
 - Browser zoom for QA: `100%`.
 - OS display scaling / devicePixelRatio must be recorded separately when comparing physical screenshots.
-- Never use `transform: scale`, CSS `zoom`, root font scaling or browser zoom to imitate the approved design.
+- Do not add ad-hoc `transform: scale`, root font scaling or browser zoom to imitate Figma. The only presentation-scale exception is the documented `.pub-site-scale` desktop wrapper below.
 
 ## Global canvas
 
@@ -64,6 +64,19 @@ The Figma prototype viewer uses `scaling=min-zoom`, which shrinks the 1920px fra
 | Footer (`5913:4994`) | 212 | — | — | 1496 | 1496 | **0** |
 
 All deltas are sub-pixel (≤1px). **No CSS width change is required or permitted to match the Figma design.**
+
+## User-approved desktop presentation scale — Stage 76 (2026-07-30)
+
+The user approved a 10% increase relative to the previously deployed desktop presentation scale.
+
+- Previous wrapper scale: `0.80`.
+- Approved wrapper scale: `0.80 × 1.10 = 0.88`.
+- Compensating wrapper width and minimum height: `100 / 0.88 = 113.6364%`.
+- Scope: public pages at viewport widths `>= 1440px`.
+- Tablet and mobile remain at scale `1`.
+- The canonical 1496–1497px design geometry remains unchanged; the wrapper changes only its final presentation size.
+- Horizontal overflow must remain clipped and the compensated wrapper must remain centered.
+
 
 ## Canonical desktop content widths
 
