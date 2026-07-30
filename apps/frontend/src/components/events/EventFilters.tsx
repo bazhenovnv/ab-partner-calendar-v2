@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CityOption,
   DirectionOption,
@@ -62,6 +62,135 @@ const EMPTY: ActiveFilters = {
   priceType: '',
   autoStatus: [],
 };
+
+interface DirectionMultiSelectProps {
+  directions: DirectionOption[];
+  value: string[];
+  onChange: (value: string[]) => void;
+}
+
+function DirectionMultiSelect({
+  directions,
+  value,
+  onChange,
+}: DirectionMultiSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selectedDirections = useMemo(
+    () =>
+      value.map((slug) => {
+        const direction = directions.find((item) => item.slug === slug);
+        return direction?.name ?? slug;
+      }),
+    [directions, value],
+  );
+  const selectionLabel =
+    selectedDirections.length > 0
+      ? selectedDirections.join(', ')
+      : 'Все направления';
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen]);
+
+  const toggleDirection = (slug: string) => {
+    onChange(
+      value.includes(slug)
+        ? value.filter((selectedSlug) => selectedSlug !== slug)
+        : [...value, slug],
+    );
+  };
+
+  return (
+    <div ref={containerRef} className="pub-filter-multi">
+      <button
+        id="filter-direction"
+        type="button"
+        className="pub-filter-select pub-filter-multi-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        title={selectionLabel}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className="pub-filter-multi-value">{selectionLabel}</span>
+        <svg
+          className="pub-filter-multi-chevron"
+          viewBox="0 0 12 8"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M1 1.5 6 6.5l5-5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          className="pub-filter-multi-menu"
+          role="listbox"
+          aria-label="Выберите одно или несколько направлений"
+          aria-multiselectable="true"
+        >
+          <label
+            className="pub-filter-multi-option"
+            role="option"
+            aria-selected={value.length === 0}
+          >
+            <input
+              type="checkbox"
+              className="pub-filter-checkbox"
+              checked={value.length === 0}
+              onChange={() => onChange([])}
+            />
+            <span>Все направления</span>
+          </label>
+
+          {directions.map((direction) => (
+            <label
+              key={direction.id}
+              className="pub-filter-multi-option"
+              role="option"
+              aria-selected={value.includes(direction.slug)}
+            >
+              <input
+                type="checkbox"
+                className="pub-filter-checkbox"
+                checked={value.includes(direction.slug)}
+                onChange={() => toggleDirection(direction.slug)}
+              />
+              <span>{direction.name}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function EventFilters({
   directions,
@@ -216,27 +345,16 @@ export function EventFilters({
               Направление
             </label>
 
-            <select
-              id="filter-direction"
-              className="pub-filter-select"
-              value={pending.directions[0] ?? ''}
-              onChange={(event) => {
-                const value = event.target.value;
-
+            <DirectionMultiSelect
+              directions={directions}
+              value={pending.directions}
+              onChange={(selectedDirections) => {
                 setPending((current) => ({
                   ...current,
-                  directions: value ? [value] : [],
+                  directions: selectedDirections,
                 }));
               }}
-            >
-              <option value="">Все направления</option>
-
-              {directions.map((direction) => (
-                <option key={direction.id} value={direction.slug}>
-                  {direction.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div>
@@ -325,7 +443,7 @@ export function EventFilters({
         </div>
       </div>
 
-      <div className="mt-auto pt-4">
+      <div className="pub-filter-actions">
         <button
           type="button"
           className="pub-filter-apply-btn"

@@ -116,6 +116,18 @@ describe('Backend — public endpoints present', () => {
   });
 });
 
+describe('Backend — public filter data', () => {
+  test('city options include cities present on published imported events', () => {
+    fileContains(
+      src('modules/filters/filters.service.ts'),
+      'this.prisma.event.findMany',
+      "status: 'PUBLISHED'",
+      'cityName: { not: null }',
+      "normalizedName === 'онлайн'",
+    );
+  });
+});
+
 // ── Backend: Logger used in main.ts (no raw console.log) ─────────────────────
 
 describe('Backend — logging', () => {
