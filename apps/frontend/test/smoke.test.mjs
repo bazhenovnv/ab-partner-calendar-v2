@@ -83,6 +83,31 @@ describe('Key components exist', () => {
   }
 });
 
+describe('Public filters and calendar interactions', () => {
+  test('direction filter supports multiple selected values', () => {
+    const content = readFileSync(
+      lib('components/events/EventFilters.tsx'),
+      'utf8',
+    );
+
+    assert.ok(content.includes('aria-multiselectable="true"'));
+    assert.ok(content.includes('toggleDirection'));
+    assert.ok(!content.includes('directions: value ? [value] : []'));
+  });
+
+  test('adjacent-month calendar days switch month and select their date', () => {
+    const content = readFileSync(
+      lib('components/events/EventCalendar.tsx'),
+      'utf8',
+    );
+
+    assert.ok(content.includes('selectAdjacentDate'));
+    assert.ok(content.includes('previousYear'));
+    assert.ok(content.includes('nextYear'));
+    assert.ok(!content.includes('aria-disabled="true"'));
+  });
+});
+
 // ── Admin auth guard ──────────────────────────────────────────────────────────
 
 describe('Admin auth guard', () => {

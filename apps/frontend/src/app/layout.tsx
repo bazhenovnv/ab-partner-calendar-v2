@@ -18,6 +18,7 @@ import './stage72-quote-corners.css';
 import './stage73-header-brand-title.css';
 import './stage74-carousel-footer-final.css';
 import './stage75-header-filter-figma-alignment.css';
+import './stage76-figma-interactions.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
