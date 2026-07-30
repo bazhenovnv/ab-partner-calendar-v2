@@ -411,3 +411,36 @@ ON CONFLICT ("type") DO UPDATE SET
   "isDraft" = false,
   "publishedAt" = EXCLUDED."publishedAt",
   "updatedAt" = NOW();
+
+-- Store the published revision in the existing version history. Deterministic
+-- IDs keep the data migration idempotent.
+INSERT INTO "LegalDocVersion" (
+  "id",
+  "docId",
+  "content",
+  "publishedAt",
+  "createdAt",
+  "createdBy"
+)
+SELECT
+  CASE "type"::text
+    WHEN 'PRIVACY_POLICY' THEN '10000000-0000-4000-8000-000000000001'
+    WHEN 'USER_AGREEMENT' THEN '10000000-0000-4000-8000-000000000002'
+    WHEN 'PERSONAL_DATA_CONSENT' THEN '10000000-0000-4000-8000-000000000003'
+    WHEN 'COOKIE_POLICY' THEN '10000000-0000-4000-8000-000000000004'
+    WHEN 'BROADCAST_CONSENT' THEN '10000000-0000-4000-8000-000000000005'
+  END,
+  "id",
+  "content",
+  "publishedAt",
+  NOW(),
+  NULL
+FROM "LegalDoc"
+WHERE "type" IN (
+  'PRIVACY_POLICY',
+  'USER_AGREEMENT',
+  'PERSONAL_DATA_CONSENT',
+  'COOKIE_POLICY',
+  'BROADCAST_CONSENT'
+)
+ON CONFLICT ("id") DO NOTHING;
