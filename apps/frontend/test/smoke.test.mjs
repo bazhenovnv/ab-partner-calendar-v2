@@ -106,6 +106,22 @@ describe('Public filters and calendar interactions', () => {
     assert.ok(content.includes('nextYear'));
     assert.ok(!content.includes('aria-disabled="true"'));
   });
+
+  test('desktop filter, calendar and quote artwork keep the approved compact geometry', () => {
+    const styles = readFileSync(app('stage76-figma-interactions.css'), 'utf8');
+    const events = readFileSync(
+      lib('components/events/EventsSection.tsx'),
+      'utf8',
+    );
+
+    assert.ok(styles.includes('height: 560px;'));
+    assert.ok(styles.includes('height: 382px;'));
+    assert.ok(styles.includes('width: 302px !important;'));
+    assert.ok(styles.includes('width: 287px !important;'));
+    assert.ok(styles.includes('.pub-calendar-cell--outside .pub-calendar-day'));
+    assert.ok(styles.includes('.pub-calendar-legend {\n    display: none;'));
+    assert.ok(events.includes('min-h-[210px]'));
+  });
 });
 
 // ── Admin auth guard ──────────────────────────────────────────────────────────
