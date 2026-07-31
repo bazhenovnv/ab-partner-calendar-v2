@@ -1,18 +1,21 @@
 .cardReveal {
   opacity: 0;
-  animation: eventCardReveal 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: blur(12px);
+  animation: eventCardReveal 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: var(--event-card-delay, 0s);
-  will-change: opacity, transform;
+  will-change: opacity, transform, filter;
 }
 
 @keyframes eventCardReveal {
   from {
     opacity: 0;
+    filter: blur(12px);
     transform: translateY(18px) scale(0.985);
   }
 
   to {
     opacity: 1;
+    filter: blur(0);
     transform: translateY(0) scale(1);
   }
 }
@@ -20,6 +23,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cardReveal {
     opacity: 1;
+    filter: none;
     animation: none;
     transform: none;
   }
