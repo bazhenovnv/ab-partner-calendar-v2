@@ -7,81 +7,79 @@ import styles from './event-results-grid.module.css';
 
 interface EventResultsGridProps {
   events: PublicEvent[];
-  centerBetweenRows: boolean;
-  onCenterComplete: () => void;
+  scrollAfterDateSelect: boolean;
+  onScrollComplete: () => void;
 }
+
+const CARD_REVEAL_STEP_MS = 100;
+const CARD_REVEAL_DURATION_MS = 100;
 
 export function EventResultsGrid({
   events,
-  centerBetweenRows,
-  onCenterComplete,
+  scrollAfterDateSelect,
+  onScrollComplete,
 }: EventResultsGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!centerBetweenRows) return;
+    if (!scrollAfterDateSelect) return;
 
-    let secondFrame = 0;
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        const grid = gridRef.current;
-        if (!grid) {
-          onCenterComplete();
-          return;
-        }
+    const lastCardDelay = Math.max(0, events.length - 1) * CARD_REVEAL_STEP_MS;
+    const scrollDelay = lastCardDelay + CARD_REVEAL_DURATION_MS + 50;
 
-        const cards = Array.from(grid.children).filter(
-          (child): child is HTMLElement => child instanceof HTMLElement,
+    const timer = window.setTimeout(() => {
+      const grid = gridRef.current;
+      if (!grid) {
+        onScrollComplete();
+        return;
+      }
+
+      const cards = Array.from(grid.children).filter(
+        (child): child is HTMLElement => child instanceof HTMLElement,
+      );
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (cards.length > 3) {
+        const cardRects = cards.map((card) => card.getBoundingClientRect());
+        const firstRowTop = Math.min(...cardRects.map((rect) => rect.top));
+        const secondRowTop = Math.min(
+          ...cardRects
+            .filter((rect) => rect.top > firstRowTop + 2)
+            .map((rect) => rect.top),
         );
 
-        if (cards.length > 3) {
-          const rowTops = Array.from(
-            new Set(cards.map((card) => Math.round(card.offsetTop))),
-          ).sort((left, right) => left - right);
-          const firstRowTop = rowTops[0] ?? 0;
-          const secondRowTop = rowTops[1];
+        if (Number.isFinite(secondRowTop)) {
+          const secondRowBottom = Math.max(
+            ...cardRects
+              .filter((rect) => Math.abs(rect.top - secondRowTop) <= 2)
+              .map((rect) => rect.bottom),
+          );
+          const targetTop = Math.max(
+            0,
+            window.scrollY + secondRowBottom - window.innerHeight,
+          );
 
-          if (secondRowTop !== undefined) {
-            const secondRowCards = cards.filter(
-              (card) => Math.abs(card.offsetTop - secondRowTop) <= 1,
-            );
-            const secondRowBottom = Math.max(
-              ...secondRowCards.map((card) => card.offsetTop + card.offsetHeight),
-            );
-            const visibleRowsHeight = secondRowBottom - firstRowTop;
-            const bottomMargin = 24;
-            const preferredContextAbove = 220;
-            const availableContextAbove = Math.max(
-              0,
-              window.innerHeight - visibleRowsHeight - bottomMargin,
-            );
-            const contextAbove = Math.min(
-              preferredContextAbove,
-              availableContextAbove,
-            );
-            const gridTop = grid.getBoundingClientRect().top + window.scrollY;
-            const targetTop = Math.max(
-              0,
-              gridTop + firstRowTop - contextAbove,
-            );
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-            window.scrollTo({
-              top: targetTop,
-              behavior: reduceMotion ? 'auto' : 'smooth',
-            });
-          }
+          window.scrollTo({
+            top: targetTop,
+            behavior: reduceMotion ? 'auto' : 'smooth',
+          });
         }
+      } else {
+        const target =
+          document.querySelector<HTMLElement>('.pub-events-date-heading') ??
+          grid;
 
-        onCenterComplete();
-      });
-    });
+        target.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'center',
+        });
+      }
 
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      if (secondFrame) window.cancelAnimationFrame(secondFrame);
-    };
-  }, [centerBetweenRows, onCenterComplete]);
+      onScrollComplete();
+    }, scrollDelay);
+
+    return () => window.clearTimeout(timer);
+  }, [events, onScrollComplete, scrollAfterDateSelect]);
 
   return (
     <div
