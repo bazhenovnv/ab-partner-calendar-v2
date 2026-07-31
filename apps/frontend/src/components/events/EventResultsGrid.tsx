@@ -34,26 +34,45 @@ export function EventResultsGrid({
           (child): child is HTMLElement => child instanceof HTMLElement,
         );
 
-        if (cards.length > 3) {
-          const firstRowTop = cards[0]?.offsetTop ?? 0;
-          const secondRowFirst = cards.find((card) => card.offsetTop > firstRowTop + 1);
+        if (cards.length > 0) {
+          const rowTops = Array.from(
+            new Set(cards.map((card) => Math.round(card.offsetTop))),
+          ).sort((left, right) => left - right);
+          const firstRowTop = rowTops[0] ?? 0;
+          const secondRowTop = rowTops[1];
+          const firstRowCards = cards.filter(
+            (card) => Math.abs(card.offsetTop - firstRowTop) <= 1,
+          );
+          const firstRowBottom = Math.max(
+            ...firstRowCards.map((card) => card.offsetTop + card.offsetHeight),
+          );
 
-          if (secondRowFirst) {
-            const firstRowBottom = Math.max(
-              ...cards
-                .filter((card) => Math.abs(card.offsetTop - firstRowTop) <= 1)
-                .map((card) => card.offsetTop + card.offsetHeight),
+          let visibleAreaTop = firstRowTop;
+          let visibleAreaBottom = firstRowBottom;
+
+          if (cards.length > 3 && secondRowTop !== undefined) {
+            const secondRowCards = cards.filter(
+              (card) => Math.abs(card.offsetTop - secondRowTop) <= 1,
             );
-            const rowsMiddle = (firstRowBottom + secondRowFirst.offsetTop) / 2;
-            const gridTop = grid.getBoundingClientRect().top + window.scrollY;
-            const targetTop = Math.max(0, gridTop + rowsMiddle - window.innerHeight / 2);
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const secondRowBottom = Math.max(
+              ...secondRowCards.map((card) => card.offsetTop + card.offsetHeight),
+            );
 
-            window.scrollTo({
-              top: targetTop,
-              behavior: reduceMotion ? 'auto' : 'smooth',
-            });
+            visibleAreaBottom = secondRowBottom;
           }
+
+          const visibleAreaMiddle = (visibleAreaTop + visibleAreaBottom) / 2;
+          const gridTop = grid.getBoundingClientRect().top + window.scrollY;
+          const targetTop = Math.max(
+            0,
+            gridTop + visibleAreaMiddle - window.innerHeight / 2,
+          );
+          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          window.scrollTo({
+            top: targetTop,
+            behavior: reduceMotion ? 'auto' : 'smooth',
+          });
         }
 
         onCenterComplete();
@@ -75,7 +94,7 @@ export function EventResultsGrid({
         <div
           key={event.id}
           className={styles.cardReveal}
-          style={{ '--event-card-delay': `${index * 0.5}s` } as CSSProperties}
+          style={{ '--event-card-delay': `${index * 0.2}s` } as CSSProperties}
         >
           <EventCard event={event} />
         </div>
