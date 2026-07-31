@@ -5,7 +5,13 @@ import { EventsSection } from '@/components/events/EventsSection';
 import { MainEventsBanner } from '@/components/events/MainEventsBanner';
 import { EventModalProvider } from '@/components/events/EventModalProvider';
 import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
-import { fetchMainEvents, fetchPublicEvents, fetchDirections, fetchPublicQuotes } from '@/lib/api';
+import {
+  fetchCities,
+  fetchDirections,
+  fetchMainEvents,
+  fetchPublicEvents,
+  fetchPublicQuotes,
+} from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +39,7 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   let main: Awaited<ReturnType<typeof fetchMainEvents>> = [];
   let events: Awaited<ReturnType<typeof fetchPublicEvents>> = { events: [], total: 0, isFallback: false };
+  let cityOptions: Awaited<ReturnType<typeof fetchCities>> = [];
   let dirs: Awaited<ReturnType<typeof fetchDirections>> = [];
   let qs: Awaited<ReturnType<typeof fetchPublicQuotes>> = [];
 
@@ -42,9 +49,10 @@ export default async function HomePage() {
     events = DEV_EVENTS_RESPONSE;
     qs = DEV_QUOTES;
   } else {
-    const [mainEvents, initialEvents, directions, quotes] = await Promise.allSettled([
+    const [mainEvents, initialEvents, cities, directions, quotes] = await Promise.allSettled([
       fetchMainEvents(),
       fetchPublicEvents({ page: 1, limit: 6 }),
+      fetchCities(),
       fetchDirections(),
       fetchPublicQuotes(),
     ]);
@@ -53,6 +61,7 @@ export default async function HomePage() {
     events = initialEvents.status === 'fulfilled'
       ? initialEvents.value
       : { events: [], total: 0, isFallback: false };
+    cityOptions = cities.status === 'fulfilled' ? cities.value : [];
     dirs = directions.status === 'fulfilled' ? directions.value : [];
     qs = quotes.status === 'fulfilled' ? quotes.value : [];
 
@@ -62,7 +71,7 @@ export default async function HomePage() {
     <PublicShell>
       <EventModalProvider>
         <HeroSection />
-        <EventsSection initialData={events} directions={dirs} />
+        <EventsSection initialData={events} cities={cityOptions} directions={dirs} />
         <div className="pub-main-quotes-wrapper">
           <div className="pub-main-quotes-inner">
             <MainEventsBanner events={main} />

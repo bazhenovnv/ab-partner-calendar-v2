@@ -11,6 +11,45 @@ import { EventStatus, EventAutoStatus, Prisma } from '@prisma/client';
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private applyPublicFilters(
+    where: Prisma.EventWhereInput,
+    query: Pick<
+      EventsQueryDto,
+      'city' | 'regions' | 'cities' | 'directions' | 'format' | 'autoStatus' | 'priceType'
+    >,
+  ) {
+    const locationFilters: Prisma.EventWhereInput[] = [];
+
+    if (query.city) {
+      locationFilters.push(
+        { cityName: { contains: query.city, mode: 'insensitive' } },
+        { city: { name: { contains: query.city, mode: 'insensitive' } } },
+      );
+    }
+
+    for (const city of query.cities ?? []) {
+      locationFilters.push(
+        { cityName: { equals: city, mode: 'insensitive' } },
+        { city: { name: { equals: city, mode: 'insensitive' } } },
+      );
+    }
+
+    for (const region of query.regions ?? []) {
+      locationFilters.push(
+        { city: { region: { equals: region, mode: 'insensitive' } } },
+        { cityName: { startsWith: region, mode: 'insensitive' } },
+      );
+    }
+
+    if (locationFilters.length > 0) where.AND = [{ OR: locationFilters }];
+    if (query.directions?.length) {
+      where.directions = { some: { direction: { slug: { in: query.directions } } } };
+    }
+    if (query.format) where.format = query.format;
+    if (query.autoStatus?.length) where.autoStatus = { in: query.autoStatus };
+    if (query.priceType) where.priceType = query.priceType;
+  }
+
   // ── Auto-status cron (every 5 min) ────────────────────────────────────────
 
   @Cron(CronExpression.EVERY_5_MINUTES)
@@ -48,7 +87,7 @@ export class EventsService {
   // ── Public ─────────────────────────────────────────────────────────────────
 
   async getPublicEvents(query: EventsQueryDto) {
-    const { date, city, directions, format, autoStatus, priceType, page = 1, limit = 6 } = query;
+    const { date, page = 1, limit = 6 } = query;
 
     const where: Prisma.EventWhereInput = {
       status: EventStatus.PUBLISHED,
@@ -57,8 +96,8 @@ export class EventsService {
     // Without a selected date, show only current and upcoming events.
     // When a specific calendar date is selected, include all published
     // events for that date, including completed ones.
-    if (autoStatus?.length) {
-      where.autoStatus = { in: autoStatus };
+    if (query.autoStatus?.length) {
+      where.autoStatus = { in: query.autoStatus };
     } else if (!date) {
       where.autoStatus = {
         in: [
@@ -75,19 +114,7 @@ export class EventsService {
       where.startDate = { gte: d, lt: nextDay };
     }
 
-    if (city) {
-      where.OR = [
-        { cityName: { contains: city, mode: 'insensitive' } },
-        { city: { name: { contains: city, mode: 'insensitive' } } },
-      ];
-    }
-
-    if (directions?.length) {
-      where.directions = { some: { direction: { slug: { in: directions } } } };
-    }
-
-    if (format) where.format = format;
-    if (priceType) where.priceType = priceType;
+    this.applyPublicFilters(where, query);
 
     console.log('PUBLIC EVENTS QUERY', {
       query,
@@ -113,11 +140,13 @@ export class EventsService {
     // the public catalogue contains no matching events at all.
     const hasFilters = Boolean(
       date ||
-      city ||
-      format ||
-      autoStatus?.length ||
-      priceType ||
-      directions?.length,
+      query.city ||
+      query.regions?.length ||
+      query.cities?.length ||
+      query.format ||
+      query.autoStatus?.length ||
+      query.priceType ||
+      query.directions?.length,
     );
 
     if (events.length === 0 && page === 1 && !hasFilters) {
@@ -170,11 +199,14 @@ export class EventsService {
     const start = new Date(year, month - 1, 1);
     const end = new Date(year, month, 0, 23, 59, 59);
 
+    const where: Prisma.EventWhereInput = {
+      status: 'PUBLISHED',
+      startDate: { gte: start, lte: end },
+    };
+    this.applyPublicFilters(where, query);
+
     const events = await this.prisma.event.findMany({
-      where: {
-        status: 'PUBLISHED',
-        startDate: { gte: start, lte: end },
-      },
+      where,
       select: { startDate: true, endDate: true, autoStatus: true },
     });
 

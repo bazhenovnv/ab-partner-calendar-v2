@@ -138,7 +138,46 @@ describe('Pinned production homepage', () => {
     const content = readFileSync(app('layout.tsx'), 'utf8');
 
     assert.match(content, /stage77-final-figma-polish\.css/);
+    assert.match(content, /filter-calendar-figma\.css/);
     assert.doesNotMatch(content, /stage76-figma-interactions\.css/);
+  });
+
+  test('region, city and direction filters support visible multi-selection', () => {
+    const filters = readFileSync(lib('components/events/EventFilters.tsx'), 'utf8');
+    const section = readFileSync(lib('components/events/EventsSection.tsx'), 'utf8');
+
+    assert.match(filters, /regions: string\[\]/);
+    assert.match(filters, /cities: string\[\]/);
+    assert.match(filters, /aria-label="Выберите регионы или города"/);
+    assert.match(filters, /aria-label="Выберите одно или несколько направлений"/);
+    assert.match(filters, /selectedLabels\.join\(', '\)/);
+    assert.match(filters, /\.join\(', '\)/);
+    assert.match(section, /qs\.append\('regions', region\)/);
+    assert.match(section, /qs\.append\('cities', city\)/);
+    assert.match(section, /qs\.append\('directions', direction\)/);
+  });
+
+  test('applied filters are forwarded to calendar markers', () => {
+    const section = readFileSync(lib('components/events/EventsSection.tsx'), 'utf8');
+    const calendar = readFileSync(lib('components/events/EventCalendar.tsx'), 'utf8');
+
+    assert.match(section, /<EventCalendar[\s\S]*filters=\{filters\}/);
+    assert.match(calendar, /filters\.regions\.forEach/);
+    assert.match(calendar, /filters\.cities\.forEach/);
+    assert.match(calendar, /filters\.directions\.forEach/);
+    assert.match(calendar, /public\/calendar\?year=/);
+  });
+
+  test('filter and calendar use the measured Figma geometry', () => {
+    const styles = readFileSync(app('filter-calendar-figma.css'), 'utf8');
+
+    assert.match(styles, /width: 588px !important/);
+    assert.match(styles, /height: 632px !important/);
+    assert.match(styles, /width: 760\.866px !important/);
+    assert.match(styles, /height: 631\.824px !important/);
+    assert.match(styles, /gap: 41\.36px !important/);
+    assert.match(styles, /font-size: 21px !important/);
+    assert.match(styles, /font-size: 30px !important/);
   });
 
   test('canonical legal documents remain the frontend fallback', () => {

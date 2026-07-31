@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CalendarHeader } from '@/components/ui/CalendarHeader';
 import type { CalendarMarker } from '@/types/event';
+import type { ActiveFilters } from './EventFilters';
 
 const DAYS_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const;
 
 interface EventCalendarProps {
+  filters: ActiveFilters;
   selectedDate: string | null;
   onSelectDate: (date: string | null) => void;
 }
@@ -53,7 +55,7 @@ function getCalendarTooltip(marker?: CalendarMarker): string {
   return `${total} ${pluralizeEvents(total)} · ${details.join(' · ')}`;
 }
 
-export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps) {
+export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCalendarProps) {
   const [today] = useState(() => new Date());
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -61,10 +63,22 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
   const [loading, setLoading] = useState(false);
   const initializedToday = useRef(false);
 
+  const markerFilterQuery = useMemo(() => {
+    const query = new URLSearchParams();
+    filters.regions.forEach((region) => query.append('regions', region));
+    filters.cities.forEach((city) => query.append('cities', city));
+    filters.directions.forEach((direction) => query.append('directions', direction));
+    filters.autoStatus.forEach((status) => query.append('autoStatus', status));
+    if (filters.format) query.set('format', filters.format);
+    if (filters.priceType) query.set('priceType', filters.priceType);
+    return query.toString();
+  }, [filters]);
+
   const loadMarkers = useCallback(async (y: number, m: number) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/events/public/calendar?year=${y}&month=${m + 1}`);
+      const filterSuffix = markerFilterQuery ? `&${markerFilterQuery}` : '';
+      const res = await fetch(`/api/events/public/calendar?year=${y}&month=${m + 1}${filterSuffix}`);
       if (res.ok) {
         const data = (await res.json()) as CalendarMarker[];
         setMarkers(data);
@@ -74,7 +88,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [markerFilterQuery]);
 
   useEffect(() => {
     void loadMarkers(year, month);

@@ -14,7 +14,7 @@ export class FiltersService {
   }
 
   async getCities() {
-    const [catalogueCities, eventCities] = await Promise.all([
+    const [catalogueCities, eventLocations] = await Promise.all([
       this.prisma.city.findMany({
         where: { isActive: true },
         select: { id: true, name: true, region: true },
@@ -23,34 +23,53 @@ export class FiltersService {
       this.prisma.event.findMany({
         where: {
           status: 'PUBLISHED',
-          cityName: { not: null },
+          OR: [
+            { cityId: { not: null } },
+            { cityName: { not: null } },
+          ],
         },
-        select: { cityName: true },
-        distinct: ['cityName'],
+        select: {
+          cityName: true,
+          city: {
+            select: { id: true, name: true, region: true },
+          },
+        },
       }),
     ]);
 
-    const citiesByName = new Map(
-      catalogueCities.map((city) => [city.name.trim().toLocaleLowerCase('ru'), city]),
+    const locationKey = (name: string, region: string) =>
+      `${region.trim().toLocaleLowerCase('ru')}::${name.trim().toLocaleLowerCase('ru')}`;
+    const citiesByLocation = new Map(
+      catalogueCities.map((city) => [locationKey(city.name, city.region), city]),
     );
 
-    for (const eventCity of eventCities) {
-      const name = eventCity.cityName?.trim();
+    for (const eventLocation of eventLocations) {
+      if (eventLocation.city) {
+        const relatedCity = eventLocation.city;
+        const key = locationKey(relatedCity.name, relatedCity.region);
+        if (!citiesByLocation.has(key)) citiesByLocation.set(key, relatedCity);
+      }
+
+      const name = eventLocation.cityName?.trim();
       const normalizedName = name?.toLocaleLowerCase('ru');
 
       if (!name || !normalizedName || normalizedName === 'онлайн') {
         continue;
       }
 
-      if (!citiesByName.has(normalizedName)) {
-        citiesByName.set(normalizedName, {
+      const inferredRegion = name.split(',')[0]?.trim() || 'Другие регионы';
+      const key = locationKey(name, inferredRegion);
+      if (!citiesByLocation.has(key)) {
+        citiesByLocation.set(key, {
           id: `event-city:${normalizedName}`,
           name,
-          region: 'Города мероприятий',
+          region: inferredRegion,
         });
       }
     }
 
-    return Array.from(citiesByName.values());
+    return Array.from(citiesByLocation.values()).sort((a, b) =>
+      a.region.localeCompare(b.region, 'ru') || a.name.localeCompare(b.name, 'ru'),
+    );
   }
 }

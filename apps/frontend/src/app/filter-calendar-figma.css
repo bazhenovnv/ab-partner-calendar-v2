@@ -1,0 +1,412 @@
+/* Filter and calendar geometry measured from Figma nodes 19:975 and 19:832. */
+
+.pub-filter-title {
+  font-size: 21px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+.pub-filter-label {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+.pub-filter-select {
+  width: 100%;
+  height: 55px !important;
+  min-height: 55px !important;
+  padding: 0 18px !important;
+  border: 1.154px solid #e8e3dc !important;
+  border-radius: 9.233px !important;
+  background: #fff;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 16px !important;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.pub-filter-multi {
+  position: relative;
+  width: 100%;
+}
+
+.pub-filter-multi-trigger {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-image: none !important;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pub-filter-multi-value {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pub-filter-multi-chevron {
+  width: 12.414px;
+  height: 7px;
+  flex: 0 0 12.414px;
+  color: rgba(13, 35, 68, 0.48);
+  transition: transform 180ms ease-out;
+}
+
+.pub-filter-multi-trigger[aria-expanded='true'] .pub-filter-multi-chevron {
+  transform: rotate(180deg);
+}
+
+.pub-filter-multi-menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 7px;
+  border: 1px solid rgba(13, 35, 68, 0.14);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(13, 35, 68, 0.18);
+}
+
+.pub-filter-multi-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 14px;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.pub-filter-multi-option:hover,
+.pub-filter-multi-option[aria-selected='true'] {
+  background: rgba(124, 216, 179, 0.2);
+}
+
+.pub-filter-multi-option .pub-filter-checkbox {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.pub-filter-location-group + .pub-filter-location-group {
+  margin-top: 3px;
+}
+
+.pub-filter-location-region {
+  font-weight: 600;
+}
+
+.pub-filter-location-city {
+  padding-left: 22px;
+}
+
+.pub-filter-multi-empty {
+  margin: 0;
+  padding: 12px 8px;
+  color: rgba(13, 35, 68, 0.55);
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.pub-filter-checkbox {
+  width: 23.083px !important;
+  height: 23.083px !important;
+  border-radius: 4.617px !important;
+}
+
+.pub-filter-check-row {
+  grid-template-columns: 23.083px max-content !important;
+  min-height: 23.083px !important;
+  column-gap: 13.85px !important;
+}
+
+.pub-filter-check-text {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+}
+
+.pub-filter-dot {
+  width: 10.504px !important;
+  height: 10.504px !important;
+  flex-basis: 10.504px !important;
+}
+
+.pub-filter-reset-link {
+  color: #0d2344;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+}
+
+.pub-filter-reset-link:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+@media (min-width: 1400px) {
+  .pub-events-controls {
+    gap: 41.36px !important;
+  }
+
+  .pub-events-filters-col {
+    width: 588px !important;
+    height: 632px !important;
+    min-height: 632px !important;
+    padding: 0 !important;
+  }
+
+  .pub-filter-root {
+    position: relative;
+    display: block !important;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pub-filter-title {
+    position: absolute;
+    top: 39.061px;
+    left: 24.857px;
+    margin: 0 !important;
+  }
+
+  .pub-filter-two-col,
+  .pub-filter-left-col,
+  .pub-filter-right-col {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pub-filter-section {
+    position: absolute;
+    width: auto;
+    margin: 0 !important;
+  }
+
+  .pub-filter-section .pub-filter-label {
+    margin: 0 0 19.062px !important;
+  }
+
+  .pub-filter-section--location {
+    top: 108.861px;
+    left: 24.857px;
+    width: 236.821px;
+  }
+
+  .pub-filter-section--direction {
+    top: 227.271px;
+    left: 25px;
+    width: 236px;
+  }
+
+  .pub-filter-section--format {
+    top: 360.961px;
+    left: 24.857px;
+    width: 190px;
+  }
+
+  .pub-filter-section--status {
+    top: 108.861px;
+    left: 357.17px;
+    width: 206px;
+  }
+
+  .pub-filter-section--price {
+    top: 360.961px;
+    left: 357.17px;
+    width: 180px;
+  }
+
+  .pub-filter-section--format .pub-filter-options,
+  .pub-filter-section--price .pub-filter-options {
+    gap: 22.917px !important;
+  }
+
+  .pub-filter-section--status .pub-filter-options {
+    gap: 25px !important;
+  }
+
+  .pub-filter-divider-v {
+    position: absolute;
+    top: 108.861px;
+    left: 302.82px;
+    display: block !important;
+    width: 1px !important;
+    height: 369.55px !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    background: rgba(13, 35, 68, 0.18) !important;
+  }
+
+  .pub-filter-divider-h {
+    position: absolute;
+    top: 312px;
+    left: 357.17px;
+    display: block !important;
+    width: 205.97px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    background: rgba(13, 35, 68, 0.18) !important;
+  }
+
+  .pub-filter-actions {
+    position: absolute;
+    top: 515.077px;
+    left: 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pub-filter-apply-btn {
+    width: 230.509px !important;
+    height: 47.648px !important;
+    margin: 0 auto !important;
+    border-radius: 7.779px !important;
+    font-size: 13.69px !important;
+    font-weight: 600 !important;
+  }
+
+  .pub-filter-reset-link {
+    width: 145px;
+    height: 17px;
+    margin: 15.761px auto 0 !important;
+  }
+
+  .pub-events-calendar-col {
+    width: 760.866px !important;
+    height: 631.824px !important;
+    min-height: 631.824px !important;
+    padding: 28.066px 26.764px 28.066px 41.102px !important;
+  }
+
+  .pub-calendar {
+    gap: 29.002px !important;
+  }
+
+  .pub-calendar-header {
+    min-height: 37px !important;
+    flex-basis: 37px !important;
+  }
+
+  .pub-calendar-heading {
+    gap: 18.711px !important;
+    font-size: 30px !important;
+    line-height: normal !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-calendar-nav {
+    gap: 30.873px !important;
+  }
+
+  .pub-calendar-nav-button {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .pub-calendar-table {
+    width: 680.573px !important;
+    min-height: 0 !important;
+  }
+
+  .pub-calendar-weekdays {
+    flex-basis: 55px !important;
+  }
+
+  .pub-calendar-weekday {
+    height: 55px !important;
+    font-size: 19px !important;
+  }
+
+  .pub-calendar-cell {
+    font-size: 23px !important;
+  }
+}
+
+@media (max-width: 1399px) {
+  .pub-events-filters-col {
+    padding: 32px 28px !important;
+  }
+
+  .pub-filter-title {
+    margin-bottom: 30px !important;
+  }
+
+  .pub-filter-label {
+    margin-bottom: 12px !important;
+  }
+
+  .pub-filter-two-col {
+    gap: 28px;
+  }
+
+  .pub-filter-left-col,
+  .pub-filter-right-col {
+    flex: 1 1 0;
+  }
+
+  .pub-filter-divider-v {
+    margin: 0 !important;
+  }
+
+  .pub-filter-actions {
+    margin-top: 32px !important;
+  }
+
+  .pub-calendar-heading {
+    font-size: 26px !important;
+  }
+
+  .pub-calendar-weekday {
+    font-size: 16px !important;
+  }
+
+  .pub-calendar-cell {
+    font-size: 18px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-events-filters-col {
+    padding: 26px 20px !important;
+  }
+
+  .pub-filter-two-col {
+    gap: 0;
+  }
+
+  .pub-filter-checkbox {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .pub-filter-check-row {
+    grid-template-columns: 20px max-content !important;
+  }
+
+  .pub-filter-check-text,
+  .pub-filter-select {
+    font-size: 15px !important;
+  }
+}

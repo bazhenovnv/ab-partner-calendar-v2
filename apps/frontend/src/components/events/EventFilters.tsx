@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CityOption,
   DirectionOption,
@@ -10,7 +10,8 @@ import type {
 } from '@/types/event';
 
 export interface ActiveFilters {
-  city: string;
+  regions: string[];
+  cities: string[];
   directions: string[];
   format: EventFormat | '';
   priceType: PriceType | '';
@@ -18,6 +19,7 @@ export interface ActiveFilters {
 }
 
 interface EventFiltersProps {
+  cities: CityOption[];
   directions: DirectionOption[];
   filters: ActiveFilters;
   onChange: (filters: ActiveFilters) => void;
@@ -43,43 +45,77 @@ const PRICE_OPTIONS: { value: PriceType; label: string }[] = [
   { value: 'PAID', label: 'Платно' },
 ];
 
-const EMPTY: ActiveFilters = {
-  city: '',
+export const EMPTY_EVENT_FILTERS: ActiveFilters = {
+  regions: [],
+  cities: [],
   directions: [],
   format: '',
   priceType: '',
   autoStatus: [],
 };
 
-export function EventFilters({ directions, filters, onChange }: EventFiltersProps) {
-  const [pending, setPending] = useState<ActiveFilters>(filters);
-  const [cities, setCities] = useState<CityOption[]>([]);
-  const [citiesLoading, setCitiesLoading] = useState(true);
+interface CloseableMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
-  useEffect(() => setPending(filters), [filters]);
+function useCloseableMenu({ isOpen, onClose }: CloseableMenuProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let active = true;
+    if (!isOpen) return;
 
-    async function loadCities() {
-      try {
-        const response = await fetch('/api/filters/cities');
-        if (!response.ok) throw new Error(`Cities request failed: ${response.status}`);
-        const data = (await response.json()) as CityOption[];
-        if (active) setCities(data);
-      } catch {
-        if (active) setCities([]);
-      } finally {
-        if (active) setCitiesLoading(false);
-      }
-    }
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) onClose();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
 
-    void loadCities();
-    return () => { active = false; };
-  }, []);
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen, onClose]);
 
+  return containerRef;
+}
+
+function FilterChevron() {
+  return (
+    <svg className="pub-filter-multi-chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+      <path
+        d="M1 1.5 6 6.5l5-5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+interface LocationMultiSelectProps {
+  cities: CityOption[];
+  selectedRegions: string[];
+  selectedCities: string[];
+  onChange: (regions: string[], cities: string[]) => void;
+}
+
+function LocationMultiSelect({
+  cities,
+  selectedRegions,
+  selectedCities,
+  onChange,
+}: LocationMultiSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const closeMenu = () => setIsOpen(false);
+  const containerRef = useCloseableMenu({ isOpen, onClose: closeMenu });
   const groupedCities = useMemo(() => {
     const groups = new Map<string, CityOption[]>();
+
     for (const city of cities) {
       const region = city.region?.trim() || 'Другие регионы';
       groups.set(region, [...(groups.get(region) ?? []), city]);
@@ -92,9 +128,198 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
         cities: regionCities.sort((a, b) => a.name.localeCompare(b.name, 'ru')),
       }));
   }, [cities]);
+  const selectedLabels = [...selectedRegions, ...selectedCities];
+  const selectionLabel = selectedLabels.length > 0
+    ? selectedLabels.join(', ')
+    : 'Все регионы';
+
+  const toggleRegion = (region: string, regionCities: CityOption[]) => {
+    if (selectedRegions.includes(region)) {
+      onChange(selectedRegions.filter((item) => item !== region), selectedCities);
+      return;
+    }
+
+    const cityNames = new Set(regionCities.map((city) => city.name));
+    onChange(
+      [...selectedRegions, region],
+      selectedCities.filter((city) => !cityNames.has(city)),
+    );
+  };
+
+  const toggleCity = (city: CityOption) => {
+    const cityIsSelected = selectedCities.includes(city.name);
+    onChange(
+      selectedRegions.filter((region) => region !== city.region),
+      cityIsSelected
+        ? selectedCities.filter((item) => item !== city.name)
+        : [...selectedCities, city.name],
+    );
+  };
+
+  return (
+    <div ref={containerRef} className="pub-filter-multi">
+      <button
+        id="filter-region"
+        type="button"
+        className="pub-filter-select pub-filter-multi-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls="filter-region-menu"
+        title={selectionLabel}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className="pub-filter-multi-value">{selectionLabel}</span>
+        <FilterChevron />
+      </button>
+
+      {isOpen && (
+        <div
+          id="filter-region-menu"
+          className="pub-filter-multi-menu pub-filter-location-menu"
+          role="listbox"
+          aria-label="Выберите регионы или города"
+          aria-multiselectable="true"
+        >
+          <label className="pub-filter-multi-option" role="option" aria-selected={selectedLabels.length === 0}>
+            <input
+              type="checkbox"
+              className="pub-filter-checkbox"
+              checked={selectedLabels.length === 0}
+              onChange={() => onChange([], [])}
+            />
+            <span>Все регионы</span>
+          </label>
+
+          {groupedCities.map(({ region, cities: regionCities }) => (
+            <div key={region} className="pub-filter-location-group">
+              <label
+                className="pub-filter-multi-option pub-filter-location-region"
+                role="option"
+                aria-selected={selectedRegions.includes(region)}
+              >
+                <input
+                  type="checkbox"
+                  className="pub-filter-checkbox"
+                  checked={selectedRegions.includes(region)}
+                  onChange={() => toggleRegion(region, regionCities)}
+                />
+                <span>{region}</span>
+              </label>
+              {regionCities.map((city) => (
+                <label
+                  key={city.id}
+                  className="pub-filter-multi-option pub-filter-location-city"
+                  role="option"
+                  aria-selected={selectedCities.includes(city.name)}
+                >
+                  <input
+                    type="checkbox"
+                    className="pub-filter-checkbox"
+                    checked={selectedCities.includes(city.name)}
+                    onChange={() => toggleCity(city)}
+                  />
+                  <span>{city.name}</span>
+                </label>
+              ))}
+            </div>
+          ))}
+
+          {groupedCities.length === 0 && (
+            <p className="pub-filter-multi-empty">Города пока не добавлены</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface DirectionMultiSelectProps {
+  directions: DirectionOption[];
+  value: string[];
+  onChange: (value: string[]) => void;
+}
+
+function DirectionMultiSelect({ directions, value, onChange }: DirectionMultiSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const closeMenu = () => setIsOpen(false);
+  const containerRef = useCloseableMenu({ isOpen, onClose: closeMenu });
+  const selectionLabel = value.length > 0
+    ? value
+      .map((slug) => directions.find((item) => item.slug === slug)?.name ?? slug)
+      .join(', ')
+    : 'Все направления';
+
+  const toggleDirection = (slug: string) => {
+    onChange(
+      value.includes(slug)
+        ? value.filter((selectedSlug) => selectedSlug !== slug)
+        : [...value, slug],
+    );
+  };
+
+  return (
+    <div ref={containerRef} className="pub-filter-multi">
+      <button
+        id="filter-direction"
+        type="button"
+        className="pub-filter-select pub-filter-multi-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls="filter-direction-menu"
+        title={selectionLabel}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span className="pub-filter-multi-value">{selectionLabel}</span>
+        <FilterChevron />
+      </button>
+
+      {isOpen && (
+        <div
+          id="filter-direction-menu"
+          className="pub-filter-multi-menu"
+          role="listbox"
+          aria-label="Выберите одно или несколько направлений"
+          aria-multiselectable="true"
+        >
+          <label className="pub-filter-multi-option" role="option" aria-selected={value.length === 0}>
+            <input
+              type="checkbox"
+              className="pub-filter-checkbox"
+              checked={value.length === 0}
+              onChange={() => onChange([])}
+            />
+            <span>Все направления</span>
+          </label>
+          {directions.map((direction) => (
+            <label
+              key={direction.id}
+              className="pub-filter-multi-option"
+              role="option"
+              aria-selected={value.includes(direction.slug)}
+            >
+              <input
+                type="checkbox"
+                className="pub-filter-checkbox"
+                checked={value.includes(direction.slug)}
+                onChange={() => toggleDirection(direction.slug)}
+              />
+              <span>{direction.name}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function EventFilters({ cities, directions, filters, onChange }: EventFiltersProps) {
+  const [pending, setPending] = useState<ActiveFilters>(filters);
+
+  useEffect(() => setPending(filters), [filters]);
 
   const hasFilters =
-    pending.city !== '' ||
+    pending.regions.length > 0 ||
+    pending.cities.length > 0 ||
     pending.directions.length > 0 ||
     pending.format !== '' ||
     pending.priceType !== '' ||
@@ -103,7 +328,6 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
   const toggleFormat = (value: EventFormat) => {
     setPending((current) => ({ ...current, format: current.format === value ? '' : value }));
   };
-
   const toggleStatus = (value: EventAutoStatus) => {
     setPending((current) => ({
       ...current,
@@ -112,7 +336,6 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
         : [...current.autoStatus, value],
     }));
   };
-
   const togglePrice = (value: PriceType) => {
     setPending((current) => ({ ...current, priceType: current.priceType === value ? '' : value }));
   };
@@ -123,43 +346,30 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
 
       <div className="pub-filter-two-col">
         <div className="pub-filter-left-col">
-          <div className="pub-filter-section">
+          <div className="pub-filter-section pub-filter-section--location">
             <label className="pub-filter-label" htmlFor="filter-region">Регион / Город</label>
-            <select
-              id="filter-region"
-              className="pub-filter-select"
-              value={pending.city}
-              disabled={citiesLoading}
-              onChange={(event) => setPending((current) => ({ ...current, city: event.target.value }))}
-            >
-              <option value="">{citiesLoading ? 'Загрузка городов…' : 'Все регионы'}</option>
-              {groupedCities.map(({ region, cities: regionCities }) => (
-                <optgroup key={region} label={region}>
-                  {regionCities.map((city) => <option key={city.id} value={city.name}>{city.name}</option>)}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-
-          <div className="pub-filter-section">
-            <label className="pub-filter-label" htmlFor="filter-direction">Направление</label>
-            <select
-              id="filter-direction"
-              className="pub-filter-select"
-              value={pending.directions[0] ?? ''}
-              onChange={(event) => {
-                const value = event.target.value;
-                setPending((current) => ({ ...current, directions: value ? [value] : [] }));
+            <LocationMultiSelect
+              cities={cities}
+              selectedRegions={pending.regions}
+              selectedCities={pending.cities}
+              onChange={(regions, selectedCities) => {
+                setPending((current) => ({ ...current, regions, cities: selectedCities }));
               }}
-            >
-              <option value="">Все направления</option>
-              {directions.map((direction) => (
-                <option key={direction.id} value={direction.slug}>{direction.name}</option>
-              ))}
-            </select>
+            />
           </div>
 
-          <div className="pub-filter-section pub-filter-section--last">
+          <div className="pub-filter-section pub-filter-section--direction">
+            <label className="pub-filter-label" htmlFor="filter-direction">Направление</label>
+            <DirectionMultiSelect
+              directions={directions}
+              value={pending.directions}
+              onChange={(selectedDirections) => {
+                setPending((current) => ({ ...current, directions: selectedDirections }));
+              }}
+            />
+          </div>
+
+          <div className="pub-filter-section pub-filter-section--format pub-filter-section--last">
             <p className="pub-filter-label">Формат</p>
             <div className="pub-filter-options">
               {FORMAT_OPTIONS.map((option) => (
@@ -175,7 +385,7 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
         <div className="pub-filter-divider-v" aria-hidden="true" />
 
         <div className="pub-filter-right-col">
-          <div className="pub-filter-section">
+          <div className="pub-filter-section pub-filter-section--status">
             <p className="pub-filter-label">Статус</p>
             <div className="pub-filter-options">
               {STATUS_OPTIONS.map((option) => (
@@ -192,7 +402,7 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
 
           <div className="pub-filter-divider-h" aria-hidden="true" />
 
-          <div className="pub-filter-section pub-filter-section--last">
+          <div className="pub-filter-section pub-filter-section--price pub-filter-section--last">
             <p className="pub-filter-label">Стоимость</p>
             <div className="pub-filter-options">
               {PRICE_OPTIONS.map((option) => (
@@ -208,15 +418,14 @@ export function EventFilters({ directions, filters, onChange }: EventFiltersProp
 
       <div className="pub-filter-actions">
         <button type="button" className="pub-filter-apply-btn" onClick={() => onChange(pending)}>Применить</button>
-        {hasFilters && (
-          <button
-            type="button"
-            className="pub-filter-reset-link"
-            onClick={() => { setPending(EMPTY); onChange(EMPTY); }}
-          >
-            ↺ Сбросить фильтр
-          </button>
-        )}
+        <button
+          type="button"
+          className="pub-filter-reset-link"
+          disabled={!hasFilters}
+          onClick={() => { setPending(EMPTY_EVENT_FILTERS); onChange(EMPTY_EVENT_FILTERS); }}
+        >
+          ↺ Сбросить фильтр
+        </button>
       </div>
     </div>
   );

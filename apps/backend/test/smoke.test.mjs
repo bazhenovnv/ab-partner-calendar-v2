@@ -123,7 +123,31 @@ describe('Backend — public filter data', () => {
       'this.prisma.event.findMany',
       "status: 'PUBLISHED'",
       'cityName: { not: null }',
+      'eventLocation.city',
+      'inferredRegion',
       "normalizedName === 'онлайн'",
+    );
+  });
+
+  test('event list and calendar accept the same location and direction filters', () => {
+    fileContains(
+      src('modules/events/dto/events-query.dto.ts'),
+      'regions?: string[]',
+      'cities?: string[]',
+      'directions?: string[]',
+    );
+    fileContains(
+      src('modules/events/dto/calendar-query.dto.ts'),
+      'regions?: string[]',
+      'cities?: string[]',
+      'directions?: string[]',
+      'autoStatus?',
+    );
+    fileContains(
+      src('modules/events/events.service.ts'),
+      'applyPublicFilters',
+      'locationFilters',
+      'this.applyPublicFilters(where, query)',
     );
   });
 });

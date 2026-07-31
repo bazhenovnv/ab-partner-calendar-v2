@@ -5,30 +5,41 @@ import { cn } from '@/lib/utils';
 import { EventCard } from './EventCard';
 import { EventGridSkeleton } from './EventCardSkeleton';
 import { EventCalendar } from './EventCalendar';
-import { EventFilters, type ActiveFilters } from './EventFilters';
-import type { PublicEvent, PublicEventsResponse, DirectionOption } from '@/types/event';
+import {
+  EMPTY_EVENT_FILTERS,
+  EventFilters,
+  type ActiveFilters,
+} from './EventFilters';
+import type {
+  CityOption,
+  DirectionOption,
+  PublicEvent,
+  PublicEventsResponse,
+} from '@/types/event';
 
 const LIMIT = 6;
-const EMPTY_FILTERS: ActiveFilters = {
-  city: '',
-  directions: [],
-  format: '',
-  priceType: '',
-  autoStatus: [],
-};
-
 interface EventsSectionProps {
   initialData: PublicEventsResponse;
+  cities: CityOption[];
   directions: DirectionOption[];
 }
 
-export function EventsSection({ initialData, directions }: EventsSectionProps) {
+function appendFilters(qs: URLSearchParams, filters: ActiveFilters) {
+  filters.regions.forEach((region) => qs.append('regions', region));
+  filters.cities.forEach((city) => qs.append('cities', city));
+  filters.directions.forEach((direction) => qs.append('directions', direction));
+  filters.autoStatus.forEach((status) => qs.append('autoStatus', status));
+  if (filters.format) qs.set('format', filters.format);
+  if (filters.priceType) qs.set('priceType', filters.priceType);
+}
+
+export function EventsSection({ initialData, cities, directions }: EventsSectionProps) {
   const [events, setEvents] = useState<PublicEvent[]>(initialData.events);
   const [total, setTotal] = useState(initialData.total);
   const [isFallback, setIsFallback] = useState(initialData.isFallback);
   const [page, setPage] = useState(1);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ActiveFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<ActiveFilters>(EMPTY_EVENT_FILTERS);
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,15 +51,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
         qs.set('page', String(currentPage));
         qs.set('limit', String(LIMIT));
         if (currentDate) qs.set('date', currentDate);
-        if (currentFilters.city) qs.set('city', currentFilters.city);
-        if (currentFilters.format) qs.set('format', currentFilters.format);
-        if (currentFilters.priceType) qs.set('priceType', currentFilters.priceType);
-        currentFilters.autoStatus.forEach((status) =>
-          qs.append('autoStatus', status),
-        );
-        currentFilters.directions.forEach((direction) =>
-          qs.append('directions', direction),
-        );
+        appendFilters(qs, currentFilters);
 
         const response = await fetch(`/api/events/public?${qs.toString()}`);
         if (!response.ok) throw new Error(`Events request failed: ${response.status}`);
@@ -88,15 +91,16 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
 
   const resetAll = () => {
     setSelectedDate(null);
-    setFilters(EMPTY_FILTERS);
+    setFilters(EMPTY_EVENT_FILTERS);
     setPage(1);
-    startTransition(() => void fetchEvents(1, null, EMPTY_FILTERS));
+    startTransition(() => void fetchEvents(1, null, EMPTY_EVENT_FILTERS));
   };
 
   const totalPages = Math.ceil(total / LIMIT);
   const loading = isPending || isLoading;
   const hasNonDateFilters = Boolean(
-    filters.city ||
+    filters.regions.length ||
+    filters.cities.length ||
     filters.format ||
     filters.priceType ||
     filters.autoStatus.length ||
@@ -109,6 +113,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
         <div className="pub-events-controls">
           <div className="pub-events-filters-col">
             <EventFilters
+              cities={cities}
               directions={directions}
               filters={filters}
               onChange={handleFilterChange}
@@ -116,6 +121,7 @@ export function EventsSection({ initialData, directions }: EventsSectionProps) {
           </div>
           <div className="pub-events-calendar-col">
             <EventCalendar
+              filters={filters}
               selectedDate={selectedDate}
               onSelectDate={handleDateSelect}
             />
