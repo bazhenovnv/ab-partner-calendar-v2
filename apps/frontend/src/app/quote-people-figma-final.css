@@ -1,0 +1,64 @@
+/* Final isolated Figma lock for the two supplied quote cut-outs.
+   The source PNG dimensions are also their desktop render dimensions. */
+
+@media (min-width: 1440px) {
+  .quotes-section,
+  .quotes-layout {
+    height: 362px !important;
+    min-height: 362px !important;
+  }
+
+  .quotes-section {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .quotes-layout {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .quotes-person {
+    position: absolute !important;
+    bottom: 0 !important;
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .quotes-person-left {
+    left: 0 !important;
+    width: 302px !important;
+    height: 362px !important;
+  }
+
+  .quotes-person-right {
+    right: 0 !important;
+    width: 287px !important;
+    height: 359px !important;
+  }
+
+  .quotes-person-img--left,
+  .quotes-person-img--right {
+    display: block !important;
+    max-width: none !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  .quotes-person-img--left {
+    width: 302px !important;
+    height: 362px !important;
+    object-position: left bottom !important;
+  }
+
+  .quotes-person-img--right {
+    width: 287px !important;
+    height: 359px !important;
+    object-position: right bottom !important;
+  }
+}

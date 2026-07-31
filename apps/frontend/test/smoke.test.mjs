@@ -180,6 +180,28 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /font-size: 30px !important/);
   });
 
+  test('quote people use the original uncompressed Figma assets and dimensions', () => {
+    const component = readFileSync(lib('components/RotatingQuotesBlock.tsx'), 'utf8');
+    const layout = readFileSync(app('layout.tsx'), 'utf8');
+    const styles = readFileSync(app('quote-people-figma-final.css'), 'utf8');
+    const leftImage = readFileSync(join(FRONTEND, 'public', 'quote-person-left.png'));
+    const rightImage = readFileSync(join(FRONTEND, 'public', 'quote-person-right.png'));
+
+    assert.deepEqual(
+      { width: leftImage.readUInt32BE(16), height: leftImage.readUInt32BE(20) },
+      { width: 302, height: 362 },
+    );
+    assert.deepEqual(
+      { width: rightImage.readUInt32BE(16), height: rightImage.readUInt32BE(20) },
+      { width: 287, height: 359 },
+    );
+    assert.match(component, /width=\{302\}[\s\S]*height=\{362\}[\s\S]*unoptimized/);
+    assert.match(component, /width=\{287\}[\s\S]*height=\{359\}[\s\S]*unoptimized/);
+    assert.match(layout, /quote-people-figma-final\.css/);
+    assert.match(styles, /\.quotes-person-left[\s\S]*width: 302px !important[\s\S]*height: 362px !important/);
+    assert.match(styles, /\.quotes-person-right[\s\S]*width: 287px !important[\s\S]*height: 359px !important/);
+  });
+
   test('canonical legal documents remain the frontend fallback', () => {
     const content = readFileSync(lib('lib/legal.ts'), 'utf8');
 
