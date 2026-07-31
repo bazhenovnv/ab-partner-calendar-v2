@@ -80,6 +80,7 @@
 
 /* Balanced shadows spread equally on all four sides. */
 .pub-hero-panel,
+.pub-hero-panel:hover,
 .pub-events-shell,
 .pub-events-filters-col,
 .pub-events-calendar-col,
@@ -87,7 +88,11 @@
   box-shadow: var(--pub-card-shadow) !important;
 }
 
-.pub-hero-panel:hover,
+.pub-hero-panel,
+.pub-hero-panel:hover {
+  transition: none !important;
+}
+
 .pub-events-filters-col:hover,
 .pub-events-calendar-col:hover {
   box-shadow: var(--pub-card-shadow-hover) !important;
