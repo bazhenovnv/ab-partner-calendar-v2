@@ -265,3 +265,45 @@
     margin: 6px 0 0 !important;
   }
 }
+
+/* The production desktop viewport is 1363 px wide. Legacy footer layers add a
+   46 px downward translation in this range, which pins the text groups to the
+   legal divider. Cancel only that translation and preserve the responsive
+   grid, typography and stationery geometry already used by the site. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-brand,
+  .pub-footer-top > .pub-footer-col {
+    transform: none !important;
+  }
+
+  .pub-footer-contact-row {
+    grid-template-columns: 32.74px minmax(0, 1fr) !important;
+  }
+
+  .pub-footer-contact-icon {
+    display: block !important;
+    justify-self: center !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    transform: none !important;
+  }
+
+  .pub-footer-contact-icon--phone {
+    width: 45px !important;
+    height: 45px !important;
+  }
+
+  .pub-footer-contact-icon--email {
+    width: 27px !important;
+    height: 26.1px !important;
+  }
+
+  .pub-footer-contact-icon--location {
+    width: 21.15px !important;
+    height: 27.02px !important;
+  }
+}

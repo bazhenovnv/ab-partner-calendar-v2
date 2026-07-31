@@ -223,6 +223,11 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /width: 45px !important[\s\S]*height: 45px !important/);
     assert.match(styles, /width: 27px !important[\s\S]*height: 26\.1px !important/);
     assert.match(styles, /width: 21\.15px !important[\s\S]*height: 27\.02px !important/);
+    assert.match(styles, /@media \(min-width: 1024px\) and \(max-width: 1439px\)/);
+    assert.match(
+      styles,
+      /@media \(min-width: 1024px\) and \(max-width: 1439px\)[\s\S]*\.pub-footer-brand,[\s\S]*\.pub-footer-top > \.pub-footer-col[\s\S]*transform: none !important/,
+    );
   });
 
   test('canonical legal documents remain the frontend fallback', () => {
