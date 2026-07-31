@@ -42,17 +42,17 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_EVENT_FILTERS);
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
-  const [centerEventRows, setCenterEventRows] = useState(false);
+  const [scrollDateResults, setScrollDateResults] = useState(false);
 
   const fetchEvents = useCallback(
     async (
       currentPage: number,
       currentDate: string | null,
       currentFilters: ActiveFilters,
-      centerRowsAfterLoad = false,
+      scrollAfterLoad = false,
     ) => {
       setIsLoading(true);
-      setCenterEventRows(false);
+      setScrollDateResults(false);
       try {
         const qs = new URLSearchParams();
         qs.set('page', String(currentPage));
@@ -67,12 +67,12 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
         setEvents(data.events);
         setTotal(data.total);
         setIsFallback(data.isFallback);
-        setCenterEventRows(centerRowsAfterLoad && data.events.length > 3);
+        setScrollDateResults(scrollAfterLoad && data.events.length > 0);
       } catch {
         setEvents([]);
         setTotal(0);
         setIsFallback(false);
-        setCenterEventRows(false);
+        setScrollDateResults(false);
       } finally {
         setIsLoading(false);
       }
@@ -92,8 +92,8 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
     startTransition(() => void fetchEvents(1, date, filters, Boolean(date)));
   };
 
-  const handleRowsCentered = useCallback(() => {
-    setCenterEventRows(false);
+  const handleDateScrollComplete = useCallback(() => {
+    setScrollDateResults(false);
   }, []);
 
   const handlePageChange = (nextPage: number) => {
@@ -168,8 +168,8 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
             <>
               <EventResultsGrid
                 events={events}
-                centerBetweenRows={centerEventRows}
-                onCenterComplete={handleRowsCentered}
+                scrollAfterDateSelect={scrollDateResults}
+                onScrollComplete={handleDateScrollComplete}
               />
 
               {totalPages > 1 && (
