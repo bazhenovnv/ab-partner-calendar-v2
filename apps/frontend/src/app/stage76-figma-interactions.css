@@ -3,12 +3,14 @@
  * Loaded after the historical visual stages so the active rules are explicit.
  */
 
-/* Lower the title by the requested 4px while preserving the approved mark. */
-.pub-site-viewport
-  header
-  a[aria-label='АБ Афиша Бухгалтера — на главную']
-  > span {
-  margin-bottom: 0 !important;
+/* Keep the title slightly lower than the original stage without over-shifting it. */
+@media (min-width: 768px) {
+  .pub-site-viewport
+    header
+    a[aria-label='АБ Афиша Бухгалтера — на главную']
+    > span {
+    margin-bottom: 2px !important;
+  }
 }
 
 /* The hero panel uses one static Figma shadow in every pointer state. */
@@ -29,7 +31,10 @@
   font-size: 17px;
 }
 
-.pub-filter-select,
+.pub-filter-select {
+  font-size: 15px;
+}
+
 .pub-filter-check-text {
   font-size: 16px;
 }
@@ -116,38 +121,34 @@
   background: rgba(124, 216, 179, 0.2);
 }
 
-/* Lock the controls to the measured Figma cards. */
+/* Preserve the measured widths while keeping the controls vertically compact. */
 @media (min-width: 1400px) {
   .pub-events-filters-col {
     width: 588px;
-    height: 632px;
-    min-height: 632px;
+    height: 560px;
+    min-height: 560px;
   }
 
   .pub-events-calendar-col {
     width: 760.866px;
-    height: 631.824px;
-    min-height: 631.824px;
+    height: 560px;
+    min-height: 560px;
   }
 }
 
-/*
- * The Figma grid is rectangular, not square. Five-week months use the measured
- * 87px rows; six-week months share the same fixed grid height so the card never
- * grows vertically.
- */
+/* The grid stays rectangular and shares one fixed height across month lengths. */
 .pub-calendar {
   gap: 12px;
 }
 
 .pub-calendar-table {
   gap: 8px;
-  margin-right: -13.5px;
-  margin-left: -27.5px;
+  margin-right: 0;
+  margin-left: 0;
 }
 
 .pub-calendar-grid {
-  height: 435px;
+  height: 382px;
   grid-template-rows:
     repeat(var(--calendar-week-count, 5), minmax(0, 1fr));
   grid-auto-rows: minmax(0, 1fr);
@@ -158,11 +159,15 @@
   height: auto !important;
   min-height: 0;
   aspect-ratio: auto !important;
-  font-size: 23px;
+  font-size: 22px;
 }
 
 .pub-calendar-day--outside {
   cursor: pointer;
+}
+
+.pub-calendar-cell--outside .pub-calendar-day {
+  color: rgba(13, 35, 68, 0.25);
 }
 
 .pub-calendar-cell--outside:hover,
@@ -179,26 +184,30 @@
   padding-top: 8px;
 }
 
-/* Larger original corner artwork, with the original PNG served as-is. */
+/* Original Figma artwork sizes, with the source PNGs served as-is. */
 @media (min-width: 1024px) {
+  .pub-calendar-legend {
+    display: none;
+  }
+
   .quotes-person-left {
-    width: 332px !important;
-    height: 398px !important;
+    width: 302px !important;
+    height: 362px !important;
   }
 
   .quotes-person-right {
-    width: 316px !important;
-    height: 395px !important;
+    width: 287px !important;
+    height: 359px !important;
   }
 
   .quotes-person-img--left {
-    width: 332px !important;
-    height: 398px !important;
+    width: 302px !important;
+    height: 362px !important;
   }
 
   .quotes-person-img--right {
-    width: 316px !important;
-    height: 395px !important;
+    width: 287px !important;
+    height: 359px !important;
   }
 }
 
