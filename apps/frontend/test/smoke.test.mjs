@@ -216,10 +216,12 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /grid-template-columns: 376px 230px 411px 479px !important/);
     assert.match(styles, /width: 101\.29px !important/);
     assert.match(styles, /font-size: 25\.76px !important/);
-    assert.match(styles, /padding: 96px 0 0 57px !important/);
+    assert.match(styles, /padding: 7px 0 0 !important/);
+    assert.match(styles, /padding: 40px 0 0 57px !important/);
     assert.match(styles, /height: 251px/);
-    assert.match(styles, /width: 32\.74px !important/);
-    assert.match(styles, /width: 30px !important[\s\S]*height: 29px !important/);
+    assert.match(styles, /grid-template-columns: 32\.74px minmax\(0, 1fr\) !important/);
+    assert.match(styles, /width: 45px !important[\s\S]*height: 45px !important/);
+    assert.match(styles, /width: 27px !important[\s\S]*height: 26\.1px !important/);
     assert.match(styles, /width: 21\.15px !important[\s\S]*height: 27\.02px !important/);
   });
 

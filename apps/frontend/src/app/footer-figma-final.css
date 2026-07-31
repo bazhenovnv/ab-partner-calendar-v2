@@ -30,12 +30,12 @@
   }
 
   .pub-footer-brand {
-    padding: 63px 0 0 !important;
+    padding: 7px 0 0 !important;
   }
 
   .pub-footer-top > .pub-footer-col {
     position: relative !important;
-    padding: 96px 0 0 57px !important;
+    padding: 40px 0 0 57px !important;
     border-left: 0 !important;
   }
 
@@ -176,13 +176,13 @@
   }
 
   .pub-footer-contact-icon--phone {
-    width: 32.74px !important;
-    height: 32.74px !important;
+    width: 45px !important;
+    height: 45px !important;
   }
 
   .pub-footer-contact-icon--email {
-    width: 30px !important;
-    height: 29px !important;
+    width: 27px !important;
+    height: 26.1px !important;
   }
 
   .pub-footer-contact-icon--location {
