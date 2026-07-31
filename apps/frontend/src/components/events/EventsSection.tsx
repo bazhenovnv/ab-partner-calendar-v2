@@ -180,7 +180,7 @@ function formatDateRu(date: string): string {
 
 function DateEmptyState() {
   return (
-    <div className="flex min-h-[309px] items-center justify-center text-center" role="status">
+    <div className="flex min-h-[210px] items-center justify-center text-center" role="status">
       <p className="font-montserrat text-[30px] font-semibold text-[#b8b8b8]">Нет событий</p>
     </div>
   );
