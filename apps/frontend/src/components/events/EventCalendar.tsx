@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CalendarHeader } from '@/components/ui/CalendarHeader';
 import type { CalendarMarker } from '@/types/event';
@@ -125,16 +118,6 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
     }
   };
 
-  const selectAdjacentDate = (
-    targetYear: number,
-    targetMonth: number,
-    day: number,
-  ) => {
-    setYear(targetYear);
-    setMonth(targetMonth);
-    selectDate(toDateString(targetYear, targetMonth, day));
-  };
-
   const daysInMonth = getDaysInMonth(year, month);
   const firstDow = getFirstDayOfWeek(year, month);
   const occupiedCells = firstDow + daysInMonth;
@@ -169,50 +152,25 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           role="grid"
           aria-label="Календарь мероприятий"
           aria-busy={loading}
-          style={
-            {
-              '--calendar-week-count': totalCells / 7,
-            } as CSSProperties
-          }
         >
           {Array.from({ length: firstDow }).map((_, index) => {
             const previousMonth = month === 0 ? 11 : month - 1;
             const previousYear = month === 0 ? year - 1 : year;
             const previousMonthDays = getDaysInMonth(previousYear, previousMonth);
             const previousDay = previousMonthDays - firstDow + index + 1;
-            const previousDate = toDateString(
-              previousYear,
-              previousMonth,
-              previousDay,
-            );
             const isWeekend = index >= 5;
 
             return (
               <div
                 key={`previous-${index}`}
                 role="gridcell"
+                aria-disabled="true"
                 className={cn(
                   'pub-calendar-cell pub-calendar-cell--outside',
                   isWeekend && 'pub-calendar-cell--weekend',
                 )}
               >
-                <button
-                  type="button"
-                  className="pub-calendar-day pub-calendar-day--outside"
-                  aria-label={`${previousDay} числа, перейти к событиям предыдущего месяца`}
-                  onClick={() =>
-                    selectAdjacentDate(
-                      previousYear,
-                      previousMonth,
-                      previousDay,
-                    )
-                  }
-                >
-                  <span className="pub-calendar-day-number">
-                    {previousDay}
-                  </span>
-                  <span className="sr-only">{previousDate}</span>
-                </button>
+                {previousDay}
               </div>
             );
           })}
@@ -232,7 +190,6 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
               <div
                 key={day}
                 role="gridcell"
-                aria-selected={isSelected}
                 className={cn(
                   'pub-calendar-cell',
                   isWeekend && !isSelected && 'pub-calendar-cell--weekend',
@@ -243,6 +200,7 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
                   type="button"
                   aria-label={`${day} числа, ${tooltip.toLowerCase()}${isSelected ? ', выбрано' : ''}`}
                   aria-describedby={tooltipId}
+                  aria-selected={isSelected}
                   onClick={() => selectDate(isSelected ? null : dateStr)}
                   className={cn(
                     'pub-calendar-day',
@@ -275,31 +233,17 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
 
           {Array.from({ length: trailingCells }).map((_, index) => {
             const columnIndex = (occupiedCells + index) % 7;
-            const nextMonth = month === 11 ? 0 : month + 1;
-            const nextYear = month === 11 ? year + 1 : year;
-            const nextDay = index + 1;
-            const nextDate = toDateString(nextYear, nextMonth, nextDay);
-
             return (
               <div
                 key={`next-${index}`}
                 role="gridcell"
+                aria-disabled="true"
                 className={cn(
                   'pub-calendar-cell pub-calendar-cell--outside',
                   columnIndex >= 5 && 'pub-calendar-cell--weekend',
                 )}
               >
-                <button
-                  type="button"
-                  className="pub-calendar-day pub-calendar-day--outside"
-                  aria-label={`${nextDay} числа, перейти к событиям следующего месяца`}
-                  onClick={() =>
-                    selectAdjacentDate(nextYear, nextMonth, nextDay)
-                  }
-                >
-                  <span className="pub-calendar-day-number">{nextDay}</span>
-                  <span className="sr-only">{nextDate}</span>
-                </button>
+                {index + 1}
               </div>
             );
           })}

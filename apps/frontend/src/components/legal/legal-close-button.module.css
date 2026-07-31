@@ -1,0 +1,70 @@
+.close {
+  position: fixed;
+  top: 92px;
+  right: 24px;
+  z-index: 50;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #0d2344;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.close span {
+  display: block;
+  font-size: 38px;
+  font-weight: 300;
+  line-height: 1;
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.close:hover,
+.close:focus-visible {
+  color: #0d2344;
+  transform: scale(1.08);
+  box-shadow: 0 0 18px rgba(13, 35, 68, 0.22);
+}
+
+.close:hover span,
+.close:focus-visible span {
+  transform: scale(1.08);
+}
+
+.close:active {
+  transform: scale(0.98);
+}
+
+.close:focus-visible {
+  outline: 2px solid rgba(124, 216, 179, 0.7);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .close {
+    top: 78px;
+    right: 12px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .close span {
+    font-size: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .close,
+  .close span {
+    transition: none;
+  }
+}

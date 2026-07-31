@@ -142,7 +142,9 @@ function isAllowedWebsite(value?: string | null): value is string {
 }
 
 function organizerActionUrl(event: PublicEvent): string | null {
-  const candidates = [event.eventUrl, event.ticketUrl];
+  const candidates = event.ticketSalesEnabled
+    ? [event.ticketUrl, event.eventUrl]
+    : [event.eventUrl, event.ticketUrl];
 
   for (const candidate of candidates) {
     if (isAllowedWebsite(candidate)) return candidate;
@@ -328,8 +330,7 @@ function EventModal({
   const image = event.images?.[0];
   const imageUrl =
     image?.modalUrl ?? image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
-  const actionLabel =
-    event.priceType === 'PAID' ? 'Купить билет' : 'Участвовать';
+  const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
   const actionUrl = organizerActionUrl(event);
   const date = new Intl.DateTimeFormat('ru-RU', {
     day: 'numeric',

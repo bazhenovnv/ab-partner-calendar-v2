@@ -46,7 +46,6 @@ export function RotatingQuotesBlock({ quotes }: Props) {
             alt=""
             width={181}
             height={217}
-            unoptimized
             className="quotes-person-img quotes-person-img--left"
             aria-hidden
           />
@@ -75,7 +74,6 @@ export function RotatingQuotesBlock({ quotes }: Props) {
             alt=""
             width={172}
             height={215}
-            unoptimized
             className="quotes-person-img quotes-person-img--right"
             aria-hidden
           />

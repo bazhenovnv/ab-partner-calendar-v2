@@ -46,10 +46,10 @@ export function SiteFooter() {
               <Image
                 src={logoImg}
                 alt=""
-                width={60}
-                height={65}
+                width={46}
+                height={50}
                 className="shrink-0 object-contain"
-                style={{ height: '65px' }}
+                style={{ height: '50px' }}
                 aria-hidden
               />
               <span className="pub-footer-logo-text">

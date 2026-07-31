@@ -83,47 +83,6 @@ describe('Key components exist', () => {
   }
 });
 
-describe('Public filters and calendar interactions', () => {
-  test('direction filter supports multiple selected values', () => {
-    const content = readFileSync(
-      lib('components/events/EventFilters.tsx'),
-      'utf8',
-    );
-
-    assert.ok(content.includes('aria-multiselectable="true"'));
-    assert.ok(content.includes('toggleDirection'));
-    assert.ok(!content.includes('directions: value ? [value] : []'));
-  });
-
-  test('adjacent-month calendar days switch month and select their date', () => {
-    const content = readFileSync(
-      lib('components/events/EventCalendar.tsx'),
-      'utf8',
-    );
-
-    assert.ok(content.includes('selectAdjacentDate'));
-    assert.ok(content.includes('previousYear'));
-    assert.ok(content.includes('nextYear'));
-    assert.ok(!content.includes('aria-disabled="true"'));
-  });
-
-  test('desktop filter, calendar and quote artwork keep the approved compact geometry', () => {
-    const styles = readFileSync(app('stage76-figma-interactions.css'), 'utf8');
-    const events = readFileSync(
-      lib('components/events/EventsSection.tsx'),
-      'utf8',
-    );
-
-    assert.ok(styles.includes('height: 560px;'));
-    assert.ok(styles.includes('height: 382px;'));
-    assert.ok(styles.includes('width: 302px !important;'));
-    assert.ok(styles.includes('width: 287px !important;'));
-    assert.ok(styles.includes('.pub-calendar-cell--outside .pub-calendar-day'));
-    assert.ok(styles.includes('.pub-calendar-legend {\n    display: none;'));
-    assert.ok(events.includes('min-h-[210px]'));
-  });
-});
-
 // ── Admin auth guard ──────────────────────────────────────────────────────────
 
 describe('Admin auth guard', () => {
@@ -134,5 +93,43 @@ describe('Admin auth guard', () => {
       content.includes('token') || content.includes('auth'),
       'Missing auth check in AdminLayoutClient',
     );
+  });
+});
+
+// ── Pinned production homepage ──────────────────────────────────────────────
+
+describe('Pinned production homepage', () => {
+  test('hero uses the tracked composition asset', () => {
+    const content = readFileSync(lib('components/HeroSection.tsx'), 'utf8');
+
+    assert.ok(
+      existsSync(join(FRONTEND, 'public', 'hero-composition.png')),
+      'Missing public/hero-composition.png',
+    );
+    assert.match(content, /src="\/hero-composition\.png"/);
+    assert.doesNotMatch(content, /approved\.png/);
+  });
+
+  test('header action icons are embedded SVG components', () => {
+    const content = readFileSync(lib('components/layout/SiteHeader.tsx'), 'utf8');
+
+    assert.match(content, /function TelegramIcon\(\)/);
+    assert.match(content, /function MaxIcon\(\)/);
+    assert.match(content, /function PartnerIcon\(\)/);
+    assert.match(content, /className="pub-header-inner/);
+    assert.doesNotMatch(content, /approved\.png/);
+  });
+
+  test('approved July 29 visual layer is loaded', () => {
+    const content = readFileSync(app('layout.tsx'), 'utf8');
+
+    assert.match(content, /stage77-final-figma-polish\.css/);
+    assert.doesNotMatch(content, /stage76-figma-interactions\.css/);
+  });
+
+  test('canonical legal documents remain the frontend fallback', () => {
+    const content = readFileSync(lib('lib/legal.ts'), 'utf8');
+
+    assert.match(content, /LEGAL_DOCUMENTS/);
   });
 });

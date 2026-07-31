@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { LegalCloseButton } from '@/components/legal/LegalCloseButton';
 import { SLUG_TO_TYPE, FALLBACK_CONTENT, fetchLegalDoc, LEGAL_LINKS } from '@/lib/legal';
 
 interface Props {
@@ -35,6 +36,8 @@ export default async function LegalPage({ params }: Props) {
 
   return (
     <div className="legal-page">
+      <LegalCloseButton />
+
       <header className="legal-header">
         <Link href="/" className="legal-back" aria-label="На главную">
           ← На главную

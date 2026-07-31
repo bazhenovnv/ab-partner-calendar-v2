@@ -1,0 +1,100 @@
+/* Final approved reminder chooser alignment. */
+
+[class*='event-modal-v2_module__chooserHeaderImage'] {
+  width: 192px !important;
+  height: 106px !important;
+  margin: 0 auto 8px !important;
+  object-fit: contain !important;
+}
+
+[class*='event-modal-v2_module__chooser'] h3 {
+  margin: 0 0 8px !important;
+  font-size: 0 !important;
+  line-height: 1.15 !important;
+}
+
+[class*='event-modal-v2_module__chooser'] h3::before {
+  content: 'Напомнить о событии';
+  display: block;
+  color: #0d2344;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+[class*='event-modal-v2_module__chooser'] > p {
+  margin: 0 0 20px !important;
+  font-size: 0 !important;
+  line-height: 1.35 !important;
+}
+
+[class*='event-modal-v2_module__chooser'] > p::before {
+  content: 'Выберите, куда отправить напоминание';
+  display: block;
+  color: rgba(13, 35, 68, 0.72);
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+/* Close controls: button-like motion, but permanently transparent. */
+[class*='event-modal-v2_module__close'],
+[class*='event-modal-v2_module__chooserClose'] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: scale(1);
+  transform-origin: center;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease !important;
+  will-change: transform;
+}
+
+[class*='event-modal-v2_module__close']:hover,
+[class*='event-modal-v2_module__chooserClose']:hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: scale(1.12);
+  opacity: 0.82;
+}
+
+[class*='event-modal-v2_module__close']:active,
+[class*='event-modal-v2_module__chooserClose']:active {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: scale(0.92);
+  opacity: 1;
+}
+
+[class*='event-modal-v2_module__close']:focus-visible,
+[class*='event-modal-v2_module__chooserClose']:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 2px solid rgba(123, 217, 181, 0.9);
+  outline-offset: 5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*='event-modal-v2_module__close'],
+  [class*='event-modal-v2_module__chooserClose'] {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  [class*='event-modal-v2_module__chooserHeaderImage'] {
+    width: 150px !important;
+    height: 83px !important;
+  }
+
+  [class*='event-modal-v2_module__chooser'] h3::before {
+    font-size: 25px;
+  }
+
+  [class*='event-modal-v2_module__chooser'] > p::before {
+    font-size: 15px;
+  }
+}

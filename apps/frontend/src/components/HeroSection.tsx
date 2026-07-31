@@ -11,6 +11,7 @@ export function HeroSection() {
           </h1>
           <p className="pub-hero-sub">
             Онлайн и офлайн события для профессионального роста,
+            <br />
             обмена опытом и актуальной практики
           </p>
           <a href="#main-events" className="pub-hero-btn">

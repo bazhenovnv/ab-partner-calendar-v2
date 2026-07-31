@@ -1,0 +1,15 @@
+/* Final footer text-group vertical alignment. Loaded after all homepage overrides. */
+
+@media (min-width: 1400px) {
+  .pub-footer-brand,
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(58px) !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .pub-footer-brand,
+  .pub-footer-top > .pub-footer-col {
+    transform: translateY(46px) !important;
+  }
+}

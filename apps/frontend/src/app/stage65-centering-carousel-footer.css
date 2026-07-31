@@ -1,5 +1,5 @@
-/* Stage 65 — lock the user-approved desktop canvas to the viewport centre and
-   preserve the Figma carousel/footer geometry. Code-only visual corrections. */
+/* Stage 65 — lock the approved 80% desktop canvas to the viewport centre and
+   restore the Figma carousel/footer geometry. Code-only visual corrections. */
 
 html,
 body {
@@ -18,14 +18,13 @@ body {
 
 @media (min-width: 1440px) {
   .pub-site-scale {
-    /* 0.80 × 1.10 = 0.88; 100 / 0.88 = 113.6364% compensation. */
-    flex: 0 0 113.6364%;
-    width: 113.6364%;
-    min-height: 113.6364vh;
+    flex: 0 0 125%;
+    width: 125%;
+    min-height: 125vh;
     margin: 0;
     position: static;
     left: auto;
-    zoom: 0.88;
+    zoom: 0.8;
     transform: none;
     transform-origin: top center;
     overflow-x: clip;

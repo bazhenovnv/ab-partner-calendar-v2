@@ -7,9 +7,9 @@ const MAX_CHANNEL = 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4i
 const PARTNER_URL = 'https://ab-buhpartner.ru/';
 
 const NAV_BTN =
-  'flex h-[38px] items-center gap-2 rounded-lg border border-black/[0.12] bg-white px-4 ' +
-  'text-sm font-medium text-primary shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] ' +
-  'transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint';
+  'pub-header-action flex items-center border border-black/[0.12] bg-white ' +
+  'text-primary transition-colors hover:bg-gray-50 focus-visible:outline-none ' +
+  'focus-visible:ring-2 focus-visible:ring-mint';
 
 function TelegramIcon() {
   return (
@@ -60,8 +60,8 @@ function PartnerIcon() {
 
 export function SiteHeader() {
   return (
-    <header className="bg-transparent">
-      <div className="mx-auto flex h-[88px] max-w-[1496px] items-center justify-between gap-4 px-4 tablet:px-8">
+    <header className="pub-header bg-transparent">
+      <div className="pub-header-inner mx-auto flex max-w-[1496px] items-center justify-between">
         <Link href="/" className="pub-header-brand group" aria-label="АБ Афиша Бухгалтера — на главную">
           <Image
             src={logoImg}
@@ -75,7 +75,7 @@ export function SiteHeader() {
           <span className="pub-header-brand-title">Афиша Бухгалтера</span>
         </Link>
 
-        <nav aria-label="Внешние ссылки" className="flex items-center gap-2">
+        <nav aria-label="Внешние ссылки" className="pub-header-actions flex items-center">
           <a
             href={TG_CHANNEL}
             target="_blank"

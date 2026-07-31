@@ -1,0 +1,175 @@
+/* Final footer typography and spacing from the approved Figma frame.
+ * Loaded after every legacy footer stage. The stationery artwork and legal divider geometry are untouched.
+ */
+
+@media (min-width: 1024px) {
+  .pub-footer-brand-title {
+    margin: 0 !important;
+    color: #000000 !important;
+    font-size: 25.76px !important;
+    font-weight: 600 !important;
+    line-height: 39px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-brand-description,
+  .pub-footer-brand p {
+    max-width: 344px !important;
+    margin-top: 30px !important;
+    color: #0d2344 !important;
+    font-size: 21px !important;
+    font-weight: 400 !important;
+    line-height: 37px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-col-title {
+    margin: 0 0 24px !important;
+    color: #0d2344 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 28px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-links,
+  .pub-footer-project-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 13px !important;
+  }
+
+  .pub-footer-link {
+    margin: 0 !important;
+    color: #0d2344 !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+    line-height: 27px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-contact-list {
+    gap: 20px !important;
+  }
+
+  .pub-footer-contact-row {
+    min-height: 37px !important;
+    align-items: center !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    column-gap: 16px !important;
+  }
+
+  .pub-footer-contact-content {
+    gap: 2px !important;
+  }
+
+  .pub-footer-contact-row,
+  .pub-footer-contact-row a,
+  .pub-footer-contact-row span,
+  .pub-footer-contact-secondary {
+    color: #0d2344 !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+    line-height: 27px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-link--strong,
+  .pub-footer-contact-row--phone a,
+  .pub-footer-contact-row--phone strong {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 27px !important;
+  }
+
+  .pub-footer-contact-icon {
+    width: 30px !important;
+    height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    transform-origin: center !important;
+  }
+
+  .pub-footer-contact-icon--phone {
+    transform: scale(0.9) !important;
+  }
+
+  .pub-footer-contact-icon--email {
+    transform: scale(0.72) !important;
+  }
+
+  .pub-footer-contact-icon--location {
+    transform: scale(0.7) !important;
+  }
+
+  .pub-footer-disclaimer,
+  .pub-footer-operator {
+    max-width: none !important;
+    color: rgba(0, 0, 0, 0.5) !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 18px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-legal-link,
+  .pub-footer-copy {
+    font-size: 13px !important;
+    line-height: 18px !important;
+    letter-spacing: 0 !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .pub-footer-brand-title {
+    font-size: 22px !important;
+    line-height: 32px !important;
+  }
+
+  .pub-footer-brand-description,
+  .pub-footer-brand p {
+    max-width: 290px !important;
+    margin-top: 22px !important;
+    font-size: 16px !important;
+    line-height: 28px !important;
+  }
+
+  .pub-footer-col-title {
+    margin-bottom: 18px !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+  }
+
+  .pub-footer-link,
+  .pub-footer-contact-row,
+  .pub-footer-contact-row a,
+  .pub-footer-contact-row span,
+  .pub-footer-contact-secondary {
+    font-size: 14px !important;
+    line-height: 22px !important;
+  }
+
+  .pub-footer-link--strong,
+  .pub-footer-contact-row--phone a,
+  .pub-footer-contact-row--phone strong {
+    font-size: 15px !important;
+    line-height: 23px !important;
+  }
+
+  .pub-footer-links,
+  .pub-footer-project-list {
+    gap: 9px !important;
+  }
+
+  .pub-footer-contact-list {
+    gap: 14px !important;
+  }
+
+  .pub-footer-disclaimer,
+  .pub-footer-operator {
+    font-size: 11px !important;
+    line-height: 15px !important;
+  }
+}

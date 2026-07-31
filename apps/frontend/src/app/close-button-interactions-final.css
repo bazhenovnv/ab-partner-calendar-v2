@@ -1,0 +1,33 @@
+/* Final close-button interactions for event and reminder modals. */
+
+button[aria-label="Закрыть"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform-origin: center;
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    filter 180ms ease !important;
+}
+
+button[aria-label="Закрыть"]:hover,
+button[aria-label="Закрыть"]:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: scale(1.1) !important;
+  filter: drop-shadow(0 0 5px rgba(13, 35, 68, 0.32));
+}
+
+button[aria-label="Закрыть"]:active {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: scale(0.98) !important;
+  filter: drop-shadow(0 0 3px rgba(13, 35, 68, 0.24));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button[aria-label="Закрыть"] {
+    transition: none !important;
+  }
+}

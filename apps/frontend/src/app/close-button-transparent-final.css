@@ -1,0 +1,44 @@
+/* Final close-button treatment: no visible button tile, shadow follows the glyph only. */
+
+.close,
+.chooserClose {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    filter 160ms ease !important;
+}
+
+.close:hover,
+.close:focus-visible,
+.chooserClose:hover,
+.chooserClose:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 5px rgba(13, 35, 68, 0.34));
+}
+
+.close:active,
+.chooserClose:active {
+  transform: scale(1.03);
+  filter: drop-shadow(0 0 3px rgba(13, 35, 68, 0.25));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .close,
+  .chooserClose {
+    transition: color 160ms ease !important;
+  }
+
+  .close:hover,
+  .close:focus-visible,
+  .chooserClose:hover,
+  .chooserClose:focus-visible,
+  .close:active,
+  .chooserClose:active {
+    transform: none;
+  }
+}
