@@ -28,19 +28,13 @@ function TelegramIcon() {
 function MaxIcon() {
   return (
     <span className="pub-header-action-icon-wrap" aria-hidden="true">
-      <svg className="pub-header-action-icon" viewBox="0 0 32 32" fill="none">
-        <defs>
-          <linearGradient id="max-gradient" x1="6" y1="5" x2="26" y2="27" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#5B35F2" />
-            <stop offset="1" stopColor="#8B2BE2" />
-          </linearGradient>
-        </defs>
-        <circle cx="16" cy="16" r="15" fill="url(#max-gradient)" />
-        <path
-          d="M10.3 10.5h3.2l2.5 4.1 2.5-4.1h3.2v11h-3v-6.3l-2.7 4.1-2.7-4.1v6.3h-3v-11Z"
-          fill="white"
-        />
-      </svg>
+      <Image
+        src="/ui-icons/header/max-header-icon.png"
+        alt=""
+        width={28}
+        height={28}
+        className="pub-header-action-icon pub-header-action-icon--max"
+      />
     </span>
   );
 }

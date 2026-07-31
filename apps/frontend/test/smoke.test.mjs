@@ -110,12 +110,17 @@ describe('Pinned production homepage', () => {
     assert.doesNotMatch(content, /approved\.png/);
   });
 
-  test('header action icons are embedded SVG components', () => {
+  test('header action icons use tracked local components and assets', () => {
     const content = readFileSync(lib('components/layout/SiteHeader.tsx'), 'utf8');
 
     assert.match(content, /function TelegramIcon\(\)/);
     assert.match(content, /function MaxIcon\(\)/);
     assert.match(content, /function PartnerIcon\(\)/);
+    assert.match(content, /max-header-icon\.png/);
+    assert.ok(
+      existsSync(join(FRONTEND, 'public', 'ui-icons', 'header', 'max-header-icon.png')),
+      'Missing tracked MAX header icon',
+    );
     assert.match(content, /className="pub-header-inner/);
     assert.doesNotMatch(content, /approved\.png/);
   });

@@ -235,3 +235,48 @@
     font-size: 14px !important;
   }
 }
+
+/* Header brand and MAX icon — exact Desktop / 1920 Figma grid. */
+.pub-header-action-icon--max {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+  clip-path: circle(38.55% at 50% 50%);
+  mix-blend-mode: normal !important;
+}
+
+@media (min-width: 1400px) {
+  .pub-header-brand {
+    position: relative;
+    display: block;
+    width: 415px;
+    height: 64px;
+    margin-left: -15px;
+    flex: 0 0 415px;
+  }
+
+  .pub-header-brand-mark {
+    position: absolute;
+    top: -1.33px;
+    left: 20.92px;
+    width: 61.6px !important;
+    height: 66.66px !important;
+    max-width: 61.6px !important;
+    max-height: 66.66px !important;
+    object-fit: cover !important;
+    flex: none !important;
+  }
+
+  .pub-header-brand-title {
+    position: absolute;
+    top: 31.48px;
+    left: 112px;
+    margin: 0 !important;
+    font-size: 18.69px !important;
+    line-height: normal !important;
+    letter-spacing: 0 !important;
+  }
+}
