@@ -1,0 +1,267 @@
+/* Final isolated desktop footer lock from the approved 1920 px Figma frame.
+   It intentionally leaves every section above the footer unchanged. */
+
+@media (min-width: 1440px) {
+  .pub-footer-inner {
+    width: 1496px !important;
+    max-width: 1496px !important;
+    padding: 38px 0 24px !important;
+    box-sizing: border-box !important;
+  }
+
+  .pub-footer-top {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 376px 230px 411px 479px !important;
+    column-gap: 0 !important;
+    min-height: 365px !important;
+    padding: 0 !important;
+    align-items: start !important;
+  }
+
+  .pub-footer-brand,
+  .pub-footer-top > .pub-footer-col {
+    min-height: 0 !important;
+    margin: 0 !important;
+    transform: none !important;
+    align-self: start !important;
+    justify-content: flex-start !important;
+    box-sizing: border-box !important;
+  }
+
+  .pub-footer-brand {
+    padding: 63px 0 0 !important;
+  }
+
+  .pub-footer-top > .pub-footer-col {
+    position: relative !important;
+    padding: 96px 0 0 57px !important;
+    border-left: 0 !important;
+  }
+
+  .pub-footer-top > .pub-footer-col::before {
+    content: "";
+    position: absolute;
+    top: 34px;
+    left: 0;
+    width: 1px;
+    height: 251px;
+    background: rgba(13, 35, 68, 0.18);
+  }
+
+  .pub-footer-logo {
+    display: flex !important;
+    align-items: center !important;
+    height: 69px !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+
+  .pub-footer-logo-mark {
+    display: block !important;
+    width: 101.29px !important;
+    height: 69px !important;
+    min-width: 101.29px !important;
+    max-width: 101.29px !important;
+    min-height: 69px !important;
+    max-height: 69px !important;
+    margin: 0 0 0 -19px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
+  .pub-footer-logo-text {
+    display: block !important;
+    flex: 0 0 262px !important;
+    width: 262px !important;
+    margin: 0 0 0 -4px !important;
+    color: #111111 !important;
+    font-size: 25.76px !important;
+    font-weight: 600 !important;
+    line-height: 39px !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .pub-footer-logo-accent {
+    color: inherit !important;
+  }
+
+  .pub-footer-desc,
+  .pub-footer-brand p {
+    width: 344px !important;
+    max-width: 344px !important;
+    margin: 28px 0 0 !important;
+    color: #0d2344 !important;
+    font-size: 21px !important;
+    font-weight: 400 !important;
+    line-height: 37px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-col-title {
+    margin: 0 0 30px !important;
+    color: #0d2344 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 28px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-links {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pub-footer-link,
+  .pub-footer-contact-row,
+  .pub-footer-contact-row a,
+  .pub-footer-contact-row span,
+  .pub-footer-contact-secondary {
+    margin: 0 !important;
+    color: #0d2344 !important;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+    line-height: 27px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-project-link,
+  .pub-footer-project-link:hover,
+  .pub-footer-project-link:focus-visible {
+    transform: none !important;
+  }
+
+  .pub-footer-contact-list {
+    gap: 32px !important;
+  }
+
+  .pub-footer-contact-row {
+    display: grid !important;
+    grid-template-columns: 32.74px minmax(0, 1fr) !important;
+    column-gap: 16px !important;
+    min-height: 0 !important;
+    align-items: center !important;
+  }
+
+  .pub-footer-contact-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+
+  .pub-footer-link--strong,
+  .pub-footer-contact-row--phone a,
+  .pub-footer-contact-row--phone strong {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 27px !important;
+  }
+
+  .pub-footer-contact-icon {
+    display: block !important;
+    justify-self: center !important;
+    flex: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    transform: none !important;
+  }
+
+  .pub-footer-contact-icon--phone {
+    width: 32.74px !important;
+    height: 32.74px !important;
+  }
+
+  .pub-footer-contact-icon--email {
+    width: 30px !important;
+    height: 29px !important;
+  }
+
+  .pub-footer-contact-icon--location {
+    width: 21.15px !important;
+    height: 27.02px !important;
+  }
+
+  .pub-footer-stationery {
+    position: absolute !important;
+    z-index: 2 !important;
+    top: -30px !important;
+    right: 29px !important;
+    width: 450px !important;
+    height: 427px !important;
+    min-width: 450px !important;
+    min-height: 427px !important;
+    max-width: 450px !important;
+    max-height: 427px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  .pub-footer-stationery-img {
+    display: block !important;
+    width: 450px !important;
+    height: 427px !important;
+    min-width: 450px !important;
+    min-height: 427px !important;
+    max-width: 450px !important;
+    max-height: 427px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    transform: rotate(-4.07deg) !important;
+    transform-origin: center center !important;
+  }
+
+  .pub-footer-divider {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 1493px !important;
+    max-width: 1493px !important;
+    margin: 0 auto !important;
+    border-top-color: rgba(13, 35, 68, 0.18) !important;
+  }
+
+  .pub-footer-bottom {
+    margin-top: 20px !important;
+  }
+
+  .pub-footer-legal {
+    gap: 10px 20px !important;
+  }
+
+  .pub-footer-legal-link,
+  .pub-footer-copy {
+    color: rgba(13, 35, 68, 0.82) !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-disclaimer,
+  .pub-footer-operator {
+    width: 1496px !important;
+    max-width: 1496px !important;
+    color: rgba(0, 0, 0, 0.5) !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 18px !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-disclaimer {
+    margin: 18px 0 0 !important;
+  }
+
+  .pub-footer-operator {
+    margin: 6px 0 0 !important;
+  }
+}

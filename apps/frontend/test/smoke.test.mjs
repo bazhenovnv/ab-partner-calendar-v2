@@ -202,6 +202,27 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /\.quotes-person-right[\s\S]*width: 287px !important[\s\S]*height: 359px !important/);
   });
 
+  test('footer uses the measured Figma brand, grid and contact icon geometry', () => {
+    const component = readFileSync(lib('components/layout/SiteFooter.tsx'), 'utf8');
+    const layout = readFileSync(app('layout.tsx'), 'utf8');
+    const styles = readFileSync(app('footer-figma-final.css'), 'utf8');
+
+    assert.match(component, /width=\{101\}[\s\S]*height=\{69\}[\s\S]*unoptimized[\s\S]*pub-footer-logo-mark/);
+    assert.match(component, /pub-footer-contact-icon--phone/);
+    assert.match(component, /pub-footer-contact-icon--email/);
+    assert.match(component, /pub-footer-contact-icon--location/);
+    assert.match(layout, /footer-figma-final\.css/);
+    assert.match(styles, /width: 1496px !important/);
+    assert.match(styles, /grid-template-columns: 376px 230px 411px 479px !important/);
+    assert.match(styles, /width: 101\.29px !important/);
+    assert.match(styles, /font-size: 25\.76px !important/);
+    assert.match(styles, /padding: 96px 0 0 57px !important/);
+    assert.match(styles, /height: 251px/);
+    assert.match(styles, /width: 32\.74px !important/);
+    assert.match(styles, /width: 30px !important[\s\S]*height: 29px !important/);
+    assert.match(styles, /width: 21\.15px !important[\s\S]*height: 27\.02px !important/);
+  });
+
   test('canonical legal documents remain the frontend fallback', () => {
     const content = readFileSync(lib('lib/legal.ts'), 'utf8');
 

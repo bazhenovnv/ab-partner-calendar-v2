@@ -23,6 +23,7 @@ import './event-modal-figma-final.css';
 import './close-button-interactions-final.css';
 import './carousel-card-shadows-final.css';
 import './quote-people-figma-final.css';
+import './footer-figma-final.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 

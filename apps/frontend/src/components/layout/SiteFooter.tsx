@@ -46,10 +46,10 @@ export function SiteFooter() {
               <Image
                 src={logoImg}
                 alt=""
-                width={46}
-                height={50}
-                className="shrink-0 object-contain"
-                style={{ height: '50px' }}
+                width={101}
+                height={69}
+                unoptimized
+                className="pub-footer-logo-mark shrink-0 object-contain"
                 aria-hidden
               />
               <span className="pub-footer-logo-text">
@@ -79,8 +79,9 @@ export function SiteFooter() {
                 <Image
                   src="/ui-icons/footer/phone.png"
                   alt=""
-                  width={30}
-                  height={29}
+                  width={33}
+                  height={33}
+                  unoptimized
                   className="pub-footer-contact-icon pub-footer-contact-icon--phone"
                   aria-hidden
                 />
@@ -106,8 +107,9 @@ export function SiteFooter() {
                 <Image
                   src="/ui-icons/footer/email.png"
                   alt=""
-                  width={22}
-                  height={27}
+                  width={30}
+                  height={29}
+                  unoptimized
                   className="pub-footer-contact-icon pub-footer-contact-icon--email"
                   aria-hidden
                 />
@@ -138,6 +140,7 @@ export function SiteFooter() {
                   alt=""
                   width={22}
                   height={28}
+                  unoptimized
                   className="pub-footer-contact-icon pub-footer-contact-icon--location"
                   aria-hidden
                 />
