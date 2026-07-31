@@ -236,7 +236,7 @@ function GlobalEmptyState() {
     <div className="empty-state-card">
       <div className="empty-state-icon" aria-hidden="true">
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <rect cx="6" cy="12" width="36" height="30" rx="4" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" />
+          <rect x="6" y="12" width="36" height="30" rx="4" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" />
           <path d="M15 6v12M33 6v12M6 24h36" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" strokeLinecap="round" />
           <path d="M16 34l4 4 8-8" stroke="#7CD8B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
