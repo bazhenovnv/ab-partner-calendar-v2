@@ -101,12 +101,35 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
   }, [onSelectDate, selectedDate, today]);
 
   const scrollToSelectedDateResults = () => {
-    window.setTimeout(() => {
-      const target =
-        document.querySelector<HTMLElement>('.pub-events-date-heading, .empty-state-card') ??
-        document.getElementById('events');
-      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 260);
+    let attempt = 0;
+
+    const routeScroll = () => {
+      const grid = document.querySelector<HTMLElement>('[data-event-results-grid]');
+
+      if (grid) {
+        if (grid.children.length > 3) return;
+
+        const target =
+          document.querySelector<HTMLElement>('.pub-events-date-heading') ??
+          grid;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const emptyTarget =
+        document.querySelector<HTMLElement>('.empty-state-card') ??
+        document.querySelector<HTMLElement>('[role="status"]');
+
+      if (emptyTarget) {
+        emptyTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      attempt += 1;
+      if (attempt < 40) window.setTimeout(routeScroll, 50);
+    };
+
+    window.setTimeout(routeScroll, 260);
   };
 
   const selectDate = (date: string | null) => {
