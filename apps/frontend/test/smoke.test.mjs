@@ -99,14 +99,22 @@ describe('Admin auth guard', () => {
 // ── Pinned production homepage ──────────────────────────────────────────────
 
 describe('Pinned production homepage', () => {
-  test('hero uses the tracked composition asset', () => {
+  test('hero keeps the vase photo and desk calendar as separate tracked layers', () => {
     const content = readFileSync(lib('components/HeroSection.tsx'), 'utf8');
 
     assert.ok(
-      existsSync(join(FRONTEND, 'public', 'hero-composition.png')),
-      'Missing public/hero-composition.png',
+      existsSync(join(FRONTEND, 'public', 'hero', 'hero-vase-books.png')),
+      'Missing the tracked vase and books hero layer',
     );
-    assert.match(content, /src="\/hero-composition\.png"/);
+    assert.ok(
+      existsSync(join(FRONTEND, 'public', 'hero', 'hero-desk-calendar.png')),
+      'Missing the tracked desk calendar hero layer',
+    );
+    assert.match(content, /src="\/hero\/hero-vase-books\.png"/);
+    assert.match(content, /src="\/hero\/hero-desk-calendar\.png"/);
+    assert.match(content, /className="pub-hero-books"/);
+    assert.match(content, /className="pub-hero-calendar"/);
+    assert.doesNotMatch(content, /src="\/hero-composition\.png"/);
     assert.doesNotMatch(content, /approved\.png/);
   });
 
@@ -117,6 +125,7 @@ describe('Pinned production homepage', () => {
     assert.match(content, /function MaxIcon\(\)/);
     assert.match(content, /function PartnerIcon\(\)/);
     assert.match(content, /max-header-icon\.png/);
+    assert.match(content, /pub-header-action-icon-wrap--max/);
     assert.ok(
       existsSync(join(FRONTEND, 'public', 'ui-icons', 'header', 'max-header-icon.png')),
       'Missing tracked MAX header icon',

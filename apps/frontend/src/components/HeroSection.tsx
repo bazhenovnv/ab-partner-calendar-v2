@@ -20,12 +20,22 @@ export function HeroSection() {
         </div>
         <div className="pub-hero-visual" aria-hidden="true">
           <Image
-            src="/hero-composition.png"
+            src="/hero/hero-vase-books.png"
             alt=""
-            width={693}
+            width={738}
             height={323}
             priority
-            className="pub-hero-img"
+            unoptimized
+            className="pub-hero-books"
+          />
+          <Image
+            src="/hero/hero-desk-calendar.png"
+            alt=""
+            width={252}
+            height={249}
+            priority
+            unoptimized
+            className="pub-hero-calendar"
           />
         </div>
       </div>

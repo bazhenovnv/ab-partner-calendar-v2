@@ -27,7 +27,7 @@ function TelegramIcon() {
 
 function MaxIcon() {
   return (
-    <span className="pub-header-action-icon-wrap" aria-hidden="true">
+    <span className="pub-header-action-icon-wrap pub-header-action-icon-wrap--max" aria-hidden="true">
       <Image
         src="/ui-icons/header/max-header-icon.png"
         alt=""

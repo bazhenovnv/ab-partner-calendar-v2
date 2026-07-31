@@ -236,15 +236,29 @@
   }
 }
 
-/* Header brand and MAX icon — exact Desktop / 1920 Figma grid. */
-.pub-header-action-icon--max {
+/* Header brand and MAX icon — Desktop / 1920 Figma grid with optical sizing. */
+.pub-header-action-icon-wrap--max {
+  position: relative;
   width: 28px !important;
   height: 28px !important;
-  max-width: 28px !important;
-  max-height: 28px !important;
+  flex: 0 0 28px !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+  mix-blend-mode: normal !important;
+}
+
+.pub-header-action-icon--max {
+  position: absolute !important;
+  top: 50%;
+  left: 50%;
+  width: 36.32px !important;
+  height: 36.32px !important;
+  max-width: none !important;
+  max-height: none !important;
   object-fit: cover !important;
   border-radius: 0 !important;
-  clip-path: circle(38.55% at 50% 50%);
+  clip-path: none !important;
+  transform: translate(-50%, -50%);
   mix-blend-mode: normal !important;
 }
 
@@ -275,8 +289,21 @@
     top: 31.48px;
     left: 112px;
     margin: 0 !important;
-    font-size: 18.69px !important;
-    line-height: normal !important;
+    font-size: 28px !important;
+    line-height: 1 !important;
     letter-spacing: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .pub-header-action-icon-wrap--max {
+    width: 25px !important;
+    height: 25px !important;
+    flex-basis: 25px !important;
+  }
+
+  .pub-header-action-icon--max {
+    width: 32.43px !important;
+    height: 32.43px !important;
   }
 }
