@@ -1,7 +1,7 @@
 .cardReveal {
   opacity: 0;
   filter: blur(12px);
-  animation: eventCardReveal 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: eventCardReveal 100ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: var(--event-card-delay, 0s);
   will-change: opacity, transform, filter;
 }
