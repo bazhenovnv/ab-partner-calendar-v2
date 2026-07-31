@@ -47,7 +47,6 @@ export function EventResultsGrid({
             ...firstRowCards.map((card) => card.offsetTop + card.offsetHeight),
           );
 
-          let visibleAreaTop = firstRowTop;
           let visibleAreaBottom = firstRowBottom;
 
           if (cards.length > 3 && secondRowTop !== undefined) {
@@ -61,7 +60,7 @@ export function EventResultsGrid({
             visibleAreaBottom = secondRowBottom;
           }
 
-          const visibleAreaMiddle = (visibleAreaTop + visibleAreaBottom) / 2;
+          const visibleAreaMiddle = (firstRowTop + visibleAreaBottom) / 2;
           const gridTop = grid.getBoundingClientRect().top + window.scrollY;
           const targetTop = Math.max(
             0,
@@ -88,6 +87,7 @@ export function EventResultsGrid({
   return (
     <div
       ref={gridRef}
+      data-event-results-grid
       className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-[53px]"
     >
       {events.map((event, index) => (
