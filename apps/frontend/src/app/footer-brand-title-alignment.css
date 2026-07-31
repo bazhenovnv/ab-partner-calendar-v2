@@ -1,0 +1,9 @@
+/* Align only the footer brand title with the adjacent column headings at the
+   production desktop width. The logo mark, description, columns and artwork
+   retain their approved positions. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pub-footer-logo-text {
+    position: relative !important;
+    top: 18px !important;
+  }
+}
