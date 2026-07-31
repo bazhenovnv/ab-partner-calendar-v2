@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import { cn } from '@/lib/utils';
-import { EventCard } from './EventCard';
+import { EventResultsGrid } from './EventResultsGrid';
 import { EventGridSkeleton } from './EventCardSkeleton';
 import { EventCalendar } from './EventCalendar';
 import {
@@ -42,10 +42,17 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
   const [filters, setFilters] = useState<ActiveFilters>(EMPTY_EVENT_FILTERS);
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
+  const [centerEventRows, setCenterEventRows] = useState(false);
 
   const fetchEvents = useCallback(
-    async (currentPage: number, currentDate: string | null, currentFilters: ActiveFilters) => {
+    async (
+      currentPage: number,
+      currentDate: string | null,
+      currentFilters: ActiveFilters,
+      centerRowsAfterLoad = false,
+    ) => {
       setIsLoading(true);
+      setCenterEventRows(false);
       try {
         const qs = new URLSearchParams();
         qs.set('page', String(currentPage));
@@ -60,10 +67,12 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
         setEvents(data.events);
         setTotal(data.total);
         setIsFallback(data.isFallback);
+        setCenterEventRows(centerRowsAfterLoad && data.events.length > 3);
       } catch {
         setEvents([]);
         setTotal(0);
         setIsFallback(false);
+        setCenterEventRows(false);
       } finally {
         setIsLoading(false);
       }
@@ -80,8 +89,12 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
   const handleDateSelect = (date: string | null) => {
     setSelectedDate(date);
     setPage(1);
-    startTransition(() => void fetchEvents(1, date, filters));
+    startTransition(() => void fetchEvents(1, date, filters, Boolean(date)));
   };
+
+  const handleRowsCentered = useCallback(() => {
+    setCenterEventRows(false);
+  }, []);
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
@@ -153,11 +166,11 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
             )
           ) : (
             <>
-              <div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-[53px]">
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
+              <EventResultsGrid
+                events={events}
+                centerBetweenRows={centerEventRows}
+                onCenterComplete={handleRowsCentered}
+              />
 
               {totalPages > 1 && (
                 <Pagination
@@ -223,7 +236,7 @@ function GlobalEmptyState() {
     <div className="empty-state-card">
       <div className="empty-state-icon" aria-hidden="true">
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <rect x="6" y="12" width="36" height="30" rx="4" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" />
+          <rect cx="6" cy="12" width="36" height="30" rx="4" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" />
           <path d="M15 6v12M33 6v12M6 24h36" stroke="#0D2344" strokeWidth="1.8" strokeOpacity="0.18" strokeLinecap="round" />
           <path d="M16 34l4 4 8-8" stroke="#7CD8B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
