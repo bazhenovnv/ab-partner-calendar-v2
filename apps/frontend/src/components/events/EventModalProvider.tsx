@@ -416,6 +416,8 @@ function EventModal({
           ×
         </button>
 
+        <span className={`${v2.status} ${status.className}`}>{status.label}</span>
+
         <div className={v2.media}>
           <div className={v2.imageStage}>
             {imageUrl ? (
@@ -428,8 +430,6 @@ function EventModal({
 
         <div className={v2.content}>
           <div className={v2.scrollArea}>
-            <span className={`${v2.status} ${status.className}`}>{status.label}</span>
-
             <div
               className={v2.textScroll}
               role="region"

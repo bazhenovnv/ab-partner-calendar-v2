@@ -207,7 +207,21 @@ describe('Pinned production homepage', () => {
     const styles = readFileSync(app('event-modal-figma-final.css'), 'utf8');
 
     assert.match(styles, /aspect-ratio: 1496 \/ 788 !important/);
-    assert.match(styles, /padding: clamp\(34px, 3\.9vw, 60px\) 0 clamp\(34px, 3\.9vw, 60px\) clamp\(30px, 4\.25vw, 65px\) !important/);
+    assert.match(styles, /grid-template-columns: 47\.593583% minmax\(0, 52\.406417%\) !important/);
+    assert.match(styles, /max-width: 647px !important/);
+    assert.match(styles, /left: calc\(47\.593583% \+ clamp\(30px, 3\.229vw, 62px\)\) !important/);
+    assert.match(styles, /width: min\(655px, 100%\) !important/);
+    assert.match(styles, /height: clamp\(80px, 5\.833vw, 112px\) !important/);
+    assert.match(styles, /width: clamp\(150px, 12\.513vw, 240\.23px\) !important/);
+    assert.match(styles, /height: clamp\(46px, 3\.839vw, 73\.71px\) !important/);
+    assert.match(styles, /width: clamp\(125px, 10\.911vw, 209\.49px\) !important/);
+    assert.match(styles, /width: min\(348px, calc\(100vw - 24px\)\) !important/);
+    assert.match(styles, /height: min\(684px, calc\(100dvh - 24px\)\) !important/);
+    assert.match(styles, /width: 309px !important/);
+    assert.match(styles, /height: 52\.79px !important/);
+    assert.match(styles, /width: 125px !important/);
+    assert.match(styles, /width: 143px !important/);
+    assert.match(styles, /height: 44px !important/);
     assert.match(styles, /event-modal-v2_media__[\s\S]*background: #fff !important/);
     assert.match(styles, /event-modal-v2_content__[\s\S]*background: #fff !important/);
     assert.match(component, /type LineIconName = 'online' \| 'location' \| 'speaker'/);
@@ -230,7 +244,8 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /event-modal-v2_statusCompleted__[\s\S]*background: #a3a3a3 !important/);
     assert.match(styles, /event-modal-v2_close__[\s\S]*:hover,[\s\S]*color: #a3a3a3 !important/);
     assert.match(styles, /event-modal-v2_detailLine__[\s\S]*color: #0d2344 !important/);
-    assert.match(styles, /grid-template-columns: minmax\(0, 1\.25fr\) minmax\(0, 1fr\) minmax\(0, 1fr\) !important/);
+    assert.match(styles, /grid-template-columns: minmax\(0, 1\.08fr\) minmax\(0, 1fr\) minmax\(0, 1fr\) !important/);
+    assert.match(component, /<span className=\{`\$\{v2\.status\} \$\{status\.className\}`\}>\{status\.label\}<\/span>[\s\S]*<div className=\{v2\.media\}>/);
   });
 
   test('footer uses the measured Figma brand, grid and contact icon geometry', () => {
