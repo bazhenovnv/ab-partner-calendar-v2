@@ -47,7 +47,7 @@
 .media {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   min-height: 0;
   padding: 28px;
   background: #fff;
@@ -85,21 +85,50 @@
 }
 
 .scrollArea {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 28px 38px 16px;
   scrollbar-gutter: auto;
 }
 
 .status {
   display: inline-flex;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 12px;
   border-radius: 8px;
-  background: #f7cf66;
   padding: 6px 12px;
-  color: #5d4a08;
+  color: #000;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
+}
+
+.statusLive { background: #ffdb99; }
+.statusPlanned { background: #7cd8b3; }
+.statusCompleted { background: #a3a3a3; }
+
+.textScroll {
+  min-height: 0;
+  flex: 0 1 auto;
+  margin-bottom: 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #a3a3a3 transparent;
+  scrollbar-width: thin;
+}
+
+.textScroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.textScroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #a3a3a3;
 }
 
 .title {
@@ -120,6 +149,7 @@
 
 .facts {
   display: grid;
+  flex: 0 0 auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin: 0 0 18px;
@@ -185,6 +215,7 @@
 
 .lines {
   display: grid;
+  flex: 0 0 auto;
   gap: 7px;
   margin-bottom: 14px;
   color: #0d2344;
@@ -447,6 +478,7 @@
   .media { padding: 14px; }
   .content { display: block; }
   .scrollArea { overflow: visible; padding: 18px; }
+  .textScroll { overflow: visible; }
   .facts { grid-template-columns: 1fr; gap: 14px; border-radius: 16px; }
   .fact { grid-template-columns: 64px 1fr; }
   .actionBar { position: sticky; bottom: 0; padding: 14px 18px 16px; }

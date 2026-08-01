@@ -207,7 +207,7 @@ describe('Pinned production homepage', () => {
     const styles = readFileSync(app('event-modal-figma-final.css'), 'utf8');
 
     assert.match(styles, /aspect-ratio: 1496 \/ 788 !important/);
-    assert.match(styles, /padding: clamp\(34px, 3\.9vw, 60px\) clamp\(30px, 4\.25vw, 65px\) !important/);
+    assert.match(styles, /padding: clamp\(34px, 3\.9vw, 60px\) 0 clamp\(34px, 3\.9vw, 60px\) clamp\(30px, 4\.25vw, 65px\) !important/);
     assert.match(styles, /event-modal-v2_media__[\s\S]*background: #fff !important/);
     assert.match(styles, /event-modal-v2_content__[\s\S]*background: #fff !important/);
     assert.match(component, /type LineIconName = 'online' \| 'location' \| 'speaker'/);
@@ -215,9 +215,21 @@ describe('Pinned production homepage', () => {
     assert.match(component, /<rect x="9" y="3" width="6" height="12" rx="3"/);
     assert.doesNotMatch(component, /ActionIcon name="participate"/);
     assert.match(component, /<ReminderIcon \/>/);
-    assert.match(styles, /event-modal-v2_scrollArea__[\s\S]*overflow-y: auto !important/);
+    assert.match(component, /\(\?:когда\|дата\|время/);
+    assert.match(component, /className=\{v2\.textScroll\}/);
+    assert.match(component, /statusLive/);
+    assert.match(component, /statusPlanned/);
+    assert.match(component, /statusCompleted/);
+    assert.match(styles, /event-modal-v2_media__[\s\S]*justify-content: flex-end !important/);
+    assert.match(styles, /event-modal-v2_scrollArea__[\s\S]*overflow: hidden !important/);
+    assert.match(styles, /event-modal-v2_textScroll__[\s\S]*overflow-y: auto !important/);
     assert.match(styles, /event-modal-v2_eventText__[\s\S]*max-height: none !important[\s\S]*overflow: visible !important/);
     assert.match(styles, /event-modal-v2_description__[\s\S]*-webkit-line-clamp: unset !important/);
+    assert.match(styles, /event-modal-v2_statusLive__[\s\S]*background: #ffdb99 !important/);
+    assert.match(styles, /event-modal-v2_statusPlanned__[\s\S]*background: #7cd8b3 !important/);
+    assert.match(styles, /event-modal-v2_statusCompleted__[\s\S]*background: #a3a3a3 !important/);
+    assert.match(styles, /event-modal-v2_close__[\s\S]*:hover,[\s\S]*color: #a3a3a3 !important/);
+    assert.match(styles, /event-modal-v2_detailLine__[\s\S]*color: #0d2344 !important/);
     assert.match(styles, /grid-template-columns: minmax\(0, 1\.25fr\) minmax\(0, 1fr\) minmax\(0, 1fr\) !important/);
   });
 

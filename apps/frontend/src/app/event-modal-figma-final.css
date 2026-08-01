@@ -21,7 +21,8 @@
 
   [class*="event-modal-v2_media__"] {
     min-width: 0 !important;
-    padding: clamp(34px, 3.9vw, 60px) clamp(30px, 4.25vw, 65px) !important;
+    justify-content: flex-end !important;
+    padding: clamp(34px, 3.9vw, 60px) 0 clamp(34px, 3.9vw, 60px) clamp(30px, 4.25vw, 65px) !important;
     background: #fff !important;
   }
 
@@ -44,17 +45,33 @@
     overflow: hidden !important;
   }
 
-  /* Keep variable event copy accessible without changing the approved outer geometry. */
+  /* Only the title and description scroll; facts, details and actions remain fixed. */
   [class*="event-modal-v2_scrollArea__"] {
+    display: flex !important;
+    flex-direction: column !important;
     min-height: 0 !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
     padding: clamp(28px, 3.9vw, 60px) clamp(38px, 4.2vw, 65px) 8px clamp(30px, 4vw, 62px) !important;
-    scrollbar-width: none !important;
   }
 
-  [class*="event-modal-v2_scrollArea__"]::-webkit-scrollbar {
-    display: none !important;
+  [class*="event-modal-v2_textScroll__"] {
+    min-height: 0 !important;
+    flex: 0 1 auto !important;
+    margin-bottom: clamp(12px, 1.7vw, 26px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    scrollbar-color: #a3a3a3 transparent !important;
+    scrollbar-width: thin !important;
+  }
+
+  [class*="event-modal-v2_textScroll__"]::-webkit-scrollbar {
+    width: 5px !important;
+  }
+
+  [class*="event-modal-v2_textScroll__"]::-webkit-scrollbar-thumb {
+    border-radius: 999px !important;
+    background: #a3a3a3 !important;
   }
 
   [class*="event-modal-v2_close__"] {
@@ -62,27 +79,48 @@
     right: clamp(32px, 2.7vw, 52px) !important;
     width: clamp(34px, 2.7vw, 40px) !important;
     height: clamp(34px, 2.7vw, 40px) !important;
-    color: rgba(30, 30, 30, 0.72) !important;
+    color: #1e1e1e !important;
     font-size: clamp(28px, 2.3vw, 34px) !important;
+  }
+
+  [class*="event-modal-v2_close__"]:hover,
+  [class*="event-modal-v2_close__"]:focus-visible {
+    color: #a3a3a3 !important;
   }
 
   [class*="event-modal-v2_status__"] {
     margin-bottom: clamp(14px, 1.8vw, 28px) !important;
-    padding: clamp(5px, .55vw, 8px) clamp(12px, 1.2vw, 18px) !important;
-    border-radius: 9px !important;
-    font-size: clamp(11px, 1vw, 15px) !important;
+    min-height: clamp(30px, 2.55vw, 39px) !important;
+    padding: 0 clamp(16px, 1.5vw, 23px) !important;
+    border-radius: 0 !important;
+    color: #000 !important;
+    font-size: clamp(14px, 1.35vw, 22px) !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+  }
+
+  [class*="event-modal-v2_statusLive__"] {
+    background: #ffdb99 !important;
+  }
+
+  [class*="event-modal-v2_statusPlanned__"] {
+    background: #7cd8b3 !important;
+  }
+
+  [class*="event-modal-v2_statusCompleted__"] {
+    background: #a3a3a3 !important;
   }
 
   [class*="event-modal-v2_title__"] {
     margin-bottom: clamp(10px, 1.3vw, 20px) !important;
-    font-size: clamp(25px, 2.55vw, 48px) !important;
+    font-size: clamp(24px, 2.25vw, 42px) !important;
     line-height: 1.03 !important;
   }
 
   [class*="event-modal-v2_eventText__"] {
     gap: 8px !important;
     max-height: none !important;
-    margin-bottom: clamp(12px, 1.7vw, 26px) !important;
+    margin-bottom: 0 !important;
     overflow: visible !important;
   }
 
@@ -147,6 +185,10 @@
     gap: clamp(5px, .65vw, 10px) !important;
     margin-bottom: 0 !important;
     font-size: clamp(11px, .98vw, 15px) !important;
+  }
+
+  [class*="event-modal-v2_detailLine__"] svg {
+    color: #0d2344 !important;
   }
 
   [class*="event-modal-v2_actionBar__"] {

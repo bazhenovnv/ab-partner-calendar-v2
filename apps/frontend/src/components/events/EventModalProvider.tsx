@@ -164,12 +164,19 @@ function sanitizeDescription(value?: string | null): string {
    * маркированные служебные строки, не затрагивая обычный текст.
    */
   result = result.replace(
-    /<(p|div|li)[^>]*>\s*(?:<[^>]+>\s*)*(?:дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][\s\S]*?<\/\1>/gi,
+    /<(p|div|li)[^>]*>\s*(?:<[^>]+>\s*)*(?:когда|дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][\s\S]*?<\/\1>/gi,
     '',
   );
 
   result = result.replace(
-    /(?:^|\n)\s*(?:дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][^\n]*(?=\n|$)/gim,
+    /(?:^|\n)\s*(?:когда|дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][^\n]*(?=\n|$)/gim,
+    '',
+  );
+
+  // MAX может сохранить перенос внутри одного HTML-блока через <br>.
+  // Удаляем только служебную строку после переноса, сохраняя основной текст блока.
+  result = result.replace(
+    /<br\s*\/?\s*>\s*(?:<[^>]+>\s*)*(?:когда|дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][\s\S]*?(?=<br\s*\/?\s*>|<\/(?:p|div|li)>|$)/gi,
     '',
   );
 
@@ -375,10 +382,10 @@ function EventModal({
       : '';
   const status =
     event.autoStatus === 'LIVE'
-      ? 'Идёт сейчас'
+      ? { label: 'Идёт сейчас', className: v2.statusLive }
       : event.autoStatus === 'COMPLETED'
-        ? 'Завершено'
-        : 'Запланировано';
+        ? { label: 'Завершено', className: v2.statusCompleted }
+        : { label: 'Запланировано', className: v2.statusPlanned };
 
   useEffect(() => closeButtonRef.current?.focus(), []);
 
@@ -421,23 +428,31 @@ function EventModal({
 
         <div className={v2.content}>
           <div className={v2.scrollArea}>
-            <span className={v2.status}>{status}</span>
-            <h2 id="event-modal-title" className={v2.title}>{event.title}</h2>
+            <span className={`${v2.status} ${status.className}`}>{status.label}</span>
 
-            <div className={v2.eventText}>
-              {lead && (
-                <div
-                  className={v2.lead}
-                  dangerouslySetInnerHTML={{ __html: lead }}
-                />
-              )}
+            <div
+              className={v2.textScroll}
+              role="region"
+              aria-label="Заголовок и описание мероприятия"
+              tabIndex={0}
+            >
+              <h2 id="event-modal-title" className={v2.title}>{event.title}</h2>
 
-              {description && (
-                <div
-                  className={v2.description}
-                  dangerouslySetInnerHTML={{ __html: description }}
-                />
-              )}
+              <div className={v2.eventText}>
+                {lead && (
+                  <div
+                    className={v2.lead}
+                    dangerouslySetInnerHTML={{ __html: lead }}
+                  />
+                )}
+
+                {description && (
+                  <div
+                    className={v2.description}
+                    dangerouslySetInnerHTML={{ __html: description }}
+                  />
+                )}
+              </div>
             </div>
 
             <div className={v2.facts}>
