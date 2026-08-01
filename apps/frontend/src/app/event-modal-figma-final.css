@@ -44,10 +44,11 @@
     overflow: hidden !important;
   }
 
-  /* No internal scrollbar: text is compacted to the approved fixed composition. */
+  /* Keep variable event copy accessible without changing the approved outer geometry. */
   [class*="event-modal-v2_scrollArea__"] {
     min-height: 0 !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
     padding: clamp(28px, 3.9vw, 60px) clamp(38px, 4.2vw, 65px) 8px clamp(30px, 4vw, 62px) !important;
     scrollbar-width: none !important;
   }
@@ -80,9 +81,9 @@
 
   [class*="event-modal-v2_eventText__"] {
     gap: 8px !important;
-    max-height: clamp(96px, 13vh, 160px) !important;
+    max-height: none !important;
     margin-bottom: clamp(12px, 1.7vw, 26px) !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   [class*="event-modal-v2_lead__"],
@@ -92,15 +93,15 @@
   }
 
   [class*="event-modal-v2_description__"] {
-    display: -webkit-box !important;
-    overflow: hidden !important;
-    -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 6 !important;
+    display: grid !important;
+    overflow: visible !important;
+    -webkit-box-orient: initial !important;
+    -webkit-line-clamp: unset !important;
   }
 
   [class*="event-modal-v2_facts__"] {
-    grid-template-columns: minmax(0, .9fr) minmax(0, .9fr) minmax(210px, 1.35fr) !important;
-    gap: clamp(8px, 1.2vw, 18px) !important;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: clamp(8px, .85vw, 14px) !important;
     margin-bottom: clamp(12px, 1.55vw, 24px) !important;
     padding: clamp(10px, 1.15vw, 18px) clamp(12px, 1.45vw, 22px) !important;
     border-radius: clamp(14px, 1.2vw, 18px) !important;
@@ -112,7 +113,7 @@
   }
 
   [class*="event-modal-v2_fact__"]:last-child {
-    min-width: 210px !important;
+    min-width: 0 !important;
   }
 
   [class*="event-modal-v2_factIconWrap__"],

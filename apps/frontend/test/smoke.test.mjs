@@ -215,6 +215,10 @@ describe('Pinned production homepage', () => {
     assert.match(component, /<rect x="9" y="3" width="6" height="12" rx="3"/);
     assert.doesNotMatch(component, /ActionIcon name="participate"/);
     assert.match(component, /<ReminderIcon \/>/);
+    assert.match(styles, /event-modal-v2_scrollArea__[\s\S]*overflow-y: auto !important/);
+    assert.match(styles, /event-modal-v2_eventText__[\s\S]*max-height: none !important[\s\S]*overflow: visible !important/);
+    assert.match(styles, /event-modal-v2_description__[\s\S]*-webkit-line-clamp: unset !important/);
+    assert.match(styles, /grid-template-columns: minmax\(0, 1\.25fr\) minmax\(0, 1fr\) minmax\(0, 1fr\) !important/);
   });
 
   test('footer uses the measured Figma brand, grid and contact icon geometry', () => {
