@@ -230,24 +230,43 @@ function sanitizeDescription(value?: string | null): string {
   return result;
 }
 
-type LineIconName = 'location' | 'speaker';
+type LineIconName = 'online' | 'location' | 'speaker';
 
 function LineIcon({ name }: { name: LineIconName }) {
-  const paths: Record<LineIconName, string> = {
-    location: 'M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z',
-    speaker: 'M5.5 20c.6-4 3-6 6.5-6s5.9 2 6.5 6',
-  };
+  if (name === 'online') {
+    return (
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+        <path
+          d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9.2 9.2 0 0 0 0 13M18.5 5.5a9.2 9.2 0 0 1 0 13"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (name === 'speaker') {
+    return (
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+        <rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v4M9 21h6"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
 
   return (
     <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
-      {name === 'speaker' && (
-        <circle cx="12" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-      )}
-      {name === 'location' && (
-        <circle cx="12" cy="10" r="2" stroke="currentColor" strokeWidth="1.8" />
-      )}
+      <circle cx="12" cy="10" r="2" stroke="currentColor" strokeWidth="1.8" />
       <path
-        d={paths[name]}
+        d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
@@ -278,16 +297,7 @@ function FactIcon({ name }: { name: FactIconName }) {
   );
 }
 
-function ActionIcon({ name }: { name: 'participate' | 'remind' }) {
-  if (name === 'participate') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" className={v2.actionIcon}>
-        <path d="M8 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-        <path d="M12 8l4 4-4 4M4 12h12" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
+function ReminderIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={v2.actionIcon}>
       <path
@@ -388,8 +398,6 @@ function EventModal({
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [onClose, reminderOpen]);
 
-  const actionIcon = <ActionIcon name="participate" />;
-
   return (
     <div
       className={v2.backdrop}
@@ -449,7 +457,7 @@ function EventModal({
             <div className={v2.lines}>
               {event.format === 'ONLINE' ? (
                 <span className={v2.detailLine}>
-                  <LineIcon name="location" />
+                  <LineIcon name="online" />
                   <span className={v2.detailLabel}>Онлайн</span>
                 </span>
               ) : (
@@ -487,9 +495,7 @@ function EventModal({
                   href={actionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ gap: 8 }}
                 >
-                  {actionIcon}
                   {actionLabel}
                 </a>
               ) : (
@@ -498,9 +504,7 @@ function EventModal({
                   type="button"
                   disabled
                   title="Сайт организатора не указан"
-                  style={{ gap: 8 }}
                 >
-                  {actionIcon}
                   {actionLabel}
                 </button>
               )}
@@ -511,7 +515,7 @@ function EventModal({
                 type="button"
                 onClick={() => setReminderOpen(true)}
               >
-                <ActionIcon name="remind" />
+                <ReminderIcon />
                 Напомнить
               </button>
             </div>

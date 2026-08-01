@@ -202,6 +202,21 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /\.quotes-person-right[\s\S]*width: 287px !important[\s\S]*height: 359px !important/);
   });
 
+  test('event modal keeps the measured Figma surface, spacing and icon set', () => {
+    const component = readFileSync(lib('components/events/EventModalProvider.tsx'), 'utf8');
+    const styles = readFileSync(app('event-modal-figma-final.css'), 'utf8');
+
+    assert.match(styles, /aspect-ratio: 1496 \/ 788 !important/);
+    assert.match(styles, /padding: clamp\(34px, 3\.9vw, 60px\) clamp\(30px, 4\.25vw, 65px\) !important/);
+    assert.match(styles, /event-modal-v2_media__[\s\S]*background: #fff !important/);
+    assert.match(styles, /event-modal-v2_content__[\s\S]*background: #fff !important/);
+    assert.match(component, /type LineIconName = 'online' \| 'location' \| 'speaker'/);
+    assert.match(component, /<LineIcon name="online" \/>/);
+    assert.match(component, /<rect x="9" y="3" width="6" height="12" rx="3"/);
+    assert.doesNotMatch(component, /ActionIcon name="participate"/);
+    assert.match(component, /<ReminderIcon \/>/);
+  });
+
   test('footer uses the measured Figma brand, grid and contact icon geometry', () => {
     const component = readFileSync(lib('components/layout/SiteFooter.tsx'), 'utf8');
     const layout = readFileSync(app('layout.tsx'), 'utf8');

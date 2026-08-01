@@ -15,13 +15,14 @@
     aspect-ratio: 1496 / 788 !important;
     grid-template-columns: minmax(0, 46%) minmax(0, 54%) !important;
     border-radius: clamp(22px, 2.35vw, 35px) !important;
+    background: #fff !important;
     overflow: hidden !important;
   }
 
   [class*="event-modal-v2_media__"] {
     min-width: 0 !important;
     padding: clamp(34px, 3.9vw, 60px) clamp(30px, 4.25vw, 65px) !important;
-    background: #f7faf9 !important;
+    background: #fff !important;
   }
 
   [class*="event-modal-v2_imageStage__"] {
@@ -39,6 +40,7 @@
   [class*="event-modal-v2_content__"] {
     min-height: 0 !important;
     grid-template-rows: minmax(0, 1fr) auto !important;
+    background: #fff !important;
     overflow: hidden !important;
   }
 
@@ -55,10 +57,11 @@
   }
 
   [class*="event-modal-v2_close__"] {
-    top: clamp(14px, 1.35vw, 20px) !important;
-    right: clamp(18px, 1.7vw, 26px) !important;
+    top: clamp(24px, 2vw, 38px) !important;
+    right: clamp(32px, 2.7vw, 52px) !important;
     width: clamp(34px, 2.7vw, 40px) !important;
     height: clamp(34px, 2.7vw, 40px) !important;
+    color: rgba(30, 30, 30, 0.72) !important;
     font-size: clamp(28px, 2.3vw, 34px) !important;
   }
 
