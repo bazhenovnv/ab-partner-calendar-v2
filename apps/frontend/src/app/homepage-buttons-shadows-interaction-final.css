@@ -2,6 +2,7 @@
 
 :root {
   --pub-card-shadow: 0 0 14px rgba(13, 35, 68, 0.16);
+  --pub-hero-shadow: 0 0 14px rgba(13, 35, 68, 0.20);
   --pub-card-shadow-hover: 0 0 18px rgba(13, 35, 68, 0.20);
   --pub-button-shadow: 0 0 9px rgba(13, 35, 68, 0.18);
 }
@@ -90,6 +91,7 @@
 
 .pub-hero-panel,
 .pub-hero-panel:hover {
+  box-shadow: var(--pub-hero-shadow) !important;
   transition: none !important;
 }
 
