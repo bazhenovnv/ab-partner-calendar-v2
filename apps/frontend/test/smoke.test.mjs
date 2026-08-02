@@ -248,6 +248,30 @@ describe('Pinned production homepage', () => {
     assert.match(component, /<span className=\{`\$\{v2\.status\} \$\{status\.className\}`\}>\{status\.label\}<\/span>[\s\S]*<div className=\{v2\.media\}>/);
   });
 
+  test('reminder chooser uses the measured Figma geometry and shared MAX icon', () => {
+    const component = readFileSync(lib('components/events/EventModalProvider.tsx'), 'utf8');
+    const reminderStyles = readFileSync(app('reminder-figma-final.css'), 'utf8');
+    const eventStyles = readFileSync(app('event-modal-figma-final.css'), 'utf8');
+    const layout = readFileSync(app('layout.tsx'), 'utf8');
+
+    assert.match(component, /Напомнить о событии/);
+    assert.match(component, /Выберите, куда отправить напоминание/);
+    assert.match(component, /\/ui-icons\/header\/max-header-icon\.png/);
+    assert.doesNotMatch(component, /Получить напоминание в боте/);
+    assert.match(reminderStyles, /width: min\(240px, calc\(100% - 24px\)\) !important/);
+    assert.match(reminderStyles, /padding: 24px 23px 39px 22px !important/);
+    assert.match(reminderStyles, /width: 107px !important[\s\S]*height: 59px !important/);
+    assert.match(reminderStyles, /width: 195px !important[\s\S]*height: 40px !important/);
+    assert.match(reminderStyles, /gap: 12px !important/);
+    assert.match(reminderStyles, /width: 29\.84px !important/);
+    assert.match(reminderStyles, /color: #686868 !important/);
+    assert.doesNotMatch(eventStyles, /Reminder chooser remains independent from event geometry/);
+    assert.ok(
+      layout.indexOf("close-button-interactions-final.css") < layout.indexOf("reminder-figma-final.css"),
+      'Reminder chooser overrides must load after shared modal interactions',
+    );
+  });
+
   test('footer uses the measured Figma brand, grid and contact icon geometry', () => {
     const component = readFileSync(lib('components/layout/SiteFooter.tsx'), 'utf8');
     const layout = readFileSync(app('layout.tsx'), 'utf8');

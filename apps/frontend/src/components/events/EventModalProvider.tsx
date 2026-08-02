@@ -601,12 +601,12 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
         <button ref={closeButtonRef} className={v2.chooserClose} type="button" onClick={onClose} aria-label="Закрыть">×</button>
 
         <Image src="/ui-icons/reminder-header.png" width={107} height={59} alt="" className={v2.chooserHeaderImage} />
-        <h3 id="reminder-dialog-title">Напомнить</h3>
-        <p>Выберите удобный способ получить напоминание</p>
+        <h3 id="reminder-dialog-title">Напомнить о событии</h3>
+        <p>Выберите, куда отправить напоминание</p>
 
         <div className={v2.platforms}>
-          <ReminderLink href={telegramUrl} image="/ui-icons/icon-telegram.png" title="Telegram" subtitle="Получить напоминание в боте" />
-          <ReminderLink href={maxUrl} image="/ui-icons/icon-max.png" title="MAX" subtitle="Получить напоминание в боте" />
+          <ReminderLink href={telegramUrl} image="/ui-icons/icon-telegram.png" title="Telegram" />
+          <ReminderLink href={maxUrl} image="/ui-icons/header/max-header-icon.png" title="MAX" isMax />
         </div>
 
         <button className={v2.cancel} type="button" onClick={onClose}>Отмена</button>
@@ -619,19 +619,26 @@ function ReminderLink({
   href,
   image,
   title,
-  subtitle,
+  isMax = false,
 }: {
   href: string | null;
   image: string;
   title: string;
-  subtitle: string;
+  isMax?: boolean;
 }) {
   const content = (
     <>
-      <Image src={image} width={56} height={56} alt="" />
+      <span className={`${v2.platformIcon} ${isMax ? v2.platformIconMax : ''}`}>
+        <Image
+          src={image}
+          width={23}
+          height={23}
+          alt=""
+          className={`${v2.platformIconImage} ${isMax ? v2.platformIconImageMax : ''}`}
+        />
+      </span>
       <span className={v2.platformText}>
         <strong>{title}</strong>
-        <small>{subtitle}</small>
       </span>
       <span className={v2.platformArrow} aria-hidden="true">›</span>
     </>

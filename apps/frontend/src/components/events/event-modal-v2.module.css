@@ -419,7 +419,20 @@
   background: #f5fcf9;
 }
 
-.platform img { width: 56px; height: 56px; object-fit: contain; }
+.platformIcon {
+  position: relative;
+  display: block;
+  width: 56px;
+  height: 56px;
+}
+
+.platformIconMax {
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.platformIconImage { width: 56px; height: 56px; object-fit: contain; }
+.platformIconImageMax { position: absolute; inset: 0; }
 .platformText { display: grid; gap: 3px; min-width: 0; }
 .platformText strong { font-size: 15px; }
 .platformText small { color: rgba(13, 35, 68, .56); font-size: 12px; line-height: 1.3; }
