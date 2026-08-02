@@ -605,7 +605,7 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
         <p>Выберите, куда отправить напоминание</p>
 
         <div className={v2.platforms}>
-          <ReminderLink href={telegramUrl} image="/ui-icons/icon-telegram.png" title="Telegram" />
+          <ReminderLink href={telegramUrl} title="Telegram" isTelegram />
           <ReminderLink href={maxUrl} image="/ui-icons/header/max-header-icon.png" title="MAX" isMax />
         </div>
 
@@ -615,27 +615,51 @@ function ReminderChooser({ event, onClose }: { event: PublicEvent; onClose: () =
   );
 }
 
+function TelegramReminderIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="23"
+      height="23"
+      aria-hidden="true"
+      className={v2.platformIconImage}
+    >
+      <circle cx="12" cy="12" r="12" fill="#2aabee" />
+      <path
+        fill="#fff"
+        d="M17.47 7.17c.18-.68-.26-.95-.73-.77L4.82 10.99c-.81.32-.8.77-.14.98l3.06.95 7.08-4.47c.33-.2.64-.09.39.13l-5.74 5.18-.21 3.04c.31 0 .44-.14.62-.31l1.47-1.43 3.07 2.27c.57.31.97.15 1.11-.52l1.94-9.64Z"
+      />
+    </svg>
+  );
+}
+
 function ReminderLink({
   href,
   image,
   title,
   isMax = false,
+  isTelegram = false,
 }: {
   href: string | null;
-  image: string;
+  image?: string;
   title: string;
   isMax?: boolean;
+  isTelegram?: boolean;
 }) {
   const content = (
     <>
       <span className={`${v2.platformIcon} ${isMax ? v2.platformIconMax : ''}`}>
-        <Image
-          src={image}
-          width={23}
-          height={23}
-          alt=""
-          className={`${v2.platformIconImage} ${isMax ? v2.platformIconImageMax : ''}`}
-        />
+        {isTelegram ? (
+          <TelegramReminderIcon />
+        ) : (
+          <Image
+            src={image ?? ''}
+            width={23}
+            height={23}
+            alt=""
+            className={`${v2.platformIconImage} ${isMax ? v2.platformIconImageMax : ''}`}
+          />
+        )}
       </span>
       <span className={v2.platformText}>
         <strong>{title}</strong>

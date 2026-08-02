@@ -257,6 +257,10 @@ describe('Pinned production homepage', () => {
     assert.match(component, /Напомнить о событии/);
     assert.match(component, /Выберите, куда отправить напоминание/);
     assert.match(component, /\/ui-icons\/header\/max-header-icon\.png/);
+    assert.match(component, /function TelegramReminderIcon\(\)/);
+    assert.match(component, /<circle cx="12" cy="12" r="12" fill="#2aabee" \/>/);
+    assert.match(component, /width="23"[\s\S]*height="23"/);
+    assert.doesNotMatch(component, /\/ui-icons\/icon-telegram\.png/);
     assert.doesNotMatch(component, /Получить напоминание в боте/);
     assert.match(reminderStyles, /width: min\(240px, calc\(100% - 24px\)\) !important/);
     assert.match(reminderStyles, /padding: 24px 23px 39px 22px !important/);
