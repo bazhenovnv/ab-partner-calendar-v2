@@ -21,10 +21,19 @@ function normalizeComparableText(value?: string | null): string {
   return decodeBasicEntities(value)
     .replace(/<br\s*\/?\s*>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/\*\*|__|~~/g, '')
     .replace(/[«»"'`]/g, '')
     .replace(/[ \t\r\n]+/g, ' ')
     .trim()
     .toLocaleLowerCase('ru-RU');
+}
+
+function withoutTerminalPunctuation(value: string): string {
+  return value.replace(/[.!?…]+$/u, '').trim();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function cleanSpeaker(value?: string | null): string {
@@ -46,7 +55,16 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
   if (!text) return true;
 
   const title = normalizeComparableText(event.title);
-  if (title && text === title) return true;
+  if (
+    title &&
+    withoutTerminalPunctuation(text) === withoutTerminalPunctuation(title)
+  ) {
+    return true;
+  }
+
+  if (/^(?:онлайн|офлайн|бесплатно|платно)$/iu.test(text)) {
+    return true;
+  }
 
   if (
     new RegExp(`^${SERVICE_LABEL}\\s*[:：—–-]`, 'iu').test(text)
@@ -69,14 +87,12 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
   const eventTime = normalizeTime(event.startTime);
   if (eventTime) {
     const candidateTime = normalizeTime(text);
-    if (
-      candidateTime === eventTime ||
-      candidateTime === `${eventTime}мск` ||
-      candidateTime === `время${eventTime}` ||
-      candidateTime === `время${eventTime}мск` ||
-      candidateTime === `начало${eventTime}` ||
-      candidateTime === `начало${eventTime}мск`
-    ) {
+    const timePattern = new RegExp(
+      `^(?:время|начало)?${escapeRegExp(eventTime)}(?:[–—-]\\d{1,2}:\\d{2})?(?:мск)?$`,
+      'iu',
+    );
+
+    if (timePattern.test(candidateTime)) {
       return true;
     }
   }
