@@ -109,7 +109,7 @@ describe('Pinned production homepage', () => {
     );
     assert.ok(
       existsSync(join(FRONTEND, 'public', 'hero', 'hero-desk-calendar.png')),
-      'Missing the tracked desk calendar hero layer',
+      'Missing the tracked desk calendar layer',
     );
     assert.match(content, /src="\/hero\/hero-vase-books\.png"/);
     assert.match(content, /src="\/hero\/hero-desk-calendar\.png"/);
@@ -205,6 +205,7 @@ describe('Pinned production homepage', () => {
 
   test('event modal keeps the measured Figma surface, spacing and icon set', () => {
     const component = readFileSync(lib('components/events/EventModalProvider.tsx'), 'utf8');
+    const modalContent = readFileSync(lib('lib/event-modal-content.ts'), 'utf8');
     const styles = readFileSync(app('event-modal-figma-final.css'), 'utf8');
 
     assert.match(styles, /aspect-ratio: 1496 \/ 788 !important/);
@@ -230,7 +231,8 @@ describe('Pinned production homepage', () => {
     assert.match(component, /<rect x="9" y="3" width="6" height="12" rx="3"/);
     assert.doesNotMatch(component, /ActionIcon name="participate"/);
     assert.match(component, /<ReminderIcon \/>/);
-    assert.match(component, /\(\?:когда\|дата\|время/);
+    assert.match(modalContent, /\(\?:когда\|дата/);
+    assert.match(modalContent, /время\(\?:\\s\+проведения\)\?/);
     assert.match(component, /className=\{v2\.textScroll\}/);
     assert.match(component, /statusLive/);
     assert.match(component, /statusPlanned/);
