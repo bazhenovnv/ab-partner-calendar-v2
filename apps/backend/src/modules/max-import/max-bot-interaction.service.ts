@@ -149,6 +149,17 @@ export class MaxBotInteractionService {
       return true;
     }
 
+    if (text.toLocaleLowerCase('ru-RU') === '/unsubscribe') {
+      const unsubscribed = await this.bots.unsubscribeMarketing('MAX', String(sender.userId));
+      await this.sendMessage(
+        sender.userId,
+        unsubscribed
+          ? 'Вы отписались от информационных рассылок. Напоминания о мероприятиях продолжат приходить.'
+          : 'Пользователь не найден. Откройте бота заново и повторите команду.',
+      );
+      return true;
+    }
+
     const state = this.states.get(sender.userId);
     if (!state) return false;
 
