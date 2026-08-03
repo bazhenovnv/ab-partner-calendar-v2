@@ -51,7 +51,7 @@ export function formatPrice(priceType: 'FREE' | 'PAID', priceText?: string | nul
   if (priceType === 'FREE') return 'Бесплатно';
 
   const value = priceText?.replace(/\s+/g, ' ').trim();
-  if (!value || !/\d/u.test(value)) return 'Бесплатно';
+  if (!value || !/\d/.test(value)) return 'Бесплатно';
 
   return value;
 }
