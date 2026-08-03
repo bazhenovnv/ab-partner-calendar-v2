@@ -66,7 +66,7 @@ describe('Event modal content', () => {
     assert.match(content, /text === title/);
     assert.match(content, /text === `спикер \$\{speaker\}`/);
     assert.match(content, /candidateTime === eventTime/);
-    assert.match(content, /время\(\?:\\s\+проведения\)\?/);
+    assert.ok(content.includes('время(?:\\\\s+проведения)?'));
     assert.match(content, /removeRepeatedBlocks/);
     assert.match(content, /removeRepeatedPlainLines/);
     assert.match(content, /removeRepeatedBreakSegments/);
