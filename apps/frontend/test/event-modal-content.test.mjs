@@ -95,11 +95,13 @@ describe('Event modal content', () => {
     assert.match(interactions, /\.cardDetails/);
   });
 
-  test('shows only a numeric price or Бесплатно in public event cards', () => {
+  test('shows only a numeric price or Бесплатно in public cards and modal', () => {
+    const modal = readFileSync(MODAL, 'utf8');
     const card = readFileSync(EVENT_CARD, 'utf8');
     const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
     const format = readFileSync(FORMAT, 'utf8');
 
+    assert.match(modal, /const price = formatPrice\(event\.priceType, event\.priceText\);/);
     assert.match(card, /formatPrice\(event\.priceType, event\.priceText\)/);
     assert.match(card, /className=\{ui\.cardPrice\}>\{price\}<\/span>/);
     assert.match(interactions, /\.cardPrice/);
