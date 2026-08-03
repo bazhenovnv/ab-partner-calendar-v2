@@ -9,6 +9,15 @@ export interface BotUserSnapshot {
   allowMarketingMessages: boolean;
 }
 
+function csvCell(value: unknown): string {
+  const text = value === null || value === undefined ? '' : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function iso(value: Date | null): string {
+  return value ? value.toISOString() : '';
+}
+
 @Injectable()
 export class BotsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -48,6 +57,7 @@ export class BotsService {
       where: { id },
       data: {
         legalAcceptedAt: now,
+        lastActivityAt: now,
         ...(acceptBroadcastConsent ? { broadcastConsentAcceptedAt: now } : {}),
       },
     });
@@ -56,12 +66,117 @@ export class BotsService {
   async savePhone(id: string, phone: string): Promise<void> {
     await this.prisma.botUser.update({
       where: { id },
-      data: { phone, phoneVerifiedAt: new Date() },
+      data: { phone, phoneVerifiedAt: new Date(), lastActivityAt: new Date() },
     });
   }
 
   async isPhoneRequired(): Promise<boolean> {
     const cfg = await this.prisma.siteConfig.findUnique({ where: { key: 'bot.phoneRequired' } });
     return cfg?.value === true;
+  }
+
+  async findAcceptedContacts(page = 1, limit = 50) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.min(200, Math.max(1, limit));
+    const where = { legalAcceptedAt: { not: null } } as const;
+    const skip = (safePage - 1) * safeLimit;
+
+    const [items, total, telegram, max, marketingAllowed, withPhone] = await Promise.all([
+      this.prisma.botUser.findMany({
+        where,
+        select: {
+          id: true,
+          channel: true,
+          externalId: true,
+          username: true,
+          firstName: true,
+          phone: true,
+          phoneVerifiedAt: true,
+          allowMarketingMessages: true,
+          allowServiceNotifications: true,
+          legalAcceptedAt: true,
+          broadcastConsentAcceptedAt: true,
+          lastActivityAt: true,
+          subscribedAt: true,
+          createdAt: true,
+        },
+        orderBy: { legalAcceptedAt: 'desc' },
+        skip,
+        take: safeLimit,
+      }),
+      this.prisma.botUser.count({ where }),
+      this.prisma.botUser.count({ where: { ...where, channel: 'TELEGRAM' } }),
+      this.prisma.botUser.count({ where: { ...where, channel: 'MAX' } }),
+      this.prisma.botUser.count({
+        where: {
+          ...where,
+          allowMarketingMessages: true,
+          broadcastConsentAcceptedAt: { not: null },
+        },
+      }),
+      this.prisma.botUser.count({ where: { ...where, phone: { not: null } } }),
+    ]);
+
+    return {
+      items,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      summary: { telegram, max, marketingAllowed, withPhone },
+    };
+  }
+
+  async exportAcceptedContactsCsv(): Promise<string> {
+    const contacts = await this.prisma.botUser.findMany({
+      where: { legalAcceptedAt: { not: null } },
+      select: {
+        channel: true,
+        externalId: true,
+        username: true,
+        firstName: true,
+        phone: true,
+        phoneVerifiedAt: true,
+        allowMarketingMessages: true,
+        allowServiceNotifications: true,
+        legalAcceptedAt: true,
+        broadcastConsentAcceptedAt: true,
+        lastActivityAt: true,
+        subscribedAt: true,
+      },
+      orderBy: { legalAcceptedAt: 'desc' },
+    });
+
+    const rows = [
+      [
+        'Канал',
+        'ID пользователя',
+        'Username',
+        'Имя',
+        'Телефон',
+        'Телефон подтверждён',
+        'Юридические документы приняты',
+        'Согласие на рассылку',
+        'Рассылки разрешены',
+        'Сервисные уведомления разрешены',
+        'Последняя активность',
+        'Дата подписки',
+      ],
+      ...contacts.map((contact) => [
+        contact.channel,
+        contact.externalId,
+        contact.username,
+        contact.firstName,
+        contact.phone,
+        iso(contact.phoneVerifiedAt),
+        iso(contact.legalAcceptedAt),
+        iso(contact.broadcastConsentAcceptedAt),
+        contact.allowMarketingMessages ? 'Да' : 'Нет',
+        contact.allowServiceNotifications ? 'Да' : 'Нет',
+        iso(contact.lastActivityAt),
+        iso(contact.subscribedAt),
+      ]),
+    ];
+
+    return `\uFEFF${rows.map((row) => row.map(csvCell).join(';')).join('\r\n')}`;
   }
 }
