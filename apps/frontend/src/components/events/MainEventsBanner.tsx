@@ -155,23 +155,26 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
     const currentActive = activeRef.current;
     const nextActive = ((currentActive + direction) % total + total) % total;
+    const cardPositions = carouselEvents.map((event, eventIndex) => ({
+      event,
+      previousOffset: circularOffset(eventIndex, currentActive, total),
+      nextOffset: circularOffset(eventIndex, nextActive, total),
+    }));
     const previouslyVisibleIds = new Set(
-      carouselEvents
-        .filter((_, eventIndex) => (
-          Math.abs(circularOffset(eventIndex, currentActive, total)) <= MAX_VISIBLE_OFFSET
-        ))
-        .map((event) => event.id),
+      cardPositions
+        .filter(({ previousOffset }) => Math.abs(previousOffset) <= MAX_VISIBLE_OFFSET)
+        .map(({ event }) => event.id),
     );
-    const enteringCard = carouselEvents
-      .map((event, eventIndex) => ({
-        event,
-        offset: circularOffset(eventIndex, nextActive, total),
-      }))
-      .find(({ event, offset }) => (
-        Math.abs(offset) <= MAX_VISIBLE_OFFSET && !previouslyVisibleIds.has(event.id)
-      ));
+    const wrappedVisibleCard = cardPositions.find(({ previousOffset, nextOffset }) => (
+      previousOffset === -direction * MAX_VISIBLE_OFFSET &&
+      nextOffset === direction * MAX_VISIBLE_OFFSET
+    ));
+    const newlyVisibleCard = cardPositions.find(({ event, nextOffset }) => (
+      Math.abs(nextOffset) <= MAX_VISIBLE_OFFSET && !previouslyVisibleIds.has(event.id)
+    ));
+    const cardToReveal = wrappedVisibleCard ?? newlyVisibleCard;
 
-    setDeferredCardId(enteringCard?.event.id ?? null);
+    setDeferredCardId(cardToReveal?.event.id ?? null);
     activeRef.current = nextActive;
     setActive(nextActive);
 
