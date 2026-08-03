@@ -7,16 +7,17 @@ import { useEventModal } from './EventModalProvider';
 import styles from './main-events-carousel.module.css';
 
 const VISIBLE_RADIUS = 2;
-const BUFFER_RADIUS = VISIBLE_RADIUS + 1;
+const MAX_ANIMATED_STEPS = 2;
+const BUFFER_RADIUS = VISIBLE_RADIUS + MAX_ANIMATED_STEPS;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
 const STEP_DURATION_MS = 520;
 const STEP_INTERVAL_MS = STEP_DURATION_MS / 2;
+const INSTANT_MOVE_DURATION_MS = 1;
 const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
 type DirectionIndicator = -1 | 0 | 1;
-type MovementDirection = -1 | 1;
 
 type CardGeometry = {
   translateX: number;
@@ -39,6 +40,7 @@ type CarouselCard = {
 };
 
 const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
+  [-4]: { translateX: -1056, translateY: 42, translateZ: -220, rotateY: 0, rotateZ: 0, scale: 0.6, opacity: 0, brightness: 0.68, blur: 3.4, zIndex: 0 },
   [-3]: { translateX: -792, translateY: 30, translateZ: -150, rotateY: 0, rotateZ: 0, scale: 0.7, opacity: 0, brightness: 0.74, blur: 2.6, zIndex: 0 },
   [-2]: { translateX: -528, translateY: 18, translateZ: -80, rotateY: 0, rotateZ: 0, scale: 0.8, opacity: 0.8, brightness: 0.82, blur: 1.8, zIndex: 20 },
   [-1]: { translateX: -264, translateY: 8, translateZ: -28, rotateY: 0, rotateZ: 0, scale: 0.9, opacity: 0.95, brightness: 0.92, blur: 1, zIndex: 60 },
@@ -46,9 +48,11 @@ const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
   [1]: { translateX: 264, translateY: 8, translateZ: -28, rotateY: 0, rotateZ: 0, scale: 0.9, opacity: 0.95, brightness: 0.92, blur: 1, zIndex: 60 },
   [2]: { translateX: 528, translateY: 18, translateZ: -80, rotateY: 0, rotateZ: 0, scale: 0.8, opacity: 0.8, brightness: 0.82, blur: 1.8, zIndex: 20 },
   [3]: { translateX: 792, translateY: 30, translateZ: -150, rotateY: 0, rotateZ: 0, scale: 0.7, opacity: 0, brightness: 0.74, blur: 2.6, zIndex: 0 },
+  [4]: { translateX: 1056, translateY: 42, translateZ: -220, rotateY: 0, rotateZ: 0, scale: 0.6, opacity: 0, brightness: 0.68, blur: 3.4, zIndex: 0 },
 };
 
 const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
+  [-4]: { translateX: -466, translateY: 54, translateZ: -420, rotateY: 48, rotateZ: -8, scale: 0.48, opacity: 0, brightness: 0.6, blur: 5.2, zIndex: 0 },
   [-3]: { translateX: -358, translateY: 40, translateZ: -310, rotateY: 42, rotateZ: -6, scale: 0.56, opacity: 0, brightness: 0.68, blur: 4.4, zIndex: 0 },
   [-2]: { translateX: -250, translateY: 24, translateZ: -210, rotateY: 34, rotateZ: -4, scale: 0.68, opacity: 0.7, brightness: 0.76, blur: 3.2, zIndex: 1 },
   [-1]: { translateX: -142, translateY: 10, translateZ: -90, rotateY: 22, rotateZ: -2, scale: 0.86, opacity: 0.92, brightness: 0.88, blur: 2.1, zIndex: 3 },
@@ -56,6 +60,7 @@ const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
   [1]: { translateX: 142, translateY: 10, translateZ: -90, rotateY: -22, rotateZ: 2, scale: 0.86, opacity: 0.92, brightness: 0.88, blur: 2.1, zIndex: 3 },
   [2]: { translateX: 250, translateY: 24, translateZ: -210, rotateY: -34, rotateZ: 4, scale: 0.68, opacity: 0.7, brightness: 0.76, blur: 3.2, zIndex: 1 },
   [3]: { translateX: 358, translateY: 40, translateZ: -310, rotateY: -42, rotateZ: 6, scale: 0.56, opacity: 0, brightness: 0.68, blur: 4.4, zIndex: 0 },
+  [4]: { translateX: 466, translateY: 54, translateZ: -420, rotateY: -48, rotateZ: 8, scale: 0.48, opacity: 0, brightness: 0.6, blur: 5.2, zIndex: 0 },
 };
 
 function normalizeIndex(index: number, total: number): number {
@@ -65,6 +70,16 @@ function normalizeIndex(index: number, total: number): number {
 function circularOffset(index: number, activeIndex: number, total: number): number {
   const distance = (index - activeIndex + total) % total;
   return distance > Math.floor(total / 2) ? distance - total : distance;
+}
+
+function getMotionDuration(movement: number): number {
+  const steps = Math.abs(movement);
+
+  if (steps <= MAX_ANIMATED_STEPS) {
+    return STEP_DURATION_MS + STEP_INTERVAL_MS * Math.max(0, steps - 1);
+  }
+
+  return INSTANT_MOVE_DURATION_MS;
 }
 
 function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
@@ -111,6 +126,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   );
 
   const [position, setPosition] = useState(0);
+  const [motionDurationMs, setMotionDurationMs] = useState(STEP_DURATION_MS);
   const [directionIndicator, setDirectionIndicator] = useState<DirectionIndicator>(0);
   const [compact, setCompact] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
@@ -124,7 +140,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const suppressClickRef = useRef(false);
   const indicatorTimerRef = useRef<number | null>(null);
   const motionTimerRef = useRef<number | null>(null);
-  const movementQueueRef = useRef<MovementDirection[]>([]);
   const movementActiveRef = useRef(false);
   const positionRef = useRef(0);
 
@@ -181,41 +196,24 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     }, MOTION_INDICATOR_MS);
   }, [clearIndicatorTimer]);
 
-  const runNextMovementStep = useCallback(function runNextMovementStep() {
-    const direction = movementQueueRef.current.shift();
+  const moveBy = useCallback((movement: number) => {
+    const normalizedMovement = Math.trunc(movement);
+    if (!total || normalizedMovement === 0 || movementActiveRef.current) return;
 
-    if (!direction || !total) {
-      movementActiveRef.current = false;
-      return;
-    }
+    const duration = getMotionDuration(normalizedMovement);
+    const nextPosition = positionRef.current + normalizedMovement;
 
-    const nextPosition = positionRef.current + direction;
+    clearMotionTimer();
+    movementActiveRef.current = true;
+    setMotionDurationMs(duration);
     positionRef.current = nextPosition;
     setPosition(nextPosition);
 
-    const hasNextStep = movementQueueRef.current.length > 0;
     motionTimerRef.current = window.setTimeout(() => {
       motionTimerRef.current = null;
-
-      if (hasNextStep) {
-        runNextMovementStep();
-      } else {
-        movementActiveRef.current = false;
-      }
-    }, hasNextStep ? STEP_INTERVAL_MS : STEP_DURATION_MS);
-  }, [total]);
-
-  const moveBy = useCallback((movement: number) => {
-    if (!total || movement === 0 || movementActiveRef.current) return;
-
-    const direction: MovementDirection = movement < 0 ? -1 : 1;
-    movementQueueRef.current = Array.from(
-      { length: Math.abs(movement) },
-      () => direction,
-    );
-    movementActiveRef.current = true;
-    runNextMovementStep();
-  }, [runNextMovementStep, total]);
+      movementActiveRef.current = false;
+    }, duration);
+  }, [clearMotionTimer, total]);
 
   const moveToEvent = useCallback((eventIndex: number) => {
     if (!total) return;
@@ -248,10 +246,10 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   }, []);
 
   useEffect(() => {
-    movementQueueRef.current = [];
     movementActiveRef.current = false;
     clearMotionTimer();
     positionRef.current = 0;
+    setMotionDurationMs(STEP_DURATION_MS);
     setPosition(0);
   }, [clearMotionTimer, total]);
 
@@ -271,7 +269,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   useEffect(() => () => {
     clearIndicatorTimer();
     clearMotionTimer();
-    movementQueueRef.current = [];
     movementActiveRef.current = false;
   }, [clearIndicatorTimer, clearMotionTimer]);
 
@@ -378,7 +375,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
               aria-label={`Главные события. Событие ${activeIndex + 1} из ${total}`}
               style={{
                 '--drag-offset': `${dragOffset}px`,
-                '--card-step-duration': `${STEP_DURATION_MS}ms`,
+                '--card-motion-duration': `${motionDurationMs}ms`,
               } as React.CSSProperties}
               onKeyDown={onKeyDown}
               onPointerDown={onPointerDown}
