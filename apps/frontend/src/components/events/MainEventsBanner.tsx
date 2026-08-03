@@ -7,9 +7,10 @@ import { useEventModal } from './EventModalProvider';
 import styles from './main-events-carousel.module.css';
 
 const MAX_VISIBLE_OFFSET = 2;
+const OFFSCREEN_OFFSET = MAX_VISIBLE_OFFSET + 1;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
-const CARD_WRAP_INTERVAL_MS = 300;
+const CARD_STEP_DURATION_MS = 520;
 const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
@@ -29,21 +30,38 @@ type CardGeometry = {
   zIndex: number;
 };
 
+type CarouselSlot = {
+  key: string;
+  event: PublicEvent;
+  eventIndex: number;
+  virtualIndex: number;
+  offset: number;
+  visible: boolean;
+};
+
 const DESKTOP_GEOMETRY: Record<number, CardGeometry> = {
+  [-3]: { translateX: -792, translateY: 30, translateZ: -150, rotateY: 0, rotateZ: 0, scale: 0.7, opacity: 0, brightness: 0.74, blur: 2.6, zIndex: 0 },
   [-2]: { translateX: -528, translateY: 18, translateZ: -80, rotateY: 0, rotateZ: 0, scale: 0.8, opacity: 0.8, brightness: 0.82, blur: 1.8, zIndex: 20 },
   [-1]: { translateX: -264, translateY: 8, translateZ: -28, rotateY: 0, rotateZ: 0, scale: 0.9, opacity: 0.95, brightness: 0.92, blur: 1, zIndex: 60 },
   [0]: { translateX: 0, translateY: 0, translateZ: 0, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, blur: 0, zIndex: 100 },
   [1]: { translateX: 264, translateY: 8, translateZ: -28, rotateY: 0, rotateZ: 0, scale: 0.9, opacity: 0.95, brightness: 0.92, blur: 1, zIndex: 60 },
   [2]: { translateX: 528, translateY: 18, translateZ: -80, rotateY: 0, rotateZ: 0, scale: 0.8, opacity: 0.8, brightness: 0.82, blur: 1.8, zIndex: 20 },
+  [3]: { translateX: 792, translateY: 30, translateZ: -150, rotateY: 0, rotateZ: 0, scale: 0.7, opacity: 0, brightness: 0.74, blur: 2.6, zIndex: 0 },
 };
 
 const COMPACT_GEOMETRY: Record<number, CardGeometry> = {
+  [-3]: { translateX: -358, translateY: 40, translateZ: -310, rotateY: 42, rotateZ: -6, scale: 0.56, opacity: 0, brightness: 0.68, blur: 4.4, zIndex: 0 },
   [-2]: { translateX: -250, translateY: 24, translateZ: -210, rotateY: 34, rotateZ: -4, scale: 0.68, opacity: 0.7, brightness: 0.76, blur: 3.2, zIndex: 1 },
   [-1]: { translateX: -142, translateY: 10, translateZ: -90, rotateY: 22, rotateZ: -2, scale: 0.86, opacity: 0.92, brightness: 0.88, blur: 2.1, zIndex: 3 },
   [0]: { translateX: 0, translateY: 0, translateZ: 30, rotateY: 0, rotateZ: 0, scale: 1, opacity: 1, brightness: 1, blur: 0, zIndex: 5 },
   [1]: { translateX: 142, translateY: 10, translateZ: -90, rotateY: -22, rotateZ: 2, scale: 0.86, opacity: 0.92, brightness: 0.88, blur: 2.1, zIndex: 3 },
   [2]: { translateX: 250, translateY: 24, translateZ: -210, rotateY: -34, rotateZ: 4, scale: 0.68, opacity: 0.7, brightness: 0.76, blur: 3.2, zIndex: 1 },
+  [3]: { translateX: 358, translateY: 40, translateZ: -310, rotateY: -42, rotateZ: 6, scale: 0.56, opacity: 0, brightness: 0.68, blur: 4.4, zIndex: 0 },
 };
+
+function normalizeIndex(index: number, total: number): number {
+  return ((index % total) + total) % total;
+}
 
 function circularOffset(index: number, active: number, total: number): number {
   const distance = (index - active + total) % total;
@@ -96,7 +114,6 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   );
   const [active, setActive] = useState(0);
   const [directionIndicator, setDirectionIndicator] = useState<DirectionIndicator>(0);
-  const [deferredCardId, setDeferredCardId] = useState<string | null>(null);
   const [compact, setCompact] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -109,12 +126,45 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const suppressClickRef = useRef(false);
   const indicatorTimerRef = useRef<number | null>(null);
   const stepTimerRef = useRef<number | null>(null);
-  const nextStepFrameRef = useRef<number | null>(null);
   const movementQueueRef = useRef<MovementDirection[]>([]);
   const movementActiveRef = useRef(false);
   const activeRef = useRef(0);
   const total = carouselEvents.length;
+  const activeEventIndex = total ? normalizeIndex(active, total) : 0;
   const isAutoScrollPaused = isHovered || isFocusWithin || isPointerActive;
+
+  const carouselSlots = useMemo<CarouselSlot[]>(() => {
+    if (!total) return [];
+
+    if (total >= MAX_VISIBLE_OFFSET * 2 + 1) {
+      return Array.from({ length: OFFSCREEN_OFFSET * 2 + 1 }, (_, position) => {
+        const offset = position - OFFSCREEN_OFFSET;
+        const virtualIndex = active + offset;
+        const eventIndex = normalizeIndex(virtualIndex, total);
+
+        return {
+          key: `virtual-${virtualIndex}`,
+          event: carouselEvents[eventIndex],
+          eventIndex,
+          virtualIndex,
+          offset,
+          visible: Math.abs(offset) <= MAX_VISIBLE_OFFSET,
+        };
+      });
+    }
+
+    return carouselEvents.map((event, eventIndex) => {
+      const offset = circularOffset(eventIndex, activeEventIndex, total);
+      return {
+        key: event.id,
+        event,
+        eventIndex,
+        virtualIndex: active + offset,
+        offset,
+        visible: true,
+      };
+    });
+  }, [active, activeEventIndex, carouselEvents, total]);
 
   const resetIndicatorTimer = useCallback(() => {
     if (indicatorTimerRef.current !== null) {
@@ -127,15 +177,10 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     }, MOTION_INDICATOR_MS);
   }, []);
 
-  const clearMovementTimers = useCallback(() => {
+  const clearMovementTimer = useCallback(() => {
     if (stepTimerRef.current !== null) {
       window.clearTimeout(stepTimerRef.current);
       stepTimerRef.current = null;
-    }
-
-    if (nextStepFrameRef.current !== null) {
-      window.cancelAnimationFrame(nextStepFrameRef.current);
-      nextStepFrameRef.current = null;
     }
   }, []);
 
@@ -149,49 +194,23 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
     if (!direction || !total) {
       movementActiveRef.current = false;
-      setDeferredCardId(null);
       return;
     }
 
-    const currentActive = activeRef.current;
-    const nextActive = ((currentActive + direction) % total + total) % total;
-    const cardPositions = carouselEvents.map((event, eventIndex) => ({
-      event,
-      previousOffset: circularOffset(eventIndex, currentActive, total),
-      nextOffset: circularOffset(eventIndex, nextActive, total),
-    }));
-    const previouslyVisibleIds = new Set(
-      cardPositions
-        .filter(({ previousOffset }) => Math.abs(previousOffset) <= MAX_VISIBLE_OFFSET)
-        .map(({ event }) => event.id),
-    );
-    const wrappedVisibleCard = cardPositions.find(({ previousOffset, nextOffset }) => (
-      previousOffset === -direction * MAX_VISIBLE_OFFSET &&
-      nextOffset === direction * MAX_VISIBLE_OFFSET
-    ));
-    const newlyVisibleCard = cardPositions.find(({ event, nextOffset }) => (
-      Math.abs(nextOffset) <= MAX_VISIBLE_OFFSET && !previouslyVisibleIds.has(event.id)
-    ));
-    const cardToReveal = wrappedVisibleCard ?? newlyVisibleCard;
-
-    setDeferredCardId(cardToReveal?.event.id ?? null);
+    const nextActive = activeRef.current + direction;
     activeRef.current = nextActive;
     setActive(nextActive);
 
     stepTimerRef.current = window.setTimeout(() => {
       stepTimerRef.current = null;
-      setDeferredCardId(null);
 
       if (movementQueueRef.current.length > 0) {
-        nextStepFrameRef.current = window.requestAnimationFrame(() => {
-          nextStepFrameRef.current = null;
-          runNextMovementStep();
-        });
+        runNextMovementStep();
       } else {
         movementActiveRef.current = false;
       }
-    }, CARD_WRAP_INTERVAL_MS);
-  }, [carouselEvents, total]);
+    }, CARD_STEP_DURATION_MS);
+  }, [total]);
 
   const queueMovement = useCallback((movement: number) => {
     if (!total || movement === 0 || movementActiveRef.current) return;
@@ -205,13 +224,9 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     runNextMovementStep();
   }, [runNextMovementStep, total]);
 
-  const goTo = useCallback((index: number) => {
-    if (!total) return;
-
-    const nextActive = ((index % total) + total) % total;
-    const movement = circularOffset(nextActive, activeRef.current, total);
-    queueMovement(movement);
-  }, [queueMovement, total]);
+  const goTo = useCallback((virtualIndex: number) => {
+    queueMovement(virtualIndex - activeRef.current);
+  }, [queueMovement]);
 
   const goPrevious = useCallback(() => {
     showMovementDirection(-1);
@@ -238,16 +253,10 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   useEffect(() => {
     movementQueueRef.current = [];
     movementActiveRef.current = false;
-    clearMovementTimers();
-    setDeferredCardId(null);
-  }, [clearMovementTimers, total]);
-
-  useEffect(() => {
-    if (active >= total && total > 0) {
-      activeRef.current = 0;
-      setActive(0);
-    }
-  }, [active, total]);
+    clearMovementTimer();
+    activeRef.current = 0;
+    setActive(0);
+  }, [clearMovementTimer, total]);
 
   useEffect(() => {
     if (total <= 1 || isAutoScrollPaused) return;
@@ -267,8 +276,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     }
     movementQueueRef.current = [];
     movementActiveRef.current = false;
-    clearMovementTimers();
-  }, [clearMovementTimers]);
+    clearMovementTimer();
+  }, [clearMovementTimer]);
 
   const finishPointerInteraction = useCallback((clientX?: number) => {
     const startX = pointerStartXRef.current;
@@ -334,13 +343,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     } else if (event.key === 'Home') {
       event.preventDefault();
       setDirectionIndicator(0);
-      goTo(0);
+      queueMovement(-activeRef.current);
     } else if (event.key === 'End') {
       event.preventDefault();
       setDirectionIndicator(0);
-      goTo(total - 1);
+      const movement = total - 1 - normalizeIndex(activeRef.current, total);
+      queueMovement(movement);
     }
-  }, [goNext, goPrevious, goTo, total]);
+  }, [goNext, goPrevious, queueMovement, total]);
 
   return (
     <section id="main-events" className={styles.section} aria-labelledby="main-events-title">
@@ -359,8 +369,11 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
               tabIndex={0}
               role="region"
               aria-roledescription="карусель"
-              aria-label={`Главные события. Событие ${active + 1} из ${total}`}
-              style={{ '--drag-offset': `${dragOffset}px` } as React.CSSProperties}
+              aria-label={`Главные события. Событие ${activeEventIndex + 1} из ${total}`}
+              style={{
+                '--drag-offset': `${dragOffset}px`,
+                '--card-step-duration': `${CARD_STEP_DURATION_MS}ms`,
+              } as React.CSSProperties}
               onKeyDown={onKeyDown}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
@@ -377,40 +390,46 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                 }
               }}
             >
-              {carouselEvents.map((event, index) => {
-                const offset = circularOffset(index, active, total);
-                if (Math.abs(offset) > MAX_VISIBLE_OFFSET || event.id === deferredCardId) return null;
-
-                const imageUrl = getMainEventImage(event);
+              {carouselSlots.map((slot) => {
+                const imageUrl = getMainEventImage(slot.event);
                 if (!imageUrl) return null;
-                const isCenter = offset === 0;
+
+                const isCenter = slot.offset === 0;
 
                 return (
                   <button
                     type="button"
-                    key={event.id}
-                    className={cn(styles.card, isCenter && styles.cardActive)}
-                    style={getCardStyle(offset, compact)}
-                    aria-label={isCenter ? `Открыть событие: ${event.title}` : `Показать событие: ${event.title}`}
+                    key={slot.key}
+                    className={cn(
+                      styles.card,
+                      isCenter && styles.cardActive,
+                      !slot.visible && styles.cardOffscreen,
+                    )}
+                    style={getCardStyle(slot.offset, compact)}
+                    tabIndex={slot.visible ? 0 : -1}
+                    aria-hidden={!slot.visible}
+                    aria-label={isCenter
+                      ? `Открыть событие: ${slot.event.title}`
+                      : `Показать событие: ${slot.event.title}`}
                     aria-current={isCenter ? 'true' : undefined}
                     onClick={(clickEvent) => {
-                      if (suppressClickRef.current) {
+                      if (!slot.visible || suppressClickRef.current) {
                         clickEvent.preventDefault();
                         return;
                       }
 
                       if (isCenter) {
-                        openEvent(event);
+                        openEvent(slot.event);
                       } else {
-                        showMovementDirection(offset < 0 ? -1 : 1);
-                        goTo(index);
+                        showMovementDirection(slot.offset < 0 ? -1 : 1);
+                        goTo(slot.virtualIndex);
                       }
                     }}
                   >
                     <span className={styles.frame}>
                       <img
                         src={imageUrl}
-                        alt={event.title}
+                        alt={slot.visible ? slot.event.title : ''}
                         loading={isCenter ? 'eager' : 'lazy'}
                         fetchPriority={isCenter ? 'high' : 'auto'}
                         draggable={false}
