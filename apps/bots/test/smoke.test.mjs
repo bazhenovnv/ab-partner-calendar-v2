@@ -24,15 +24,19 @@ describe('Bot files exist', () => {
   }
 });
 
-describe('Reminder date selection', () => {
-  test('Telegram uses multi-select date buttons and Apply', () => {
+describe('Reminder calendar and time selection', () => {
+  test('Telegram uses compact calendar, time controls and Apply', () => {
     const source = readFileSync(join(SRC, 'telegram/bot.ts'), 'utf8');
-    assert.ok(source.includes('buildReminderDateOptions'));
-    assert.ok(source.includes('reminder_toggle:'));
+    assert.ok(source.includes('buildReminderCalendar'));
+    assert.ok(source.includes('buildReminderDateTime'));
+    assert.ok(source.includes('reminder_month:'));
+    assert.ok(source.includes('reminder_date:'));
+    assert.ok(source.includes('reminder_time:'));
+    assert.ok(source.includes("bot.callbackQuery('reminder_add'"));
     assert.ok(source.includes("bot.callbackQuery('reminder_apply'"));
     assert.ok(source.includes('Применить'));
     assert.ok(!source.includes('awaitingReminderTime'));
-    assert.ok(!source.includes('ДД.ММ.ГГГГ'));
+    assert.ok(!source.includes('reminder_toggle:'));
   });
 
   test('MAX standalone process is disabled in webhook mode', () => {
