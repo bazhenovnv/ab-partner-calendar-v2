@@ -9,11 +9,12 @@ import styles from './main-events-carousel.module.css';
 const MAX_VISIBLE_OFFSET = 2;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
-const CARD_ENTRY_STAGGER_MS = 200;
+const CARD_WRAP_INTERVAL_MS = 300;
 const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
 type DirectionIndicator = -1 | 0 | 1;
+type MovementDirection = -1 | 1;
 
 type CardGeometry = {
   translateX: number;
@@ -107,7 +108,11 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const dragStartedRef = useRef(false);
   const suppressClickRef = useRef(false);
   const indicatorTimerRef = useRef<number | null>(null);
-  const deferredCardTimerRef = useRef<number | null>(null);
+  const stepTimerRef = useRef<number | null>(null);
+  const nextStepFrameRef = useRef<number | null>(null);
+  const movementQueueRef = useRef<MovementDirection[]>([]);
+  const movementActiveRef = useRef(false);
+  const activeRef = useRef(0);
   const total = carouselEvents.length;
   const isAutoScrollPaused = isHovered || isFocusWithin || isPointerActive;
 
@@ -122,10 +127,15 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     }, MOTION_INDICATOR_MS);
   }, []);
 
-  const clearDeferredCardTimer = useCallback(() => {
-    if (deferredCardTimerRef.current !== null) {
-      window.clearTimeout(deferredCardTimerRef.current);
-      deferredCardTimerRef.current = null;
+  const clearMovementTimers = useCallback(() => {
+    if (stepTimerRef.current !== null) {
+      window.clearTimeout(stepTimerRef.current);
+      stepTimerRef.current = null;
+    }
+
+    if (nextStepFrameRef.current !== null) {
+      window.cancelAnimationFrame(nextStepFrameRef.current);
+      nextStepFrameRef.current = null;
     }
   }, []);
 
@@ -134,53 +144,81 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     resetIndicatorTimer();
   }, [resetIndicatorTimer]);
 
+  const runNextMovementStep = useCallback(function runNextMovementStep() {
+    const direction = movementQueueRef.current.shift();
+
+    if (!direction || !total) {
+      movementActiveRef.current = false;
+      setDeferredCardId(null);
+      return;
+    }
+
+    const currentActive = activeRef.current;
+    const nextActive = ((currentActive + direction) % total + total) % total;
+    const previouslyVisibleIds = new Set(
+      carouselEvents
+        .filter((_, eventIndex) => (
+          Math.abs(circularOffset(eventIndex, currentActive, total)) <= MAX_VISIBLE_OFFSET
+        ))
+        .map((event) => event.id),
+    );
+    const enteringCard = carouselEvents
+      .map((event, eventIndex) => ({
+        event,
+        offset: circularOffset(eventIndex, nextActive, total),
+      }))
+      .find(({ event, offset }) => (
+        Math.abs(offset) <= MAX_VISIBLE_OFFSET && !previouslyVisibleIds.has(event.id)
+      ));
+
+    setDeferredCardId(enteringCard?.event.id ?? null);
+    activeRef.current = nextActive;
+    setActive(nextActive);
+
+    stepTimerRef.current = window.setTimeout(() => {
+      stepTimerRef.current = null;
+      setDeferredCardId(null);
+
+      if (movementQueueRef.current.length > 0) {
+        nextStepFrameRef.current = window.requestAnimationFrame(() => {
+          nextStepFrameRef.current = null;
+          runNextMovementStep();
+        });
+      } else {
+        movementActiveRef.current = false;
+      }
+    }, CARD_WRAP_INTERVAL_MS);
+  }, [carouselEvents, total]);
+
+  const queueMovement = useCallback((movement: number) => {
+    if (!total || movement === 0 || movementActiveRef.current) return;
+
+    const direction: MovementDirection = movement < 0 ? -1 : 1;
+    movementQueueRef.current = Array.from(
+      { length: Math.abs(movement) },
+      () => direction,
+    );
+    movementActiveRef.current = true;
+    runNextMovementStep();
+  }, [runNextMovementStep, total]);
+
   const goTo = useCallback((index: number) => {
     if (!total) return;
 
     const nextActive = ((index % total) + total) % total;
-    const movement = circularOffset(nextActive, active, total);
-
-    clearDeferredCardTimer();
-    setDeferredCardId(null);
-
-    if (Math.abs(movement) === MAX_VISIBLE_OFFSET) {
-      const previouslyVisibleIds = new Set(
-        carouselEvents
-          .filter((_, eventIndex) => Math.abs(circularOffset(eventIndex, active, total)) <= MAX_VISIBLE_OFFSET)
-          .map((event) => event.id),
-      );
-
-      const enteringCards = carouselEvents
-        .map((event, eventIndex) => ({
-          id: event.id,
-          offset: circularOffset(eventIndex, nextActive, total),
-        }))
-        .filter(({ id, offset }) => (
-          Math.abs(offset) <= MAX_VISIBLE_OFFSET && !previouslyVisibleIds.has(id)
-        ))
-        .sort((left, right) => Math.abs(left.offset) - Math.abs(right.offset));
-
-      if (enteringCards.length > 1) {
-        setDeferredCardId(enteringCards[1].id);
-        deferredCardTimerRef.current = window.setTimeout(() => {
-          setDeferredCardId(null);
-          deferredCardTimerRef.current = null;
-        }, CARD_ENTRY_STAGGER_MS);
-      }
-    }
-
-    setActive(nextActive);
-  }, [active, carouselEvents, clearDeferredCardTimer, total]);
+    const movement = circularOffset(nextActive, activeRef.current, total);
+    queueMovement(movement);
+  }, [queueMovement, total]);
 
   const goPrevious = useCallback(() => {
     showMovementDirection(-1);
-    goTo(active - 1);
-  }, [active, goTo, showMovementDirection]);
+    queueMovement(-1);
+  }, [queueMovement, showMovementDirection]);
 
   const goNext = useCallback(() => {
     showMovementDirection(1);
-    goTo(active + 1);
-  }, [active, goTo, showMovementDirection]);
+    queueMovement(1);
+  }, [queueMovement, showMovementDirection]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
@@ -191,26 +229,43 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   }, []);
 
   useEffect(() => {
-    if (active >= total && total > 0) setActive(0);
+    activeRef.current = active;
+  }, [active]);
+
+  useEffect(() => {
+    movementQueueRef.current = [];
+    movementActiveRef.current = false;
+    clearMovementTimers();
+    setDeferredCardId(null);
+  }, [clearMovementTimers, total]);
+
+  useEffect(() => {
+    if (active >= total && total > 0) {
+      activeRef.current = 0;
+      setActive(0);
+    }
   }, [active, total]);
 
   useEffect(() => {
     if (total <= 1 || isAutoScrollPaused) return;
 
     const timer = window.setTimeout(() => {
+      if (movementActiveRef.current) return;
       showMovementDirection(1);
-      setActive((current) => (current + 1) % total);
+      queueMovement(1);
     }, AUTO_SCROLL_MS);
 
     return () => window.clearTimeout(timer);
-  }, [active, total, isAutoScrollPaused, showMovementDirection]);
+  }, [active, total, isAutoScrollPaused, queueMovement, showMovementDirection]);
 
   useEffect(() => () => {
     if (indicatorTimerRef.current !== null) {
       window.clearTimeout(indicatorTimerRef.current);
     }
-    clearDeferredCardTimer();
-  }, [clearDeferredCardTimer]);
+    movementQueueRef.current = [];
+    movementActiveRef.current = false;
+    clearMovementTimers();
+  }, [clearMovementTimers]);
 
   const finishPointerInteraction = useCallback((clientX?: number) => {
     const startX = pointerStartXRef.current;
