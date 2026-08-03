@@ -83,6 +83,7 @@ describe('Event modal content', () => {
   });
 
   test('does not render speaker or retain obsolete modal styles in compact event cards', () => {
+    const modal = readFileSync(MODAL, 'utf8');
     const card = readFileSync(EVENT_CARD, 'utf8');
     const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
 
@@ -93,6 +94,9 @@ describe('Event modal content', () => {
     assert.doesNotMatch(interactions, /\.reminderDialog/);
     assert.match(interactions, /\.cardOpen/);
     assert.match(interactions, /\.cardDetails/);
+    assert.match(modal, /при\\s\+регистрации/);
+    assert.match(modal, /по\\s\+запросу/);
+    assert.match(modal, /return null;/);
   });
 
   test('shows only a numeric price or Бесплатно in public cards and modal', () => {
