@@ -62,7 +62,11 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
     return true;
   }
 
-  if (/^(?:онлайн|офлайн|бесплатно|платно)$/iu.test(text)) {
+  if (
+    /^(?:онлайн|офлайн|бесплатно|платно|при\s+регистрации|по\s+запросу|уточняется)$/iu.test(
+      text,
+    )
+  ) {
     return true;
   }
 
@@ -206,8 +210,8 @@ export function cleanEventModalDescription(
 }
 
 /**
- * Main events keep their prepared modal/main artwork. Regular events use the
- * original upload so the modal can crop it into the same square composition.
+ * Both main and regular events prefer the dedicated square modal artwork.
+ * Original and card variants remain fallbacks for historical records.
  */
 export function getEventModalImageUrl(event: PublicEvent): string | null {
   const image = event.images?.[0];
@@ -225,8 +229,8 @@ export function getEventModalImageUrl(event: PublicEvent): string | null {
   }
 
   return (
-    image.originalUrl ??
     image.modalUrl ??
+    image.originalUrl ??
     image.eventCardUrl ??
     image.thumbnailUrl ??
     image.mainEventUrl ??
