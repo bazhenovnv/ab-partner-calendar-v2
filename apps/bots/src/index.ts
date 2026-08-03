@@ -2,6 +2,28 @@ import 'dotenv/config';
 import { startTelegramBot } from './telegram/bot';
 import { startMaxBot } from './max/bot';
 
+interface TelegramApiResponse {
+  ok?: boolean;
+  description?: string;
+}
+
+async function prepareTelegramLongPolling(token: string): Promise<void> {
+  const response = await fetch(`https://api.telegram.org/bot${token}/deleteWebhook`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ drop_pending_updates: false }),
+  });
+  const payload = await response.json().catch(() => null) as TelegramApiResponse | null;
+
+  if (!response.ok || payload?.ok !== true) {
+    throw new Error(
+      `Telegram deleteWebhook failed: ${response.status} ${payload?.description ?? 'unknown error'}`,
+    );
+  }
+
+  console.log('[bots] Telegram webhook cleared; long polling can start');
+}
+
 async function main() {
   console.log('[bots] Starting bot service...');
 
@@ -9,6 +31,7 @@ async function main() {
   const maxToken = process.env.MAX_BOT_TOKEN;
 
   if (tgToken) {
+    await prepareTelegramLongPolling(tgToken);
     startTelegramBot(tgToken);
     console.log('[bots] Telegram bot started');
   } else {
