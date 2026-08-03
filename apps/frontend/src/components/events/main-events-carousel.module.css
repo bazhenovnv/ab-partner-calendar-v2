@@ -51,6 +51,7 @@
   --card-opacity: 1;
   --card-brightness: 1;
   --card-blur: 0px;
+  --card-border-width: 1px;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -95,17 +96,20 @@
 .frame {
   position: relative;
   display: block;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 1px solid #111;
+  border: var(--card-border-width) solid #111;
   border-radius: 18px;
   background: transparent;
   box-shadow:
     0 12px 24px rgba(0, 0, 0, 0.52),
     0 4px 10px rgba(0, 0, 0, 0.38);
   transform: translateZ(0);
-  transition: box-shadow 260ms ease;
+  transition:
+    border-width var(--card-step-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms ease;
 }
 
 .cardActive {
