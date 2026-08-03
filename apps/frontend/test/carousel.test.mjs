@@ -38,14 +38,17 @@ describe('Main events carousel', () => {
     assert.doesNotMatch(carouselCardType, /\bvirtualIndex\s*:/);
   });
 
-  test('has no card border and uses one visible omnidirectional shadow', () => {
+  test('has no card border and uses one strong visible omnidirectional shadow', () => {
     const styles = readFileSync(STYLES, 'utf8');
     const card = styles.match(/\.card \{[\s\S]*?\n\}/)?.[0] ?? '';
     const frame = styles.match(/\.frame \{[\s\S]*?\n\}/)?.[0] ?? '';
 
     assert.match(card, /border: 0;/);
     assert.match(card, /border-radius: var\(--card-radius\);/);
-    assert.match(card, /box-shadow: 0 0 18px rgba\(0, 0, 0, 0\.38\);/);
+    assert.match(
+      card,
+      /box-shadow:\s*0 0 12px 2px rgba\(0, 0, 0, 0\.44\),\s*0 0 30px 6px rgba\(0, 0, 0, 0\.30\);/,
+    );
 
     assert.match(frame, /border: 0;/);
     assert.match(frame, /clip-path: inset\(0 round var\(--card-radius\)\);/);
