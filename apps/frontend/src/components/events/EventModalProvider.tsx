@@ -131,7 +131,18 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
 }
 
 function cleanSpeaker(value?: string | null): string | null {
-  return value?.split(/\s+[—–-]\s+/)[0]?.trim() || null;
+  const speaker = value?.split(/\s+[—–-]\s+/)[0]?.replace(/\s+/g, ' ').trim();
+  if (!speaker) return null;
+
+  if (
+    /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/iu.test(
+      speaker,
+    )
+  ) {
+    return null;
+  }
+
+  return speaker;
 }
 
 function isAllowedWebsite(value?: string | null): value is string {
