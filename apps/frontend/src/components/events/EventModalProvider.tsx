@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from 'react';
 import { sanitizeEventHtml } from '@/lib/html';
+import { formatPrice } from '@/lib/format';
 import {
   cleanEventModalDescription,
   getEventModalImageUrl,
@@ -277,7 +278,7 @@ function EventModal({
     .replace(/\s*г\.$/, '');
   const format =
     event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
-  const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
+  const price = formatPrice(event.priceType, event.priceText);
   const speaker = cleanSpeaker(event.speaker);
   const rawLead = sanitizeEventHtml(
     cleanEventModalDescription(event.shortDescription, event),
