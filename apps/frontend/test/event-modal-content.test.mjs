@@ -48,7 +48,7 @@ describe('Event modal content', () => {
     assert.match(modal, /objectPosition: 'center'/);
   });
 
-  test('prefers original artwork for regular events and prepared artwork for main events', () => {
+  test('prefers dedicated modal artwork for both regular and main events', () => {
     const content = readFileSync(MODAL_CONTENT, 'utf8');
     const imageSelector = content.match(
       /export function getEventModalImageUrl[\s\S]*$/,
@@ -59,10 +59,10 @@ describe('Event modal content', () => {
       imageSelector,
       /image\.modalUrl \?\?[\s\S]*image\.mainEventUrl \?\?[\s\S]*image\.originalUrl/,
     );
-    assert.match(
-      imageSelector,
-      /return \([\s\S]*image\.originalUrl \?\?[\s\S]*image\.modalUrl/,
-    );
+
+    const regularBranch = imageSelector.split('if (event.mainEvent)')[1]?.split('return (')[2] ?? '';
+    assert.ok(regularBranch.indexOf('image.modalUrl') >= 0);
+    assert.ok(regularBranch.indexOf('image.originalUrl') > regularBranch.indexOf('image.modalUrl'));
   });
 
   test('filters title speaker time and other structured metadata duplicates', () => {
@@ -75,7 +75,9 @@ describe('Event modal content', () => {
     assert.match(content, /text === `спикер \$\{speaker\}`/);
     assert.match(content, /timePattern\.test\(candidateTime\)/);
     assert.ok(content.includes('время(?:\\\\s+проведения)?'));
-    assert.match(content, /\^\(\?:онлайн\|офлайн\|бесплатно\|платно\)\$/);
+    assert.match(content, /при\\s\+регистрации/);
+    assert.match(content, /по\\s\+запросу/);
+    assert.match(content, /уточняется/);
     assert.match(content, /\.replace\(\/\\\*\\\*\|__\|~~\/g, ''\)/);
     assert.match(content, /removeRepeatedBlocks/);
     assert.match(content, /removeRepeatedPlainLines/);
