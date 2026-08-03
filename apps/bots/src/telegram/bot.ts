@@ -554,7 +554,12 @@ export function startTelegramBot(token: string) {
     }
   });
 
-  bot.on('message:text', async (ctx) => {
+  bot.on('message:text', async (ctx, next) => {
+    if (ctx.message.text.startsWith('/')) {
+      await next();
+      return;
+    }
+
     const tgUserId = ctx.from.id;
     const state = userState.get(tgUserId);
     if (!state) return;
