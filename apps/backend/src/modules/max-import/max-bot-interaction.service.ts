@@ -45,6 +45,7 @@ type MaxUserState =
       selected: Set<string>;
     };
 
+type MaxLegalState = Extract<MaxUserState, { step: 'awaitingLegal' }>;
 type MaxReminderState = Extract<MaxUserState, { step: 'selectingReminderDates' }>;
 
 @Injectable()
@@ -100,7 +101,11 @@ export class MaxBotInteractionService {
         pendingEventId,
         allowMarketing: snapshot.allowMarketingMessages,
       });
-      await this.sendMessage(user.userId, this.legalNotice(snapshot.allowMarketingMessages));
+      await this.sendMessage(
+        user.userId,
+        this.legalNotice(snapshot.allowMarketingMessages),
+        this.legalKeyboard(),
+      );
       return;
     }
 
@@ -119,10 +124,7 @@ export class MaxBotInteractionService {
       return;
     }
 
-    await this.sendMessage(
-      user.userId,
-      `Привет! Я бот АБ Афиши Бухгалтера. Используйте кнопку «Напомнить» на сайте ${SITE_URL}`,
-    );
+    await this.sendWelcome(user.userId);
   }
 
   private async handleMessage(update: MaxMessageCreatedUpdate): Promise<boolean> {
@@ -140,22 +142,16 @@ export class MaxBotInteractionService {
     if (!state) return false;
 
     if (state.step === 'awaitingLegal') {
-      if (text.toLocaleLowerCase('ru-RU') !== 'принимаю') {
-        await this.sendMessage(sender.userId, 'Введите «Принимаю», чтобы продолжить.');
+      const normalized = text.toLocaleLowerCase('ru-RU');
+      if (normalized !== 'принимаю' && normalized !== 'принять') {
+        await this.sendMessage(
+          sender.userId,
+          'Нажмите кнопку «Принять», чтобы продолжить.',
+          this.legalKeyboard(),
+        );
         return true;
       }
-      await this.bots.acceptLegal(state.botUserId, state.allowMarketing);
-      this.states.delete(sender.userId);
-      if (await this.bots.isPhoneRequired()) {
-        this.states.set(sender.userId, {
-          step: 'awaitingPhone',
-          botUserId: state.botUserId,
-          pendingEventId: state.pendingEventId,
-        });
-        await this.sendMessage(sender.userId, 'Согласие принято. Укажите номер телефона в формате +7XXXXXXXXXX.');
-      } else if (state.pendingEventId) {
-        await this.showReminderSelector(sender.userId, state.botUserId, state.pendingEventId);
-      }
+      await this.completeLegalAcceptance(sender.userId, state);
       return true;
     }
 
@@ -183,13 +179,28 @@ export class MaxBotInteractionService {
     const user = update.callback.user ?? update.user ?? update.message?.sender;
     if (!user) return;
 
+    const payload = update.callback.payload ?? '';
     const state = this.states.get(user.userId);
+
+    if (payload === 'accept_legal') {
+      if (!state || state.step !== 'awaitingLegal') {
+        await this.answerCallback(
+          update.callback.callbackId,
+          undefined,
+          undefined,
+          'Согласие уже принято. Откройте напоминание заново на сайте.',
+        );
+        return;
+      }
+      await this.completeLegalAcceptance(user.userId, state, update.callback.callbackId);
+      return;
+    }
+
     if (!state || state.step !== 'selectingReminderDates') {
       await this.answerCallback(update.callback.callbackId, undefined, undefined, 'Начните выбор заново через кнопку «Напомнить».');
       return;
     }
 
-    const payload = update.callback.payload ?? '';
     const toggleMatch = /^reminder_toggle:(\d+)$/.exec(payload);
     if (toggleMatch) {
       const option = state.options[Number(toggleMatch[1])];
@@ -239,6 +250,45 @@ export class MaxBotInteractionService {
     );
   }
 
+  private async completeLegalAcceptance(
+    userId: number,
+    state: MaxLegalState,
+    callbackId?: string,
+  ): Promise<void> {
+    await this.bots.acceptLegal(state.botUserId, state.allowMarketing);
+    this.states.delete(userId);
+
+    if (callbackId) {
+      await this.answerCallback(callbackId, 'Согласие принято.');
+    } else {
+      await this.sendMessage(userId, 'Согласие принято.');
+    }
+
+    if (await this.bots.isPhoneRequired()) {
+      this.states.set(userId, {
+        step: 'awaitingPhone',
+        botUserId: state.botUserId,
+        pendingEventId: state.pendingEventId,
+      });
+      await this.sendMessage(userId, 'Укажите номер телефона в формате +7XXXXXXXXXX.');
+      return;
+    }
+
+    if (state.pendingEventId) {
+      await this.showReminderSelector(userId, state.botUserId, state.pendingEventId);
+      return;
+    }
+
+    await this.sendWelcome(userId);
+  }
+
+  private async sendWelcome(userId: number): Promise<void> {
+    await this.sendMessage(
+      userId,
+      `Привет! Я бот АБ Афиши Бухгалтера. Используйте кнопку «Напомнить» на сайте ${SITE_URL}`,
+    );
+  }
+
   private async showReminderSelector(userId: number, botUserId: string, eventId: string): Promise<void> {
     const event = await this.prisma.event.findFirst({
       where: { id: eventId, status: 'PUBLISHED' },
@@ -271,6 +321,19 @@ export class MaxBotInteractionService {
 
   private selectorText(eventTitle: string): string {
     return `Выберите одну или несколько дат напоминания для мероприятия «${eventTitle}».\n\nНапоминания будут отправлены в 09:00 МСК. После выбора нажмите «Применить».`;
+  }
+
+  private legalKeyboard(): MaxKeyboardAttachment {
+    return {
+      type: 'inline_keyboard',
+      payload: {
+        buttons: [[{
+          type: 'callback',
+          text: 'Принять',
+          payload: 'accept_legal',
+        }]],
+      },
+    };
   }
 
   private reminderKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
@@ -340,7 +403,7 @@ export class MaxBotInteractionService {
       `• Согласие на обработку персональных данных: ${SITE_URL}/legal/consent`,
     ];
     if (includeMarketing) lines.push(`• Согласие на информационные рассылки: ${SITE_URL}/legal/broadcast-consent`);
-    lines.push('', 'Введите «Принимаю», чтобы подтвердить согласие и продолжить.');
+    lines.push('', 'Нажмите кнопку «Принять», чтобы подтвердить согласие и продолжить.');
     return lines.join('\n');
   }
 }
