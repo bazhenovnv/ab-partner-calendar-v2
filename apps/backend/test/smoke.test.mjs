@@ -15,8 +15,6 @@ const BACKEND = resolve(import.meta.dirname, '..');
 const ROOT = resolve(BACKEND, '../..');
 const FRONTEND = resolve(ROOT, 'apps/frontend');
 
-// ── Helper ────────────────────────────────────────────────────────────────────
-
 function src(relPath) {
   return join(BACKEND, 'src', relPath);
 }
@@ -27,15 +25,13 @@ function feRoute(relPath) {
 
 function fileContains(filePath, ...patterns) {
   const content = readFileSync(filePath, 'utf8');
-  for (const p of patterns) {
+  for (const pattern of patterns) {
     assert.ok(
-      content.includes(p),
-      `Expected "${p}" in ${filePath}`,
+      content.includes(pattern),
+      `Expected "${pattern}" in ${filePath}`,
     );
   }
 }
-
-// ── Backend: Core modules exist ───────────────────────────────────────────────
 
 describe('Backend — module files exist', () => {
   const modules = [
@@ -58,14 +54,14 @@ describe('Backend — module files exist', () => {
     'modules/max-import/max-bot-interaction.service.ts',
   ];
 
-  for (const mod of modules) {
-    test(`exists: src/${mod}`, () => {
-      assert.ok(existsSync(src(mod)), `Missing: apps/backend/src/${mod}`);
+  for (const modulePath of modules) {
+    test(`exists: src/${modulePath}`, () => {
+      assert.ok(existsSync(src(modulePath)), `Missing: apps/backend/src/${modulePath}`);
     });
   }
 });
 
-describe('Backend — MAX reminder date selection', () => {
+describe('Backend — MAX reminder calendar and time selection', () => {
   test('webhook routes bot callbacks before channel import', () => {
     fileContains(
       src('modules/max-import/max-webhook.controller.ts'),
@@ -75,14 +71,18 @@ describe('Backend — MAX reminder date selection', () => {
     );
   });
 
-  test('MAX supports start, callback multi-select and Apply', () => {
+  test('MAX supports compact calendar, time controls and Apply', () => {
     fileContains(
       src('modules/max-import/max-bot-interaction.service.ts'),
       "update.updateType === 'bot_started'",
       "update.updateType === 'message_callback'",
-      'buildReminderDateOptions',
+      'buildReminderCalendar',
+      'buildReminderDateTime',
       "type: 'inline_keyboard'",
-      'reminder_toggle:',
+      'reminder_month:',
+      'reminder_date:',
+      'reminder_time:',
+      'reminder_add',
       'reminder_apply',
       'Применить',
     );
@@ -99,7 +99,29 @@ describe('Backend — MAX reminder date selection', () => {
   });
 });
 
-// ── Backend: JWT_SECRET is required (no fallback) ─────────────────────────────
+describe('Backend — accepted bot contacts', () => {
+  test('contacts and CSV export are admin-only', () => {
+    fileContains(
+      src('modules/bots/bots.controller.ts'),
+      "@Get('contacts')",
+      "@Get('contacts/export')",
+      'JwtAuthGuard',
+      "@Roles('ADMIN')",
+      'text/csv',
+    );
+  });
+
+  test('only users who accepted legal documents are listed and exported', () => {
+    fileContains(
+      src('modules/bots/bots.service.ts'),
+      'findAcceptedContacts',
+      'exportAcceptedContactsCsv',
+      'legalAcceptedAt: { not: null }',
+      'broadcastConsentAcceptedAt',
+      'allowMarketingMessages',
+    );
+  });
+});
 
 describe('Backend — JWT security', () => {
   test('auth.module.ts throws on missing JWT_SECRET (no fallback)', () => {
@@ -119,8 +141,6 @@ describe('Backend — JWT security', () => {
   });
 });
 
-// ── Backend: Admin routes are guarded ─────────────────────────────────────────
-
 describe('Backend — admin route protection', () => {
   test('admin.controller.ts uses JwtAuthGuard', () => {
     fileContains(src('modules/admin/admin.controller.ts'), 'JwtAuthGuard');
@@ -134,8 +154,6 @@ describe('Backend — admin route protection', () => {
     fileContains(src('modules/quotes/quotes.controller.ts'), 'JwtAuthGuard');
   });
 });
-
-// ── Backend: Public endpoints declared ───────────────────────────────────────
 
 describe('Backend — public endpoints present', () => {
   test('events controller has /public route', () => {
@@ -187,8 +205,6 @@ describe('Backend — public filter data', () => {
   });
 });
 
-// ── Backend: Logger used in main.ts (no raw console.log) ─────────────────────
-
 describe('Backend — logging', () => {
   test('main.ts uses Logger instead of console.log', () => {
     const content = readFileSync(src('main.ts'), 'utf8');
@@ -197,16 +213,14 @@ describe('Backend — logging', () => {
   });
 });
 
-// ── Frontend: Key route files exist ──────────────────────────────────────────
-
 describe('Frontend — public route files exist', () => {
   const routes = [
-    'page.tsx',               // home
-    'events/[id]/page.tsx',   // event detail
-    'legal/[slug]/page.tsx',  // legal pages
-    'layout.tsx',             // root layout
-    'loading.tsx',            // loading state
-    'error.tsx',              // error boundary
+    'page.tsx',
+    'events/[id]/page.tsx',
+    'legal/[slug]/page.tsx',
+    'layout.tsx',
+    'loading.tsx',
+    'error.tsx',
   ];
 
   for (const route of routes) {
@@ -219,13 +233,14 @@ describe('Frontend — public route files exist', () => {
 describe('Frontend — admin route files exist', () => {
   const adminRoutes = [
     'admin/layout.tsx',
-    'admin/page.tsx',              // dashboard
+    'admin/page.tsx',
     'admin/login/page.tsx',
     'admin/events/page.tsx',
     'admin/quotes/page.tsx',
     'admin/cities/page.tsx',
     'admin/directions/page.tsx',
     'admin/broadcasts/page.tsx',
+    'admin/contacts/page.tsx',
     'admin/settings/page.tsx',
     'admin/legal/[type]/page.tsx',
   ];
@@ -237,15 +252,21 @@ describe('Frontend — admin route files exist', () => {
   }
 });
 
-// ── Frontend: Admin layout has auth redirect ──────────────────────────────────
-
 describe('Frontend — admin auth guard', () => {
   test('AdminLayoutClient.tsx redirects unauthenticated users to /admin/login', () => {
     fileContains(feRoute('admin/AdminLayoutClient.tsx'), '/admin/login', 'token');
   });
-});
 
-// ── Config: .env.example has required vars ────────────────────────────────────
+  test('Admin menu exposes contacts and subscriber broadcasts', () => {
+    fileContains(
+      feRoute('admin/AdminLayoutClient.tsx'),
+      '/admin/contacts',
+      'Контакты пользователей',
+      '/admin/broadcasts',
+      'Рассылки подписчикам',
+    );
+  });
+});
 
 describe('Config — .env.example completeness', () => {
   test('root .env.example has required variables', () => {
