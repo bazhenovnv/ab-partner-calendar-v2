@@ -16,6 +16,10 @@ const EVENT_CARD = join(
   FRONTEND,
   'src/components/events/EventCard.tsx',
 );
+const EVENT_INTERACTIONS = join(
+  FRONTEND,
+  'src/components/events/event-interactions.module.css',
+);
 
 describe('Event modal content', () => {
   test('uses one dedicated cleanup module without legacy inline sanitizer', () => {
@@ -72,10 +76,16 @@ describe('Event modal content', () => {
     assert.match(content, /removeRepeatedBreakSegments/);
   });
 
-  test('does not render speaker inside compact event cards', () => {
+  test('does not render speaker or retain obsolete modal styles in compact event cards', () => {
     const card = readFileSync(EVENT_CARD, 'utf8');
+    const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
 
     assert.doesNotMatch(card, /event\.speaker/);
     assert.doesNotMatch(card, /Спикер:/);
+    assert.doesNotMatch(interactions, /\.cardSpeaker/);
+    assert.doesNotMatch(interactions, /\.modalFrame/);
+    assert.doesNotMatch(interactions, /\.reminderDialog/);
+    assert.match(interactions, /\.cardOpen/);
+    assert.match(interactions, /\.cardDetails/);
   });
 });
