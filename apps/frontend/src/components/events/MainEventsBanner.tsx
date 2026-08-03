@@ -9,6 +9,7 @@ import styles from './main-events-carousel.module.css';
 const MAX_VISIBLE_OFFSET = 2;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
+const CARD_ENTRY_STAGGER_MS = 100;
 const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
@@ -94,6 +95,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   );
   const [active, setActive] = useState(0);
   const [directionIndicator, setDirectionIndicator] = useState<DirectionIndicator>(0);
+  const [deferredCardId, setDeferredCardId] = useState<string | null>(null);
   const [compact, setCompact] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -105,6 +107,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const dragStartedRef = useRef(false);
   const suppressClickRef = useRef(false);
   const indicatorTimerRef = useRef<number | null>(null);
+  const deferredCardTimerRef = useRef<number | null>(null);
   const total = carouselEvents.length;
   const isAutoScrollPaused = isHovered || isFocusWithin || isPointerActive;
 
@@ -119,6 +122,13 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     }, MOTION_INDICATOR_MS);
   }, []);
 
+  const clearDeferredCardTimer = useCallback(() => {
+    if (deferredCardTimerRef.current !== null) {
+      window.clearTimeout(deferredCardTimerRef.current);
+      deferredCardTimerRef.current = null;
+    }
+  }, []);
+
   const showMovementDirection = useCallback((direction: Exclude<DirectionIndicator, 0>) => {
     setDirectionIndicator(direction);
     resetIndicatorTimer();
@@ -126,8 +136,41 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const goTo = useCallback((index: number) => {
     if (!total) return;
-    setActive(((index % total) + total) % total);
-  }, [total]);
+
+    const nextActive = ((index % total) + total) % total;
+    const movement = circularOffset(nextActive, active, total);
+
+    clearDeferredCardTimer();
+    setDeferredCardId(null);
+
+    if (Math.abs(movement) === MAX_VISIBLE_OFFSET) {
+      const previouslyVisibleIds = new Set(
+        carouselEvents
+          .filter((_, eventIndex) => Math.abs(circularOffset(eventIndex, active, total)) <= MAX_VISIBLE_OFFSET)
+          .map((event) => event.id),
+      );
+
+      const enteringCards = carouselEvents
+        .map((event, eventIndex) => ({
+          id: event.id,
+          offset: circularOffset(eventIndex, nextActive, total),
+        }))
+        .filter(({ id, offset }) => (
+          Math.abs(offset) <= MAX_VISIBLE_OFFSET && !previouslyVisibleIds.has(id)
+        ))
+        .sort((left, right) => Math.abs(left.offset) - Math.abs(right.offset));
+
+      if (enteringCards.length > 1) {
+        setDeferredCardId(enteringCards[1].id);
+        deferredCardTimerRef.current = window.setTimeout(() => {
+          setDeferredCardId(null);
+          deferredCardTimerRef.current = null;
+        }, CARD_ENTRY_STAGGER_MS);
+      }
+    }
+
+    setActive(nextActive);
+  }, [active, carouselEvents, clearDeferredCardTimer, total]);
 
   const goPrevious = useCallback(() => {
     showMovementDirection(-1);
@@ -166,7 +209,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     if (indicatorTimerRef.current !== null) {
       window.clearTimeout(indicatorTimerRef.current);
     }
-  }, []);
+    clearDeferredCardTimer();
+  }, [clearDeferredCardTimer]);
 
   const finishPointerInteraction = useCallback((clientX?: number) => {
     const startX = pointerStartXRef.current;
@@ -277,7 +321,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
             >
               {carouselEvents.map((event, index) => {
                 const offset = circularOffset(index, active, total);
-                if (Math.abs(offset) > MAX_VISIBLE_OFFSET) return null;
+                if (Math.abs(offset) > MAX_VISIBLE_OFFSET || event.id === deferredCardId) return null;
 
                 const imageUrl = getMainEventImage(event);
                 if (!imageUrl) return null;
