@@ -29,7 +29,7 @@ function normalizeComparableText(value?: string | null): string {
 }
 
 function withoutTerminalPunctuation(value: string): string {
-  return value.replace(/[.!?…]+$/u, '').trim();
+  return value.replace(/[.!?…]+$/, '').trim();
 }
 
 function escapeRegExp(value: string): string {
@@ -49,7 +49,7 @@ function normalizeTime(value?: string | null): string {
 
 function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
   const text = normalizeComparableText(value).replace(
-    /^[\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]+/u,
+    /^[\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]+/,
     '',
   );
   if (!text) return true;
@@ -63,7 +63,7 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
   }
 
   if (
-    /^(?:онлайн|офлайн|бесплатно|платно|при\s+регистрации|по\s+запросу|уточняется)$/iu.test(
+    /^(?:онлайн|офлайн|бесплатно|платно|при\s+регистрации|по\s+запросу|уточняется)$/i.test(
       text,
     )
   ) {
@@ -71,7 +71,7 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
   }
 
   if (
-    new RegExp(`^${SERVICE_LABEL}\\s*[:：—–-]`, 'iu').test(text)
+    new RegExp(`^${SERVICE_LABEL}\\s*[:：—–-]`, 'i').test(text)
   ) {
     return true;
   }
@@ -93,7 +93,7 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
     const candidateTime = normalizeTime(text);
     const timePattern = new RegExp(
       `^(?:время|начало)?${escapeRegExp(eventTime)}(?:[–—-]\\d{1,2}:\\d{2})?(?:мск)?$`,
-      'iu',
+      'i',
     );
 
     if (timePattern.test(candidateTime)) {
@@ -151,21 +151,21 @@ export function cleanEventModalDescription(
   result = result.replace(
     new RegExp(
       `<(${BLOCK_TAGS})[^>]*>${OPTIONAL_MARKERS}(?:<[^>]+>${OPTIONAL_MARKERS})*${SERVICE_LABEL}\\s*[:：—–-][\\s\\S]*?<\\/\\1>`,
-      'giu',
+      'gi',
     ),
     '',
   );
   result = result.replace(
     new RegExp(
       `(?:^|\\n)${OPTIONAL_MARKERS}${SERVICE_LABEL}\\s*[:：—–-][^\\n]*(?=\\n|$)`,
-      'gimu',
+      'gim',
     ),
     '\n',
   );
   result = result.replace(
     new RegExp(
       `<br\\s*\\/?\\s*>${OPTIONAL_MARKERS}(?:<[^>]+>${OPTIONAL_MARKERS})*${SERVICE_LABEL}\\s*[:：—–-][\\s\\S]*?(?=<br\\s*\\/?\\s*>|<\\/(?:p|div|li)>|$)`,
-      'giu',
+      'gi',
     ),
     '',
   );
