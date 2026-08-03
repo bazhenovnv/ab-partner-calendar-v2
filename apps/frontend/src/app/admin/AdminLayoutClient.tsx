@@ -47,12 +47,21 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           >
             Мероприятия
           </Link>
+
+          <div className="adm-sidebar__section-title">Боты и напоминания</div>
+          <Link
+            href="/admin/contacts"
+            className={`adm-sidebar__link adm-sidebar__link--sub${pathname.startsWith('/admin/contacts') ? ' adm-sidebar__link--active' : ''}`}
+          >
+            Контакты пользователей
+          </Link>
           <Link
             href="/admin/broadcasts"
-            className={`adm-sidebar__link${pathname.startsWith('/admin/broadcasts') ? ' adm-sidebar__link--active' : ''}`}
+            className={`adm-sidebar__link adm-sidebar__link--sub${pathname.startsWith('/admin/broadcasts') ? ' adm-sidebar__link--active' : ''}`}
           >
-            Рассылки
+            Рассылки подписчикам
           </Link>
+
           <Link
             href="/admin/legal"
             className={`adm-sidebar__link${pathname.startsWith('/admin/legal') ? ' adm-sidebar__link--active' : ''}`}
