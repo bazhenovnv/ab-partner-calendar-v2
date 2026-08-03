@@ -135,7 +135,7 @@ function cleanSpeaker(value?: string | null): string | null {
   if (!speaker) return null;
 
   if (
-    /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/iu.test(
+    /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/i.test(
       speaker,
     )
   ) {
