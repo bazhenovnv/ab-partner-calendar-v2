@@ -71,6 +71,14 @@ export class BotsService {
     });
   }
 
+  async unsubscribeMarketing(channel: 'TELEGRAM' | 'MAX', externalId: string): Promise<boolean> {
+    const result = await this.prisma.botUser.updateMany({
+      where: { channel, externalId },
+      data: { allowMarketingMessages: false, lastActivityAt: new Date() },
+    });
+    return result.count > 0;
+  }
+
   async isPhoneRequired(): Promise<boolean> {
     const cfg = await this.prisma.siteConfig.findUnique({ where: { key: 'bot.phoneRequired' } });
     return cfg?.value === true;
