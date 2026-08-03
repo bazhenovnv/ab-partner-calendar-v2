@@ -6,12 +6,12 @@ import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
 import styles from './main-events-carousel.module.css';
 
-const MAX_VISIBLE_OFFSET = 2;
-const OFFSCREEN_OFFSET = MAX_VISIBLE_OFFSET + 1;
+const VISIBLE_RADIUS = 2;
+const BUFFER_RADIUS = VISIBLE_RADIUS + 1;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
-const CARD_STEP_DURATION_MS = 520;
-const CARD_STEP_INTERVAL_MS = CARD_STEP_DURATION_MS / 2;
+const STEP_DURATION_MS = 520;
+const STEP_INTERVAL_MS = STEP_DURATION_MS / 2;
 const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
@@ -31,11 +31,9 @@ type CardGeometry = {
   zIndex: number;
 };
 
-type CarouselSlot = {
+type CarouselCard = {
   key: string;
   event: PublicEvent;
-  eventIndex: number;
-  virtualIndex: number;
   offset: number;
   visible: boolean;
 };
@@ -64,8 +62,8 @@ function normalizeIndex(index: number, total: number): number {
   return ((index % total) + total) % total;
 }
 
-function circularOffset(index: number, active: number, total: number): number {
-  const distance = (index - active + total) % total;
+function circularOffset(index: number, activeIndex: number, total: number): number {
+  const distance = (index - activeIndex + total) % total;
   return distance > Math.floor(total / 2) ? distance - total : distance;
 }
 
@@ -82,7 +80,6 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
     '--card-opacity': geometry.opacity,
     '--card-brightness': geometry.brightness,
     '--card-blur': `${geometry.blur}px`,
-    '--card-border-width': Math.abs(offset) === MAX_VISIBLE_OFFSET ? '1.2px' : '1px',
     zIndex: geometry.zIndex,
   } as React.CSSProperties;
 }
@@ -99,8 +96,6 @@ function getMainEventImage(event: PublicEvent): string | null {
   const image = event.images?.[0];
   if (!image) return null;
 
-  // Posts marked #Хит use the untouched square source image.
-  // mainEventUrl remains a compatibility fallback for older records.
   return image.originalUrl?.trim() || image.mainEventUrl?.trim() || null;
 }
 
@@ -114,82 +109,77 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     () => events.filter((event) => event.mainEvent && hasHitMarker(event) && getMainEventImage(event)),
     [events],
   );
-  const [active, setActive] = useState(0);
+
+  const [position, setPosition] = useState(0);
   const [directionIndicator, setDirectionIndicator] = useState<DirectionIndicator>(0);
   const [compact, setCompact] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
   const [isPointerActive, setIsPointerActive] = useState(false);
-  const galleryRef = useRef<HTMLDivElement>(null);
+
   const pointerStartXRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | null>(null);
   const dragStartedRef = useRef(false);
   const suppressClickRef = useRef(false);
   const indicatorTimerRef = useRef<number | null>(null);
-  const stepTimerRef = useRef<number | null>(null);
+  const motionTimerRef = useRef<number | null>(null);
   const movementQueueRef = useRef<MovementDirection[]>([]);
   const movementActiveRef = useRef(false);
-  const activeRef = useRef(0);
+  const positionRef = useRef(0);
+
   const total = carouselEvents.length;
-  const activeEventIndex = total ? normalizeIndex(active, total) : 0;
+  const activeIndex = total ? normalizeIndex(position, total) : 0;
   const isAutoScrollPaused = isHovered || isFocusWithin || isPointerActive;
 
-  const carouselSlots = useMemo<CarouselSlot[]>(() => {
+  const carouselCards = useMemo<CarouselCard[]>(() => {
     if (!total) return [];
 
-    if (total >= MAX_VISIBLE_OFFSET * 2 + 1) {
-      return Array.from({ length: OFFSCREEN_OFFSET * 2 + 1 }, (_, position) => {
-        const offset = position - OFFSCREEN_OFFSET;
-        const virtualIndex = active + offset;
-        const eventIndex = normalizeIndex(virtualIndex, total);
+    if (total >= VISIBLE_RADIUS * 2 + 1) {
+      return Array.from({ length: BUFFER_RADIUS * 2 + 1 }, (_, slotIndex) => {
+        const offset = slotIndex - BUFFER_RADIUS;
+        const virtualIndex = position + offset;
 
         return {
           key: `virtual-${virtualIndex}`,
-          event: carouselEvents[eventIndex],
-          eventIndex,
-          virtualIndex,
+          event: carouselEvents[normalizeIndex(virtualIndex, total)],
           offset,
-          visible: Math.abs(offset) <= MAX_VISIBLE_OFFSET,
+          visible: Math.abs(offset) <= VISIBLE_RADIUS,
         };
       });
     }
 
-    return carouselEvents.map((event, eventIndex) => {
-      const offset = circularOffset(eventIndex, activeEventIndex, total);
-      return {
-        key: event.id,
-        event,
-        eventIndex,
-        virtualIndex: active + offset,
-        offset,
-        visible: true,
-      };
-    });
-  }, [active, activeEventIndex, carouselEvents, total]);
+    return carouselEvents.map((event, eventIndex) => ({
+      key: event.id,
+      event,
+      offset: circularOffset(eventIndex, activeIndex, total),
+      visible: true,
+    }));
+  }, [activeIndex, carouselEvents, position, total]);
 
-  const resetIndicatorTimer = useCallback(() => {
+  const clearIndicatorTimer = useCallback(() => {
     if (indicatorTimerRef.current !== null) {
       window.clearTimeout(indicatorTimerRef.current);
+      indicatorTimerRef.current = null;
     }
+  }, []);
+
+  const clearMotionTimer = useCallback(() => {
+    if (motionTimerRef.current !== null) {
+      window.clearTimeout(motionTimerRef.current);
+      motionTimerRef.current = null;
+    }
+  }, []);
+
+  const showMovementDirection = useCallback((direction: Exclude<DirectionIndicator, 0>) => {
+    clearIndicatorTimer();
+    setDirectionIndicator(direction);
 
     indicatorTimerRef.current = window.setTimeout(() => {
       setDirectionIndicator(0);
       indicatorTimerRef.current = null;
     }, MOTION_INDICATOR_MS);
-  }, []);
-
-  const clearMovementTimer = useCallback(() => {
-    if (stepTimerRef.current !== null) {
-      window.clearTimeout(stepTimerRef.current);
-      stepTimerRef.current = null;
-    }
-  }, []);
-
-  const showMovementDirection = useCallback((direction: Exclude<DirectionIndicator, 0>) => {
-    setDirectionIndicator(direction);
-    resetIndicatorTimer();
-  }, [resetIndicatorTimer]);
+  }, [clearIndicatorTimer]);
 
   const runNextMovementStep = useCallback(function runNextMovementStep() {
     const direction = movementQueueRef.current.shift();
@@ -199,22 +189,23 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
       return;
     }
 
-    const nextActive = activeRef.current + direction;
-    activeRef.current = nextActive;
-    setActive(nextActive);
+    const nextPosition = positionRef.current + direction;
+    positionRef.current = nextPosition;
+    setPosition(nextPosition);
 
-    stepTimerRef.current = window.setTimeout(() => {
-      stepTimerRef.current = null;
+    const hasNextStep = movementQueueRef.current.length > 0;
+    motionTimerRef.current = window.setTimeout(() => {
+      motionTimerRef.current = null;
 
-      if (movementQueueRef.current.length > 0) {
+      if (hasNextStep) {
         runNextMovementStep();
       } else {
         movementActiveRef.current = false;
       }
-    }, CARD_STEP_INTERVAL_MS);
+    }, hasNextStep ? STEP_INTERVAL_MS : STEP_DURATION_MS);
   }, [total]);
 
-  const queueMovement = useCallback((movement: number) => {
+  const moveBy = useCallback((movement: number) => {
     if (!total || movement === 0 || movementActiveRef.current) return;
 
     const direction: MovementDirection = movement < 0 ? -1 : 1;
@@ -226,60 +217,63 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     runNextMovementStep();
   }, [runNextMovementStep, total]);
 
-  const goTo = useCallback((virtualIndex: number) => {
-    queueMovement(virtualIndex - activeRef.current);
-  }, [queueMovement]);
+  const moveToEvent = useCallback((eventIndex: number) => {
+    if (!total) return;
+
+    const movement = circularOffset(
+      eventIndex,
+      normalizeIndex(positionRef.current, total),
+      total,
+    );
+    moveBy(movement);
+  }, [moveBy, total]);
 
   const goPrevious = useCallback(() => {
     showMovementDirection(-1);
-    queueMovement(-1);
-  }, [queueMovement, showMovementDirection]);
+    moveBy(-1);
+  }, [moveBy, showMovementDirection]);
 
   const goNext = useCallback(() => {
     showMovementDirection(1);
-    queueMovement(1);
-  }, [queueMovement, showMovementDirection]);
+    moveBy(1);
+  }, [moveBy, showMovementDirection]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
-    const sync = () => setCompact(media.matches);
-    sync();
-    media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  }, []);
+    const syncCompactMode = () => setCompact(media.matches);
 
-  useEffect(() => {
-    activeRef.current = active;
-  }, [active]);
+    syncCompactMode();
+    media.addEventListener('change', syncCompactMode);
+    return () => media.removeEventListener('change', syncCompactMode);
+  }, []);
 
   useEffect(() => {
     movementQueueRef.current = [];
     movementActiveRef.current = false;
-    clearMovementTimer();
-    activeRef.current = 0;
-    setActive(0);
-  }, [clearMovementTimer, total]);
+    clearMotionTimer();
+    positionRef.current = 0;
+    setPosition(0);
+  }, [clearMotionTimer, total]);
 
   useEffect(() => {
     if (total <= 1 || isAutoScrollPaused) return;
 
     const timer = window.setTimeout(() => {
-      if (movementActiveRef.current) return;
-      showMovementDirection(1);
-      queueMovement(1);
+      if (!movementActiveRef.current) {
+        showMovementDirection(1);
+        moveBy(1);
+      }
     }, AUTO_SCROLL_MS);
 
     return () => window.clearTimeout(timer);
-  }, [active, total, isAutoScrollPaused, queueMovement, showMovementDirection]);
+  }, [isAutoScrollPaused, moveBy, position, showMovementDirection, total]);
 
   useEffect(() => () => {
-    if (indicatorTimerRef.current !== null) {
-      window.clearTimeout(indicatorTimerRef.current);
-    }
+    clearIndicatorTimer();
+    clearMotionTimer();
     movementQueueRef.current = [];
     movementActiveRef.current = false;
-    clearMovementTimer();
-  }, [clearMovementTimer]);
+  }, [clearIndicatorTimer, clearMotionTimer]);
 
   const finishPointerInteraction = useCallback((clientX?: number) => {
     const startX = pointerStartXRef.current;
@@ -308,6 +302,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+
     setIsPointerActive(true);
     pointerStartXRef.current = event.clientX;
     pointerIdRef.current = event.pointerId;
@@ -316,8 +311,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (pointerStartXRef.current === null || pointerIdRef.current !== event.pointerId) return;
-    const delta = event.clientX - pointerStartXRef.current;
 
+    const delta = event.clientX - pointerStartXRef.current;
     if (!dragStartedRef.current && Math.abs(delta) >= 6) {
       dragStartedRef.current = true;
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -333,26 +328,36 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     finishPointerInteraction(event.clientX);
   }, [finishPointerInteraction]);
 
-  const onPointerCancel = useCallback(() => finishPointerInteraction(), [finishPointerInteraction]);
+  const onPointerCancel = useCallback(() => {
+    finishPointerInteraction();
+  }, [finishPointerInteraction]);
 
   const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
       goPrevious();
-    } else if (event.key === 'ArrowRight') {
+      return;
+    }
+
+    if (event.key === 'ArrowRight') {
       event.preventDefault();
       goNext();
-    } else if (event.key === 'Home') {
-      event.preventDefault();
-      setDirectionIndicator(0);
-      queueMovement(-activeRef.current);
-    } else if (event.key === 'End') {
-      event.preventDefault();
-      setDirectionIndicator(0);
-      const movement = total - 1 - normalizeIndex(activeRef.current, total);
-      queueMovement(movement);
+      return;
     }
-  }, [goNext, goPrevious, queueMovement, total]);
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      setDirectionIndicator(0);
+      moveToEvent(0);
+      return;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      setDirectionIndicator(0);
+      moveToEvent(total - 1);
+    }
+  }, [goNext, goPrevious, moveToEvent, total]);
 
   return (
     <section id="main-events" className={styles.section} aria-labelledby="main-events-title">
@@ -366,15 +371,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
         ) : (
           <>
             <div
-              ref={galleryRef}
               className={cn(styles.gallery, dragOffset !== 0 && styles.galleryDragging)}
               tabIndex={0}
               role="region"
               aria-roledescription="карусель"
-              aria-label={`Главные события. Событие ${activeEventIndex + 1} из ${total}`}
+              aria-label={`Главные события. Событие ${activeIndex + 1} из ${total}`}
               style={{
                 '--drag-offset': `${dragOffset}px`,
-                '--card-step-duration': `${CARD_STEP_DURATION_MS}ms`,
+                '--card-step-duration': `${STEP_DURATION_MS}ms`,
               } as React.CSSProperties}
               onKeyDown={onKeyDown}
               onPointerDown={onPointerDown}
@@ -392,46 +396,43 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                 }
               }}
             >
-              {carouselSlots.map((slot) => {
-                const imageUrl = getMainEventImage(slot.event);
+              {carouselCards.map((card) => {
+                const imageUrl = getMainEventImage(card.event);
                 if (!imageUrl) return null;
 
-                const isCenter = slot.offset === 0;
+                const isCenter = card.offset === 0;
 
                 return (
                   <button
                     type="button"
-                    key={slot.key}
-                    className={cn(
-                      styles.card,
-                      isCenter && styles.cardActive,
-                      !slot.visible && styles.cardOffscreen,
-                    )}
-                    style={getCardStyle(slot.offset, compact)}
-                    tabIndex={slot.visible ? 0 : -1}
-                    aria-hidden={!slot.visible}
+                    key={card.key}
+                    className={cn(styles.card, !card.visible && styles.cardOffscreen)}
+                    style={getCardStyle(card.offset, compact)}
+                    tabIndex={card.visible ? 0 : -1}
+                    aria-hidden={!card.visible}
                     aria-label={isCenter
-                      ? `Открыть событие: ${slot.event.title}`
-                      : `Показать событие: ${slot.event.title}`}
+                      ? `Открыть событие: ${card.event.title}`
+                      : `Показать событие: ${card.event.title}`}
                     aria-current={isCenter ? 'true' : undefined}
                     onClick={(clickEvent) => {
-                      if (!slot.visible || suppressClickRef.current) {
+                      if (!card.visible || suppressClickRef.current) {
                         clickEvent.preventDefault();
                         return;
                       }
 
                       if (isCenter) {
-                        openEvent(slot.event);
-                      } else {
-                        showMovementDirection(slot.offset < 0 ? -1 : 1);
-                        goTo(slot.virtualIndex);
+                        openEvent(card.event);
+                        return;
                       }
+
+                      showMovementDirection(card.offset < 0 ? -1 : 1);
+                      moveBy(card.offset);
                     }}
                   >
                     <span className={styles.frame}>
                       <img
                         src={imageUrl}
-                        alt={slot.visible ? slot.event.title : ''}
+                        alt={card.visible ? card.event.title : ''}
                         loading={isCenter ? 'eager' : 'lazy'}
                         fetchPriority={isCenter ? 'high' : 'auto'}
                         draggable={false}
