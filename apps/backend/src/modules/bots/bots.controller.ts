@@ -3,13 +3,19 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Headers,
   Logger,
   Param,
   Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { BotsService } from './bots.service';
 
 class UpsertBotUserDto {
@@ -53,6 +59,11 @@ function assertBotToken(header: string | undefined): void {
   }
 }
 
+function positiveInteger(value: unknown, fallback: number): number {
+  const parsed = Number.parseInt(String(value), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 @ApiTags('bots')
 @Controller('bots')
 export class BotsController {
@@ -68,6 +79,30 @@ export class BotsController {
   async getConfig() {
     const phoneRequired = await this.botsService.isPhoneRequired();
     return { phoneRequired };
+  }
+
+  @Get('contacts')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  listContacts(
+    @Query('page') page: unknown,
+    @Query('limit') limit: unknown,
+  ) {
+    return this.botsService.findAcceptedContacts(
+      positiveInteger(page, 1),
+      positiveInteger(limit, 50),
+    );
+  }
+
+  @Get('contacts/export')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="ab-afisha-bot-contacts.csv"')
+  exportContacts() {
+    return this.botsService.exportAcceptedContactsCsv();
   }
 
   @Post('users/upsert')
