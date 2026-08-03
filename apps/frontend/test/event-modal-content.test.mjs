@@ -67,10 +67,15 @@ describe('Event modal content', () => {
   test('filters title speaker time and other structured metadata duplicates', () => {
     const content = readFileSync(MODAL_CONTENT, 'utf8');
 
-    assert.match(content, /text === title/);
+    assert.match(
+      content,
+      /withoutTerminalPunctuation\(text\) === withoutTerminalPunctuation\(title\)/,
+    );
     assert.match(content, /text === `спикер \$\{speaker\}`/);
-    assert.match(content, /candidateTime === eventTime/);
+    assert.match(content, /timePattern\.test\(candidateTime\)/);
     assert.ok(content.includes('время(?:\\\\s+проведения)?'));
+    assert.match(content, /\^\(\?:онлайн\|офлайн\|бесплатно\|платно\)\$/);
+    assert.match(content, /\.replace\(\/\\\*\\\*\|__\|~~\/g, ''\)/);
     assert.match(content, /removeRepeatedBlocks/);
     assert.match(content, /removeRepeatedPlainLines/);
     assert.match(content, /removeRepeatedBreakSegments/);
