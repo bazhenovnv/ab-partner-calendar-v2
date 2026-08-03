@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { formatEventDateParts } from '@/lib/format';
+import { formatEventDateParts, formatPrice } from '@/lib/format';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
 import styles from './events-runtime.module.css';
@@ -25,6 +25,7 @@ export function EventCard({ event, className }: EventCardProps) {
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
   const dateParts = formatEventDateParts(event.startDate);
   const status = STATUS_LABEL[event.autoStatus] ?? STATUS_LABEL.PLANNED;
+  const price = formatPrice(event.priceType, event.priceText);
 
   return (
     <article className={cn(styles.eventCard, ui.cardShell, 'group', className)}>
@@ -58,6 +59,7 @@ export function EventCard({ event, className }: EventCardProps) {
           </span>
           <span className={cn(styles.eventBody, ui.cardBody)}>
             <span className={cn(styles.eventTitle, ui.cardTitle)}>{event.title}</span>
+            <span className={ui.cardPrice}>{price}</span>
             <span className={ui.cardDetails}>Подробнее →</span>
           </span>
         </span>
