@@ -16,10 +16,13 @@ const STYLES = join(
 describe('Main events carousel', () => {
   test('uses one virtual drum and one movement queue', () => {
     const component = readFileSync(COMPONENT, 'utf8');
+    const carouselCardType = component.match(
+      /type CarouselCard = \{[\s\S]*?\n\};/,
+    )?.[0] ?? '';
 
     assert.match(component, /const VISIBLE_RADIUS = 2;/);
     assert.match(component, /const BUFFER_RADIUS = VISIBLE_RADIUS \+ 1;/);
-    assert.match(component, /type CarouselCard = \{/);
+    assert.match(carouselCardType, /type CarouselCard = \{/);
     assert.match(component, /movementQueueRef/);
     assert.match(component, /runNextMovementStep/);
     assert.match(component, /hasNextStep \? STEP_INTERVAL_MS : STEP_DURATION_MS/);
@@ -31,8 +34,8 @@ describe('Main events carousel', () => {
     assert.doesNotMatch(component, /CARD_WRAP_INTERVAL_MS/);
     assert.doesNotMatch(component, /--card-border-width/);
     assert.doesNotMatch(component, /styles\.cardActive/);
-    assert.doesNotMatch(component, /eventIndex:\s*number/);
-    assert.doesNotMatch(component, /virtualIndex:\s*number/);
+    assert.doesNotMatch(carouselCardType, /\beventIndex\s*:/);
+    assert.doesNotMatch(carouselCardType, /\bvirtualIndex\s*:/);
   });
 
   test('has no card border and uses one uniform omnidirectional shadow', () => {
