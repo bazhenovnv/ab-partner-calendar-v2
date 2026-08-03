@@ -104,6 +104,12 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
     onSelectDate(date);
   };
 
+  const selectNextMonthDate = (nextYear: number, nextMonth: number, day: number) => {
+    setYear(nextYear);
+    setMonth(nextMonth);
+    selectDate(toDateString(nextYear, nextMonth, day));
+  };
+
   const goToPrev = () => {
     if (month === 0) {
       setYear((value) => value - 1);
@@ -237,17 +243,29 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
 
           {Array.from({ length: trailingCells }).map((_, index) => {
             const columnIndex = (occupiedCells + index) % 7;
+            const nextMonth = month === 11 ? 0 : month + 1;
+            const nextYear = month === 11 ? year + 1 : year;
+            const nextDay = index + 1;
+            const nextDateStr = toDateString(nextYear, nextMonth, nextDay);
+
             return (
               <div
                 key={`next-${index}`}
                 role="gridcell"
-                aria-disabled="true"
                 className={cn(
                   'pub-calendar-cell pub-calendar-cell--outside',
                   columnIndex >= 5 && 'pub-calendar-cell--weekend',
                 )}
               >
-                {index + 1}
+                <button
+                  type="button"
+                  className="pub-calendar-day"
+                  aria-label={`${nextDay} числа следующего месяца, открыть дату`}
+                  aria-selected={selectedDate === nextDateStr}
+                  onClick={() => selectNextMonthDate(nextYear, nextMonth, nextDay)}
+                >
+                  <span className="pub-calendar-day-number">{nextDay}</span>
+                </button>
               </div>
             );
           })}
