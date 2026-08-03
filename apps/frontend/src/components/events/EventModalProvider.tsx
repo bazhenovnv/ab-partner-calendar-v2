@@ -12,6 +12,10 @@ import {
   type ReactNode,
 } from 'react';
 import { sanitizeEventHtml } from '@/lib/html';
+import {
+  cleanEventModalDescription,
+  getEventModalImageUrl,
+} from '@/lib/event-modal-content';
 import type { PublicEvent } from '@/types/event';
 import v2 from './event-modal-v2.module.css';
 
@@ -153,90 +157,6 @@ function organizerActionUrl(event: PublicEvent): string | null {
   return null;
 }
 
-function sanitizeDescription(value?: string | null): string {
-  if (!value) return '';
-
-  let result = value;
-
-  /*
-   * Дата, время, место, формат, стоимость и спикер выводятся
-   * отдельными элементами модального окна. Удаляем только явно
-   * маркированные служебные строки, не затрагивая обычный текст.
-   */
-  result = result.replace(
-    /<(p|div|li)[^>]*>\s*(?:<[^>]+>\s*)*(?:когда|дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][\s\S]*?<\/\1>/gi,
-    '',
-  );
-
-  result = result.replace(
-    /(?:^|\n)\s*(?:когда|дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][^\n]*(?=\n|$)/gim,
-    '',
-  );
-
-  // MAX может сохранить перенос внутри одного HTML-блока через <br>.
-  // Удаляем только служебную строку после переноса, сохраняя основной текст блока.
-  result = result.replace(
-    /<br\s*\/?\s*>\s*(?:<[^>]+>\s*)*(?:когда|дата|время|место(?:\s+проведения)?|адрес|формат|стоимость|цена|спикер|ведущ(?:ий|ая)|онлайн)\s*[:—–-][\s\S]*?(?=<br\s*\/?\s*>|<\/(?:p|div|li)>|$)/gi,
-    '',
-  );
-
-  // Удаляем HTML-блоки, посвящённые регистрации.
-  result = result.replace(
-    /<(p|div|li)[^>]*>[\s\S]*?(?:зарегистрир|регистрац|записаться|для\s+участия|принять\s+участие|подать\s+заявку|ссылка\s+для\s+регистрации)[\s\S]*?<\/\1>/gi,
-    '',
-  );
-
-  // Удаляем регистрационные ссылки в тегах <a>.
-  result = result.replace(
-    /<a\b[^>]*href=["'][^"']*(?:max\.ru|t\.me|telegram\.me|telegram\.dog)[^"']*["'][^>]*>[\s\S]*?<\/a>/gi,
-    '',
-  );
-
-  // Удаляем фразу «зарегистрироваться...» вместе с URL,
-  // включая переносы строк и параметры вида ?mid=...
-  result = result.replace(
-    /(?:зарегистрир\w*|регистрац\w*|записаться|ссылка\s+для\s+регистрации|для\s+участия)[\s\S]{0,400}?https?:\/\/[^\s<>"']+(?:\s*[?&]?\s*mid\s*=\s*[A-Za-z0-9_-]+)?/gi,
-    '',
-  );
-
-  // Удаляем оставшиеся прямые URL MAX/Telegram.
-  result = result.replace(
-    /https?:\/\/(?:www\.)?(?:max\.ru|t\.me|telegram\.me|telegram\.dog)\/[^\s<>"']+/gi,
-    '',
-  );
-
-  // Удаляем отдельно оставшийся параметр mid.
-  result = result.replace(
-    /(?:\?|&|&amp;)?\s*mid\s*=\s*[A-Za-z0-9_-]+/gi,
-    '',
-  );
-
-  // Удаляем остаточные фразы регистрации без ссылки.
-  result = result.replace(
-    /(?:зарегистрир\w*|регистрац\w*|записаться|ссылка\s+для\s+регистрации|для\s+участия)[^.!?<]*(?:[.!?]|$)/gi,
-    '',
-  );
-
-  // Удаляем хвостовые служебные хештеги.
-  result = result.replace(
-    /(?:\s|&nbsp;|<br\s*\/?>)*(?:#[A-Za-zА-Яа-яЁё0-9_-]+(?:\s|&nbsp;|<br\s*\/?>)*){2,}$/gi,
-    '',
-  );
-
-  // Чистим пустые HTML-элементы и лишние пробелы.
-  result = result
-    .replace(
-      /<p[^>]*>\s*(?:&nbsp;|<br\s*\/?\s*>)*\s*<\/p>/gi,
-      '',
-    )
-    .replace(/(?:<br\s*\/?\s*>[\s\u00a0]*){3,}/gi, '<br><br>')
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-
-  return result;
-}
-
 type LineIconName = 'online' | 'location' | 'speaker';
 
 function LineIcon({ name }: { name: LineIconName }) {
@@ -344,9 +264,7 @@ function EventModal({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const reminderTriggerRef = useRef<HTMLButtonElement>(null);
 
-  const image = event.images?.[0];
-  const imageUrl =
-    image?.modalUrl ?? image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
+  const imageUrl = getEventModalImageUrl(event);
   const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
   const actionUrl = organizerActionUrl(event);
   const date = new Intl.DateTimeFormat('ru-RU', {
@@ -362,12 +280,16 @@ function EventModal({
   const price = event.priceType === 'FREE' ? 'Бесплатно' : event.priceText ?? 'Платно';
   const speaker = cleanSpeaker(event.speaker);
   const rawLead = sanitizeEventHtml(
-    sanitizeDescription(event.shortDescription),
+    cleanEventModalDescription(event.shortDescription, event),
   );
   const description = sanitizeEventHtml(
-    sanitizeDescription(event.fullDescription),
+    cleanEventModalDescription(event.fullDescription, event),
   );
-  const normalizedLead = rawLead.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const normalizedLead = rawLead
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
   const normalizedDescription = description
     .replace(/<[^>]*>/g, '')
     .replace(/&nbsp;/g, ' ')
@@ -421,7 +343,21 @@ function EventModal({
         <div className={v2.media}>
           <div className={v2.imageStage}>
             {imageUrl ? (
-              <Image src={imageUrl} alt={event.title} fill unoptimized priority className={v2.image} />
+              <Image
+                src={imageUrl}
+                alt={event.title}
+                width={1280}
+                height={1280}
+                unoptimized
+                priority
+                className={v2.image}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+              />
             ) : (
               <div className={v2.imagePlaceholder}>АБ</div>
             )}
@@ -460,11 +396,7 @@ function EventModal({
               <Fact
                 icon="clock"
                 label="Время"
-                value={
-                  event.startTime
-                    ? `${event.startTime} (МСК)`
-                    : 'Уточняется'
-                }
+                value={event.startTime ? `${event.startTime} (МСК)` : 'Уточняется'}
               />
               <Fact icon="price" label="Стоимость" value={price} />
             </div>
