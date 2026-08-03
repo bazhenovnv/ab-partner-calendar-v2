@@ -28,12 +28,22 @@
   text-decoration: none !important;
 }
 
-/* Apply control: white surface with the same restrained outline language as event-card controls. */
+/* Apply control: white surface with the approved mint hover and dark active states preserved. */
 .pub-filter-apply-btn {
   border: 1px solid rgba(13, 35, 68, 0.20) !important;
   background: #ffffff !important;
   color: #0d2344 !important;
   box-shadow: 0 0 9px rgba(13, 35, 68, 0.18) !important;
+}
+
+.pub-filter-apply-btn:hover:not(:disabled) {
+  background: #7cd8b3 !important;
+  color: #0d2344 !important;
+}
+
+.pub-filter-apply-btn:active:not(:disabled) {
+  background: #367d67 !important;
+  color: #ffffff !important;
 }
 
 /* Header actions use the same outline and balanced surrounding shadow. */
