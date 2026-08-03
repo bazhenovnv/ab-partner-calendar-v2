@@ -11,6 +11,7 @@ const OFFSCREEN_OFFSET = MAX_VISIBLE_OFFSET + 1;
 const SWIPE_THRESHOLD_PX = 44;
 const MOTION_INDICATOR_MS = 560;
 const CARD_STEP_DURATION_MS = 520;
+const CARD_STEP_INTERVAL_MS = CARD_STEP_DURATION_MS / 2;
 const AUTO_SCROLL_MS = 10_000;
 const HIT_MARKER = /(?:^|\s)#хит(?=\s|$|[.,;:!?])/i;
 
@@ -81,6 +82,7 @@ function getCardStyle(offset: number, compact: boolean): React.CSSProperties {
     '--card-opacity': geometry.opacity,
     '--card-brightness': geometry.brightness,
     '--card-blur': `${geometry.blur}px`,
+    '--card-border-width': Math.abs(offset) === MAX_VISIBLE_OFFSET ? '1.2px' : '1px',
     zIndex: geometry.zIndex,
   } as React.CSSProperties;
 }
@@ -209,7 +211,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
       } else {
         movementActiveRef.current = false;
       }
-    }, CARD_STEP_DURATION_MS);
+    }, CARD_STEP_INTERVAL_MS);
   }, [total]);
 
   const queueMovement = useCallback((movement: number) => {
