@@ -42,9 +42,18 @@ export function formatMonthYear(year: number, month: number): string {
   return `${MONTHS_RU_NOM[month]} ${year}`;
 }
 
+/**
+ * Public price labels must contain either a concrete numeric amount or
+ * "Бесплатно". Administrative placeholders such as "При регистрации",
+ * "По запросу" and "Уточняется" are not shown to visitors as prices.
+ */
 export function formatPrice(priceType: 'FREE' | 'PAID', priceText?: string | null): string {
   if (priceType === 'FREE') return 'Бесплатно';
-  return priceText ?? 'Платно';
+
+  const value = priceText?.replace(/\s+/g, ' ').trim();
+  if (!value || !/\d/u.test(value)) return 'Бесплатно';
+
+  return value;
 }
 
 export function formatEventDateParts(startDate: string): { day: number; month: string } {
