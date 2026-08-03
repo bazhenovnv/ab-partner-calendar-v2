@@ -1,0 +1,98 @@
+/* Final homepage control and event-card polish. Loaded after all legacy stage layers. */
+
+/* Event cards: stronger balanced shadow on every side without changing card animation. */
+[data-event-results-grid] article {
+  box-shadow:
+    0 0 12px 2px rgba(13, 35, 68, 0.28),
+    0 0 26px 6px rgba(13, 35, 68, 0.16) !important;
+}
+
+[data-event-results-grid] article:hover {
+  box-shadow:
+    0 0 14px 3px rgba(13, 35, 68, 0.34),
+    0 0 32px 8px rgba(13, 35, 68, 0.20) !important;
+}
+
+/* Reset control: no underline; black text on hover. Existing scale animation is preserved. */
+.pub-filter-reset-link,
+.pub-filter-reset-link:visited {
+  border-bottom: 0 !important;
+  color: #0d2344 !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+.pub-filter-reset-link:hover:not(:disabled),
+.pub-filter-reset-link:focus-visible:not(:disabled) {
+  color: #111111 !important;
+  text-decoration: none !important;
+}
+
+/* Apply control: white surface with the same restrained outline language as event-card controls. */
+.pub-filter-apply-btn {
+  border: 1px solid rgba(13, 35, 68, 0.20) !important;
+  background: #ffffff !important;
+  color: #0d2344 !important;
+  box-shadow: 0 0 9px rgba(13, 35, 68, 0.18) !important;
+}
+
+/* Header actions use the same outline and balanced surrounding shadow. */
+.pub-header-action {
+  border: 1px solid rgba(13, 35, 68, 0.20) !important;
+  box-shadow: 0 0 9px rgba(13, 35, 68, 0.18) !important;
+}
+
+/* Header icons: no wrapper outline and one optical size for Telegram, MAX and Partner. */
+.pub-header-action-icon-wrap,
+.pub-header-action-icon {
+  width: 27px !important;
+  height: 27px !important;
+  min-width: 27px !important;
+  max-width: 27px !important;
+  min-height: 27px !important;
+  max-height: 27px !important;
+  flex: 0 0 27px !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.pub-header-action-icon-wrap {
+  overflow: visible !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  mix-blend-mode: normal !important;
+}
+
+.pub-header-action-icon {
+  position: static !important;
+  display: block !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  clip-path: none !important;
+  transform: none !important;
+  mix-blend-mode: normal !important;
+}
+
+.pub-header-action-icon-wrap--max,
+.pub-header-action-icon--max {
+  width: 27px !important;
+  height: 27px !important;
+  flex-basis: 27px !important;
+}
+
+@media (max-width: 767px) {
+  .pub-header-action-icon-wrap,
+  .pub-header-action-icon,
+  .pub-header-action-icon-wrap--max,
+  .pub-header-action-icon--max {
+    width: 25px !important;
+    height: 25px !important;
+    min-width: 25px !important;
+    max-width: 25px !important;
+    min-height: 25px !important;
+    max-height: 25px !important;
+    flex-basis: 25px !important;
+  }
+}
