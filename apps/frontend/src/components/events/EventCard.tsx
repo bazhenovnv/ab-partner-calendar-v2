@@ -58,7 +58,6 @@ export function EventCard({ event, className }: EventCardProps) {
           </span>
           <span className={cn(styles.eventBody, ui.cardBody)}>
             <span className={cn(styles.eventTitle, ui.cardTitle)}>{event.title}</span>
-            {event.speaker && <strong className={ui.cardSpeaker}>Спикер: {event.speaker}</strong>}
             <span className={ui.cardDetails}>Подробнее →</span>
           </span>
         </span>
