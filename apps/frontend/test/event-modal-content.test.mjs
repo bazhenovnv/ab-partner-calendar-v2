@@ -112,7 +112,7 @@ describe('Event modal content', () => {
     assert.match(card, /className=\{ui\.cardPrice\}>\{price\}<\/span>/);
     assert.match(interactions, /\.cardPrice/);
     assert.match(format, /if \(priceType === 'FREE'\) return 'Бесплатно';/);
-    assert.match(format, /if \(!value \|\| !\/\\d\/u\.test\(value\)\) return 'Бесплатно';/);
+    assert.match(format, /if \(!value \|\| !\/\\d\/\.test\(value\)\) return 'Бесплатно';/);
     assert.doesNotMatch(format, /return priceText \?\? 'Платно'/);
   });
 });
