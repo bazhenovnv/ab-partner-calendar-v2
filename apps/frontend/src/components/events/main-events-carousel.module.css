@@ -52,6 +52,7 @@
   --card-brightness: 1;
   --card-blur: 0px;
   --card-border-width: 1px;
+  --card-radius: 18px;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -101,8 +102,11 @@
   height: 100%;
   overflow: hidden;
   border: var(--card-border-width) solid #111;
-  border-radius: 18px;
-  background: transparent;
+  border-radius: var(--card-radius);
+  background: #050505;
+  -webkit-clip-path: inset(0 round var(--card-radius));
+  clip-path: inset(0 round var(--card-radius));
+  backface-visibility: hidden;
   box-shadow:
     0 12px 24px rgba(0, 0, 0, 0.52),
     0 4px 10px rgba(0, 0, 0, 0.38);
@@ -137,12 +141,14 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
-  border-radius: inherit;
-  background: transparent;
+  border-radius: calc(var(--card-radius) - var(--card-border-width));
+  background: #050505;
   filter:
     blur(var(--card-blur))
     brightness(var(--card-brightness))
     saturate(0.94);
+  transform: scale(1.002);
+  backface-visibility: hidden;
   transition: filter var(--card-step-duration) cubic-bezier(0.22, 1, 0.36, 1);
   will-change: filter;
   pointer-events: none;
@@ -280,11 +286,8 @@
   }
 
   .card {
+    --card-radius: 16px;
     width: min(244px, 70vw);
-  }
-
-  .frame {
-    border-radius: 16px;
   }
 
   .nav {
