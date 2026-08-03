@@ -20,6 +20,7 @@ const EVENT_INTERACTIONS = join(
   FRONTEND,
   'src/components/events/event-interactions.module.css',
 );
+const FORMAT = join(FRONTEND, 'src/lib/format.ts');
 
 describe('Event modal content', () => {
   test('uses one dedicated cleanup module without legacy inline sanitizer', () => {
@@ -92,5 +93,18 @@ describe('Event modal content', () => {
     assert.doesNotMatch(interactions, /\.reminderDialog/);
     assert.match(interactions, /\.cardOpen/);
     assert.match(interactions, /\.cardDetails/);
+  });
+
+  test('shows only a numeric price or Бесплатно in public event cards', () => {
+    const card = readFileSync(EVENT_CARD, 'utf8');
+    const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
+    const format = readFileSync(FORMAT, 'utf8');
+
+    assert.match(card, /formatPrice\(event\.priceType, event\.priceText\)/);
+    assert.match(card, /className=\{ui\.cardPrice\}>\{price\}<\/span>/);
+    assert.match(interactions, /\.cardPrice/);
+    assert.match(format, /if \(priceType === 'FREE'\) return 'Бесплатно';/);
+    assert.match(format, /if \(!value \|\| !\/\\d\/u\.test\(value\)\) return 'Бесплатно';/);
+    assert.doesNotMatch(format, /return priceText \?\? 'Платно'/);
   });
 });
