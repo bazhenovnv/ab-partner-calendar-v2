@@ -10,7 +10,10 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: transparent;
+  appearance: none;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none;
   color: #0d2344;
   cursor: pointer;
   transition:
@@ -30,9 +33,11 @@
 
 .close:hover,
 .close:focus-visible {
+  background-color: transparent !important;
+  background-image: none !important;
   color: #0d2344;
   transform: scale(1.08);
-  box-shadow: 0 0 18px rgba(13, 35, 68, 0.22);
+  box-shadow: none;
 }
 
 .close:hover span,

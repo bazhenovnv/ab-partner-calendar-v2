@@ -10,6 +10,7 @@ import { resolve, join } from 'node:path';
 
 const FRONTEND = resolve(import.meta.dirname, '..');
 const SRC = join(FRONTEND, 'src');
+const SHARED = resolve(FRONTEND, '../../packages/shared');
 
 function app(relPath) {
   return join(SRC, 'app', relPath);
@@ -308,5 +309,29 @@ describe('Pinned production homepage', () => {
     const content = readFileSync(lib('lib/legal.ts'), 'utf8');
 
     assert.match(content, /LEGAL_DOCUMENTS/);
+  });
+
+  test('public legal documents omit internal legal-review notices', () => {
+    const content = readFileSync(join(SHARED, 'src/constants/legal-documents.ts'), 'utf8');
+
+    assert.doesNotMatch(
+      content,
+      /Проект АБ Афиша Бухгалтера\. Редакция для юридической проверки от 01\.07\.2026/,
+    );
+    assert.doesNotMatch(
+      content,
+      /Документ подготовлен как проект для проверки и правовой редакции юристом\./,
+    );
+  });
+
+  test('legal document close control has no background tile', () => {
+    const styles = readFileSync(
+      lib('components/legal/legal-close-button.module.css'),
+      'utf8',
+    );
+
+    assert.match(styles, /background-color: transparent !important/);
+    assert.match(styles, /background-image: none !important/);
+    assert.match(styles, /box-shadow: none/);
   });
 });
