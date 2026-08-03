@@ -59,8 +59,10 @@
   width: clamp(420px, 25vw, 480px);
   aspect-ratio: 1 / 1;
   border: 0;
+  border-radius: var(--card-radius);
   padding: 0;
   background: transparent;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.38);
   cursor: pointer;
   opacity: var(--card-opacity);
   transform:
@@ -104,7 +106,6 @@
   -webkit-clip-path: inset(0 round var(--card-radius));
   clip-path: inset(0 round var(--card-radius));
   backface-visibility: hidden;
-  box-shadow: 0 0 18px rgba(0, 0, 0, 0.38);
   transform: translateZ(0);
 }
 
