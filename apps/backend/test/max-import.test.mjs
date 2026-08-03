@@ -73,6 +73,24 @@ const RAW_UNKNOWN_TYPE = {
   chat_id: FIXTURE_CHANNEL_ID,
 };
 
+const RAW_MESSAGE_CALLBACK = {
+  update_type: 'message_callback',
+  timestamp: 1720005000000,
+  callback: {
+    callback_id: 'callback-123',
+    payload: 'reminder_toggle:2',
+    user: { user_id: 777, name: 'Accountant' },
+  },
+};
+
+const RAW_BOT_STARTED = {
+  update_type: 'bot_started',
+  timestamp: 1720006000000,
+  chat_id: 888,
+  payload: 'remind_event-123',
+  user: { user_id: 777, name: 'Accountant' },
+};
+
 // ─── Inline normalizer (mirrors max-api.types.ts for unit testing) ────────────
 
 function normalizeUser(raw) {
@@ -124,6 +142,30 @@ function normalizeMaxUpdate(raw) {
   if (updateType === 'message_removed') {
     return { updateType, timestamp, messageId: raw['message_id'], chatId: raw['chat_id'], userId: raw['user_id'] };
   }
+  if (updateType === 'message_callback') {
+    const callback = raw['callback'];
+    if (!callback || typeof callback.callback_id !== 'string') return null;
+    return {
+      updateType,
+      timestamp,
+      callback: {
+        callbackId: callback.callback_id,
+        payload: callback.payload,
+        user: normalizeUser(callback.user),
+      },
+    };
+  }
+  if (updateType === 'bot_started') {
+    const user = normalizeUser(raw['user']);
+    if (!user) return null;
+    return {
+      updateType,
+      timestamp,
+      chatId: raw['chat_id'],
+      payload: raw['payload'],
+      user,
+    };
+  }
   return { updateType, timestamp };
 }
 
@@ -160,6 +202,22 @@ describe('normalizeMaxUpdate — raw snake_case → internal camelCase', () => {
     const n = normalizeMaxUpdate(RAW_UNKNOWN_TYPE);
     assert.equal(n.updateType, 'chat_title_changed');
     assert.ok(!('update_type' in n), 'snake_case update_type must not remain');
+  });
+
+  test('message_callback normalizes callback and user identifiers', () => {
+    const n = normalizeMaxUpdate(RAW_MESSAGE_CALLBACK);
+    assert.equal(n.updateType, 'message_callback');
+    assert.equal(n.callback.callbackId, 'callback-123');
+    assert.equal(n.callback.payload, 'reminder_toggle:2');
+    assert.equal(n.callback.user.userId, 777);
+  });
+
+  test('bot_started preserves deep-link payload', () => {
+    const n = normalizeMaxUpdate(RAW_BOT_STARTED);
+    assert.equal(n.updateType, 'bot_started');
+    assert.equal(n.chatId, 888);
+    assert.equal(n.payload, 'remind_event-123');
+    assert.equal(n.user.userId, 777);
   });
 
   test('missing update_type returns null', () => {

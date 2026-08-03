@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm run build && node --test test/*.mjs"
   },
   "devDependencies": {
     "typescript": "^5.4.0"

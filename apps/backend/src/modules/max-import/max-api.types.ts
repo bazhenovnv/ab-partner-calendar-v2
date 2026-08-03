@@ -86,11 +86,36 @@ export interface RawMaxMessageRemovedUpdate {
   user_id?: number;
 }
 
+export interface RawMaxCallback {
+  callback_id: string;
+  payload?: string;
+  timestamp?: number;
+  user?: RawMaxUser;
+}
+
+export interface RawMaxMessageCallbackUpdate {
+  update_type: 'message_callback';
+  timestamp: number;
+  callback: RawMaxCallback;
+  message?: RawMaxMessage;
+  user?: RawMaxUser;
+}
+
+export interface RawMaxBotStartedUpdate {
+  update_type: 'bot_started';
+  timestamp: number;
+  chat_id?: number;
+  payload?: string;
+  user: RawMaxUser;
+}
+
 export type RawMaxUpdate =
   | RawMaxBotAddedUpdate
   | RawMaxMessageCreatedUpdate
   | RawMaxMessageEditedUpdate
   | RawMaxMessageRemovedUpdate
+  | RawMaxMessageCallbackUpdate
+  | RawMaxBotStartedUpdate
   | { update_type: string; timestamp: number; [key: string]: unknown };
 
 export interface RawMaxUpdatesResponse {
@@ -190,11 +215,36 @@ export interface MaxMessageRemovedUpdate {
   userId?: number;
 }
 
+export interface MaxCallback {
+  callbackId: string;
+  payload?: string;
+  timestamp?: number;
+  user?: MaxUser;
+}
+
+export interface MaxMessageCallbackUpdate {
+  updateType: 'message_callback';
+  timestamp: number;
+  callback: MaxCallback;
+  message?: MaxMessage;
+  user?: MaxUser;
+}
+
+export interface MaxBotStartedUpdate {
+  updateType: 'bot_started';
+  timestamp: number;
+  chatId?: number;
+  payload?: string;
+  user: MaxUser;
+}
+
 export type MaxUpdate =
   | MaxBotAddedUpdate
   | MaxMessageCreatedUpdate
   | MaxMessageEditedUpdate
   | MaxMessageRemovedUpdate
+  | MaxMessageCallbackUpdate
+  | MaxBotStartedUpdate
   | { updateType: string; timestamp: number; [key: string]: unknown };
 
 // ─── Normalization boundary ───────────────────────────────────────────────────
@@ -282,6 +332,36 @@ export function normalizeMaxUpdate(raw: unknown): MaxUpdate | null {
       messageId: r['message_id'] as string,
       chatId: r['chat_id'] as number,
       userId: r['user_id'] as number | undefined,
+    };
+  }
+
+  if (updateType === 'message_callback') {
+    const rawCallback = r['callback'] as RawMaxCallback | undefined;
+    if (!rawCallback || typeof rawCallback.callback_id !== 'string') return null;
+    const rawMessage = r['message'] as RawMaxMessage | undefined;
+    return {
+      updateType: 'message_callback',
+      timestamp,
+      callback: {
+        callbackId: rawCallback.callback_id,
+        payload: rawCallback.payload,
+        timestamp: rawCallback.timestamp,
+        user: normalizeUser(rawCallback.user),
+      },
+      message: rawMessage ? normalizeMessage(rawMessage) : undefined,
+      user: normalizeUser(r['user'] as RawMaxUser | undefined),
+    };
+  }
+
+  if (updateType === 'bot_started') {
+    const user = normalizeUser(r['user'] as RawMaxUser | undefined);
+    if (!user) return null;
+    return {
+      updateType: 'bot_started',
+      timestamp,
+      chatId: r['chat_id'] as number | undefined,
+      payload: r['payload'] as string | undefined,
+      user,
     };
   }
 

@@ -11,6 +11,7 @@ import { ApiTags, ApiExcludeController } from '@nestjs/swagger';
 import { timingSafeEqual } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { MaxImportService } from './max-import.service';
+import { MaxBotInteractionService } from './max-bot-interaction.service';
 
 /**
  * Public endpoint for MAX Bot API webhook deliveries.
@@ -26,6 +27,7 @@ export class MaxWebhookController {
 
   constructor(
     private readonly maxImportService: MaxImportService,
+    private readonly maxBotInteractionService: MaxBotInteractionService,
     private readonly config: ConfigService,
   ) {}
 
@@ -51,27 +53,35 @@ export class MaxWebhookController {
       throw new ForbiddenException('Invalid secret');
     }
 
-    const enabled =
-      this.config.get<string>('MAX_IMPORT_ENABLED') === 'true';
-
-    if (!enabled) {
-      this.logger.debug(
-        'MAX_IMPORT_ENABLED=false — webhook payload acknowledged but not processed',
-      );
-
-      return { ok: true };
-    }
+    let handledByBot = false;
 
     try {
-      await this.maxImportService.processWebhookUpdate(body);
+      handledByBot = await this.maxBotInteractionService.processWebhookUpdate(body);
     } catch (err) {
       this.logger.error(
-        `Webhook processing error: ${
+        `MAX bot interaction error: ${
           err instanceof Error
             ? err.stack
             : String(err)
         }`,
       );
+    }
+
+    const importEnabled =
+      this.config.get<string>('MAX_IMPORT_ENABLED') === 'true';
+
+    if (importEnabled && !handledByBot) {
+      try {
+        await this.maxImportService.processWebhookUpdate(body);
+      } catch (err) {
+        this.logger.error(
+          `Webhook import error: ${
+            err instanceof Error
+              ? err.stack
+              : String(err)
+          }`,
+        );
+      }
     }
 
     return { ok: true };

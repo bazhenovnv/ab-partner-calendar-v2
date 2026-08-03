@@ -55,6 +55,7 @@ describe('Backend — module files exist', () => {
     'modules/admin/admin.module.ts',
     'modules/cities/cities.controller.ts',
     'modules/directions/directions.controller.ts',
+    'modules/max-import/max-bot-interaction.service.ts',
   ];
 
   for (const mod of modules) {
@@ -62,6 +63,40 @@ describe('Backend — module files exist', () => {
       assert.ok(existsSync(src(mod)), `Missing: apps/backend/src/${mod}`);
     });
   }
+});
+
+describe('Backend — MAX reminder date selection', () => {
+  test('webhook routes bot callbacks before channel import', () => {
+    fileContains(
+      src('modules/max-import/max-webhook.controller.ts'),
+      'MaxBotInteractionService',
+      'handledByBot',
+      '!handledByBot',
+    );
+  });
+
+  test('MAX supports start, callback multi-select and Apply', () => {
+    fileContains(
+      src('modules/max-import/max-bot-interaction.service.ts'),
+      "update.updateType === 'bot_started'",
+      "update.updateType === 'message_callback'",
+      'buildReminderDateOptions',
+      "type: 'inline_keyboard'",
+      'reminder_toggle:',
+      'reminder_apply',
+      'Применить',
+    );
+  });
+
+  test('MAX normalization declares interactive update types', () => {
+    fileContains(
+      src('modules/max-import/max-api.types.ts'),
+      "update_type: 'message_callback'",
+      "update_type: 'bot_started'",
+      "updateType: 'message_callback'",
+      "updateType: 'bot_started'",
+    );
+  });
 });
 
 // ── Backend: JWT_SECRET is required (no fallback) ─────────────────────────────

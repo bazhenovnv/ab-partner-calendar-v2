@@ -17,7 +17,7 @@ async function main() {
 
   if (maxToken) {
     startMaxBot(maxToken);
-    console.log('[bots] MAX bot started');
+    console.log('[bots] MAX bot webhook mode enabled');
   } else {
     console.warn('[bots] MAX_BOT_TOKEN not set, MAX bot skipped');
   }
