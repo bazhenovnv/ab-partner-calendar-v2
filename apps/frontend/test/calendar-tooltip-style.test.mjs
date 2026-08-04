@@ -16,12 +16,12 @@ describe('Calendar date tooltip styling', () => {
     assert.match(calendar, /aria-describedby=\{tooltipId\}/);
   });
 
-  test('uses a 30-percent-transparent single-line surface with 12px text', () => {
+  test('uses a 45-percent-transparent single-line surface with 12px text', () => {
     const styles = readFileSync(STYLES, 'utf8');
 
     assert.match(
       styles,
-      /\.pub-calendar-tooltip\s*\{[\s\S]*background: rgba\(255, 255, 255, 0\.7\) !important/,
+      /\.pub-calendar-tooltip\s*\{[\s\S]*background: rgba\(255, 255, 255, 0\.55\) !important/,
     );
     assert.match(
       styles,
@@ -38,7 +38,7 @@ describe('Calendar date tooltip styling', () => {
     assert.match(styles, /backdrop-filter: blur\(8px\)/);
     assert.match(
       styles,
-      /\.pub-calendar-tooltip::after\s*\{[\s\S]*border-top-color: rgba\(255, 255, 255, 0\.7\) !important/,
+      /\.pub-calendar-tooltip::after\s*\{[\s\S]*border-top-color: rgba\(255, 255, 255, 0\.55\) !important/,
     );
   });
 });
