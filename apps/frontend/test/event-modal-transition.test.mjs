@@ -11,57 +11,79 @@ const EVENT_CARD = join(FRONTEND, 'src/components/events/EventCard.tsx');
 const CAROUSEL = join(FRONTEND, 'src/components/events/MainEventsBanner.tsx');
 const MODAL = join(FRONTEND, 'src/components/events/EventModalProvider.tsx');
 
-describe('Staged composite event modal transition', () => {
-  test('uses the complete modal surface instead of an independent image transition', () => {
+describe('Sharp event image flight into a static modal', () => {
+  test('moves the image by real coordinates and dimensions without blur or scaling transforms', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
+    const flightStart = transition.indexOf('function animateImageFlight');
+    const flightEnd = transition.indexOf('function createShellOpeningAnimations');
+    const flight = transition.slice(flightStart, flightEnd);
 
+    assert.ok(flightStart >= 0 && flightEnd > flightStart);
+    assert.match(transition, /createImageFlightClone/);
+    assert.match(transition, /imageRectKeyframe/);
+    assert.match(flight, /top:/);
+    assert.match(flight, /left:/);
+    assert.match(flight, /width:/);
+    assert.match(flight, /height:/);
+    assert.doesNotMatch(flight, /filter|blur|transform|scale/);
     assert.doesNotMatch(transition, /startViewTransition/);
-    assert.match(transition, /createOpeningAnimations/);
-    assert.match(transition, /createClosingAnimations/);
-    assert.match(transition, /elements\.surface\.animate|animateElement\(\s*elements\.surface/);
-    assert.match(transition, /transformForRect/);
-    assert.match(transition, /getIntermediateRect/);
+    assert.doesNotMatch(transition, /transformForRect|getIntermediateRect/);
   });
 
-  test('keeps the deliberately slow staged timing', () => {
+  test('keeps the deliberately slow timing', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
 
     assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 2800/);
     assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 2400/);
-    assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.38/);
-    assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_END = 0\.68/);
+    assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.28/);
+    assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_END = 0\.88/);
   });
 
-  test('opens in three visible stages', () => {
+  test('keeps the modal at final size and reveals only non-image content from blur', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
+    const openingStart = transition.indexOf('function createShellOpeningAnimations');
+    const openingEnd = transition.indexOf('function createShellClosingAnimations');
+    const opening = transition.slice(openingStart, openingEnd);
 
-    assert.match(transition, /originTransform/);
-    assert.match(transition, /intermediateTransform/);
-    assert.match(transition, /offset: EVENT_MODAL_CONTENT_REVEAL_START/);
-    assert.match(transition, /offset: EVENT_MODAL_CONTENT_REVEAL_END/);
-    assert.match(transition, /overlayTranslateX/);
-    assert.match(transition, /backgroundColor: 'rgba\(255, 255, 255, \.92\)'/);
-    assert.match(transition, /clipPath: 'inset\(5% 5% 5% 5% round 24px\)'/);
-    assert.match(transition, /transform: 'translateX\(0px\) scale\(1\)'/);
+    assert.ok(openingStart >= 0 && openingEnd > openingStart);
+    assert.match(opening, /backgroundColor: 'rgba\(255, 255, 255, 0\)'/);
+    assert.match(opening, /elements\.content/);
+    assert.match(opening, /filter: 'blur\(26px\)'/);
+    assert.match(opening, /filter: 'blur\(0px\)'/);
+    assert.match(opening, /opacity: 0/);
+    assert.match(opening, /opacity: 1/);
+    assert.doesNotMatch(opening, /transform:/);
+    assert.doesNotMatch(opening, /scale\(/);
   });
 
-  test('closes through the same stages in reverse', () => {
+  test('closes by blurring the shell while the sharp image flies back', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
+    const closingStart = transition.indexOf('function createShellClosingAnimations');
+    const closingEnd = transition.indexOf('function waitForAnimations');
+    const closing = transition.slice(closingStart, closingEnd);
 
-    assert.match(transition, /destinationTransform/);
-    assert.match(transition, /offset: 0\.34/);
-    assert.match(transition, /offset: 0\.64/);
-    assert.match(transition, /flushSync\(update\)/);
+    assert.ok(closingStart >= 0 && closingEnd > closingStart);
+    assert.match(closing, /elements\.content/);
+    assert.match(closing, /filter: 'blur\(26px\)'/);
+    assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS/);
     assert.match(transition, /restoreOriginImage/);
     assert.match(transition, /dispatchModalState\(false\)/);
   });
 
-  test('temporarily hides the source image and pauses the carousel', () => {
+  test('temporarily hides the original and in-modal images during the sharp flight', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
-    const carousel = readFileSync(CAROUSEL, 'utf8');
+    const css = readFileSync(TRANSITION_CSS, 'utf8');
 
     assert.match(transition, /originImage\.style\.visibility = 'hidden'/);
     assert.match(transition, /originImage\.style\.visibility = originVisibility/);
+    assert.match(transition, /hideModalImage/);
+    assert.match(css, /data-event-composite-part='image-stage'/);
+    assert.match(css, /visibility: hidden/);
+  });
+
+  test('pauses the carousel while the source image must stay fixed', () => {
+    const carousel = readFileSync(CAROUSEL, 'utf8');
+
     assert.match(carousel, /EVENT_MODAL_STATE_EVENT/);
     assert.match(carousel, /isEventModalOpen/);
     assert.match(
@@ -83,7 +105,7 @@ describe('Staged composite event modal transition', () => {
     );
   });
 
-  test('uses the existing modal DOM as the animated composite object', () => {
+  test('uses the existing modal DOM at its final geometry', () => {
     const modal = readFileSync(MODAL, 'utf8');
 
     assert.match(modal, /data-event-modal-backdrop/);
@@ -93,11 +115,11 @@ describe('Staged composite event modal transition', () => {
     assert.match(modal, /restoreFocus/);
   });
 
-  test('loads the motion stabilization layer after visual overrides', () => {
+  test('loads the final transition layer after visual overrides', () => {
     const css = readFileSync(TRANSITION_CSS, 'utf8');
     const layout = readFileSync(LAYOUT, 'utf8');
 
-    assert.match(css, /One staged composite animation/);
+    assert.match(css, /Sharp image flight/);
     assert.match(css, /data-event-composite-motion/);
     assert.match(css, /data-event-composite-part='content'/);
     assert.match(css, /prefers-reduced-motion: reduce/);
@@ -105,7 +127,7 @@ describe('Staged composite event modal transition', () => {
     assert.ok(
       layout.indexOf("homepage-controls-event-cards-final.css") <
         layout.indexOf("event-modal-transitions.css"),
-      'Composite modal transition styles must load after homepage overrides',
+      'Modal transition styles must load after homepage overrides',
     );
   });
 });
