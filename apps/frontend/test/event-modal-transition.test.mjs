@@ -11,20 +11,66 @@ const EVENT_CARD = join(FRONTEND, 'src/components/events/EventCard.tsx');
 const CAROUSEL = join(FRONTEND, 'src/components/events/MainEventsBanner.tsx');
 const MODAL = join(FRONTEND, 'src/components/events/EventModalProvider.tsx');
 
-describe('Reversible event modal transition', () => {
-  test('uses one shared image element for opening and closing', () => {
+describe('Staged composite event modal transition', () => {
+  test('uses the complete modal surface instead of an independent image transition', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
 
-    assert.match(transition, /EVENT_IMAGE_TRANSITION_NAME = 'event-modal-image'/);
-    assert.match(transition, /startViewTransition/);
-    assert.match(transition, /openEventWithTransition/);
-    assert.match(transition, /closeEventWithTransition/);
-    assert.match(transition, /setViewTransitionName\(source, EVENT_IMAGE_TRANSITION_NAME\)/);
-    assert.match(transition, /clearViewTransitionName\(source\)/);
-    assert.match(transition, /flushSync\(update\)/);
+    assert.doesNotMatch(transition, /startViewTransition/);
+    assert.match(transition, /createOpeningAnimations/);
+    assert.match(transition, /createClosingAnimations/);
+    assert.match(transition, /elements\.surface\.animate|animateElement\(\s*elements\.surface/);
+    assert.match(transition, /transformForRect/);
+    assert.match(transition, /getIntermediateRect/);
   });
 
-  test('opens from regular cards and carousel images', () => {
+  test('keeps the deliberately slow staged timing', () => {
+    const transition = readFileSync(TRANSITION, 'utf8');
+
+    assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 2800/);
+    assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 2400/);
+    assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.38/);
+    assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_END = 0\.68/);
+  });
+
+  test('opens in three visible stages', () => {
+    const transition = readFileSync(TRANSITION, 'utf8');
+
+    assert.match(transition, /originTransform/);
+    assert.match(transition, /intermediateTransform/);
+    assert.match(transition, /offset: EVENT_MODAL_CONTENT_REVEAL_START/);
+    assert.match(transition, /offset: EVENT_MODAL_CONTENT_REVEAL_END/);
+    assert.match(transition, /overlayTranslateX/);
+    assert.match(transition, /backgroundColor: 'rgba\(255, 255, 255, \.92\)'/);
+    assert.match(transition, /clipPath: 'inset\(5% 5% 5% 5% round 24px\)'/);
+    assert.match(transition, /transform: 'translateX\(0px\) scale\(1\)'/);
+  });
+
+  test('closes through the same stages in reverse', () => {
+    const transition = readFileSync(TRANSITION, 'utf8');
+
+    assert.match(transition, /destinationTransform/);
+    assert.match(transition, /offset: 0\.34/);
+    assert.match(transition, /offset: 0\.64/);
+    assert.match(transition, /flushSync\(update\)/);
+    assert.match(transition, /restoreOriginImage/);
+    assert.match(transition, /dispatchModalState\(false\)/);
+  });
+
+  test('temporarily hides the source image and pauses the carousel', () => {
+    const transition = readFileSync(TRANSITION, 'utf8');
+    const carousel = readFileSync(CAROUSEL, 'utf8');
+
+    assert.match(transition, /originImage\.style\.visibility = 'hidden'/);
+    assert.match(transition, /originImage\.style\.visibility = originVisibility/);
+    assert.match(carousel, /EVENT_MODAL_STATE_EVENT/);
+    assert.match(carousel, /isEventModalOpen/);
+    assert.match(
+      carousel,
+      /isHovered \|\| isFocusWithin \|\| isPointerActive \|\| isEventModalOpen/,
+    );
+  });
+
+  test('opens from both regular cards and carousel images', () => {
     const card = readFileSync(EVENT_CARD, 'utf8');
     const carousel = readFileSync(CAROUSEL, 'utf8');
 
@@ -37,69 +83,29 @@ describe('Reversible event modal transition', () => {
     );
   });
 
-  test('pauses carousel while modal origin must remain stable', () => {
-    const carousel = readFileSync(CAROUSEL, 'utf8');
-
-    assert.match(carousel, /EVENT_MODAL_STATE_EVENT/);
-    assert.match(carousel, /isEventModalOpen/);
-    assert.match(
-      carousel,
-      /isHovered \|\| isFocusWithin \|\| isPointerActive \|\| isEventModalOpen/,
-    );
-  });
-
-  test('marks modal layers and restores focus after reverse movement', () => {
+  test('uses the existing modal DOM as the animated composite object', () => {
     const modal = readFileSync(MODAL, 'utf8');
 
-    assert.match(modal, /closeEventWithTransition/);
     assert.match(modal, /data-event-modal-backdrop/);
     assert.match(modal, /data-event-modal-surface/);
     assert.match(modal, /data-event-modal-image/);
-    assert.match(modal, /EVENT_BACKDROP_TRANSITION_NAME/);
-    assert.match(modal, /EVENT_SURFACE_TRANSITION_NAME/);
-    assert.match(modal, /EVENT_IMAGE_TRANSITION_NAME/);
+    assert.match(modal, /closeEventWithTransition/);
     assert.match(modal, /restoreFocus/);
   });
 
-  test('animates blur in both directions and respects reduced motion', () => {
+  test('loads the motion stabilization layer after visual overrides', () => {
     const css = readFileSync(TRANSITION_CSS, 'utf8');
-    const transition = readFileSync(TRANSITION, 'utf8');
-
-    assert.match(css, /data-event-modal-transition='opening'/);
-    assert.match(css, /data-event-modal-transition='closing'/);
-    assert.match(css, /eventImageOpeningNew/);
-    assert.match(css, /eventImageClosingOld/);
-    assert.match(css, /eventSurfaceIn/);
-    assert.match(css, /eventSurfaceOut/);
-    assert.match(css, /filter: blur\(22px\)/);
-    assert.match(css, /filter: blur\(20px\)/);
-    assert.match(css, /prefers-reduced-motion: reduce/);
-    assert.match(transition, /prefers-reduced-motion: reduce/);
-  });
-
-  test('keeps the modal transition deliberately visible', () => {
-    const css = readFileSync(TRANSITION_CSS, 'utf8');
-    const transition = readFileSync(TRANSITION, 'utf8');
-
-    assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 1200/);
-    assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 950/);
-    assert.match(transition, /EVENT_MODAL_SURFACE_DELAY_MS = 120/);
-    assert.match(css, /animation-duration: 1200ms/);
-    assert.match(css, /eventImageOpeningNew 1200ms/);
-    assert.match(css, /eventImageClosingOld 950ms/);
-    assert.match(css, /eventSurfaceIn 900ms[\s\S]*120ms both/);
-    assert.match(css, /eventSurfaceOut 760ms/);
-    assert.doesNotMatch(css, /eventImageOpeningNew 680ms/);
-    assert.doesNotMatch(css, /eventImageClosingOld 520ms/);
-  });
-
-  test('loads the transition layer after all visual overrides', () => {
     const layout = readFileSync(LAYOUT, 'utf8');
+
+    assert.match(css, /One staged composite animation/);
+    assert.match(css, /data-event-composite-motion/);
+    assert.match(css, /data-event-composite-part='content'/);
+    assert.match(css, /prefers-reduced-motion: reduce/);
 
     assert.ok(
       layout.indexOf("homepage-controls-event-cards-final.css") <
         layout.indexOf("event-modal-transitions.css"),
-      'Event modal transitions must load after final homepage overrides',
+      'Composite modal transition styles must load after homepage overrides',
     );
   });
 });
