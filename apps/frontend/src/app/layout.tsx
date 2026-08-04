@@ -26,6 +26,7 @@ import './quote-people-figma-final.css';
 import './footer-figma-final.css';
 import './footer-brand-title-alignment.css';
 import './homepage-controls-event-cards-final.css';
+import './event-modal-transitions.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
