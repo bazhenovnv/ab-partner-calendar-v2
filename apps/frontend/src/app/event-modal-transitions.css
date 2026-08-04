@@ -3,6 +3,20 @@
  * The modal shell stays at its final size while non-image content fades in from blur.
  */
 
+/*
+ * Final modal artwork contract.
+ * The source keeps its intrinsic 1280 × 1280 ratio, fills the square stage,
+ * and is cropped from the centre. This selector is modal-only and loads after
+ * the legacy Figma overrides that previously forced object-fit: contain.
+ */
+[data-event-modal-image] {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
 [data-event-modal-backdrop][data-event-composite-motion] {
   pointer-events: none;
   contain: layout paint;
