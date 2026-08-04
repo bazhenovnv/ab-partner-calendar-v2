@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { formatEventDateParts, formatPrice } from '@/lib/format';
+import { openEventWithTransition } from '@/lib/event-modal-transition';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
 import styles from './events-runtime.module.css';
@@ -33,7 +34,10 @@ export function EventCard({ event, className }: EventCardProps) {
         type="button"
         className={ui.cardOpen}
         aria-label={`Подробнее о мероприятии: ${event.title}`}
-        onClick={() => openEvent(event)}
+        onClick={(clickEvent) => {
+          const sourceImage = clickEvent.currentTarget.querySelector<HTMLElement>('img');
+          openEventWithTransition(sourceImage, () => openEvent(event));
+        }}
       >
         <span className={cn(styles.eventCardMedia, ui.cardMedia)}>
           {imgUrl ? (
