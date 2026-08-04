@@ -71,10 +71,26 @@ describe('Reversible event modal transition', () => {
     assert.match(css, /eventImageClosingOld/);
     assert.match(css, /eventSurfaceIn/);
     assert.match(css, /eventSurfaceOut/);
+    assert.match(css, /filter: blur\(22px\)/);
     assert.match(css, /filter: blur\(20px\)/);
-    assert.match(css, /filter: blur\(18px\)/);
     assert.match(css, /prefers-reduced-motion: reduce/);
     assert.match(transition, /prefers-reduced-motion: reduce/);
+  });
+
+  test('keeps the modal transition deliberately visible', () => {
+    const css = readFileSync(TRANSITION_CSS, 'utf8');
+    const transition = readFileSync(TRANSITION, 'utf8');
+
+    assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 1200/);
+    assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 950/);
+    assert.match(transition, /EVENT_MODAL_SURFACE_DELAY_MS = 120/);
+    assert.match(css, /animation-duration: 1200ms/);
+    assert.match(css, /eventImageOpeningNew 1200ms/);
+    assert.match(css, /eventImageClosingOld 950ms/);
+    assert.match(css, /eventSurfaceIn 900ms[\s\S]*120ms both/);
+    assert.match(css, /eventSurfaceOut 760ms/);
+    assert.doesNotMatch(css, /eventImageOpeningNew 680ms/);
+    assert.doesNotMatch(css, /eventImageClosingOld 520ms/);
   });
 
   test('loads the transition layer after all visual overrides', () => {
