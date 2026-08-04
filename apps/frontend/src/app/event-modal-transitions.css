@@ -1,226 +1,54 @@
-/* Reversible shared-element transition between an event card and its modal. */
+/*
+ * One staged composite animation:
+ * event-card image -> enlarged image surface -> content over image -> full modal.
+ * Geometry and timing are driven by Web Animations in event-modal-transition.ts.
+ */
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+[data-event-modal-backdrop][data-event-composite-motion] {
+  pointer-events: none;
+  contain: layout paint;
+  will-change: opacity, backdrop-filter;
 }
 
-::view-transition-group(event-modal-image) {
-  z-index: 1104;
-  overflow: clip;
-  border-radius: 20px;
-  animation-duration: 1200ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+[data-event-modal-surface][data-event-composite-motion] {
+  transform-origin: top left;
+  contain: paint;
+  isolation: isolate;
+  will-change: transform, border-radius, box-shadow, filter;
 }
 
-::view-transition-image-pair(event-modal-image) {
-  isolation: auto;
-  overflow: clip;
-  border-radius: 20px;
+[data-event-composite-part='media'] {
+  position: relative;
+  z-index: 1;
+  will-change: transform, padding;
 }
 
-::view-transition-old(event-modal-image),
-::view-transition-new(event-modal-image) {
-  width: 100%;
-  height: 100%;
-  overflow: clip;
-  border-radius: 20px;
-  mix-blend-mode: normal;
-  object-fit: cover;
+[data-event-composite-part='image-stage'] {
+  position: relative;
+  z-index: 1;
+  will-change: transform, border-radius, box-shadow;
 }
 
-::view-transition-group(event-modal-backdrop) {
-  z-index: 1100;
-  animation-duration: 650ms;
+[data-event-composite-part='content'] {
+  position: relative;
+  z-index: 3;
+  will-change: opacity, transform, filter, background-color, clip-path;
 }
 
-::view-transition-group(event-modal-surface) {
-  z-index: 1102;
-  animation-duration: 900ms;
+[data-event-composite-part='chrome'] {
+  will-change: opacity, transform;
 }
 
-::view-transition-old(event-modal-backdrop),
-::view-transition-new(event-modal-backdrop),
-::view-transition-old(event-modal-surface),
-::view-transition-new(event-modal-surface) {
-  mix-blend-mode: normal;
-}
-
-html[data-event-modal-transition='opening']::view-transition-old(event-modal-image) {
-  animation: eventImageOpeningOld 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-html[data-event-modal-transition='opening']::view-transition-new(event-modal-image) {
-  animation: eventImageOpeningNew 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-html[data-event-modal-transition='opening']::view-transition-new(event-modal-backdrop) {
-  animation: eventBackdropIn 650ms ease-out both;
-}
-
-html[data-event-modal-transition='opening']::view-transition-new(event-modal-surface) {
-  transform-origin: center;
-  animation: eventSurfaceIn 900ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
-}
-
-html[data-event-modal-transition='closing']::view-transition-group(event-modal-image) {
-  animation-duration: 950ms;
-  animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-}
-
-html[data-event-modal-transition='closing']::view-transition-group(event-modal-backdrop) {
-  animation-duration: 550ms;
-}
-
-html[data-event-modal-transition='closing']::view-transition-group(event-modal-surface) {
-  animation-duration: 760ms;
-}
-
-html[data-event-modal-transition='closing']::view-transition-old(event-modal-image) {
-  animation: eventImageClosingOld 950ms cubic-bezier(0.55, 0, 1, 0.45) both;
-}
-
-html[data-event-modal-transition='closing']::view-transition-new(event-modal-image) {
-  animation: eventImageClosingNew 950ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-html[data-event-modal-transition='closing']::view-transition-old(event-modal-backdrop) {
-  animation: eventBackdropOut 550ms ease-in both;
-}
-
-html[data-event-modal-transition='closing']::view-transition-old(event-modal-surface) {
-  transform-origin: center;
-  animation: eventSurfaceOut 760ms cubic-bezier(0.55, 0, 1, 0.45) both;
-}
-
-@keyframes eventImageOpeningOld {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  64% {
-    opacity: 0.66;
-    filter: blur(9px);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(16px);
-  }
-}
-
-@keyframes eventImageOpeningNew {
-  0% {
-    opacity: 0.14;
-    filter: blur(22px);
-  }
-  62% {
-    opacity: 0.72;
-    filter: blur(8px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-@keyframes eventImageClosingOld {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  64% {
-    opacity: 0.56;
-    filter: blur(11px);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(19px);
-  }
-}
-
-@keyframes eventImageClosingNew {
-  0% {
-    opacity: 0.12;
-    filter: blur(20px);
-  }
-  62% {
-    opacity: 0.7;
-    filter: blur(8px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-@keyframes eventBackdropIn {
-  from {
-    opacity: 0;
-    filter: blur(0);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-@keyframes eventBackdropOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes eventSurfaceIn {
-  0% {
-    opacity: 0;
-    transform: translateY(32px) scale(0.88);
-    filter: blur(22px);
-  }
-  60% {
-    opacity: 0.78;
-    transform: translateY(7px) scale(0.98);
-    filter: blur(6px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes eventSurfaceOut {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-  64% {
-    opacity: 0.58;
-    transform: translateY(11px) scale(0.96);
-    filter: blur(9px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(28px) scale(0.88);
-    filter: blur(20px);
-  }
+[data-event-modal-surface][data-event-composite-motion='opening'],
+[data-event-modal-surface][data-event-composite-motion='closing'] {
+  user-select: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(event-modal-image),
-  ::view-transition-group(event-modal-backdrop),
-  ::view-transition-group(event-modal-surface),
-  ::view-transition-old(event-modal-image),
-  ::view-transition-new(event-modal-image),
-  ::view-transition-old(event-modal-backdrop),
-  ::view-transition-new(event-modal-backdrop),
-  ::view-transition-old(event-modal-surface),
-  ::view-transition-new(event-modal-surface) {
-    animation-duration: 1ms !important;
-    animation-delay: 0ms !important;
+  [data-event-modal-backdrop][data-event-composite-motion],
+  [data-event-modal-surface][data-event-composite-motion],
+  [data-event-composite-part] {
+    animation: none !important;
+    transition: none !important;
   }
 }
