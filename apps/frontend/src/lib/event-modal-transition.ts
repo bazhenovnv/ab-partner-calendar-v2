@@ -8,6 +8,10 @@ export const EVENT_BACKDROP_TRANSITION_NAME = 'event-modal-backdrop';
 
 export const EVENT_MODAL_STATE_EVENT = 'ab:event-modal-state';
 
+export const EVENT_MODAL_OPEN_DURATION_MS = 1200;
+export const EVENT_MODAL_CLOSE_DURATION_MS = 950;
+export const EVENT_MODAL_SURFACE_DELAY_MS = 120;
+
 interface BrowserViewTransition {
   finished: Promise<void>;
   ready: Promise<void>;
@@ -77,15 +81,15 @@ function animateFallbackOpening(): void {
         { opacity: 0, backdropFilter: 'blur(0px)' },
         { opacity: 1, backdropFilter: 'blur(10px)' },
       ],
-      { duration: 360, easing: 'ease-out' },
+      { duration: 650, easing: 'ease-out' },
     );
 
     surface?.animate(
       [
         {
           opacity: 0,
-          transform: 'translateY(24px) scale(0.9)',
-          filter: 'blur(16px)',
+          transform: 'translateY(32px) scale(0.88)',
+          filter: 'blur(22px)',
         },
         {
           opacity: 1,
@@ -94,18 +98,20 @@ function animateFallbackOpening(): void {
         },
       ],
       {
-        duration: 520,
+        duration: 900,
+        delay: EVENT_MODAL_SURFACE_DELAY_MS,
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        fill: 'both',
       },
     );
 
     image?.animate(
       [
-        { opacity: 0.25, transform: 'scale(0.82)', filter: 'blur(18px)' },
+        { opacity: 0.14, transform: 'scale(0.78)', filter: 'blur(22px)' },
         { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' },
       ],
       {
-        duration: 560,
+        duration: EVENT_MODAL_OPEN_DURATION_MS,
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
     );
@@ -123,7 +129,7 @@ async function animateFallbackClosing(): Promise<void> {
         { opacity: 1, backdropFilter: 'blur(10px)' },
         { opacity: 0, backdropFilter: 'blur(0px)' },
       ],
-      { duration: 320, easing: 'ease-in', fill: 'forwards' },
+      { duration: 550, easing: 'ease-in', fill: 'forwards' },
     ),
     surface?.animate(
       [
@@ -134,12 +140,12 @@ async function animateFallbackClosing(): Promise<void> {
         },
         {
           opacity: 0,
-          transform: 'translateY(18px) scale(0.92)',
-          filter: 'blur(14px)',
+          transform: 'translateY(28px) scale(0.88)',
+          filter: 'blur(20px)',
         },
       ],
       {
-        duration: 360,
+        duration: 760,
         easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
         fill: 'forwards',
       },
@@ -147,10 +153,10 @@ async function animateFallbackClosing(): Promise<void> {
     image?.animate(
       [
         { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' },
-        { opacity: 0.2, transform: 'scale(0.84)', filter: 'blur(18px)' },
+        { opacity: 0.12, transform: 'scale(0.78)', filter: 'blur(20px)' },
       ],
       {
-        duration: 360,
+        duration: EVENT_MODAL_CLOSE_DURATION_MS,
         easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
         fill: 'forwards',
       },
