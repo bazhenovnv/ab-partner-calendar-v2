@@ -11,6 +11,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {
+  closeEventWithTransition,
+  EVENT_BACKDROP_TRANSITION_NAME,
+  EVENT_IMAGE_TRANSITION_NAME,
+  EVENT_SURFACE_TRANSITION_NAME,
+} from '@/lib/event-modal-transition';
 import { sanitizeEventHtml } from '@/lib/html';
 import { formatPrice } from '@/lib/format';
 import {
@@ -39,6 +45,7 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const requestSequenceRef = useRef(0);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  const closingRef = useRef(false);
 
   const loadEvent = useCallback(async (preview: PublicEvent) => {
     abortControllerRef.current?.abort();
@@ -81,25 +88,38 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
     (preview: PublicEvent) => {
       const activeElement = document.activeElement;
       returnFocusRef.current = activeElement instanceof HTMLElement ? activeElement : null;
+      closingRef.current = false;
       setEvent(preview);
       void loadEvent(preview);
     },
     [loadEvent],
   );
 
-  const close = useCallback(() => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = null;
-    requestSequenceRef.current += 1;
-    setEvent(null);
-    setLoading(false);
-    setLoadError(null);
-
+  const restoreFocus = useCallback(() => {
     window.requestAnimationFrame(() => {
       if (returnFocusRef.current?.isConnected) returnFocusRef.current.focus();
       returnFocusRef.current = null;
+      closingRef.current = false;
     });
   }, []);
+
+  const close = useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    requestSequenceRef.current += 1;
+
+    closeEventWithTransition(
+      () => {
+        setEvent(null);
+        setLoading(false);
+        setLoadError(null);
+      },
+      restoreFocus,
+    );
+  }, [restoreFocus]);
 
   useEffect(() => () => abortControllerRef.current?.abort(), []);
 
@@ -343,9 +363,22 @@ function EventModal({
     <div
       className={v2.backdrop}
       role="presentation"
+      data-event-modal-backdrop
+      style={{
+        viewTransitionName: EVENT_BACKDROP_TRANSITION_NAME,
+      } as React.CSSProperties}
       onMouseDown={(mouseEvent) => mouseEvent.target === mouseEvent.currentTarget && onClose()}
     >
-      <article className={v2.modal} role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+      <article
+        className={v2.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-modal-title"
+        data-event-modal-surface
+        style={{
+          viewTransitionName: EVENT_SURFACE_TRANSITION_NAME,
+        } as React.CSSProperties}
+      >
         <button ref={closeButtonRef} className={v2.close} type="button" onClick={onClose} aria-label="Закрыть">
           ×
         </button>
@@ -363,12 +396,14 @@ function EventModal({
                 unoptimized
                 priority
                 className={v2.image}
+                data-event-modal-image
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
                   objectPosition: 'center',
-                }}
+                  viewTransitionName: EVENT_IMAGE_TRANSITION_NAME,
+                } as React.CSSProperties}
               />
             ) : (
               <div className={v2.imagePlaceholder}>АБ</div>
