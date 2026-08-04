@@ -1,6 +1,7 @@
 /*
- * Sharp image flight into the final modal image slot.
- * The modal shell stays at its final size while non-image content fades in from blur.
+ * Final event modal contracts and sharp image flight.
+ * This file loads after the measured Figma layer, so only deliberate final
+ * corrections belong here.
  */
 
 /*
@@ -15,6 +16,45 @@
   height: 100% !important;
   object-fit: cover !important;
   object-position: center !important;
+}
+
+/* Desktop measurements from the approved 1920px Figma modal. */
+@media (min-width: 768px) {
+  [class*="event-modal-v2_title__"] {
+    font-size: clamp(26px, 2.083vw, 40px) !important;
+  }
+
+  [class*="event-modal-v2_facts__"] {
+    height: clamp(68px, 4.063vw, 78px) !important;
+    border-radius: 16.38px !important;
+    padding: clamp(7px, 0.417vw, 8px) clamp(12px, 0.833vw, 16px) !important;
+  }
+
+  [class*="event-modal-v2_fact__"] {
+    grid-template-columns: clamp(38px, 2.604vw, 50px) minmax(0, 1fr) !important;
+    gap: clamp(6px, 0.521vw, 10px) !important;
+  }
+
+  [class*="event-modal-v2_factIconWrap__"],
+  [class*="event-modal-v2_factIcon_calendar__"],
+  [class*="event-modal-v2_factIcon_clock__"],
+  [class*="event-modal-v2_factIcon_price__"],
+  [class*="event-modal-v2_factIcon__"] {
+    width: clamp(38px, 2.604vw, 50px) !important;
+    height: clamp(38px, 2.604vw, 50px) !important;
+  }
+
+  [class*="event-modal-v2_status__"] {
+    overflow: hidden;
+    border-radius: 6px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  [class*="event-modal-v2_status__"] {
+    overflow: hidden;
+    border-radius: 5px !important;
+  }
 }
 
 [data-event-modal-backdrop][data-event-composite-motion] {
