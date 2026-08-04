@@ -200,7 +200,10 @@ function getImageElement(element: HTMLElement | null): HTMLImageElement | null {
   return element instanceof HTMLImageElement ? element : null;
 }
 
-function getBorderRadius(element: Element | null, fallback = '18px'): string {
+function getBorderRadius(
+  element: Element | null | undefined,
+  fallback = '18px',
+): string {
   if (!(element instanceof HTMLElement)) return fallback;
   return getComputedStyle(element).borderRadius || fallback;
 }
