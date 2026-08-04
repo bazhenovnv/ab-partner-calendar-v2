@@ -10,8 +10,8 @@ export const EVENT_MODAL_STATE_EVENT = 'ab:event-modal-state';
 
 export const EVENT_MODAL_OPEN_DURATION_MS = 2800;
 export const EVENT_MODAL_CLOSE_DURATION_MS = 2400;
-export const EVENT_MODAL_CONTENT_REVEAL_START = 0.38;
-export const EVENT_MODAL_CONTENT_REVEAL_END = 0.68;
+export const EVENT_MODAL_CONTENT_REVEAL_START = 0.28;
+export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 
 type MotionDirection = 'opening' | 'closing';
 
@@ -37,6 +37,10 @@ let originImage: HTMLElement | null = null;
 let originRect: MotionRect | null = null;
 let originVisibility = '';
 let activeAnimations: Animation[] = [];
+let activeClone: HTMLImageElement | null = null;
+let activeElements: ModalMotionElements | null = null;
+let activeDirection: MotionDirection | null = null;
+let activeMotionDone: Promise<void> | null = null;
 let transitionSequence = 0;
 
 function prefersReducedMotion(): boolean {
@@ -96,12 +100,19 @@ function getModalMotionElements(): ModalMotionElements | null {
 function markMotionElements(
   elements: ModalMotionElements,
   direction: MotionDirection,
+  hideModalImage: boolean,
 ): void {
+  activeElements = elements;
+  activeDirection = direction;
+
   elements.backdrop.dataset.eventCompositeMotion = direction;
   elements.surface.dataset.eventCompositeMotion = direction;
   elements.media.dataset.eventCompositePart = 'media';
-  elements.imageStage.dataset.eventCompositePart = 'image-stage';
   elements.content.dataset.eventCompositePart = 'content';
+
+  if (hideModalImage) {
+    elements.imageStage.dataset.eventCompositePart = 'image-stage';
+  }
 
   if (elements.closeButton) {
     elements.closeButton.dataset.eventCompositePart = 'chrome';
@@ -128,29 +139,32 @@ function clearMotionElements(elements: ModalMotionElements | null): void {
   if (elements.status) {
     delete elements.status.dataset.eventCompositePart;
   }
-
-  elements.surface.style.removeProperty('transform-origin');
-  elements.media.style.removeProperty('transform-origin');
-  elements.imageStage.style.removeProperty('transform-origin');
-  elements.content.style.removeProperty('transform-origin');
 }
 
-function finishAndClearActiveAnimations(): void {
+function cancelActiveAnimations(): void {
   for (const animation of activeAnimations) {
-    try {
-      animation.finish();
-    } catch {
-      // An animation can already be idle after browser navigation or cancellation.
-    }
-
     try {
       animation.cancel();
     } catch {
-      // Cancellation is best-effort cleanup only.
+      // Best-effort cleanup after navigation or browser cancellation.
     }
   }
 
   activeAnimations = [];
+}
+
+function removeActiveClone(): void {
+  activeClone?.remove();
+  activeClone = null;
+}
+
+function clearActiveMotion(): void {
+  cancelActiveAnimations();
+  clearMotionElements(activeElements);
+  removeActiveClone();
+  activeElements = null;
+  activeDirection = null;
+  activeMotionDone = null;
 }
 
 function restoreOriginImage(): void {
@@ -182,73 +196,119 @@ function animateElement(
   }
 }
 
-function transformForRect(target: MotionRect, finalRect: MotionRect): string {
-  const scaleX = Math.max(0.02, target.width / finalRect.width);
-  const scaleY = Math.max(0.02, target.height / finalRect.height);
-  const translateX = target.left - finalRect.left;
-  const translateY = target.top - finalRect.top;
-
-  return `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+function getImageElement(element: HTMLElement | null): HTMLImageElement | null {
+  return element instanceof HTMLImageElement ? element : null;
 }
 
-function getIntermediateRect(finalRect: MotionRect): MotionRect {
-  const width = Math.min(
-    finalRect.width * 0.66,
-    Math.max(finalRect.width * 0.58, (originRect?.width ?? 0) * 1.65),
-  );
-  const height = Math.min(
-    finalRect.height * 0.74,
-    Math.max(finalRect.height * 0.66, (originRect?.height ?? 0) * 1.5),
-  );
+function getBorderRadius(element: Element | null, fallback = '18px'): string {
+  if (!(element instanceof HTMLElement)) return fallback;
+  return getComputedStyle(element).borderRadius || fallback;
+}
 
+function createImageFlightClone(
+  source: HTMLImageElement,
+  startRect: MotionRect,
+  borderRadius: string,
+): HTMLImageElement {
+  const clone = document.createElement('img');
+  const sourceStyle = getComputedStyle(source);
+
+  clone.src = source.currentSrc || source.src;
+  clone.alt = '';
+  clone.draggable = false;
+  clone.decoding = 'async';
+  clone.setAttribute('aria-hidden', 'true');
+
+  clone.style.position = 'fixed';
+  clone.style.top = `${startRect.top}px`;
+  clone.style.left = `${startRect.left}px`;
+  clone.style.width = `${startRect.width}px`;
+  clone.style.height = `${startRect.height}px`;
+  clone.style.margin = '0';
+  clone.style.maxWidth = 'none';
+  clone.style.maxHeight = 'none';
+  clone.style.objectFit = sourceStyle.objectFit || 'cover';
+  clone.style.objectPosition = sourceStyle.objectPosition || '50% 50%';
+  clone.style.borderRadius = borderRadius;
+  clone.style.boxShadow = '0 8px 24px rgba(13, 35, 68, .16)';
+  clone.style.pointerEvents = 'none';
+  clone.style.userSelect = 'none';
+  clone.style.zIndex = '1205';
+  clone.style.willChange = 'top, left, width, height, border-radius, box-shadow';
+
+  document.body.appendChild(clone);
+  activeClone = clone;
+  return clone;
+}
+
+function imageRectKeyframe(
+  rect: MotionRect,
+  borderRadius: string,
+  boxShadow: string,
+  offset: number,
+): Keyframe {
   return {
-    width,
-    height,
-    left: (window.innerWidth - width) / 2,
-    top: (window.innerHeight - height) / 2,
+    top: `${rect.top}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
+    height: `${rect.height}px`,
+    borderRadius,
+    boxShadow,
+    opacity: 1,
+    offset,
   };
 }
 
-function waitForAnimations(animations: Animation[]): Promise<void> {
-  return Promise.allSettled(
-    animations.map((animation) => animation.finished),
-  ).then(() => undefined);
+function animateImageFlight(
+  clone: HTMLImageElement,
+  fromRect: MotionRect,
+  toRect: MotionRect,
+  fromRadius: string,
+  toRadius: string,
+  duration: number,
+  direction: MotionDirection,
+): Animation | null {
+  const easing =
+    direction === 'opening'
+      ? 'cubic-bezier(0.16, 1, 0.3, 1)'
+      : 'cubic-bezier(0.55, 0, 1, 0.45)';
+
+  return animateElement(
+    clone,
+    [
+      imageRectKeyframe(
+        fromRect,
+        fromRadius,
+        '0 8px 24px rgba(13, 35, 68, .16)',
+        0,
+      ),
+      imageRectKeyframe(
+        toRect,
+        toRadius,
+        direction === 'opening'
+          ? '0 18px 48px rgba(13, 35, 68, .2)'
+          : '0 8px 24px rgba(13, 35, 68, .16)',
+        1,
+      ),
+    ],
+    {
+      duration,
+      easing,
+      fill: 'both',
+    },
+  );
 }
 
-function createOpeningAnimations(
-  elements: ModalMotionElements,
-  sourceRect: MotionRect,
-): Animation[] {
-  const finalSurfaceRect = copyRect(elements.surface.getBoundingClientRect());
-  const finalMediaRect = copyRect(elements.media.getBoundingClientRect());
-  const finalImageStageRect = copyRect(elements.imageStage.getBoundingClientRect());
-  const intermediateRect = getIntermediateRect(finalSurfaceRect);
-
+function createShellOpeningAnimations(elements: ModalMotionElements): Animation[] {
   const surfaceStyle = getComputedStyle(elements.surface);
   const mediaStyle = getComputedStyle(elements.media);
-  const contentStyle = getComputedStyle(elements.content);
-  const imageStageStyle = getComputedStyle(elements.imageStage);
-  const originStyle = originImage?.parentElement
-    ? getComputedStyle(originImage.parentElement)
-    : null;
 
-  const originTransform = transformForRect(sourceRect, finalSurfaceRect);
-  const intermediateTransform = transformForRect(intermediateRect, finalSurfaceRect);
-  const mediaFillScaleX = Math.max(1, finalSurfaceRect.width / finalMediaRect.width);
-  const imageFillScaleY = Math.max(1, finalSurfaceRect.height / finalImageStageRect.height);
-  const overlayTranslateX = -Math.max(0, finalMediaRect.width * 0.92);
-
-  elements.surface.style.transformOrigin = 'top left';
-  elements.media.style.transformOrigin = 'top left';
-  elements.imageStage.style.transformOrigin = 'center';
-  elements.content.style.transformOrigin = 'center';
-
-  const animations = [
+  return [
     animateElement(
       elements.backdrop,
       [
         { opacity: 0, backdropFilter: 'blur(0px)', offset: 0 },
-        { opacity: 0.72, backdropFilter: 'blur(8px)', offset: 0.5 },
+        { opacity: 0.78, backdropFilter: 'blur(8px)', offset: 0.58 },
         { opacity: 1, backdropFilter: 'blur(10px)', offset: 1 },
       ],
       {
@@ -261,207 +321,116 @@ function createOpeningAnimations(
       elements.surface,
       [
         {
-          transform: originTransform,
-          borderRadius: originStyle?.borderRadius || '18px',
-          boxShadow: '0 8px 24px rgba(13, 35, 68, .16)',
-          filter: 'blur(0px)',
+          backgroundColor: 'rgba(255, 255, 255, 0)',
+          boxShadow: '0 0 0 rgba(13, 35, 68, 0)',
           offset: 0,
-          easing: 'cubic-bezier(0.2, 0.72, 0.26, 1)',
         },
         {
-          transform: intermediateTransform,
-          borderRadius: '24px',
-          boxShadow: '0 24px 70px rgba(13, 35, 68, .26)',
-          filter: 'blur(1px)',
+          backgroundColor: 'rgba(255, 255, 255, 0)',
+          boxShadow: '0 0 0 rgba(13, 35, 68, 0)',
           offset: EVENT_MODAL_CONTENT_REVEAL_START,
-          easing: 'ease-in-out',
         },
         {
-          transform: intermediateTransform,
-          borderRadius: '24px',
-          boxShadow: '0 30px 84px rgba(13, 35, 68, .3)',
-          filter: 'blur(0px)',
-          offset: EVENT_MODAL_CONTENT_REVEAL_END,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        },
-        {
-          transform: 'translate(0px, 0px) scale(1, 1)',
-          borderRadius: surfaceStyle.borderRadius,
+          backgroundColor: surfaceStyle.backgroundColor,
           boxShadow: surfaceStyle.boxShadow,
-          filter: 'blur(0px)',
+          offset: EVENT_MODAL_CONTENT_REVEAL_END,
+        },
+        {
+          backgroundColor: surfaceStyle.backgroundColor,
+          boxShadow: surfaceStyle.boxShadow,
           offset: 1,
         },
       ],
       {
         duration: EVENT_MODAL_OPEN_DURATION_MS,
+        easing: 'linear',
         fill: 'both',
       },
     ),
     animateElement(
       elements.media,
       [
+        { backgroundColor: 'rgba(255, 255, 255, 0)', offset: 0 },
         {
-          transform: `scale(${mediaFillScaleX}, 1)`,
-          padding: '0px',
-          offset: 0,
+          backgroundColor: 'rgba(255, 255, 255, 0)',
+          offset: EVENT_MODAL_CONTENT_REVEAL_START,
         },
         {
-          transform: `scale(${mediaFillScaleX}, 1)`,
-          padding: '0px',
+          backgroundColor: mediaStyle.backgroundColor,
           offset: EVENT_MODAL_CONTENT_REVEAL_END,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
         },
-        {
-          transform: 'scale(1, 1)',
-          padding: mediaStyle.padding,
-          offset: 1,
-        },
+        { backgroundColor: mediaStyle.backgroundColor, offset: 1 },
       ],
       {
         duration: EVENT_MODAL_OPEN_DURATION_MS,
-        fill: 'both',
-      },
-    ),
-    animateElement(
-      elements.imageStage,
-      [
-        {
-          transform: `scaleY(${imageFillScaleY})`,
-          borderRadius: originStyle?.borderRadius || '18px',
-          boxShadow: 'none',
-          offset: 0,
-        },
-        {
-          transform: `scaleY(${imageFillScaleY})`,
-          borderRadius: '22px',
-          boxShadow: '0 18px 48px rgba(13, 35, 68, .2)',
-          offset: EVENT_MODAL_CONTENT_REVEAL_END,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        },
-        {
-          transform: 'scaleY(1)',
-          borderRadius: imageStageStyle.borderRadius,
-          boxShadow: imageStageStyle.boxShadow,
-          offset: 1,
-        },
-      ],
-      {
-        duration: EVENT_MODAL_OPEN_DURATION_MS,
+        easing: 'linear',
         fill: 'both',
       },
     ),
     animateElement(
       elements.content,
       [
+        { opacity: 0, filter: 'blur(26px)', offset: 0 },
         {
           opacity: 0,
-          transform: `translateX(${overlayTranslateX}px) scale(.88)`,
-          filter: 'blur(18px)',
-          backgroundColor: 'rgba(255, 255, 255, .76)',
-          borderRadius: '24px',
-          clipPath: 'inset(8% 7% 8% 7% round 24px)',
-          offset: 0,
-        },
-        {
-          opacity: 0,
-          transform: `translateX(${overlayTranslateX}px) scale(.9)`,
-          filter: 'blur(16px)',
-          backgroundColor: 'rgba(255, 255, 255, .8)',
-          borderRadius: '24px',
-          clipPath: 'inset(8% 7% 8% 7% round 24px)',
+          filter: 'blur(26px)',
           offset: EVENT_MODAL_CONTENT_REVEAL_START,
-          easing: 'ease-out',
         },
+        { opacity: 0.55, filter: 'blur(11px)', offset: 0.66 },
         {
           opacity: 1,
-          transform: `translateX(${overlayTranslateX}px) scale(.94)`,
           filter: 'blur(0px)',
-          backgroundColor: 'rgba(255, 255, 255, .92)',
-          borderRadius: '24px',
-          clipPath: 'inset(5% 5% 5% 5% round 24px)',
           offset: EVENT_MODAL_CONTENT_REVEAL_END,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
         },
-        {
-          opacity: 1,
-          transform: 'translateX(0px) scale(1)',
-          filter: 'blur(0px)',
-          backgroundColor: contentStyle.backgroundColor,
-          borderRadius: '0px',
-          clipPath: 'inset(0% 0% 0% 0% round 0px)',
-          offset: 1,
-        },
+        { opacity: 1, filter: 'blur(0px)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_OPEN_DURATION_MS,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
         fill: 'both',
       },
     ),
     animateElement(
       elements.closeButton,
       [
-        { opacity: 0, transform: 'scale(.7)', offset: 0 },
-        { opacity: 0, transform: 'scale(.7)', offset: 0.54 },
-        { opacity: 1, transform: 'scale(1)', offset: 0.76 },
-        { opacity: 1, transform: 'scale(1)', offset: 1 },
+        { opacity: 0, filter: 'blur(14px)', offset: 0 },
+        { opacity: 0, filter: 'blur(14px)', offset: 0.52 },
+        { opacity: 1, filter: 'blur(0px)', offset: 0.9 },
+        { opacity: 1, filter: 'blur(0px)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_OPEN_DURATION_MS,
+        easing: 'ease-out',
         fill: 'both',
       },
     ),
     animateElement(
       elements.status,
       [
-        { opacity: 0, transform: 'translateY(-10px)', offset: 0 },
-        { opacity: 0, transform: 'translateY(-10px)', offset: 0.52 },
-        { opacity: 1, transform: 'translateY(0px)', offset: 0.75 },
-        { opacity: 1, transform: 'translateY(0px)', offset: 1 },
+        { opacity: 0, filter: 'blur(14px)', offset: 0 },
+        { opacity: 0, filter: 'blur(14px)', offset: 0.48 },
+        { opacity: 1, filter: 'blur(0px)', offset: 0.86 },
+        { opacity: 1, filter: 'blur(0px)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_OPEN_DURATION_MS,
+        easing: 'ease-out',
         fill: 'both',
       },
     ),
   ].filter((animation): animation is Animation => Boolean(animation));
-
-  return animations;
 }
 
-function createClosingAnimations(
-  elements: ModalMotionElements,
-  destinationRect: MotionRect,
-): Animation[] {
-  const finalSurfaceRect = copyRect(elements.surface.getBoundingClientRect());
-  const finalMediaRect = copyRect(elements.media.getBoundingClientRect());
-  const finalImageStageRect = copyRect(elements.imageStage.getBoundingClientRect());
-  const intermediateRect = getIntermediateRect(finalSurfaceRect);
-
+function createShellClosingAnimations(elements: ModalMotionElements): Animation[] {
   const surfaceStyle = getComputedStyle(elements.surface);
   const mediaStyle = getComputedStyle(elements.media);
-  const contentStyle = getComputedStyle(elements.content);
-  const imageStageStyle = getComputedStyle(elements.imageStage);
-  const destinationStyle = originImage?.parentElement
-    ? getComputedStyle(originImage.parentElement)
-    : null;
 
-  const destinationTransform = transformForRect(destinationRect, finalSurfaceRect);
-  const intermediateTransform = transformForRect(intermediateRect, finalSurfaceRect);
-  const mediaFillScaleX = Math.max(1, finalSurfaceRect.width / finalMediaRect.width);
-  const imageFillScaleY = Math.max(1, finalSurfaceRect.height / finalImageStageRect.height);
-  const overlayTranslateX = -Math.max(0, finalMediaRect.width * 0.92);
-
-  elements.surface.style.transformOrigin = 'top left';
-  elements.media.style.transformOrigin = 'top left';
-  elements.imageStage.style.transformOrigin = 'center';
-  elements.content.style.transformOrigin = 'center';
-
-  const animations = [
+  return [
     animateElement(
       elements.backdrop,
       [
         { opacity: 1, backdropFilter: 'blur(10px)', offset: 0 },
-        { opacity: 0.72, backdropFilter: 'blur(8px)', offset: 0.5 },
+        { opacity: 0.72, backdropFilter: 'blur(8px)', offset: 0.46 },
         { opacity: 0, backdropFilter: 'blur(0px)', offset: 1 },
       ],
       {
@@ -474,206 +443,118 @@ function createClosingAnimations(
       elements.surface,
       [
         {
-          transform: 'translate(0px, 0px) scale(1, 1)',
-          borderRadius: surfaceStyle.borderRadius,
+          backgroundColor: surfaceStyle.backgroundColor,
           boxShadow: surfaceStyle.boxShadow,
-          filter: 'blur(0px)',
           offset: 0,
-          easing: 'cubic-bezier(0.2, 0.72, 0.26, 1)',
         },
         {
-          transform: intermediateTransform,
-          borderRadius: '24px',
-          boxShadow: '0 30px 84px rgba(13, 35, 68, .3)',
-          filter: 'blur(0px)',
-          offset: 0.34,
-          easing: 'ease-in-out',
+          backgroundColor: 'rgba(255, 255, 255, 0)',
+          boxShadow: '0 0 0 rgba(13, 35, 68, 0)',
+          offset: 0.7,
         },
         {
-          transform: intermediateTransform,
-          borderRadius: '24px',
-          boxShadow: '0 24px 70px rgba(13, 35, 68, .26)',
-          filter: 'blur(1px)',
-          offset: 0.64,
-          easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
-        },
-        {
-          transform: destinationTransform,
-          borderRadius: destinationStyle?.borderRadius || '18px',
-          boxShadow: '0 8px 24px rgba(13, 35, 68, .16)',
-          filter: 'blur(0px)',
+          backgroundColor: 'rgba(255, 255, 255, 0)',
+          boxShadow: '0 0 0 rgba(13, 35, 68, 0)',
           offset: 1,
         },
       ],
       {
         duration: EVENT_MODAL_CLOSE_DURATION_MS,
+        easing: 'linear',
         fill: 'both',
       },
     ),
     animateElement(
       elements.media,
       [
-        {
-          transform: 'scale(1, 1)',
-          padding: mediaStyle.padding,
-          offset: 0,
-        },
-        {
-          transform: `scale(${mediaFillScaleX}, 1)`,
-          padding: '0px',
-          offset: 0.34,
-          easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
-        },
-        {
-          transform: `scale(${mediaFillScaleX}, 1)`,
-          padding: '0px',
-          offset: 1,
-        },
+        { backgroundColor: mediaStyle.backgroundColor, offset: 0 },
+        { backgroundColor: 'rgba(255, 255, 255, 0)', offset: 0.7 },
+        { backgroundColor: 'rgba(255, 255, 255, 0)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_CLOSE_DURATION_MS,
-        fill: 'both',
-      },
-    ),
-    animateElement(
-      elements.imageStage,
-      [
-        {
-          transform: 'scaleY(1)',
-          borderRadius: imageStageStyle.borderRadius,
-          boxShadow: imageStageStyle.boxShadow,
-          offset: 0,
-        },
-        {
-          transform: `scaleY(${imageFillScaleY})`,
-          borderRadius: '22px',
-          boxShadow: '0 18px 48px rgba(13, 35, 68, .2)',
-          offset: 0.34,
-          easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
-        },
-        {
-          transform: `scaleY(${imageFillScaleY})`,
-          borderRadius: destinationStyle?.borderRadius || '18px',
-          boxShadow: 'none',
-          offset: 1,
-        },
-      ],
-      {
-        duration: EVENT_MODAL_CLOSE_DURATION_MS,
+        easing: 'linear',
         fill: 'both',
       },
     ),
     animateElement(
       elements.content,
       [
-        {
-          opacity: 1,
-          transform: 'translateX(0px) scale(1)',
-          filter: 'blur(0px)',
-          backgroundColor: contentStyle.backgroundColor,
-          borderRadius: '0px',
-          clipPath: 'inset(0% 0% 0% 0% round 0px)',
-          offset: 0,
-        },
-        {
-          opacity: 1,
-          transform: `translateX(${overlayTranslateX}px) scale(.94)`,
-          filter: 'blur(0px)',
-          backgroundColor: 'rgba(255, 255, 255, .92)',
-          borderRadius: '24px',
-          clipPath: 'inset(5% 5% 5% 5% round 24px)',
-          offset: 0.34,
-          easing: 'ease-in-out',
-        },
-        {
-          opacity: 0,
-          transform: `translateX(${overlayTranslateX}px) scale(.9)`,
-          filter: 'blur(16px)',
-          backgroundColor: 'rgba(255, 255, 255, .8)',
-          borderRadius: '24px',
-          clipPath: 'inset(8% 7% 8% 7% round 24px)',
-          offset: 0.64,
-          easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
-        },
-        {
-          opacity: 0,
-          transform: `translateX(${overlayTranslateX}px) scale(.88)`,
-          filter: 'blur(18px)',
-          backgroundColor: 'rgba(255, 255, 255, .76)',
-          borderRadius: '24px',
-          clipPath: 'inset(8% 7% 8% 7% round 24px)',
-          offset: 1,
-        },
+        { opacity: 1, filter: 'blur(0px)', offset: 0 },
+        { opacity: 0.55, filter: 'blur(11px)', offset: 0.3 },
+        { opacity: 0, filter: 'blur(26px)', offset: 0.62 },
+        { opacity: 0, filter: 'blur(26px)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_CLOSE_DURATION_MS,
+        easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
         fill: 'both',
       },
     ),
     animateElement(
       elements.closeButton,
       [
-        { opacity: 1, transform: 'scale(1)', offset: 0 },
-        { opacity: 1, transform: 'scale(1)', offset: 0.22 },
-        { opacity: 0, transform: 'scale(.7)', offset: 0.48 },
-        { opacity: 0, transform: 'scale(.7)', offset: 1 },
+        { opacity: 1, filter: 'blur(0px)', offset: 0 },
+        { opacity: 0, filter: 'blur(14px)', offset: 0.38 },
+        { opacity: 0, filter: 'blur(14px)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_CLOSE_DURATION_MS,
+        easing: 'ease-in',
         fill: 'both',
       },
     ),
     animateElement(
       elements.status,
       [
-        { opacity: 1, transform: 'translateY(0px)', offset: 0 },
-        { opacity: 1, transform: 'translateY(0px)', offset: 0.2 },
-        { opacity: 0, transform: 'translateY(-10px)', offset: 0.46 },
-        { opacity: 0, transform: 'translateY(-10px)', offset: 1 },
+        { opacity: 1, filter: 'blur(0px)', offset: 0 },
+        { opacity: 0, filter: 'blur(14px)', offset: 0.42 },
+        { opacity: 0, filter: 'blur(14px)', offset: 1 },
       ],
       {
         duration: EVENT_MODAL_CLOSE_DURATION_MS,
+        easing: 'ease-in',
         fill: 'both',
       },
     ),
   ].filter((animation): animation is Animation => Boolean(animation));
-
-  return animations;
 }
 
-function openWithoutOrigin(update: () => void): void {
+function waitForAnimations(animations: Animation[]): Promise<void> {
+  return Promise.allSettled(
+    animations.map((animation) => animation.finished),
+  ).then(() => undefined);
+}
+
+function finishOpeningMotion(
+  sequence: number,
+  elements: ModalMotionElements,
+): void {
+  if (sequence !== transitionSequence) return;
+
+  clearMotionElements(elements);
+  removeActiveClone();
+  cancelActiveAnimations();
+  activeElements = null;
+  activeDirection = null;
+  activeMotionDone = null;
+}
+
+function openWithoutImageOrigin(update: () => void): void {
   flushSync(update);
 
   window.requestAnimationFrame(() => {
     const elements = getModalMotionElements();
     if (!elements) return;
 
-    markMotionElements(elements, 'opening');
-
-    const animations = [
-      animateElement(
-        elements.backdrop,
-        [
-          { opacity: 0, backdropFilter: 'blur(0px)' },
-          { opacity: 1, backdropFilter: 'blur(10px)' },
-        ],
-        { duration: 900, easing: 'ease-out' },
-      ),
-      animateElement(
-        elements.surface,
-        [
-          { opacity: 0, transform: 'scale(.82)', filter: 'blur(18px)' },
-          { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' },
-        ],
-        { duration: 1600, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
-      ),
-    ].filter((animation): animation is Animation => Boolean(animation));
+    const sequence = transitionSequence;
+    markMotionElements(elements, 'opening', false);
+    const animations = createShellOpeningAnimations(elements);
 
     activeAnimations = animations;
-    void waitForAnimations(animations).finally(() => {
-      finishAndClearActiveAnimations();
-      clearMotionElements(elements);
-    });
+    activeMotionDone = waitForAnimations(animations);
+
+    void activeMotionDone.finally(() => finishOpeningMotion(sequence, elements));
   });
 }
 
@@ -682,8 +563,8 @@ export function openEventWithTransition(
   update: () => void,
 ): void {
   const sequence = ++transitionSequence;
-  finishAndClearActiveAnimations();
-  clearMotionElements(getModalMotionElements());
+
+  clearActiveMotion();
   restoreOriginImage();
 
   originImage = imageElement?.isConnected ? imageElement : null;
@@ -697,8 +578,9 @@ export function openEventWithTransition(
     return;
   }
 
-  if (!originRect) {
-    openWithoutOrigin(update);
+  const originImageElement = getImageElement(originImage);
+  if (!originRect || !originImageElement) {
+    openWithoutImageOrigin(update);
     return;
   }
 
@@ -715,17 +597,36 @@ export function openEventWithTransition(
       return;
     }
 
-    markMotionElements(elements, 'opening');
+    const finalImageRect = copyRect(elements.imageStage.getBoundingClientRect());
+    const sourceRadius = getBorderRadius(originImageElement.parentElement);
+    const finalRadius = getBorderRadius(elements.imageStage, '20px');
+    const clone = createImageFlightClone(
+      originImageElement,
+      sourceRect,
+      sourceRadius,
+    );
+
+    markMotionElements(elements, 'opening', true);
     hideOriginImage();
 
-    const animations = createOpeningAnimations(elements, sourceRect);
-    activeAnimations = animations;
+    const imageAnimation = animateImageFlight(
+      clone,
+      sourceRect,
+      finalImageRect,
+      sourceRadius,
+      finalRadius,
+      EVENT_MODAL_OPEN_DURATION_MS,
+      'opening',
+    );
+    const shellAnimations = createShellOpeningAnimations(elements);
+    const animations = [imageAnimation, ...shellAnimations].filter(
+      (animation): animation is Animation => Boolean(animation),
+    );
 
-    void waitForAnimations(animations).finally(() => {
-      if (sequence !== transitionSequence) return;
-      finishAndClearActiveAnimations();
-      clearMotionElements(elements);
-    });
+    activeAnimations = animations;
+    activeMotionDone = waitForAnimations(animations);
+
+    void activeMotionDone.finally(() => finishOpeningMotion(sequence, elements));
   });
 }
 
@@ -733,35 +634,70 @@ export function closeEventWithTransition(
   update: () => void,
   afterClose?: () => void,
 ): void {
+  if (activeDirection === 'opening' && activeMotionDone) {
+    const openingDone = activeMotionDone;
+    void openingDone.finally(() => closeEventWithTransition(update, afterClose));
+    return;
+  }
+
   const sequence = ++transitionSequence;
-  finishAndClearActiveAnimations();
+  clearActiveMotion();
 
   const elements = getModalMotionElements();
   const destinationRect = getConnectedOriginRect();
+  const modalImage = getImageElement(elements?.image ?? null);
 
   const finalize = () => {
     clearMotionElements(elements);
     restoreOriginImage();
+    removeActiveClone();
+    cancelActiveAnimations();
+    activeElements = null;
+    activeDirection = null;
+    activeMotionDone = null;
     dispatchModalState(false);
     afterClose?.();
   };
 
-  if (prefersReducedMotion() || !elements || !destinationRect) {
+  if (
+    prefersReducedMotion() ||
+    !elements ||
+    !destinationRect ||
+    !modalImage
+  ) {
     flushSync(update);
     finalize();
     return;
   }
 
-  markMotionElements(elements, 'closing');
+  const startRect = copyRect(elements.imageStage.getBoundingClientRect());
+  const startRadius = getBorderRadius(elements.imageStage, '20px');
+  const destinationRadius = getBorderRadius(originImage?.parentElement);
+  const clone = createImageFlightClone(modalImage, startRect, startRadius);
 
-  const animations = createClosingAnimations(elements, destinationRect);
+  markMotionElements(elements, 'closing', true);
+
+  const imageAnimation = animateImageFlight(
+    clone,
+    startRect,
+    destinationRect,
+    startRadius,
+    destinationRadius,
+    EVENT_MODAL_CLOSE_DURATION_MS,
+    'closing',
+  );
+  const shellAnimations = createShellClosingAnimations(elements);
+  const animations = [imageAnimation, ...shellAnimations].filter(
+    (animation): animation is Animation => Boolean(animation),
+  );
+
   activeAnimations = animations;
+  activeMotionDone = waitForAnimations(animations);
 
-  void waitForAnimations(animations).finally(() => {
+  void activeMotionDone.finally(() => {
     if (sequence !== transitionSequence) return;
 
     flushSync(update);
-    finishAndClearActiveAnimations();
     finalize();
   });
 }
