@@ -85,16 +85,50 @@
   mix-blend-mode: normal !important;
 }
 
-.pub-header-action-icon-wrap--max,
-.pub-header-action-icon--max {
+/*
+ * The tracked MAX PNG contains a square raster background and internal padding.
+ * Crop the raster to the actual circular mark and enlarge only the useful logo area,
+ * so its optical diameter matches the two neighbouring vector icons.
+ */
+.pub-header-action-icon-wrap--max {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: 27px !important;
   height: 27px !important;
   flex-basis: 27px !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+}
+
+.pub-header-action-icon--max {
+  width: 27px !important;
+  height: 27px !important;
+  min-width: 27px !important;
+  max-width: 27px !important;
+  min-height: 27px !important;
+  max-height: 27px !important;
+  flex: 0 0 27px !important;
+  object-fit: contain !important;
+  clip-path: circle(38.5% at 50% 50%) !important;
+  transform: scale(1.2) !important;
+  transform-origin: 50% 50% !important;
 }
 
 @media (max-width: 767px) {
   .pub-header-action-icon-wrap,
-  .pub-header-action-icon,
+  .pub-header-action-icon {
+    width: 25px !important;
+    height: 25px !important;
+    min-width: 25px !important;
+    max-width: 25px !important;
+    min-height: 25px !important;
+    max-height: 25px !important;
+    flex-basis: 25px !important;
+  }
+
   .pub-header-action-icon-wrap--max,
   .pub-header-action-icon--max {
     width: 25px !important;
