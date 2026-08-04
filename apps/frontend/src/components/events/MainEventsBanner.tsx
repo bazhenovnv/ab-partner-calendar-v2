@@ -1,6 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EVENT_MODAL_STATE_EVENT,
+  openEventWithTransition,
+} from '@/lib/event-modal-transition';
 import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
@@ -133,6 +137,7 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
   const [isPointerActive, setIsPointerActive] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   const pointerStartXRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | null>(null);
@@ -145,7 +150,8 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
 
   const total = carouselEvents.length;
   const activeIndex = total ? normalizeIndex(position, total) : 0;
-  const isAutoScrollPaused = isHovered || isFocusWithin || isPointerActive;
+  const isAutoScrollPaused =
+    isHovered || isFocusWithin || isPointerActive || isEventModalOpen;
 
   const carouselCards = useMemo<CarouselCard[]>(() => {
     if (!total) return [];
@@ -243,6 +249,16 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     syncCompactMode();
     media.addEventListener('change', syncCompactMode);
     return () => media.removeEventListener('change', syncCompactMode);
+  }, []);
+
+  useEffect(() => {
+    const onModalState = (event: Event) => {
+      const detail = (event as CustomEvent<{ open?: boolean }>).detail;
+      setIsEventModalOpen(Boolean(detail?.open));
+    };
+
+    window.addEventListener(EVENT_MODAL_STATE_EVENT, onModalState);
+    return () => window.removeEventListener(EVENT_MODAL_STATE_EVENT, onModalState);
   }, []);
 
   useEffect(() => {
@@ -418,7 +434,9 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
                       }
 
                       if (isCenter) {
-                        openEvent(card.event);
+                        const sourceImage =
+                          clickEvent.currentTarget.querySelector<HTMLElement>('img');
+                        openEventWithTransition(sourceImage, () => openEvent(card.event));
                         return;
                       }
 
