@@ -10,6 +10,7 @@ export const EVENT_MODAL_STATE_EVENT = 'ab:event-modal-state';
 
 export const EVENT_MODAL_OPEN_DURATION_MS = 1400;
 export const EVENT_MODAL_CLOSE_DURATION_MS = 1200;
+export const EVENT_IMAGE_SPEED_MULTIPLIER = 1.5;
 export const EVENT_MODAL_CONTENT_REVEAL_START = 0.28;
 export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 
@@ -295,7 +296,7 @@ function animateImageFlight(
       ),
     ],
     {
-      duration,
+      duration: Math.round(duration / EVENT_IMAGE_SPEED_MULTIPLIER),
       easing,
       fill: 'both',
     },
