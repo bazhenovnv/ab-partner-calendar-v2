@@ -12,6 +12,15 @@ const MODAL_CONTENT = join(
   FRONTEND,
   'src/lib/event-modal-content.ts',
 );
+const MODAL_FIGMA = join(
+  FRONTEND,
+  'src/app/event-modal-figma-final.css',
+);
+const MODAL_TRANSITIONS = join(
+  FRONTEND,
+  'src/app/event-modal-transitions.css',
+);
+const LAYOUT = join(FRONTEND, 'src/app/layout.tsx');
 const EVENT_CARD = join(
   FRONTEND,
   'src/components/events/EventCard.tsx',
@@ -39,13 +48,33 @@ describe('Event modal content', () => {
     );
   });
 
-  test('renders the selected source in a cropped 1280 by 1280 square', () => {
+  test('crops modal artwork into the final 1280 by 1280 square without changing event cards', () => {
     const modal = readFileSync(MODAL, 'utf8');
+    const figma = readFileSync(MODAL_FIGMA, 'utf8');
+    const transitions = readFileSync(MODAL_TRANSITIONS, 'utf8');
+    const layout = readFileSync(LAYOUT, 'utf8');
+    const card = readFileSync(EVENT_CARD, 'utf8');
+    const imageRule =
+      transitions.match(/\[data-event-modal-image\]\s*\{[\s\S]*?\}/)?.[0] ?? '';
 
     assert.match(modal, /width=\{1280\}/);
     assert.match(modal, /height=\{1280\}/);
-    assert.match(modal, /objectFit: 'cover'/);
-    assert.match(modal, /objectPosition: 'center'/);
+    assert.match(modal, /data-event-modal-image/);
+    assert.match(figma, /event-modal-v2_imageStage__[\s\S]*aspect-ratio: 1 \/ 1 !important/);
+
+    assert.match(imageRule, /width: 100% !important/);
+    assert.match(imageRule, /height: 100% !important/);
+    assert.match(imageRule, /object-fit: cover !important/);
+    assert.match(imageRule, /object-position: center !important/);
+    assert.doesNotMatch(imageRule, /object-fit:\s*contain/);
+
+    assert.ok(
+      layout.indexOf("event-modal-figma-final.css") <
+        layout.indexOf("event-modal-transitions.css"),
+      'The square crop contract must load after the Figma modal overrides',
+    );
+
+    assert.doesNotMatch(card, /data-event-modal-image/);
   });
 
   test('prefers dedicated modal artwork for both regular and main events', () => {
