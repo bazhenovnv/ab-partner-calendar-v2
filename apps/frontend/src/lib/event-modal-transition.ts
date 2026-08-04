@@ -8,8 +8,8 @@ export const EVENT_BACKDROP_TRANSITION_NAME = 'event-modal-backdrop';
 
 export const EVENT_MODAL_STATE_EVENT = 'ab:event-modal-state';
 
-export const EVENT_MODAL_OPEN_DURATION_MS = 2800;
-export const EVENT_MODAL_CLOSE_DURATION_MS = 2400;
+export const EVENT_MODAL_OPEN_DURATION_MS = 1400;
+export const EVENT_MODAL_CLOSE_DURATION_MS = 1200;
 export const EVENT_MODAL_CONTENT_REVEAL_START = 0.28;
 export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 
