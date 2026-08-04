@@ -1,0 +1,212 @@
+/* Reversible shared-element transition between an event card and its modal. */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(event-modal-image) {
+  z-index: 1104;
+  overflow: clip;
+  border-radius: 20px;
+  animation-duration: 680ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-image-pair(event-modal-image) {
+  isolation: auto;
+  overflow: clip;
+  border-radius: 20px;
+}
+
+::view-transition-old(event-modal-image),
+::view-transition-new(event-modal-image) {
+  width: 100%;
+  height: 100%;
+  overflow: clip;
+  border-radius: 20px;
+  mix-blend-mode: normal;
+  object-fit: cover;
+}
+
+::view-transition-group(event-modal-backdrop) {
+  z-index: 1100;
+  animation-duration: 420ms;
+}
+
+::view-transition-group(event-modal-surface) {
+  z-index: 1102;
+  animation-duration: 560ms;
+}
+
+::view-transition-old(event-modal-backdrop),
+::view-transition-new(event-modal-backdrop),
+::view-transition-old(event-modal-surface),
+::view-transition-new(event-modal-surface) {
+  mix-blend-mode: normal;
+}
+
+html[data-event-modal-transition='opening']::view-transition-old(event-modal-image) {
+  animation: eventImageOpeningOld 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-event-modal-transition='opening']::view-transition-new(event-modal-image) {
+  animation: eventImageOpeningNew 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-event-modal-transition='opening']::view-transition-new(event-modal-backdrop) {
+  animation: eventBackdropIn 380ms ease-out both;
+}
+
+html[data-event-modal-transition='opening']::view-transition-new(event-modal-surface) {
+  transform-origin: center;
+  animation: eventSurfaceIn 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-event-modal-transition='closing']::view-transition-old(event-modal-image) {
+  animation: eventImageClosingOld 520ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+html[data-event-modal-transition='closing']::view-transition-new(event-modal-image) {
+  animation: eventImageClosingNew 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-event-modal-transition='closing']::view-transition-old(event-modal-backdrop) {
+  animation: eventBackdropOut 360ms ease-in both;
+}
+
+html[data-event-modal-transition='closing']::view-transition-old(event-modal-surface) {
+  transform-origin: center;
+  animation: eventSurfaceOut 460ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+@keyframes eventImageOpeningOld {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  55% {
+    opacity: 0.62;
+    filter: blur(9px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(16px);
+  }
+}
+
+@keyframes eventImageOpeningNew {
+  0% {
+    opacity: 0.18;
+    filter: blur(20px);
+  }
+  52% {
+    opacity: 0.72;
+    filter: blur(7px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes eventImageClosingOld {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  58% {
+    opacity: 0.52;
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(18px);
+  }
+}
+
+@keyframes eventImageClosingNew {
+  0% {
+    opacity: 0.14;
+    filter: blur(18px);
+  }
+  56% {
+    opacity: 0.68;
+    filter: blur(7px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes eventBackdropIn {
+  from {
+    opacity: 0;
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes eventBackdropOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes eventSurfaceIn {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.9);
+    filter: blur(18px);
+  }
+  58% {
+    opacity: 0.8;
+    transform: translateY(5px) scale(0.985);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes eventSurfaceOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  62% {
+    opacity: 0.58;
+    transform: translateY(9px) scale(0.965);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+    filter: blur(18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(event-modal-image),
+  ::view-transition-group(event-modal-backdrop),
+  ::view-transition-group(event-modal-surface),
+  ::view-transition-old(event-modal-image),
+  ::view-transition-new(event-modal-image),
+  ::view-transition-old(event-modal-backdrop),
+  ::view-transition-new(event-modal-backdrop),
+  ::view-transition-old(event-modal-surface),
+  ::view-transition-new(event-modal-surface) {
+    animation-duration: 1ms !important;
+  }
+}
