@@ -14,13 +14,13 @@ const MODAL = join(FRONTEND, 'src/components/events/EventModalProvider.tsx');
 describe('Sharp event image flight into a static modal', () => {
   test('moves the image by real coordinates and dimensions without blur or scaling transforms', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
-    const flightStart = transition.indexOf('function animateImageFlight');
+    const flightStart = transition.indexOf('function imageRectKeyframe');
     const flightEnd = transition.indexOf('function createShellOpeningAnimations');
     const flight = transition.slice(flightStart, flightEnd);
 
     assert.ok(flightStart >= 0 && flightEnd > flightStart);
     assert.match(transition, /createImageFlightClone/);
-    assert.match(transition, /imageRectKeyframe/);
+    assert.match(transition, /animateImageFlight/);
     assert.match(flight, /top:/);
     assert.match(flight, /left:/);
     assert.match(flight, /width:/);
