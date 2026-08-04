@@ -192,6 +192,7 @@ export function openEventWithTransition(
 
   activeTransition = transition;
   void transition.finished.finally(() => {
+    if (sequence !== transitionSequence) return;
     clearViewTransitionName(source);
     finishTransition(sequence);
   });
@@ -240,6 +241,7 @@ export function closeEventWithTransition(
 
   activeTransition = transition;
   void transition.finished.finally(() => {
+    if (sequence !== transitionSequence) return;
     clearViewTransitionName(source);
     originImage = null;
     finishTransition(sequence);
