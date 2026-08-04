@@ -1,7 +1,6 @@
 /*
- * One staged composite animation:
- * event-card image -> enlarged image surface -> content over image -> full modal.
- * Geometry and timing are driven by Web Animations in event-modal-transition.ts.
+ * Sharp image flight into the final modal image slot.
+ * The modal shell stays at its final size while non-image content fades in from blur.
  */
 
 [data-event-modal-backdrop][data-event-composite-motion] {
@@ -11,32 +10,29 @@
 }
 
 [data-event-modal-surface][data-event-composite-motion] {
-  transform-origin: top left;
   contain: paint;
   isolation: isolate;
-  will-change: transform, border-radius, box-shadow, filter;
+  will-change: background-color, box-shadow;
 }
 
 [data-event-composite-part='media'] {
   position: relative;
   z-index: 1;
-  will-change: transform, padding;
+  will-change: background-color;
 }
 
 [data-event-composite-part='image-stage'] {
-  position: relative;
-  z-index: 1;
-  will-change: transform, border-radius, box-shadow;
+  visibility: hidden;
 }
 
 [data-event-composite-part='content'] {
   position: relative;
   z-index: 3;
-  will-change: opacity, transform, filter, background-color, clip-path;
+  will-change: opacity, filter;
 }
 
 [data-event-composite-part='chrome'] {
-  will-change: opacity, transform;
+  will-change: opacity, filter;
 }
 
 [data-event-modal-surface][data-event-composite-motion='opening'],
