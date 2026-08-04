@@ -30,11 +30,16 @@ describe('Sharp event image flight into a static modal', () => {
     assert.doesNotMatch(transition, /transformForRect|getIntermediateRect/);
   });
 
-  test('keeps the exact two-times-faster timing', () => {
+  test('speeds up only the image flight by 1.5 times', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
 
     assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 1400/);
     assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 1200/);
+    assert.match(transition, /EVENT_IMAGE_SPEED_MULTIPLIER = 1\.5/);
+    assert.match(
+      transition,
+      /duration: Math\.round\(duration \/ EVENT_IMAGE_SPEED_MULTIPLIER\)/,
+    );
     assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.28/);
     assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_END = 0\.88/);
   });
