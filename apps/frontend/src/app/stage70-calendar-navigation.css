@@ -114,7 +114,7 @@
 
 .pub-calendar-tooltip {
   max-width: none !important;
-  background: rgba(255, 255, 255, 0.7) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
   color: #0d2344 !important;
   border: 1px solid rgba(13, 35, 68, 0.14) !important;
   border-radius: 10px !important;
@@ -126,5 +126,5 @@
 }
 
 .pub-calendar-tooltip::after {
-  border-top-color: rgba(255, 255, 255, 0.7) !important;
+  border-top-color: rgba(255, 255, 255, 0.55) !important;
 }
