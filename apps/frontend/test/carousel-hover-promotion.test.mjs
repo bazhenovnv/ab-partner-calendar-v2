@@ -20,12 +20,22 @@ describe('Built carousel hover promotion', () => {
     );
   });
 
-  test('verifies the actual hover contract before and after promotion', () => {
-    assert.match(SCRIPT, /CAROUSEL_HOVER_SCALE_104/);
+  test('verifies the actual two-percent hover contract before and after promotion', () => {
+    assert.match(SCRIPT, /CAROUSEL_HOVER_SCALE_102/);
+    assert.match(SCRIPT, /scale:1\.02/);
+    assert.match(SCRIPT, /OLD_SCALE_REMOVED/);
+    assert.doesNotMatch(SCRIPT, /CAROUSEL_HOVER_SCALE_104/);
     assert.match(SCRIPT, /CAROUSEL_HOVER_TRANSITION/);
     assert.match(SCRIPT, /CAROUSEL_DRAG_GUARD/);
     assert.match(SCRIPT, /verify_hover_runtime "\$PREFLIGHT"/);
     assert.match(SCRIPT, /verify_hover_runtime "\$new_frontend"/);
+  });
+
+  test('requires an explicit built-image revision', () => {
+    assert.match(
+      SCRIPT,
+      /TARGET="\$\{1:\?Usage: promote-built-carousel-hover\.sh <40-char-image-revision>\}"/,
+    );
   });
 
   test('promotes only the existing frontend image with rollback protection', () => {
