@@ -71,4 +71,31 @@ describe('Main events carousel', () => {
     assert.doesNotMatch(styles, /\.cardActive/);
     assert.doesNotMatch(styles, /\.card:hover \.frame/);
   });
+
+  test('gently enlarges hovered cards without moving carousel geometry', () => {
+    const styles = readFileSync(STYLES, 'utf8');
+    const card = styles.match(/\.card \{[\s\S]*?\n\}/)?.[0] ?? '';
+    const hover = styles.match(
+      /@media \(hover: hover\) and \(pointer: fine\) \{[\s\S]*?\n\}/,
+    )?.[0] ?? '';
+    const focus = styles.match(
+      /\.gallery:not\(\.galleryDragging\) \.card:not\(\.cardOffscreen\):focus-visible \{[\s\S]*?\n\}/,
+    )?.[0] ?? '';
+    const reducedMotion = styles.match(
+      /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*\n\}/,
+    )?.[0] ?? '';
+
+    assert.match(card, /scale: 1;/);
+    assert.match(card, /scale 180ms cubic-bezier\(0\.22, 1, 0\.36, 1\);/);
+    assert.match(card, /will-change: transform, opacity, scale;/);
+    assert.match(hover, /\.card:not\(\.cardOffscreen\):hover/);
+    assert.match(hover, /scale: 1\.04;/);
+    assert.match(focus, /scale: 1\.04;/);
+
+    assert.doesNotMatch(hover, /(?:^|\s)(?:top|right|bottom|left|margin|translate|transform)\s*:/);
+    assert.doesNotMatch(focus, /(?:^|\s)(?:top|right|bottom|left|margin|translate|transform)\s*:/);
+
+    assert.match(reducedMotion, /transition-duration: 1ms;/);
+    assert.match(reducedMotion, /scale: 1;/);
+  });
 });
