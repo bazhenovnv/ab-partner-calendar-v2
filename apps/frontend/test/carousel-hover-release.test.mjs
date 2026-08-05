@@ -11,12 +11,14 @@ const SCRIPT = readFileSync(
 
 describe('Carousel hover frontend release', () => {
   test('verifies the approved hover animation in source and runtime CSS', () => {
-    assert.match(SCRIPT, /scale: 1\.04;/);
+    assert.match(SCRIPT, /scale: 1\.02;/);
+    assert.doesNotMatch(SCRIPT, /scale: 1\.04;/);
     assert.match(SCRIPT, /scale 180ms cubic-bezier/);
-    assert.match(SCRIPT, /CAROUSEL_HOVER_SCALE_104/);
+    assert.match(SCRIPT, /CAROUSEL_HOVER_SCALE_102/);
     assert.match(SCRIPT, /CAROUSEL_HOVER_FINE_POINTER/);
     assert.match(SCRIPT, /CAROUSEL_DRAG_GUARD/);
     assert.match(SCRIPT, /REDUCED_MOTION_SCALE_RESET/);
+    assert.match(SCRIPT, /OLD_SCALE_REMOVED/);
   });
 
   test('runs frontend typecheck, all frontend tests, build and preflight', () => {
@@ -25,6 +27,12 @@ describe('Carousel hover frontend release', () => {
     assert.match(SCRIPT, /apps\/frontend\/Dockerfile/);
     assert.match(SCRIPT, /PREFLIGHT_OK/);
     assert.match(SCRIPT, /PRODUCTION_HOVER_CONTRACTS_OK/);
+  });
+
+  test('uses minifier-safe runtime checks', () => {
+    assert.match(SCRIPT, /180ms\|\\\.18s/);
+    assert.match(SCRIPT, /finePointerTail/);
+    assert.match(SCRIPT, /notCount >= 2/);
   });
 
   test('switches only frontend and preserves backend bots and nginx', () => {
