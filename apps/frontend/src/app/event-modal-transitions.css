@@ -96,6 +96,15 @@
     font-size: clamp(13px, 0.833vw, 16px) !important;
   }
 
+  [data-event-modal-speakers] {
+    align-items: flex-start !important;
+  }
+
+  [data-event-modal-speakers] [class*="event-modal-v2_detailValue__"] {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+  }
+
   [data-event-modal-action-bar] {
     padding-top: 6px !important;
     padding-bottom: var(--event-modal-image-inset-y) !important;
