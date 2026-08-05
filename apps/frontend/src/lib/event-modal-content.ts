@@ -5,6 +5,9 @@ const SERVICE_LABEL =
 const OPTIONAL_MARKERS = '[\\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]*';
 const BLOCK_TAGS = 'h1|h2|h3|h4|h5|h6|p|div|li|blockquote';
 const SPEAKER_MARKER_SOURCE = '(?:🎙️?|🎤️?)';
+const SPEAKER_WORD_SOURCE = "[A-ZА-ЯЁ][A-Za-zА-Яа-яЁё'’.-]+";
+const SPEAKER_NAME_SOURCE =
+  `${SPEAKER_WORD_SOURCE}(?:\\s+${SPEAKER_WORD_SOURCE}){1,4}`;
 const INVALID_SPEAKER =
   /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/i;
 
@@ -74,25 +77,38 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function collectMatches(value: string, pattern: RegExp): RegExpExecArray[] {
+  const matches: RegExpExecArray[] = [];
+  let match: RegExpExecArray | null;
+
+  pattern.lastIndex = 0;
+
+  while ((match = pattern.exec(value)) !== null) {
+    matches.push(match);
+
+    if (match[0].length === 0) {
+      pattern.lastIndex += 1;
+    }
+  }
+
+  return matches;
+}
+
 function normalizeSpeakerName(value?: string | null): string | null {
   if (!value) return null;
 
   const candidate = decodeBasicEntities(value)
     .replace(/<[^>]+>/g, ' ')
-    .replace(/^[\s🎙️🎤•▪▫–—-]+/u, '')
-    .replace(/^(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]?\s*/iu, '')
-    .split(/\s+[—–-]\s+/u)[0]
-    ?.replace(/[,:;.!?]+$/u, '')
+    .replace(/^[\s🎙️🎤•▪▫–—-]+/, '')
+    .replace(/^(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]?\s*/i, '')
+    .split(/\s+[—–-]\s+/)[0]
+    ?.replace(/[,:;.!?]+$/, '')
     .replace(/\s+/g, ' ')
     .trim();
 
   if (!candidate || INVALID_SPEAKER.test(candidate)) return null;
 
-  if (
-    !/^[\p{Lu}][\p{L}'’.-]+(?:\s+[\p{Lu}][\p{L}'’.-]+){1,4}$/u.test(
-      candidate,
-    )
-  ) {
+  if (!new RegExp(`^${SPEAKER_NAME_SOURCE}$`).test(candidate)) {
     return null;
   }
 
@@ -119,8 +135,8 @@ function appendSpeakersFromSource(target: string[], value?: string | null): void
   const plainText = htmlToPlainText(value);
   if (!plainText) return;
 
-  const markerPattern = new RegExp(SPEAKER_MARKER_SOURCE, 'gu');
-  const markers = [...plainText.matchAll(markerPattern)];
+  const markerPattern = new RegExp(SPEAKER_MARKER_SOURCE, 'g');
+  const markers = collectMatches(plainText, markerPattern);
 
   markers.forEach((marker, index) => {
     const start = (marker.index ?? 0) + marker[0].length;
@@ -128,20 +144,23 @@ function appendSpeakersFromSource(target: string[], value?: string | null): void
     appendSpeaker(target, plainText.slice(start, end));
   });
 
-  for (const match of plainText.matchAll(
-    /([\p{Lu}][\p{L}'’.-]+(?:\s+[\p{Lu}][\p{L}'’.-]+){1,4})\s+[—–-]\s+/gu,
-  )) {
+  const titledSpeakerPattern = new RegExp(
+    `(${SPEAKER_NAME_SOURCE})\\s+[—–-]\\s+`,
+    'g',
+  );
+
+  for (const match of collectMatches(plainText, titledSpeakerPattern)) {
     appendSpeaker(target, match[1]);
   }
 
   for (const line of plainText.split('\n')) {
     const labelled = line.match(
-      /^\s*(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]\s*(.+)$/iu,
+      /^\s*(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]\s*(.+)$/i,
     );
     if (!labelled) continue;
 
     for (const part of labelled[1].split(
-      /\s*(?:;|\||,\s*(?=[\p{Lu}]))\s*/u,
+      /\s*(?:;|\||,\s*(?=[A-ZА-ЯЁ]))\s*/,
     )) {
       appendSpeaker(target, part);
     }
@@ -162,7 +181,7 @@ export function getEventModalSpeakers(event: PublicEvent): string[] {
 
   if (speakers.length === 0 && event.speaker) {
     for (const part of event.speaker.split(
-      /\s*(?:\r?\n|;|\||,\s*(?=[\p{Lu}]))\s*/u,
+      /\s*(?:\r?\n|;|\||,\s*(?=[A-ZА-ЯЁ]))\s*/,
     )) {
       appendSpeaker(speakers, part);
     }
@@ -274,7 +293,7 @@ function removeInlineSpeakerFragments(value: string): string {
     `<(${BLOCK_TAGS})([^>]*)>([\\s\\S]*?)<\\/\\1>`,
     'gi',
   );
-  const markerPattern = new RegExp(SPEAKER_MARKER_SOURCE, 'u');
+  const markerPattern = new RegExp(SPEAKER_MARKER_SOURCE);
 
   result = result.replace(
     blockPattern,
@@ -290,13 +309,13 @@ function removeInlineSpeakerFragments(value: string): string {
   );
 
   result = result.replace(
-    new RegExp(`${SPEAKER_MARKER_SOURCE}[^\\r\\n]*(?=\\r?\\n|$)`, 'gu'),
+    new RegExp(`${SPEAKER_MARKER_SOURCE}[^\\r\\n]*(?=\\r?\\n|$)`, 'g'),
     '',
   );
   result = result.replace(
     new RegExp(
       `\\s+(?:спикер(?:ы)?|ведущ(?:ий|ая))\\s*[:：—–-]\\s*[\\s\\S]*?(?=<\\/(?:${BLOCK_TAGS})>|\\r?\\n|$)`,
-      'giu',
+      'gi',
     ),
     '',
   );
