@@ -38,7 +38,7 @@ describe('Homepage control and event-card polish', () => {
     assert.match(eventCard, /data-event-card-date/);
   });
 
-  test('matches the approved status palette and date position', () => {
+  test('matches the approved status palette and quarter-height date overlap', () => {
     const polish = readFileSync(POLISH, 'utf8');
 
     assert.match(
@@ -59,7 +59,11 @@ describe('Homepage control and event-card polish', () => {
     );
     assert.match(
       polish,
-      /\[data-event-results-grid\] \[data-event-card-date\] \{\s*top: 0 !important;\s*\}/,
+      /\[data-event-results-grid\] \[data-event-card-date\] \{\s*top: -24\.25px !important;\s*\}/,
+    );
+    assert.match(
+      polish,
+      /@media \(max-width: 767px\)[\s\S]*\[data-event-results-grid\] \[data-event-card-date\] \{\s*top: -21\.5px !important;\s*\}/,
     );
   });
 
