@@ -23,7 +23,8 @@ describe('Main-events ingestion boundary', () => {
   test('bridges legacy source-marker filtering without changing persisted events', () => {
     assert.match(BRIDGE, /events\.map/);
     assert.match(BRIDGE, /event\.mainEvent/);
-    assert.match(BRIDGE, /#хит/);
+    assert.ok(BRIDGE.includes('<!-- #хит -->'));
+    assert.ok(!BRIDGE.includes("\\n#хит`.trim()"));
     assert.match(BRIDGE, /<MainEventsBanner events=\{canonicalEvents\} \/>/);
   });
 
