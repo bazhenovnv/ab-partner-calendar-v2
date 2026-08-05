@@ -89,8 +89,9 @@ describe('Main events carousel', () => {
     assert.match(card, /scale 180ms cubic-bezier\(0\.22, 1, 0\.36, 1\);/);
     assert.match(card, /will-change: transform, opacity, scale;/);
     assert.match(hover, /\.card:not\(\.cardOffscreen\):hover/);
-    assert.match(hover, /scale: 1\.04;/);
-    assert.match(focus, /scale: 1\.04;/);
+    assert.match(hover, /scale: 1\.02;/);
+    assert.match(focus, /scale: 1\.02;/);
+    assert.doesNotMatch(styles, /scale: 1\.04;/);
 
     assert.doesNotMatch(hover, /(?:^|\s)(?:top|right|bottom|left|margin|translate|transform)\s*:/);
     assert.doesNotMatch(focus, /(?:^|\s)(?:top|right|bottom|left|margin|translate|transform)\s*:/);
