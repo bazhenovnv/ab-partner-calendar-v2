@@ -4,7 +4,7 @@ set -Eeuo pipefail
 ROOT="${ROOT:-/srv/ab-afisha}"
 COMPOSE_FILE="${COMPOSE_FILE:-$ROOT/docker-compose.production.v2.yml}"
 PUBLIC_URL="${PUBLIC_URL:-https://ab-event.pro}"
-TARGET="${1:-328e45762f555d1463986c479b3231b4b0c33912}"
+TARGET="${1:?Usage: promote-built-carousel-hover.sh <40-char-image-revision>}"
 
 if [[ ! "$TARGET" =~ ^[0-9a-f]{40}$ ]]; then
   echo "TARGET must be a full 40-character commit SHA" >&2
@@ -115,18 +115,19 @@ async function main() {
 
   const checks = {
     CAROUSEL_CARD_BASE_SCALE: compact.includes('scale:1'),
-    CAROUSEL_HOVER_SCALE_104:
+    CAROUSEL_HOVER_SCALE_102:
       finePointerTail.includes(':hover') &&
-      finePointerTail.includes('scale:1.04'),
+      finePointerTail.includes('scale:1.02'),
     CAROUSEL_HOVER_FINE_POINTER: finePointerStart >= 0,
     CAROUSEL_HOVER_TRANSITION: transitionPattern.test(compact),
     CAROUSEL_DRAG_GUARD:
       finePointerTail.includes(':hover') &&
       notCount >= 2 &&
-      finePointerTail.includes('scale:1.04'),
+      finePointerTail.includes('scale:1.02'),
     REDUCED_MOTION_SCALE_RESET:
       compact.includes('@media(prefers-reduced-motion:reduce)') &&
       compact.includes('scale:1'),
+    OLD_SCALE_REMOVED: !compact.includes('scale:1.04'),
   };
 
   let failed = false;
@@ -280,7 +281,7 @@ echo "COMMIT=$TARGET"
 echo "PRODUCTION_FRONTEND=$new_frontend_image"
 echo "PRODUCTION_REVISION=$new_revision"
 echo "PUBLIC_HTTP=$public_http"
-echo "CAROUSEL_HOVER_SCALE=1.04"
+echo "CAROUSEL_HOVER_SCALE=1.02"
 echo "CAROUSEL_HOVER_DURATION=.18s"
 echo "CAROUSEL_GEOMETRY_UNCHANGED=true"
 echo "BACKEND_UNCHANGED=$backend_image_before"
