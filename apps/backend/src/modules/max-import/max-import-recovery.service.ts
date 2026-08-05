@@ -22,6 +22,7 @@ export class MaxImportRecoveryService {
     const events = await this.prisma.event.findMany({
       where: {
         source: 'MAX',
+        isManualStatus: false,
         status: { in: ['DRAFT', 'NEEDS_ATTENTION'] },
       },
       orderBy: { updatedAt: 'desc' },
