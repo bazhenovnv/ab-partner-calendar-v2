@@ -4,23 +4,61 @@ const SERVICE_LABEL =
   '(?:когда|дата(?:\\s+и\\s+время)?|время(?:\\s+проведения)?|начало|место(?:\\s+проведения)?|адрес|формат|стоимость|цена|участие|спикер(?:ы)?|ведущ(?:ий|ая)|онлайн)';
 const OPTIONAL_MARKERS = '[\\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]*';
 const BLOCK_TAGS = 'h1|h2|h3|h4|h5|h6|p|div|li|blockquote';
+const SPEAKER_MARKER_SOURCE = '(?:🎙️?|🎤️?)';
+const INVALID_SPEAKER =
+  /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/i;
 
 function decodeBasicEntities(value: string): string {
   return value
-    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&#x([0-9a-f]+);?/gi, (match, hex: string) => {
+      try {
+        return String.fromCodePoint(Number.parseInt(hex, 16));
+      } catch {
+        return match;
+      }
+    })
+    .replace(/&#(\d+);?/g, (match, decimal: string) => {
+      try {
+        return String.fromCodePoint(Number.parseInt(decimal, 10));
+      } catch {
+        return match;
+      }
+    })
+    .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
-    .replace(/&quot;|&#34;/gi, '"')
+    .replace(/&quot;/gi, '"')
     .replace(/&#39;|&apos;/gi, "'")
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>');
 }
 
-function normalizeComparableText(value?: string | null): string {
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function htmlToPlainText(value?: string | null): string {
   if (!value) return '';
 
   return decodeBasicEntities(value)
     .replace(/<br\s*\/?\s*>/gi, '\n')
+    .replace(/<\/(?:p|div|li|blockquote|h[1-6])>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/\r/g, '')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function normalizeComparableText(value?: string | null): string {
+  if (!value) return '';
+
+  return htmlToPlainText(value)
     .replace(/\*\*|__|~~/g, '')
     .replace(/[«»"'`]/g, '')
     .replace(/[ \t\r\n]+/g, ' ')
@@ -36,8 +74,101 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function cleanSpeaker(value?: string | null): string {
-  return value?.split(/\s+[—–-]\s+/)[0]?.trim() ?? '';
+function normalizeSpeakerName(value?: string | null): string | null {
+  if (!value) return null;
+
+  const candidate = decodeBasicEntities(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/^[\s🎙️🎤•▪▫–—-]+/u, '')
+    .replace(/^(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]?\s*/iu, '')
+    .split(/\s+[—–-]\s+/u)[0]
+    ?.replace(/[,:;.!?]+$/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!candidate || INVALID_SPEAKER.test(candidate)) return null;
+
+  if (
+    !/^[\p{Lu}][\p{L}'’.-]+(?:\s+[\p{Lu}][\p{L}'’.-]+){1,4}$/u.test(
+      candidate,
+    )
+  ) {
+    return null;
+  }
+
+  return candidate;
+}
+
+function appendSpeaker(target: string[], value?: string | null): void {
+  const speaker = normalizeSpeakerName(value);
+  if (!speaker) return;
+
+  const comparable = speaker.toLocaleLowerCase('ru-RU');
+  if (
+    target.some(
+      (current) => current.toLocaleLowerCase('ru-RU') === comparable,
+    )
+  ) {
+    return;
+  }
+
+  target.push(speaker);
+}
+
+function appendSpeakersFromSource(target: string[], value?: string | null): void {
+  const plainText = htmlToPlainText(value);
+  if (!plainText) return;
+
+  const markerPattern = new RegExp(SPEAKER_MARKER_SOURCE, 'gu');
+  const markers = [...plainText.matchAll(markerPattern)];
+
+  markers.forEach((marker, index) => {
+    const start = (marker.index ?? 0) + marker[0].length;
+    const end = markers[index + 1]?.index ?? plainText.length;
+    appendSpeaker(target, plainText.slice(start, end));
+  });
+
+  for (const match of plainText.matchAll(
+    /([\p{Lu}][\p{L}'’.-]+(?:\s+[\p{Lu}][\p{L}'’.-]+){1,4})\s+[—–-]\s+/gu,
+  )) {
+    appendSpeaker(target, match[1]);
+  }
+
+  for (const line of plainText.split('\n')) {
+    const labelled = line.match(
+      /^\s*(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]\s*(.+)$/iu,
+    );
+    if (!labelled) continue;
+
+    for (const part of labelled[1].split(
+      /\s*(?:;|\||,\s*(?=[\p{Lu}]))\s*/u,
+    )) {
+      appendSpeaker(target, part);
+    }
+  }
+}
+
+/**
+ * Returns every public speaker available in the structured field or imported
+ * description. Historical MAX records may contain several microphone-prefixed
+ * speaker blocks even when the legacy `speaker` column contains only one name.
+ */
+export function getEventModalSpeakers(event: PublicEvent): string[] {
+  const speakers: string[] = [];
+
+  appendSpeakersFromSource(speakers, event.speaker);
+  appendSpeakersFromSource(speakers, event.fullDescription);
+  appendSpeakersFromSource(speakers, event.shortDescription);
+
+  if (speakers.length === 0 && event.speaker) {
+    for (const part of event.speaker.split(
+      /\s*(?:\r?\n|;|\||,\s*(?=[\p{Lu}]))\s*/u,
+    )) {
+      appendSpeaker(speakers, part);
+    }
+  }
+
+  return speakers;
 }
 
 function normalizeTime(value?: string | null): string {
@@ -76,14 +207,17 @@ function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
     return true;
   }
 
-  const speaker = normalizeComparableText(cleanSpeaker(event.speaker));
+  const speakers = getEventModalSpeakers(event).map(normalizeComparableText);
   if (
-    speaker &&
-    (text === speaker ||
-      text === `спикер ${speaker}` ||
-      text === `спикеры ${speaker}` ||
-      text === `ведущий ${speaker}` ||
-      text === `ведущая ${speaker}`)
+    speakers.some(
+      (speaker) =>
+        speaker &&
+        (text === speaker ||
+          text === `спикер ${speaker}` ||
+          text === `спикеры ${speaker}` ||
+          text === `ведущий ${speaker}` ||
+          text === `ведущая ${speaker}`),
+    )
   ) {
     return true;
   }
@@ -131,21 +265,43 @@ function removeRepeatedBreakSegments(value: string, event: PublicEvent): string 
 }
 
 /**
- * Removes speaker lists appended to editorial copy in historical imports.
- * MAX posts often place one or more microphone-prefixed names and job titles
- * at the end of the same paragraph, so line-only metadata cleanup cannot see
- * them. The structured speaker row remains the single public source.
+ * Truncates each editorial block at the first microphone marker. It handles
+ * literal emoji, variation selectors, numeric HTML entities and nested spans.
  */
 function removeInlineSpeakerFragments(value: string): string {
-  return value
-    .replace(
-      /\s*(?:🎙️?|🎤️?)\s*[^<\r\n]*(?=<|\r?\n|$)/giu,
-      '',
-    )
-    .replace(
-      /\s+(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]\s*[^<\r\n]*(?=<|\r?\n|$)/giu,
-      '',
-    );
+  let result = decodeBasicEntities(value);
+  const blockPattern = new RegExp(
+    `<(${BLOCK_TAGS})([^>]*)>([\\s\\S]*?)<\\/\\1>`,
+    'gi',
+  );
+  const markerPattern = new RegExp(SPEAKER_MARKER_SOURCE, 'u');
+
+  result = result.replace(
+    blockPattern,
+    (block, tag: string, attributes: string, inner: string) => {
+      const markerIndex = inner.search(markerPattern);
+      if (markerIndex < 0) return block;
+
+      const editorialPrefix = htmlToPlainText(inner.slice(0, markerIndex));
+      return editorialPrefix
+        ? `<${tag}${attributes}>${escapeHtml(editorialPrefix)}</${tag}>`
+        : '';
+    },
+  );
+
+  result = result.replace(
+    new RegExp(`${SPEAKER_MARKER_SOURCE}[^\\r\\n]*(?=\\r?\\n|$)`, 'gu'),
+    '',
+  );
+  result = result.replace(
+    new RegExp(
+      `\\s+(?:спикер(?:ы)?|ведущ(?:ий|ая))\\s*[:：—–-]\\s*[\\s\\S]*?(?=<\\/(?:${BLOCK_TAGS})>|\\r?\\n|$)`,
+      'giu',
+    ),
+    '',
+  );
+
+  return result;
 }
 
 /**
@@ -188,8 +344,6 @@ export function cleanEventModalDescription(
     '',
   );
 
-  // Nested formatting can split the microphone block, so run the inline pass
-  // once more after service-line cleanup has flattened the surrounding copy.
   result = removeInlineSpeakerFragments(result);
 
   // Registration blocks and messenger links are actions, not description copy.
