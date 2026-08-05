@@ -100,6 +100,12 @@ describe('MAX event ingestion regressions', () => {
     assert.match(RELIABLE, /lastSyncedAt < processingStartedAt/);
   });
 
+  test('does not redeclare private members from the base MAX importer', () => {
+    assert.match(RELIABLE, /private reliableSourceChannelId\(\): number \| null/);
+    assert.match(RELIABLE, /this\.reliableSourceChannelId\(\)/);
+    assert.doesNotMatch(RELIABLE, /private sourceChannelId\(\): number \| null/);
+  });
+
   test('supports a one-time recent update replay without moving the stored marker', () => {
     assert.match(RELIABLE, /RECENT_BACKFILL_KEY/);
     assert.match(RELIABLE, /runRecentBackfill/);
