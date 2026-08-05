@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { formatEventDateParts, formatPrice } from '@/lib/format';
+import { formatEventDateParts } from '@/lib/format';
 import { openEventWithTransition } from '@/lib/event-modal-transition';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
@@ -26,7 +26,6 @@ export function EventCard({ event, className }: EventCardProps) {
   const imgUrl = image?.eventCardUrl ?? image?.thumbnailUrl ?? image?.originalUrl;
   const dateParts = formatEventDateParts(event.startDate);
   const status = STATUS_LABEL[event.autoStatus] ?? STATUS_LABEL.PLANNED;
-  const price = formatPrice(event.priceType, event.priceText);
 
   return (
     <article className={cn(styles.eventCard, ui.cardShell, 'group', className)}>
@@ -53,17 +52,25 @@ export function EventCard({ event, className }: EventCardProps) {
           ) : (
             <span className="pub-event-card-placeholder" aria-hidden="true"><span>АБ</span></span>
           )}
-          <span className={cn('pub-event-card-status', status.className)}>{status.label}</span>
+          <span
+            className={cn('pub-event-card-status', status.className)}
+            data-event-card-status
+          >
+            {status.label}
+          </span>
         </span>
 
         <span className={cn(styles.infoPanel, ui.cardInfo)}>
-          <span className={styles.dateBadge} aria-label={`${dateParts.day} ${dateParts.month}`}>
+          <span
+            className={styles.dateBadge}
+            aria-label={`${dateParts.day} ${dateParts.month}`}
+            data-event-card-date
+          >
             <span className={styles.dateDay}>{dateParts.day}</span>
             <span className={styles.dateMonth}>{dateParts.month}</span>
           </span>
           <span className={cn(styles.eventBody, ui.cardBody)}>
             <span className={cn(styles.eventTitle, ui.cardTitle)}>{event.title}</span>
-            <span className={ui.cardPrice}>{price}</span>
             <span className={ui.cardDetails}>Подробнее →</span>
           </span>
         </span>
