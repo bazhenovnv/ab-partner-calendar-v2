@@ -6,19 +6,32 @@ import { describe, test } from 'node:test';
 const FRONTEND = resolve(import.meta.dirname, '..');
 const FINAL_MODAL = join(FRONTEND, 'src/app/event-modal-transitions.css');
 const FIGMA_MODAL = join(FRONTEND, 'src/app/event-modal-figma-final.css');
+const MODAL_CONTENT = join(FRONTEND, 'src/lib/event-modal-content.ts');
 const LAYOUT = join(FRONTEND, 'src/app/layout.tsx');
 
 describe('Final modal Figma tuning', () => {
-  test('uses the approved 40px desktop title and compact 655 by 78 facts panel', () => {
+  test('expands the copy viewport while reducing title facts and controls proportionally', () => {
     const finalStyles = readFileSync(FINAL_MODAL, 'utf8');
 
     assert.match(
       finalStyles,
-      /event-modal-v2_title__[\s\S]*font-size: clamp\(26px, 2\.083vw, 40px\) !important/,
+      /event-modal-v2_scrollArea__[\s\S]*padding-top: clamp\(82px, 5\.625vw, 108px\) !important/,
     );
     assert.match(
       finalStyles,
-      /event-modal-v2_facts__[\s\S]*height: clamp\(68px, 4\.063vw, 78px\) !important/,
+      /event-modal-v2_textScroll__[\s\S]*flex: 1 1 auto !important[\s\S]*overflow-y: auto !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_title__[\s\S]*font-size: clamp\(24px, 1\.875vw, 36px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_lead__[\s\S]*font-size: clamp\(13px, 0\.938vw, 18px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_facts__[\s\S]*height: clamp\(62px, 3\.75vw, 72px\) !important/,
     );
     assert.match(
       finalStyles,
@@ -26,11 +39,43 @@ describe('Final modal Figma tuning', () => {
     );
     assert.match(
       finalStyles,
-      /event-modal-v2_factIcon__[\s\S]*width: clamp\(38px, 2\.604vw, 50px\) !important/,
+      /event-modal-v2_factIcon__[\s\S]*width: clamp\(34px, 2\.292vw, 44px\) !important/,
     );
     assert.match(
       finalStyles,
-      /event-modal-v2_factIcon__[\s\S]*height: clamp\(38px, 2\.604vw, 50px\) !important/,
+      /event-modal-v2_primary__[\s\S]*height: clamp\(42px, 3\.021vw, 58px\) !important[\s\S]*font-size: clamp\(13px, 0\.833vw, 16px\) !important/,
+    );
+  });
+
+  test('makes the structured format and speaker rows more readable', () => {
+    const finalStyles = readFileSync(FINAL_MODAL, 'utf8');
+
+    assert.match(
+      finalStyles,
+      /event-modal-v2_lines__[\s\S]*font-size: clamp\(14px, 0\.938vw, 18px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_detailLabel__[\s\S]*font-weight: 700 !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_detailValue__[\s\S]*font-size: clamp\(13px, 0\.833vw, 16px\) !important/,
+    );
+  });
+
+  test('removes microphone-prefixed speaker lists embedded in imported copy', () => {
+    const modalContent = readFileSync(MODAL_CONTENT, 'utf8');
+
+    assert.match(modalContent, /function removeInlineSpeakerFragments/);
+    assert.match(modalContent, /🎙️\?\|🎤️\?/);
+    assert.match(
+      modalContent,
+      /let result = removeInlineSpeakerFragments\(value\)/,
+    );
+    assert.match(
+      modalContent,
+      /result = removeInlineSpeakerFragments\(result\)/,
     );
   });
 
