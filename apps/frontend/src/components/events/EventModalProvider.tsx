@@ -22,6 +22,7 @@ import { formatPrice } from '@/lib/format';
 import {
   cleanEventModalDescription,
   getEventModalImageUrl,
+  getEventModalSpeakers,
 } from '@/lib/event-modal-content';
 import type { PublicEvent } from '@/types/event';
 import v2 from './event-modal-v2.module.css';
@@ -148,21 +149,6 @@ export function EventModalProvider({ children }: { children: ReactNode }) {
       )}
     </EventModalContext.Provider>
   );
-}
-
-function cleanSpeaker(value?: string | null): string | null {
-  const speaker = value?.split(/\s+[—–-]\s+/)[0]?.replace(/\s+/g, ' ').trim();
-  if (!speaker) return null;
-
-  if (
-    /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/i.test(
-      speaker,
-    )
-  ) {
-    return null;
-  }
-
-  return speaker;
 }
 
 function isAllowedWebsite(value?: string | null): value is string {
@@ -295,6 +281,7 @@ function EventModal({
   const [reminderOpen, setReminderOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const reminderTriggerRef = useRef<HTMLButtonElement>(null);
+  const textScrollRef = useRef<HTMLDivElement>(null);
 
   const imageUrl = getEventModalImageUrl(event);
   const actionLabel = event.ticketSalesEnabled ? 'Купить билет' : 'Участвовать';
@@ -310,7 +297,8 @@ function EventModal({
   const format =
     event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = formatPrice(event.priceType, event.priceText);
-  const speaker = cleanSpeaker(event.speaker);
+  const speakers = getEventModalSpeakers(event);
+  const speakerLabel = speakers.length > 1 ? 'Спикеры:' : 'Спикер:';
   const rawLead = sanitizeEventHtml(
     cleanEventModalDescription(event.shortDescription, event),
   );
@@ -342,6 +330,10 @@ function EventModal({
         : { label: 'Запланировано', className: v2.statusPlanned };
 
   useEffect(() => closeButtonRef.current?.focus(), []);
+
+  useEffect(() => {
+    textScrollRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [event.id, event.shortDescription, event.fullDescription]);
 
   useEffect(() => {
     const onKeyDown = (keyboardEvent: KeyboardEvent) => {
@@ -383,10 +375,15 @@ function EventModal({
           ×
         </button>
 
-        <span className={`${v2.status} ${status.className}`}>{status.label}</span>
+        <span
+          className={`${v2.status} ${status.className}`}
+          data-event-modal-status
+        >
+          {status.label}
+        </span>
 
         <div className={v2.media}>
-          <div className={v2.imageStage}>
+          <div className={v2.imageStage} data-event-modal-image-stage>
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -414,10 +411,12 @@ function EventModal({
         <div className={v2.content}>
           <div className={v2.scrollArea}>
             <div
+              ref={textScrollRef}
               className={v2.textScroll}
               role="region"
               aria-label="Заголовок и описание мероприятия"
               tabIndex={0}
+              data-event-modal-copy-scroll
             >
               <h2 id="event-modal-title" className={v2.title}>{event.title}</h2>
 
@@ -462,11 +461,11 @@ function EventModal({
                 </span>
               )}
 
-              {speaker && (
-                <span className={v2.detailLine}>
+              {speakers.length > 0 && (
+                <span className={v2.detailLine} data-event-modal-speakers>
                   <LineIcon name="speaker" />
-                  <span className={v2.detailLabel}>Спикер:</span>
-                  <span className={v2.detailValue}>{speaker}</span>
+                  <span className={v2.detailLabel}>{speakerLabel}</span>
+                  <span className={v2.detailValue}>{speakers.join(', ')}</span>
                 </span>
               )}
             </div>
@@ -481,8 +480,8 @@ function EventModal({
             )}
           </div>
 
-          <div className={v2.actionBar}>
-            <div className={v2.actions}>
+          <div className={v2.actionBar} data-event-modal-action-bar>
+            <div className={v2.actions} data-event-modal-actions>
               {actionUrl ? (
                 <a
                   className={v2.primary}
