@@ -6,77 +6,97 @@ import { describe, test } from 'node:test';
 const FRONTEND = resolve(import.meta.dirname, '..');
 const FINAL_MODAL = join(FRONTEND, 'src/app/event-modal-transitions.css');
 const FIGMA_MODAL = join(FRONTEND, 'src/app/event-modal-figma-final.css');
+const MODAL = join(FRONTEND, 'src/components/events/EventModalProvider.tsx');
 const MODAL_CONTENT = join(FRONTEND, 'src/lib/event-modal-content.ts');
 const LAYOUT = join(FRONTEND, 'src/app/layout.tsx');
 
 describe('Final modal Figma tuning', () => {
-  test('expands the copy viewport while reducing title facts and controls proportionally', () => {
+  test('uses one artwork inset for the status top and action bottom edges', () => {
     const finalStyles = readFileSync(FINAL_MODAL, 'utf8');
+    const modal = readFileSync(MODAL, 'utf8');
 
+    assert.match(modal, /data-event-modal-status/);
+    assert.match(modal, /data-event-modal-action-bar/);
+    assert.match(modal, /data-event-modal-actions/);
     assert.match(
       finalStyles,
-      /event-modal-v2_scrollArea__[\s\S]*padding-top: clamp\(82px, 5\.625vw, 108px\) !important/,
+      /--event-modal-image-inset-y: clamp\(40px, 3\.68vw, 71px\)/,
     );
     assert.match(
       finalStyles,
-      /event-modal-v2_textScroll__[\s\S]*flex: 1 1 auto !important[\s\S]*overflow-y: auto !important/,
+      /\[data-event-modal-status\][\s\S]*top: var\(--event-modal-image-inset-y\) !important/,
     );
     assert.match(
       finalStyles,
-      /event-modal-v2_title__[\s\S]*font-size: clamp\(24px, 1\.875vw, 36px\) !important/,
-    );
-    assert.match(
-      finalStyles,
-      /event-modal-v2_lead__[\s\S]*font-size: clamp\(13px, 0\.938vw, 18px\) !important/,
-    );
-    assert.match(
-      finalStyles,
-      /event-modal-v2_facts__[\s\S]*height: clamp\(62px, 3\.75vw, 72px\) !important/,
-    );
-    assert.match(
-      finalStyles,
-      /event-modal-v2_facts__[\s\S]*border-radius: 16\.38px !important/,
-    );
-    assert.match(
-      finalStyles,
-      /event-modal-v2_factIcon__[\s\S]*width: clamp\(34px, 2\.292vw, 44px\) !important/,
-    );
-    assert.match(
-      finalStyles,
-      /event-modal-v2_primary__[\s\S]*height: clamp\(42px, 3\.021vw, 58px\) !important[\s\S]*font-size: clamp\(13px, 0\.833vw, 16px\) !important/,
+      /\[data-event-modal-action-bar\][\s\S]*padding-bottom: var\(--event-modal-image-inset-y\) !important/,
     );
   });
 
-  test('makes the structured format and speaker rows more readable', () => {
+  test('expands the copy viewport and resets it to the beginning', () => {
+    const finalStyles = readFileSync(FINAL_MODAL, 'utf8');
+    const modal = readFileSync(MODAL, 'utf8');
+
+    assert.match(
+      finalStyles,
+      /event-modal-v2_scrollArea__[\s\S]*padding-top: clamp\(96px, 6\.4vw, 123px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /\[data-event-modal-copy-scroll\][\s\S]*flex: 1 1 auto !important[\s\S]*overflow-y: auto !important[\s\S]*scrollbar-gutter: auto !important/,
+    );
+    assert.match(modal, /textScrollRef\.current\?\.scrollTo\(\{ top: 0, left: 0 \}\)/);
+  });
+
+  test('uses visibly smaller title copy facts and action controls', () => {
     const finalStyles = readFileSync(FINAL_MODAL, 'utf8');
 
     assert.match(
       finalStyles,
-      /event-modal-v2_lines__[\s\S]*font-size: clamp\(14px, 0\.938vw, 18px\) !important/,
+      /event-modal-v2_title__[\s\S]*font-size: clamp\(23px, 1\.771vw, 34px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_lead__[\s\S]*font-size: clamp\(13px, 0\.885vw, 17px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_facts__[\s\S]*height: clamp\(58px, 3\.542vw, 68px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_factIcon__[\s\S]*width: clamp\(32px, 2\.188vw, 42px\) !important/,
+    );
+    assert.match(
+      finalStyles,
+      /event-modal-v2_primary__[\s\S]*width: clamp\(132px, 9\.896vw, 190px\) !important[\s\S]*height: clamp\(40px, 2\.708vw, 52px\) !important[\s\S]*font-size: clamp\(13px, 0\.781vw, 15px\) !important/,
+    );
+  });
+
+  test('keeps format and complete speaker rows readable', () => {
+    const finalStyles = readFileSync(FINAL_MODAL, 'utf8');
+    const modal = readFileSync(MODAL, 'utf8');
+
+    assert.match(
+      finalStyles,
+      /event-modal-v2_lines__[\s\S]*font-size: clamp\(14px, 0\.885vw, 17px\) !important/,
     );
     assert.match(
       finalStyles,
       /event-modal-v2_detailLabel__[\s\S]*font-weight: 700 !important/,
     );
-    assert.match(
-      finalStyles,
-      /event-modal-v2_detailValue__[\s\S]*font-size: clamp\(13px, 0\.833vw, 16px\) !important/,
-    );
+    assert.match(modal, /speakers\.length > 1 \? 'Спикеры:' : 'Спикер:'/);
+    assert.match(modal, /speakers\.join\(', '\)/);
   });
 
-  test('removes microphone-prefixed speaker lists embedded in imported copy', () => {
+  test('removes every imported speaker tail including numeric microphone entities', () => {
     const modalContent = readFileSync(MODAL_CONTENT, 'utf8');
 
+    assert.match(modalContent, /export function getEventModalSpeakers/);
     assert.match(modalContent, /function removeInlineSpeakerFragments/);
-    assert.match(modalContent, /🎙️\?\|🎤️\?/);
-    assert.match(
-      modalContent,
-      /let result = removeInlineSpeakerFragments\(value\)/,
-    );
-    assert.match(
-      modalContent,
-      /result = removeInlineSpeakerFragments\(result\)/,
-    );
+    assert.match(modalContent, /&#x\(\[0-9a-f\]\+\)/);
+    assert.match(modalContent, /&#\(\\d\+\)/);
+    assert.match(modalContent, /inner\.search\(markerPattern\)/);
+    assert.match(modalContent, /escapeHtml\(editorialPrefix\)/);
   });
 
   test('rounds every status badge while preserving the approved status palette', () => {
