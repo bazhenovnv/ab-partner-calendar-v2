@@ -54,7 +54,7 @@ describe('Event modal content', () => {
     assert.match(modal, /data-event-modal-speakers/);
   });
 
-  test('extracts every speaker from structured and imported source data', () => {
+  test('extracts every speaker with the legacy TypeScript-compatible matcher', () => {
     const content = readFileSync(MODAL_CONTENT, 'utf8');
 
     assert.match(content, /export function getEventModalSpeakers/);
@@ -62,11 +62,15 @@ describe('Event modal content', () => {
     assert.match(content, /appendSpeakersFromSource\(speakers, event\.fullDescription\)/);
     assert.match(content, /appendSpeakersFromSource\(speakers, event\.shortDescription\)/);
     assert.match(content, /SPEAKER_MARKER_SOURCE/);
+    assert.match(content, /SPEAKER_NAME_SOURCE/);
+    assert.match(content, /function collectMatches/);
+    assert.match(content, /collectMatches\(plainText, markerPattern\)/);
+    assert.match(content, /collectMatches\(plainText, titledSpeakerPattern\)/);
     assert.match(content, /&#x\(\[0-9a-f\]\+\)/);
     assert.match(content, /&#\(\\d\+\)/);
-    assert.match(content, /matchAll\(markerPattern\)/);
-    assert.match(content, /matchAll\([\s\S]*\\p\{Lu\}/);
     assert.match(content, /toLocaleLowerCase\('ru-RU'\)/);
+    assert.ok(!content.includes('matchAll('));
+    assert.ok(!content.includes('\\p{Lu}'));
   });
 
   test('removes microphone speaker tails from plain and nested HTML descriptions', () => {
@@ -162,14 +166,17 @@ describe('Event modal content', () => {
     assert.match(content, /removeRepeatedBreakSegments/);
   });
 
-  test('keeps speaker data out of compact cards and legacy interaction styles', () => {
+  test('keeps speaker and price metadata out of compact cards', () => {
     const modal = readFileSync(MODAL, 'utf8');
     const card = readFileSync(EVENT_CARD, 'utf8');
     const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
 
     assert.doesNotMatch(card, /event\.speaker/);
     assert.doesNotMatch(card, /Спикер:/);
+    assert.doesNotMatch(card, /formatPrice/);
+    assert.doesNotMatch(card, /cardPrice/);
     assert.doesNotMatch(interactions, /\.cardSpeaker/);
+    assert.doesNotMatch(interactions, /\.cardPrice/);
     assert.doesNotMatch(interactions, /\.modalFrame/);
     assert.doesNotMatch(interactions, /\.reminderDialog/);
     assert.match(interactions, /\.cardOpen/);
@@ -177,16 +184,16 @@ describe('Event modal content', () => {
     assert.match(modal, /return null;/);
   });
 
-  test('shows only a numeric price or Бесплатно in public cards and modal', () => {
+  test('formats price in the modal while compact cards follow the approved sketch', () => {
     const modal = readFileSync(MODAL, 'utf8');
     const card = readFileSync(EVENT_CARD, 'utf8');
     const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
     const format = readFileSync(FORMAT, 'utf8');
 
     assert.match(modal, /const price = formatPrice\(event\.priceType, event\.priceText\);/);
-    assert.match(card, /formatPrice\(event\.priceType, event\.priceText\)/);
-    assert.match(card, /className=\{ui\.cardPrice\}>\{price\}<\/span>/);
-    assert.match(interactions, /\.cardPrice/);
+    assert.doesNotMatch(card, /formatPrice/);
+    assert.doesNotMatch(card, /cardPrice/);
+    assert.doesNotMatch(interactions, /\.cardPrice/);
     assert.match(format, /if \(priceType === 'FREE'\) return 'Бесплатно';/);
     assert.match(format, /if \(!value \|\| !\/\\d\/\.test\(value\)\) return 'Бесплатно';/);
     assert.doesNotMatch(format, /return priceText \?\? 'Платно'/);
