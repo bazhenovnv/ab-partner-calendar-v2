@@ -101,12 +101,12 @@
 
 @media (hover: hover) and (pointer: fine) {
   .gallery:not(.galleryDragging) .card:not(.cardOffscreen):hover {
-    scale: 1.04;
+    scale: 1.02;
   }
 }
 
 .gallery:not(.galleryDragging) .card:not(.cardOffscreen):focus-visible {
-  scale: 1.04;
+  scale: 1.02;
 }
 
 .frame {
