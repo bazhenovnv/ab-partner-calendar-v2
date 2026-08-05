@@ -18,43 +18,51 @@
   object-position: center !important;
 }
 
-/* Desktop measurements from the approved modal, rebalanced for longer copy. */
+/* Desktop measurements from the approved modal, tied to artwork geometry. */
 @media (min-width: 768px) {
-  [class*="event-modal-v2_scrollArea__"] {
-    padding-top: clamp(82px, 5.625vw, 108px) !important;
-    padding-bottom: 12px !important;
+  [data-event-modal-surface] {
+    --event-modal-image-inset-y: clamp(40px, 3.68vw, 71px);
   }
 
-  [class*="event-modal-v2_textScroll__"] {
+  [data-event-modal-status] {
+    top: var(--event-modal-image-inset-y) !important;
+  }
+
+  [class*="event-modal-v2_scrollArea__"] {
+    padding-top: clamp(96px, 6.4vw, 123px) !important;
+    padding-bottom: 10px !important;
+  }
+
+  [data-event-modal-copy-scroll] {
     min-height: 0 !important;
     flex: 1 1 auto !important;
-    margin-bottom: clamp(10px, 0.729vw, 14px) !important;
+    margin-bottom: clamp(9px, 0.625vw, 12px) !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     scrollbar-gutter: auto !important;
   }
 
   [class*="event-modal-v2_title__"] {
-    font-size: clamp(24px, 1.875vw, 36px) !important;
+    font-size: clamp(23px, 1.771vw, 34px) !important;
     line-height: 1.06 !important;
   }
 
   [class*="event-modal-v2_lead__"],
   [class*="event-modal-v2_description__"] {
-    font-size: clamp(13px, 0.938vw, 18px) !important;
+    font-size: clamp(13px, 0.885vw, 17px) !important;
     line-height: 1.22 !important;
   }
 
   [class*="event-modal-v2_facts__"] {
-    height: clamp(62px, 3.75vw, 72px) !important;
+    height: clamp(58px, 3.542vw, 68px) !important;
     border-radius: 16.38px !important;
-    padding: clamp(6px, 0.365vw, 7px) clamp(11px, 0.729vw, 14px) !important;
-    margin-bottom: clamp(10px, 0.729vw, 14px) !important;
+    padding: clamp(5px, 0.313vw, 6px) clamp(10px, 0.677vw, 13px) !important;
+    margin-bottom: clamp(9px, 0.625vw, 12px) !important;
   }
 
   [class*="event-modal-v2_fact__"] {
-    grid-template-columns: clamp(34px, 2.292vw, 44px) minmax(0, 1fr) !important;
-    gap: clamp(5px, 0.417vw, 8px) !important;
+    grid-template-columns: clamp(32px, 2.188vw, 42px) minmax(0, 1fr) !important;
+    gap: clamp(5px, 0.365vw, 7px) !important;
   }
 
   [class*="event-modal-v2_factIconWrap__"],
@@ -62,21 +70,21 @@
   [class*="event-modal-v2_factIcon_clock__"],
   [class*="event-modal-v2_factIcon_price__"],
   [class*="event-modal-v2_factIcon__"] {
-    width: clamp(34px, 2.292vw, 44px) !important;
-    height: clamp(34px, 2.292vw, 44px) !important;
+    width: clamp(32px, 2.188vw, 42px) !important;
+    height: clamp(32px, 2.188vw, 42px) !important;
   }
 
   [class*="event-modal-v2_label__"] {
-    font-size: clamp(9px, 0.625vw, 12px) !important;
+    font-size: clamp(9px, 0.573vw, 11px) !important;
   }
 
   [class*="event-modal-v2_value__"] {
-    font-size: clamp(10px, 0.729vw, 14px) !important;
+    font-size: clamp(10px, 0.677vw, 13px) !important;
   }
 
   [class*="event-modal-v2_lines__"] {
     gap: 6px !important;
-    font-size: clamp(14px, 0.938vw, 18px) !important;
+    font-size: clamp(14px, 0.885vw, 17px) !important;
     line-height: 1.24 !important;
   }
 
@@ -88,28 +96,30 @@
     font-size: clamp(13px, 0.833vw, 16px) !important;
   }
 
-  [class*="event-modal-v2_actionBar__"] {
+  [data-event-modal-action-bar] {
     padding-top: 6px !important;
-    padding-bottom: clamp(24px, 2.188vw, 42px) !important;
+    padding-bottom: var(--event-modal-image-inset-y) !important;
   }
 
-  [class*="event-modal-v2_actions__"] {
-    width: min(455px, 100%) !important;
-    gap: clamp(12px, 1.25vw, 24px) !important;
+  [data-event-modal-actions] {
+    width: min(400px, 100%) !important;
+    gap: clamp(12px, 0.833vw, 16px) !important;
   }
 
   [class*="event-modal-v2_primary__"],
   [class*="event-modal-v2_remind__"] {
-    width: clamp(138px, 10.938vw, 210px) !important;
-    height: clamp(42px, 3.021vw, 58px) !important;
+    width: clamp(132px, 9.896vw, 190px) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: clamp(40px, 2.708vw, 52px) !important;
     border-radius: 9px !important;
-    padding: 0 clamp(15px, 1.042vw, 20px) !important;
-    font-size: clamp(13px, 0.833vw, 16px) !important;
+    padding: 0 clamp(14px, 0.938vw, 18px) !important;
+    font-size: clamp(13px, 0.781vw, 15px) !important;
   }
 
   [class*="event-modal-v2_actionIcon__"] {
-    width: clamp(16px, 1.042vw, 20px) !important;
-    height: clamp(16px, 1.042vw, 20px) !important;
+    width: clamp(15px, 0.938vw, 18px) !important;
+    height: clamp(15px, 0.938vw, 18px) !important;
   }
 
   [class*="event-modal-v2_status__"] {
@@ -119,7 +129,7 @@
 }
 
 @media (max-width: 767px) {
-  [class*="event-modal-v2_textScroll__"] {
+  [data-event-modal-copy-scroll] {
     overflow-y: auto !important;
     scrollbar-gutter: auto !important;
   }
