@@ -11,8 +11,14 @@ const SCRIPT = readFileSync(
 
 describe('Carousel hover frontend release', () => {
   test('verifies the approved hover animation in source and runtime CSS', () => {
+    const guardedLegacyScaleMentions = SCRIPT.match(/scale: 1\.04;/g) ?? [];
+
     assert.match(SCRIPT, /scale: 1\.02;/);
-    assert.doesNotMatch(SCRIPT, /scale: 1\.04;/);
+    assert.equal(guardedLegacyScaleMentions.length, 1);
+    assert.match(
+      SCRIPT,
+      /if grep -Fq 'scale: 1\.04;' "\$CAROUSEL_CSS"; then/,
+    );
     assert.match(SCRIPT, /scale 180ms cubic-bezier/);
     assert.match(SCRIPT, /CAROUSEL_HOVER_SCALE_102/);
     assert.match(SCRIPT, /CAROUSEL_HOVER_FINE_POINTER/);
