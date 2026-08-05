@@ -54,10 +54,10 @@ describe('MAX event ingestion regressions', () => {
   });
 
   test('parses city-first offline format lines and parenthetical addresses', () => {
-    assert.match(PARSER, /const structured = text\.match\(\/(?:Формат\|Где)/);
-    assert.match(PARSER, /cityAndDetails/);
-    assert.match(PARSER, /parentheticalAddress/);
-    assert.match(PARSER, /STREET_PREFIX\.test\(details\)/);
+    assert.ok(PARSER.includes('const structured = text.match(/(?:Формат|Где):'));
+    assert.ok(PARSER.includes('const cityAndDetails = rawValue.match'));
+    assert.ok(PARSER.includes('const parentheticalAddress = details.match'));
+    assert.ok(PARSER.includes('STREET_PREFIX.test(details)'));
   });
 
   test('infers directions when source posts omit recognized hashtags', () => {
@@ -65,10 +65,10 @@ describe('MAX event ingestion regressions', () => {
       assert.ok(fixture.expectedDirection.length > 0);
     }
     assert.match(PARSER, /DIRECTION_HINTS/);
-    assert.match(PARSER, /автоусн\|аусн/);
-    assert.match(PARSER, /фнс\|налогов/);
-    assert.match(PARSER, /кадр\|персонал/);
-    assert.match(PARSER, /result\.directionSlugs = \['accounting'\]/);
+    assert.ok(PARSER.includes('автоусн|аусн'));
+    assert.ok(PARSER.includes('фнс|налогов'));
+    assert.ok(PARSER.includes('кадр|персонал'));
+    assert.ok(PARSER.includes("result.directionSlugs = ['accounting']"));
   });
 
   test('does not hide valid events only because time or registration URL is absent', () => {
@@ -78,9 +78,10 @@ describe('MAX event ingestion regressions', () => {
     assert.doesNotMatch(PARSER, /addAttention\(result, 'Время не указано'\)/);
   });
 
-  test('reprocesses historical MAX drafts and needs-attention records', () => {
+  test('reprocesses historical non-manual MAX drafts and needs-attention records', () => {
     assert.match(RECOVERY, /status: \{ in: \['DRAFT', 'NEEDS_ATTENTION'\] \}/);
     assert.match(RECOVERY, /source: 'MAX'/);
+    assert.match(RECOVERY, /isManualStatus: false/);
     assert.match(RECOVERY, /status: nextStatus/);
     assert.match(RECOVERY, /publishedAt: publishable/);
     assert.match(RECOVERY, /mainEvent: event\.mainEvent \|\| parsed\.mainEvent/);
