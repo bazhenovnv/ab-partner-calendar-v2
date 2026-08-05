@@ -5,6 +5,10 @@ import { describe, test } from 'node:test';
 
 const FRONTEND = resolve(import.meta.dirname, '..');
 const EVENT_CARD = join(FRONTEND, 'src/components/events/EventCard.tsx');
+const EVENT_INTERACTIONS = join(
+  FRONTEND,
+  'src/components/events/event-interactions.module.css',
+);
 const LAYOUT = join(FRONTEND, 'src/app/layout.tsx');
 const POLISH = join(
   FRONTEND,
@@ -12,12 +16,51 @@ const POLISH = join(
 );
 
 describe('Homepage control and event-card polish', () => {
-  test('does not render speaker text inside compact event cards', () => {
+  test('keeps compact event cards free of speaker and price metadata', () => {
     const eventCard = readFileSync(EVENT_CARD, 'utf8');
+    const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
 
     assert.doesNotMatch(eventCard, /event\.speaker/);
     assert.doesNotMatch(eventCard, /Спикер:/);
+    assert.doesNotMatch(eventCard, /formatPrice/);
+    assert.doesNotMatch(eventCard, /cardPrice/);
+    assert.doesNotMatch(interactions, /\.cardPrice/);
     assert.match(eventCard, /className=\{ui\.cardDetails\}>Подробнее →<\/span>/);
+  });
+
+  test('renders the three approved event statuses through a stable card hook', () => {
+    const eventCard = readFileSync(EVENT_CARD, 'utf8');
+
+    assert.match(eventCard, /LIVE: \{ label: 'Идёт сейчас'/);
+    assert.match(eventCard, /COMPLETED: \{ label: 'Завершено'/);
+    assert.match(eventCard, /PLANNED: \{ label: 'Запланировано'/);
+    assert.match(eventCard, /data-event-card-status/);
+    assert.match(eventCard, /data-event-card-date/);
+  });
+
+  test('matches the approved status palette and date position', () => {
+    const polish = readFileSync(POLISH, 'utf8');
+
+    assert.match(
+      polish,
+      /\[data-event-results-grid\] \[data-event-card-status\] \{[\s\S]*top: 15px !important;[\s\S]*left: 18px !important;[\s\S]*min-height: 29px !important;[\s\S]*border-radius: 8px !important;/,
+    );
+    assert.match(
+      polish,
+      /\.pub-event-card-status--planned \{[\s\S]*background: #7cd8b3 !important;/,
+    );
+    assert.match(
+      polish,
+      /\.pub-event-card-status--live \{[\s\S]*background: #ffdb99 !important;/,
+    );
+    assert.match(
+      polish,
+      /\.pub-event-card-status--completed \{[\s\S]*background: #a3a3a3 !important;/,
+    );
+    assert.match(
+      polish,
+      /\[data-event-results-grid\] \[data-event-card-date\] \{\s*top: 0 !important;\s*\}/,
+    );
   });
 
   test('loads the final polish layer after legacy homepage styles', () => {
