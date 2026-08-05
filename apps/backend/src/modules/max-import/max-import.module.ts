@@ -4,6 +4,7 @@ import { MaxParserService } from './max-parser.service';
 import { MaxImportController } from './max-import.controller';
 import { MaxWebhookController } from './max-webhook.controller';
 import { MaxImportBootstrapService } from './max-import-bootstrap.service';
+import { MaxImportRecoveryService } from './max-import-recovery.service';
 import { MaxBotInteractionService } from './max-bot-interaction.service';
 import { BotsModule } from '../bots/bots.module';
 import { RemindersModule } from '../reminders/reminders.module';
@@ -14,9 +15,10 @@ import { RemindersModule } from '../reminders/reminders.module';
   providers: [
     MaxImportService,
     MaxParserService,
+    MaxImportRecoveryService,
     MaxImportBootstrapService,
     MaxBotInteractionService,
   ],
-  exports: [MaxImportService, MaxParserService],
+  exports: [MaxImportService, MaxParserService, MaxImportRecoveryService],
 })
 export class MaxImportModule {}
