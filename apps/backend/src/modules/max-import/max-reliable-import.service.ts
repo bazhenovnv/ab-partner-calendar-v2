@@ -15,7 +15,7 @@ const MAX_API_BASE = 'https://platform-api2.max.ru';
 const POLL_MARKER_KEY = 'maxImport.pollMarker';
 const RECENT_BACKFILL_KEY = 'maxImport.recentBackfillV3';
 
-type ReliableImportLog = {
+export type ReliableImportLog = {
   postsFound: number;
   imported: number;
   updated: number;
@@ -46,7 +46,7 @@ export class MaxReliableImportService extends MaxImportService {
       return;
     }
 
-    const { log } = await this.runManual();
+    const { log } = await this.runReliableManual();
     this.reliableLogger.log(
       `MAX reliable hourly sync: found=${log.postsFound}, ` +
         `imported=${log.imported}, updated=${log.updated}, ` +
@@ -54,7 +54,7 @@ export class MaxReliableImportService extends MaxImportService {
     );
   }
 
-  override async runManual(): Promise<{ log: ReliableImportLog }> {
+  async runReliableManual(): Promise<{ log: ReliableImportLog }> {
     if (!this.isReliableImportEnabled()) {
       return {
         log: {
