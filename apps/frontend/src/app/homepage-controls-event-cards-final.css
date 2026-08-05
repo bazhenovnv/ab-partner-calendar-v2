@@ -13,6 +13,52 @@
     0 0 32px 8px rgba(13, 35, 68, 0.20) !important;
 }
 
+/*
+ * Approved compact event-card contract.
+ * The status sits on the artwork; the 78 × 97 date badge starts at the exact
+ * image/content boundary instead of floating too high over the picture.
+ */
+[data-event-results-grid] [data-event-card-status] {
+  position: absolute !important;
+  z-index: 7 !important;
+  top: 15px !important;
+  left: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  min-height: 29px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  padding: 0 13px !important;
+  color: #111111 !important;
+  font-family: var(--font-montserrat), sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+[data-event-results-grid] .pub-event-card-status--planned {
+  background: #7cd8b3 !important;
+}
+
+[data-event-results-grid] .pub-event-card-status--live {
+  background: #ffdb99 !important;
+}
+
+[data-event-results-grid] .pub-event-card-status--completed {
+  background: #a3a3a3 !important;
+}
+
+[data-event-results-grid] [data-event-card-date] {
+  top: 0 !important;
+}
+
 /* Reset control: no underline; black text on hover. Existing scale animation is preserved. */
 .pub-filter-reset-link,
 .pub-filter-reset-link:visited {
@@ -118,6 +164,19 @@
 }
 
 @media (max-width: 767px) {
+  [data-event-results-grid] [data-event-card-status] {
+    top: 12px !important;
+    left: 14px !important;
+    min-height: 27px !important;
+    border-radius: 7px !important;
+    padding: 0 11px !important;
+    font-size: 11px !important;
+  }
+
+  [data-event-results-grid] [data-event-card-date] {
+    top: 0 !important;
+  }
+
   .pub-header-action-icon-wrap,
   .pub-header-action-icon {
     width: 25px !important;
