@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MaxImportService } from './max-import.service';
+import { MaxImportRecoveryService } from './max-import-recovery.service';
 
 @Injectable()
 export class MaxImportBootstrapService implements OnApplicationBootstrap {
@@ -8,6 +9,7 @@ export class MaxImportBootstrapService implements OnApplicationBootstrap {
 
   constructor(
     private readonly maxImportService: MaxImportService,
+    private readonly maxImportRecovery: MaxImportRecoveryService,
     private readonly config: ConfigService,
   ) {}
 
@@ -17,7 +19,6 @@ export class MaxImportBootstrapService implements OnApplicationBootstrap {
       return;
     }
 
-    // Let Nest finish binding routes and database connections before the first reconciliation.
     setTimeout(() => {
       void this.runStartupReconciliation();
     }, 5_000);
@@ -27,9 +28,13 @@ export class MaxImportBootstrapService implements OnApplicationBootstrap {
     try {
       this.logger.log('Starting MAX reconciliation after application startup');
       const { log } = await this.maxImportService.runManual();
+      const recovery = await this.maxImportRecovery.reprocessPending();
+
       this.logger.log(
         `MAX startup reconciliation finished: found=${log.postsFound}, imported=${log.imported}, ` +
-          `updated=${log.updated}, skipped=${log.skipped}, errors=${log.errors}`,
+          `updated=${log.updated}, skipped=${log.skipped}, errors=${log.errors}; ` +
+          `recoveryScanned=${recovery.scanned}, recovered=${recovery.published}, ` +
+          `keptForReview=${recovery.keptForReview}, recoveryFailed=${recovery.failed}`,
       );
     } catch (error) {
       this.logger.error(
