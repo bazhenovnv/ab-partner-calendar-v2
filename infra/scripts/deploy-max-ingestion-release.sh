@@ -77,11 +77,12 @@ wait_startup_reconciliation() {
   local container="$1"
 
   for attempt in $(seq 1 90); do
-    local logs
+    local logs line
     logs="$(docker logs --since 10m "$container" 2>&1 || true)"
+    line="$(grep -F 'MAX startup reconciliation finished:' <<<"$logs" | tail -n 1 || true)"
 
-    if grep -Fq 'MAX startup reconciliation finished:' <<<"$logs"; then
-      grep -F 'MAX startup reconciliation finished:' <<<"$logs" | tail -n 1
+    if [ -n "$line" ]; then
+      echo "$line"
       return 0
     fi
 
@@ -132,10 +133,11 @@ NODE
 }
 
 verify_public_api() {
-  local base_url="$1"
+  local backend_container="$1"
+  local base_url="$2"
 
-  node <<NODE
-const base = ${PUBLIC_URL@Q};
+  docker exec -e VERIFY_PUBLIC_URL="$base_url" -i "$backend_container" node <<'NODE'
+const base = process.env.VERIFY_PUBLIC_URL;
 
 async function json(path) {
   const response = await fetch(base + path, {
@@ -150,22 +152,22 @@ async function json(path) {
 async function main() {
   const dates = ['2026-07-30', '2026-08-04', '2026-08-05'];
   for (const date of dates) {
-    const data = await json('/api/events/public?date=' + date + '&page=1&limit=100&verify=' + Date.now());
+    const data = await json('/api/events/public?date=' + date + '&page=1&limit=100');
     if (!data || !Array.isArray(data.events)) {
       throw new Error('Invalid public events payload for ' + date);
     }
     console.log('PUBLIC_DATE_' + date.replaceAll('-', '_') + '_COUNT=' + data.events.length);
   }
 
-  const july = await json('/api/events/public/calendar?year=2026&month=7&verify=' + Date.now());
-  const august = await json('/api/events/public/calendar?year=2026&month=8&verify=' + Date.now());
+  const july = await json('/api/events/public/calendar?year=2026&month=7');
+  const august = await json('/api/events/public/calendar?year=2026&month=8');
   if (!Array.isArray(july) || !Array.isArray(august)) {
     throw new Error('Invalid calendar marker payload');
   }
   console.log('CALENDAR_JULY_MARKERS=' + july.length);
   console.log('CALENDAR_AUGUST_MARKERS=' + august.length);
 
-  const mainEvents = await json('/api/events/public/main?verify=' + Date.now());
+  const mainEvents = await json('/api/events/public/main');
   if (!Array.isArray(mainEvents)) {
     throw new Error('Invalid main-events payload');
   }
@@ -177,6 +179,9 @@ async function main() {
   if (invalid.length > 0) {
     throw new Error('Main-events endpoint returned invalid records');
   }
+  if (mainEvents.length === 0) {
+    throw new Error('Main-events endpoint returned no events');
+  }
   console.log('MAIN_EVENTS_COUNT=' + mainEvents.length);
 }
 
@@ -184,6 +189,21 @@ main().catch((error) => {
   console.error(error);
   process.exit(1);
 });
+NODE
+}
+
+force_recent_backfill() {
+  local backend_container="$1"
+
+  docker exec -i "$backend_container" node <<'NODE'
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+prisma.siteConfig.deleteMany({
+  where: { key: 'maxImport.recentBackfillV3' },
+})
+  .then((result) => console.log(`RECENT_BACKFILL_MARKER_REMOVED=${result.count}`))
+  .finally(() => prisma.$disconnect());
 NODE
 }
 
@@ -195,22 +215,21 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const expected = [
-  {
-    key: 'AUTOUSN',
-    title: 'АВТОУСН',
-    date: '2026-07-30',
-  },
-  {
-    key: 'FNS_RISKS',
-    title: 'ФНС УЖЕ ВИДИТ РИСКИ',
-    date: '2026-08-04',
-  },
-  {
-    key: 'HR_CHANGES',
-    title: 'КАДРОВЫЕ ИЗМЕНЕНИЯ ИДУТ',
-    date: '2026-08-05',
-  },
+  { key: 'AUTOUSN', title: 'АВТОУСН', date: '2026-07-30' },
+  { key: 'FNS_RISKS', title: 'ФНС УЖЕ ВИДИТ РИСКИ', date: '2026-08-04' },
+  { key: 'HR_CHANGES', title: 'КАДРОВЫЕ ИЗМЕНЕНИЯ ИДУТ', date: '2026-08-05' },
 ];
+
+async function publicEvents(date) {
+  const response = await fetch(
+    `http://localhost:3001/api/events/public?date=${date}&page=1&limit=100`,
+  );
+  if (!response.ok) {
+    throw new Error(`Internal public API returned HTTP ${response.status} for ${date}`);
+  }
+  const payload = await response.json();
+  return Array.isArray(payload.events) ? payload.events : [];
+}
 
 async function main() {
   let complete = 0;
@@ -242,12 +261,22 @@ async function main() {
     ));
     const directions = event.directions.map((row) => row.direction.slug).join(',');
     const ready = event.status === 'PUBLISHED' && hasImage && date === item.date;
+    let publicVisible = false;
+
+    if (ready) {
+      const events = await publicEvents(item.date);
+      publicVisible = events.some((candidate) => candidate.id === event.id);
+      if (!publicVisible) {
+        throw new Error(`${item.key} is published in DB but absent from public API`);
+      }
+    }
 
     console.log(`${item.key}_DB_STATUS=${event.status}`);
     console.log(`${item.key}_DATE=${date}`);
     console.log(`${item.key}_FORMAT=${event.format}`);
     console.log(`${item.key}_CITY=${event.cityName ?? ''}`);
     console.log(`${item.key}_IMAGE=${hasImage}`);
+    console.log(`${item.key}_PUBLIC=${publicVisible}`);
     console.log(`${item.key}_MAIN_EVENT=${event.mainEvent}`);
     console.log(`${item.key}_DIRECTIONS=${directions}`);
     console.log(`${item.key}_EXTERNAL_ID=${event.externalId ?? ''}`);
@@ -259,12 +288,7 @@ async function main() {
   console.log(`REPORTED_EVENTS_COMPLETE=${complete}`);
   console.log(`REPORTED_EVENTS_MISSING=${missing}`);
   console.log(`REPORTED_EVENTS_NEED_ATTENTION=${needsAttention}`);
-
-  if (complete === expected.length) {
-    console.log('EVENT_RECOVERY_OK');
-  } else {
-    console.log('EVENT_RECOVERY_INCOMPLETE');
-  }
+  console.log(complete === expected.length ? 'EVENT_RECOVERY_OK' : 'EVENT_RECOVERY_INCOMPLETE');
 }
 
 main()
@@ -512,7 +536,7 @@ docker rm -f "$BACKEND_PREFLIGHT" "$FRONTEND_PREFLIGHT" >/dev/null
 BACKEND_PREFLIGHT=""
 FRONTEND_PREFLIGHT=""
 
-section "7. ТОЧКА ОТКАТА"
+section "7. ТОЧКА ОТКАТА И ПРИНУДИТЕЛЬНЫЙ BACKFILL"
 
 if docker image inspect "$old_backend_image" >/dev/null 2>&1; then
   docker tag "$old_backend_image" "$BACKEND_ROLLBACK_IMAGE"
@@ -528,6 +552,7 @@ fi
 
 docker image inspect "$BACKEND_ROLLBACK_IMAGE" >/dev/null
 docker image inspect "$FRONTEND_ROLLBACK_IMAGE" >/dev/null
+force_recent_backfill "$old_backend"
 echo "ROLLBACK_TAG=$ROLLBACK_TAG"
 
 section "8. ПЕРЕКЛЮЧАЕМ BACKEND"
@@ -538,7 +563,6 @@ new_backend="$(dc ps -q backend)"
 test -n "$new_backend"
 wait_backend "$new_backend" "$BACKEND_IMAGE"
 wait_startup_reconciliation "$new_backend"
-
 echo "PRODUCTION_BACKEND_OK"
 
 section "9. ПЕРЕКЛЮЧАЕМ FRONTEND"
@@ -561,10 +585,10 @@ for attempt in $(seq 1 30); do
 done
 test "$public_http" = "200"
 
-verify_public_api "$PUBLIC_URL"
+verify_public_api "$new_backend" "$PUBLIC_URL"
 echo "PUBLIC_API_OK"
 
-section "11. ПРОВЕРКА ТРЁХ СОБЫТИЙ В БАЗЕ"
+section "11. ПРОВЕРКА ТРЁХ СОБЫТИЙ В БАЗЕ И API"
 
 inspect_reported_events "$new_backend"
 
