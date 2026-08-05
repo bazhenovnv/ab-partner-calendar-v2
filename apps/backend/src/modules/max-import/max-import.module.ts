@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MaxImportService } from './max-import.service';
+import { MaxReliableImportService } from './max-reliable-import.service';
 import { MaxParserService } from './max-parser.service';
 import { MaxImportController } from './max-import.controller';
 import { MaxWebhookController } from './max-webhook.controller';
@@ -13,12 +14,21 @@ import { RemindersModule } from '../reminders/reminders.module';
   imports: [BotsModule, RemindersModule],
   controllers: [MaxImportController, MaxWebhookController],
   providers: [
-    MaxImportService,
     MaxParserService,
+    MaxReliableImportService,
+    {
+      provide: MaxImportService,
+      useExisting: MaxReliableImportService,
+    },
     MaxImportRecoveryService,
     MaxImportBootstrapService,
     MaxBotInteractionService,
   ],
-  exports: [MaxImportService, MaxParserService, MaxImportRecoveryService],
+  exports: [
+    MaxImportService,
+    MaxReliableImportService,
+    MaxParserService,
+    MaxImportRecoveryService,
+  ],
 })
 export class MaxImportModule {}
