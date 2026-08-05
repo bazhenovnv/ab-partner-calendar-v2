@@ -32,12 +32,14 @@ const EVENT_INTERACTIONS = join(
 const FORMAT = join(FRONTEND, 'src/lib/format.ts');
 
 describe('Event modal content', () => {
-  test('uses one dedicated cleanup module without legacy inline sanitizer', () => {
+  test('uses one dedicated cleanup module and a complete speaker selector', () => {
     const modal = readFileSync(MODAL, 'utf8');
 
     assert.match(modal, /cleanEventModalDescription/);
     assert.match(modal, /getEventModalImageUrl/);
+    assert.match(modal, /getEventModalSpeakers/);
     assert.doesNotMatch(modal, /function sanitizeDescription/);
+    assert.doesNotMatch(modal, /function cleanSpeaker/);
     assert.match(
       modal,
       /cleanEventModalDescription\(event\.shortDescription, event\)/,
@@ -46,6 +48,51 @@ describe('Event modal content', () => {
       modal,
       /cleanEventModalDescription\(event\.fullDescription, event\)/,
     );
+    assert.match(modal, /const speakers = getEventModalSpeakers\(event\)/);
+    assert.match(modal, /speakers\.length > 1 \? 'Спикеры:' : 'Спикер:'/);
+    assert.match(modal, /speakers\.join\(', '\)/);
+    assert.match(modal, /data-event-modal-speakers/);
+  });
+
+  test('extracts every speaker from structured and imported source data', () => {
+    const content = readFileSync(MODAL_CONTENT, 'utf8');
+
+    assert.match(content, /export function getEventModalSpeakers/);
+    assert.match(content, /appendSpeakersFromSource\(speakers, event\.speaker\)/);
+    assert.match(content, /appendSpeakersFromSource\(speakers, event\.fullDescription\)/);
+    assert.match(content, /appendSpeakersFromSource\(speakers, event\.shortDescription\)/);
+    assert.match(content, /SPEAKER_MARKER_SOURCE/);
+    assert.match(content, /&#x\(\[0-9a-f\]\+\)/);
+    assert.match(content, /&#\(\\d\+\)/);
+    assert.match(content, /matchAll\(markerPattern\)/);
+    assert.match(content, /matchAll\([\s\S]*\\p\{Lu\}/);
+    assert.match(content, /toLocaleLowerCase\('ru-RU'\)/);
+  });
+
+  test('removes microphone speaker tails from plain and nested HTML descriptions', () => {
+    const content = readFileSync(MODAL_CONTENT, 'utf8');
+
+    assert.match(content, /function removeInlineSpeakerFragments/);
+    assert.match(content, /decodeBasicEntities\(value\)/);
+    assert.match(content, /inner\.search\(markerPattern\)/);
+    assert.match(content, /htmlToPlainText\(inner\.slice\(0, markerIndex\)\)/);
+    assert.match(content, /escapeHtml\(editorialPrefix\)/);
+    assert.match(content, /let result = removeInlineSpeakerFragments\(value\)/);
+    assert.match(content, /result = removeInlineSpeakerFragments\(result\)/);
+  });
+
+  test('resets the copy viewport when the full no-store event replaces its preview', () => {
+    const modal = readFileSync(MODAL, 'utf8');
+
+    assert.match(modal, /cache: 'no-store'/);
+    assert.match(modal, /const textScrollRef = useRef<HTMLDivElement>\(null\)/);
+    assert.match(modal, /ref=\{textScrollRef\}/);
+    assert.match(modal, /textScrollRef\.current\?\.scrollTo\(\{ top: 0, left: 0 \}\)/);
+    assert.match(
+      modal,
+      /\[event\.id, event\.shortDescription, event\.fullDescription\]/,
+    );
+    assert.match(modal, /data-event-modal-copy-scroll/);
   });
 
   test('crops modal artwork into the final 1280 by 1280 square without changing event cards', () => {
@@ -60,6 +107,7 @@ describe('Event modal content', () => {
     assert.match(modal, /width=\{1280\}/);
     assert.match(modal, /height=\{1280\}/);
     assert.match(modal, /data-event-modal-image/);
+    assert.match(modal, /data-event-modal-image-stage/);
     assert.match(figma, /event-modal-v2_imageStage__[\s\S]*aspect-ratio: 1 \/ 1 !important/);
 
     assert.match(imageRule, /width: 100% !important/);
@@ -101,6 +149,7 @@ describe('Event modal content', () => {
       content,
       /withoutTerminalPunctuation\(text\) === withoutTerminalPunctuation\(title\)/,
     );
+    assert.match(content, /getEventModalSpeakers\(event\)\.map\(normalizeComparableText\)/);
     assert.match(content, /text === `спикер \$\{speaker\}`/);
     assert.match(content, /timePattern\.test\(candidateTime\)/);
     assert.ok(content.includes('время(?:\\\\s+проведения)?'));
@@ -113,7 +162,7 @@ describe('Event modal content', () => {
     assert.match(content, /removeRepeatedBreakSegments/);
   });
 
-  test('does not render speaker or retain obsolete modal styles in compact event cards', () => {
+  test('keeps speaker data out of compact cards and legacy interaction styles', () => {
     const modal = readFileSync(MODAL, 'utf8');
     const card = readFileSync(EVENT_CARD, 'utf8');
     const interactions = readFileSync(EVENT_INTERACTIONS, 'utf8');
@@ -125,8 +174,6 @@ describe('Event modal content', () => {
     assert.doesNotMatch(interactions, /\.reminderDialog/);
     assert.match(interactions, /\.cardOpen/);
     assert.match(interactions, /\.cardDetails/);
-    assert.match(modal, /при\\s\+регистрации/);
-    assert.match(modal, /по\\s\+запросу/);
     assert.match(modal, /return null;/);
   });
 
