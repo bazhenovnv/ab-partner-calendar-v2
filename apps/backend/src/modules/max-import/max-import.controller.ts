@@ -1,7 +1,7 @@
 import { Controller, Post, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { MaxImportService } from './max-import.service';
+import { MaxReliableImportService } from './max-reliable-import.service';
 import { MaxImportRecoveryService } from './max-import-recovery.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -18,7 +18,7 @@ const MAX_API_BASE = 'https://platform-api2.max.ru';
 @Roles('ADMIN')
 export class MaxImportController {
   constructor(
-    private readonly maxImportService: MaxImportService,
+    private readonly maxImportService: MaxReliableImportService,
     private readonly maxImportRecovery: MaxImportRecoveryService,
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
@@ -78,10 +78,16 @@ export class MaxImportController {
     };
   }
 
-  /** Poll the MAX updates queue for missed webhook deliveries. */
+  /** Poll the MAX queue and acknowledge the marker only after durable processing. */
   @Post('run')
   async runManualImport(): Promise<unknown> {
-    return this.maxImportService.runManual();
+    return this.maxImportService.runReliableManual();
+  }
+
+  /** Replay the latest MAX update window without changing the stored marker. */
+  @Post('backfill-recent')
+  async backfillRecent(): Promise<unknown> {
+    return this.maxImportService.runRecentBackfill(true);
   }
 
   /** Reparse and republish stored non-manual MAX drafts after parser changes. */
