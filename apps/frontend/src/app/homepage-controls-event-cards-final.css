@@ -15,8 +15,8 @@
 
 /*
  * Approved compact event-card contract.
- * The status sits on the artwork; the 78 × 97 date badge starts at the exact
- * image/content boundary instead of floating too high over the picture.
+ * The status sits on the artwork; the date badge overlaps the artwork by
+ * exactly 25% of its own height and remains 75% on the content panel.
  */
 [data-event-results-grid] [data-event-card-status] {
   position: absolute !important;
@@ -56,7 +56,7 @@
 }
 
 [data-event-results-grid] [data-event-card-date] {
-  top: 0 !important;
+  top: -24.25px !important;
 }
 
 /* Reset control: no underline; black text on hover. Existing scale animation is preserved. */
@@ -174,7 +174,7 @@
   }
 
   [data-event-results-grid] [data-event-card-date] {
-    top: 0 !important;
+    top: -21.5px !important;
   }
 
   .pub-header-action-icon-wrap,
