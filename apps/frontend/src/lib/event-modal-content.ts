@@ -131,6 +131,24 @@ function removeRepeatedBreakSegments(value: string, event: PublicEvent): string 
 }
 
 /**
+ * Removes speaker lists appended to editorial copy in historical imports.
+ * MAX posts often place one or more microphone-prefixed names and job titles
+ * at the end of the same paragraph, so line-only metadata cleanup cannot see
+ * them. The structured speaker row remains the single public source.
+ */
+function removeInlineSpeakerFragments(value: string): string {
+  return value
+    .replace(
+      /\s*(?:🎙️?|🎤️?)\s*[^<\r\n]*(?=<|\r?\n|$)/giu,
+      '',
+    )
+    .replace(
+      /\s+(?:спикер(?:ы)?|ведущ(?:ий|ая))\s*[:：—–-]\s*[^<\r\n]*(?=<|\r?\n|$)/giu,
+      '',
+    );
+}
+
+/**
  * Removes data already rendered by the structured modal UI while preserving
  * editorial body copy. This also cleans historical MAX records where the raw
  * post was stored wholesale in fullDescription.
@@ -141,7 +159,7 @@ export function cleanEventModalDescription(
 ): string {
   if (!value) return '';
 
-  let result = value;
+  let result = removeInlineSpeakerFragments(value);
 
   result = removeRepeatedBlocks(result, event);
   result = removeRepeatedBreakSegments(result, event);
@@ -169,6 +187,10 @@ export function cleanEventModalDescription(
     ),
     '',
   );
+
+  // Nested formatting can split the microphone block, so run the inline pass
+  // once more after service-line cleanup has flattened the surrounding copy.
+  result = removeInlineSpeakerFragments(result);
 
   // Registration blocks and messenger links are actions, not description copy.
   result = result.replace(
