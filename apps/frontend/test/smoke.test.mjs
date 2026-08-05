@@ -248,7 +248,10 @@ describe('Pinned production homepage', () => {
     assert.match(styles, /event-modal-v2_close__[\s\S]*:hover,[\s\S]*color: #a3a3a3 !important/);
     assert.match(styles, /event-modal-v2_detailLine__[\s\S]*color: #0d2344 !important/);
     assert.match(styles, /grid-template-columns: minmax\(0, 1\.08fr\) minmax\(0, 1fr\) minmax\(0, 1fr\) !important/);
-    assert.match(component, /<span className=\{`\$\{v2\.status\} \$\{status\.className\}`\}>\{status\.label\}<\/span>[\s\S]*<div className=\{v2\.media\}>/);
+    assert.match(
+      component,
+      /className=\{`\$\{v2\.status\} \$\{status\.className\}`\}[\s\S]*data-event-modal-status[\s\S]*\{status\.label\}[\s\S]*<div className=\{v2\.media\}>/,
+    );
   });
 
   test('reminder chooser uses the measured Figma geometry and shared MAX icon', () => {
