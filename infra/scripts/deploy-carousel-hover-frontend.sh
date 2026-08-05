@@ -63,7 +63,7 @@ function attribute(tag, name) {
 }
 
 async function main() {
-  const page = await fetch(`${baseUrl}?verify=carousel-hover`);
+  const page = await fetch(`${baseUrl}?verify=carousel-hover-subtle`);
   if (page.status !== 200) {
     throw new Error(`Homepage returned HTTP ${page.status}`);
   }
@@ -94,22 +94,28 @@ async function main() {
   }
 
   const compact = css.replace(/\s+/g, '').toLowerCase();
+  const finePointerStart = compact.indexOf('@media(hover:hover)and(pointer:fine)');
+  const finePointerTail = finePointerStart >= 0
+    ? compact.slice(finePointerStart, finePointerStart + 1200)
+    : '';
+  const transitionPattern = /scale(?:180ms|\.18s)cubic-bezier\((?:0?\.)22,1,(?:0?\.)36,1\)/;
+  const notCount = (finePointerTail.match(/:not\(/g) ?? []).length;
+
   const checks = {
-    CAROUSEL_CARD_BASE_SCALE:
-      compact.includes('scale:1'),
-    CAROUSEL_HOVER_SCALE_104:
-      compact.includes('scale:1.04'),
-    CAROUSEL_HOVER_FINE_POINTER:
-      compact.includes('@media(hover:hover)and(pointer:fine)'),
-    CAROUSEL_HOVER_TRANSITION:
-      compact.includes('scale 180ms cubic-bezier(.22,1,.36,1)') ||
-      compact.includes('scale 180ms cubic-bezier(0.22,1,0.36,1)'),
+    CAROUSEL_CARD_BASE_SCALE: compact.includes('scale:1'),
+    CAROUSEL_HOVER_SCALE_102:
+      finePointerTail.includes(':hover') &&
+      finePointerTail.includes('scale:1.02'),
+    CAROUSEL_HOVER_FINE_POINTER: finePointerStart >= 0,
+    CAROUSEL_HOVER_TRANSITION: transitionPattern.test(compact),
     CAROUSEL_DRAG_GUARD:
-      compact.includes('.gallery:not(.gallerydragging)') &&
-      compact.includes('.card:not(.cardoffscreen):hover'),
+      finePointerTail.includes(':hover') &&
+      notCount >= 2 &&
+      finePointerTail.includes('scale:1.02'),
     REDUCED_MOTION_SCALE_RESET:
       compact.includes('@media(prefers-reduced-motion:reduce)') &&
       compact.includes('scale:1'),
+    OLD_SCALE_REMOVED: !compact.includes('scale:1.04'),
   };
 
   let failed = false;
@@ -234,7 +240,11 @@ section "3. SOURCE-КОНТРАКТЫ HOVER"
 CAROUSEL_CSS="$WORKTREE/apps/frontend/src/components/events/main-events-carousel.module.css"
 CAROUSEL_TEST="$WORKTREE/apps/frontend/test/carousel.test.mjs"
 
-grep -F 'scale: 1.04;' "$CAROUSEL_CSS"
+grep -F 'scale: 1.02;' "$CAROUSEL_CSS"
+if grep -Fq 'scale: 1.04;' "$CAROUSEL_CSS"; then
+  echo "Old carousel hover scale 1.04 is still present" >&2
+  exit 1
+fi
 grep -F 'scale 180ms cubic-bezier(0.22, 1, 0.36, 1);' "$CAROUSEL_CSS"
 grep -F '@media (hover: hover) and (pointer: fine)' "$CAROUSEL_CSS"
 grep -F '.gallery:not(.galleryDragging) .card:not(.cardOffscreen):hover' "$CAROUSEL_CSS"
@@ -384,7 +394,7 @@ echo "COMMIT=$TARGET"
 echo "PRODUCTION_FRONTEND=$new_frontend_image"
 echo "PRODUCTION_REVISION=$new_revision"
 echo "PUBLIC_HTTP=$public_http"
-echo "CAROUSEL_HOVER_SCALE=1.04"
+echo "CAROUSEL_HOVER_SCALE=1.02"
 echo "CAROUSEL_HOVER_DURATION_MS=180"
 echo "CAROUSEL_GEOMETRY_UNCHANGED=true"
 echo "BACKEND_UNCHANGED=$backend_image_before"
