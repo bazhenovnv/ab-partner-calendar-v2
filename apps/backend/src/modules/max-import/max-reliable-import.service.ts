@@ -190,7 +190,7 @@ export class MaxReliableImportService extends MaxImportService {
     const messageUpdate = update as
       | MaxMessageCreatedUpdate
       | MaxMessageEditedUpdate;
-    const sourceChannelId = this.sourceChannelId();
+    const sourceChannelId = this.reliableSourceChannelId();
     const chatId = messageUpdate.message.recipient.chatId;
 
     if (sourceChannelId === null) {
@@ -333,7 +333,7 @@ export class MaxReliableImportService extends MaxImportService {
     });
   }
 
-  private sourceChannelId(): number | null {
+  private reliableSourceChannelId(): number | null {
     const raw = this.reliableConfig.get<string>(
       'MAX_SOURCE_CHANNEL_ID',
     );
