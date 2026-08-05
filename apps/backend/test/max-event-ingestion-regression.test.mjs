@@ -12,12 +12,20 @@ const PARSER_COMPAT = readFileSync(
   resolve(ROOT, 'src/modules/max-import/max-parser.service.ts'),
   'utf8',
 );
+const RELIABLE = readFileSync(
+  resolve(ROOT, 'src/modules/max-import/max-reliable-import.service.ts'),
+  'utf8',
+);
 const RECOVERY = readFileSync(
   resolve(ROOT, 'src/modules/max-import/max-import-recovery.service.ts'),
   'utf8',
 );
 const BOOTSTRAP = readFileSync(
   resolve(ROOT, 'src/modules/max-import/max-import-bootstrap.service.ts'),
+  'utf8',
+);
+const CONTROLLER = readFileSync(
+  resolve(ROOT, 'src/modules/max-import/max-import.controller.ts'),
   'utf8',
 );
 const MODULE = readFileSync(
@@ -83,6 +91,22 @@ describe('MAX event ingestion regressions', () => {
     assert.doesNotMatch(PARSER, /addAttention\(result, 'Время не указано'\)/);
   });
 
+  test('acknowledges the MAX marker only after durable batch processing', () => {
+    assert.match(RELIABLE, /for \(const rawUpdate of batch\.updates\)/);
+    assert.match(RELIABLE, /await this\.processDurably\(rawUpdate, log\)/);
+    assert.match(RELIABLE, /batch\.marker !== undefined/);
+    assert.match(RELIABLE, /log\.errors === 0/);
+    assert.match(RELIABLE, /await this\.saveStoredMarker\(batch\.marker\)/);
+    assert.match(RELIABLE, /lastSyncedAt < processingStartedAt/);
+  });
+
+  test('supports a one-time recent update replay without moving the stored marker', () => {
+    assert.match(RELIABLE, /RECENT_BACKFILL_KEY/);
+    assert.match(RELIABLE, /runRecentBackfill/);
+    assert.match(RELIABLE, /runReliableCycle\(false\)/);
+    assert.match(CONTROLLER, /@Post\('backfill-recent'\)/);
+  });
+
   test('reprocesses historical non-manual MAX drafts and needs-attention records', () => {
     assert.match(RECOVERY, /status: \{ in: \['DRAFT', 'NEEDS_ATTENTION'\] \}/);
     assert.match(RECOVERY, /source: 'MAX'/);
@@ -92,9 +116,11 @@ describe('MAX event ingestion regressions', () => {
     assert.match(RECOVERY, /mainEvent: event\.mainEvent \|\| parsed\.mainEvent/);
   });
 
-  test('runs recovery after the normal startup MAX reconciliation', () => {
-    assert.match(BOOTSTRAP, /maxImportService\.runManual\(\)/);
+  test('runs recent replay reliable polling and recovery at startup', () => {
+    assert.match(BOOTSTRAP, /maxImportService\.runRecentBackfill\(\)/);
+    assert.match(BOOTSTRAP, /maxImportService\.runReliableManual\(\)/);
     assert.match(BOOTSTRAP, /maxImportRecovery\.reprocessPending\(\)/);
+    assert.match(MODULE, /useExisting: MaxReliableImportService/);
     assert.match(MODULE, /MaxImportRecoveryService/);
   });
 });
