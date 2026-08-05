@@ -8,6 +8,10 @@ const PARSER = readFileSync(
   resolve(ROOT, 'src/modules/max-import/max-parser-v2.service.ts'),
   'utf8',
 );
+const PARSER_COMPAT = readFileSync(
+  resolve(ROOT, 'src/modules/max-import/max-parser.service.ts'),
+  'utf8',
+);
 const RECOVERY = readFileSync(
   resolve(ROOT, 'src/modules/max-import/max-import-recovery.service.ts'),
   'utf8',
@@ -60,15 +64,16 @@ describe('MAX event ingestion regressions', () => {
     assert.ok(PARSER.includes('STREET_PREFIX.test(details)'));
   });
 
-  test('infers directions when source posts omit recognized hashtags', () => {
+  test('infers directions without ASCII word boundaries around Cyrillic text', () => {
     for (const fixture of FIXTURES) {
       assert.ok(fixture.expectedDirection.length > 0);
     }
-    assert.match(PARSER, /DIRECTION_HINTS/);
-    assert.ok(PARSER.includes('автоусн|аусн'));
-    assert.ok(PARSER.includes('фнс|налогов'));
-    assert.ok(PARSER.includes('кадр|персонал'));
-    assert.ok(PARSER.includes("result.directionSlugs = ['accounting']"));
+    assert.match(PARSER_COMPAT, /CYRILLIC_DIRECTION_HINTS/);
+    assert.ok(PARSER_COMPAT.includes('автоусн|аусн'));
+    assert.ok(PARSER_COMPAT.includes('фнс|налогов'));
+    assert.ok(PARSER_COMPAT.includes('кадр|персонал'));
+    assert.ok(PARSER_COMPAT.includes("result.directionSlugs[0] === 'accounting'"));
+    assert.ok(PARSER_COMPAT.includes("tag !== 'auto-direction-fallback'"));
   });
 
   test('does not hide valid events only because time or registration URL is absent', () => {
