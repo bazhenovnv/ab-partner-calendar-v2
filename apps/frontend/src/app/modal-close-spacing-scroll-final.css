@@ -1,0 +1,24 @@
+/* Final modal chrome and vertical placement overrides. Loaded last. */
+
+/* Every modal close control remains a bare glyph on the modal surface. */
+button[aria-label="Закрыть"],
+button[aria-label="Закрыть"]:hover,
+button[aria-label="Закрыть"]:focus-visible,
+button[aria-label="Закрыть"]:active {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/*
+ * Move the facts panel and the following online/location/speaker rows upward
+ * by exactly one facts-panel height. The title and description geometry stays
+ * unchanged; only the unused space below the metadata group is increased.
+ */
+@media (min-width: 768px) {
+  [class*="event-modal-v2_scrollArea__"] {
+    padding-bottom: calc(clamp(58px, 3.542vw, 68px) + 10px) !important;
+  }
+}
