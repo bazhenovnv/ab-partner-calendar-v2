@@ -27,6 +27,7 @@ import './footer-figma-final.css';
 import './footer-brand-title-alignment.css';
 import './homepage-controls-event-cards-final.css';
 import './event-modal-transitions.css';
+import './modal-close-spacing-scroll-final.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
@@ -75,6 +76,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={montserrat.variable}>
       <head>
+        <script
+          id="reset-scroll-on-full-page-load"
+          dangerouslySetInnerHTML={{
+            __html: `
+(function () {
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual';
+  }
+
+  function resetScroll() {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }
+
+  resetScroll();
+  window.addEventListener('pageshow', resetScroll, { once: true });
+  window.addEventListener('load', function () {
+    window.requestAnimationFrame(resetScroll);
+  }, { once: true });
+})();
+`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
