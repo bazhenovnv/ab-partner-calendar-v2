@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { PublicShell } from '@/components/layout/PublicShell';
 import { HeroSection } from '@/components/HeroSection';
 import { EventsSection } from '@/components/events/EventsSection';
-import { MainEventsBanner } from '@/components/events/MainEventsBanner';
+import { MainEventsCarouselBridge } from '@/components/events/MainEventsCarouselBridge';
 import { EventModalProvider } from '@/components/events/EventModalProvider';
 import { RotatingQuotesBlock } from '@/components/RotatingQuotesBlock';
 import {
@@ -64,7 +64,6 @@ export default async function HomePage() {
     cityOptions = cities.status === 'fulfilled' ? cities.value : [];
     dirs = directions.status === 'fulfilled' ? directions.value : [];
     qs = quotes.status === 'fulfilled' ? quotes.value : [];
-
   }
 
   return (
@@ -74,7 +73,7 @@ export default async function HomePage() {
         <EventsSection initialData={events} cities={cityOptions} directions={dirs} />
         <div className="pub-main-quotes-wrapper">
           <div className="pub-main-quotes-inner">
-            <MainEventsBanner events={main} />
+            <MainEventsCarouselBridge events={main} />
             {qs.length > 0 && <RotatingQuotesBlock quotes={qs} />}
           </div>
         </div>
