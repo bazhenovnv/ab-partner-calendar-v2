@@ -10,9 +10,9 @@ const STYLES = readFileSync(
 );
 
 describe('Reminder chooser enlarged visible flight', () => {
-  test('uses the enlarged 380 by 491 desktop geometry', () => {
+  test('uses the enlarged 380 by 493 desktop geometry', () => {
     assert.match(STYLES, /width: min\(380px, calc\(100% - 24px\)\) !important/);
-    assert.match(STYLES, /height: min\(491px, calc\(100% - 24px\)\) !important/);
+    assert.match(STYLES, /height: min\(493px, calc\(100% - 24px\)\) !important/);
     assert.match(STYLES, /padding: 38px 36px 62px 35px !important/);
     assert.match(STYLES, /width: 169px !important[\s\S]*height: 93px !important/);
     assert.match(STYLES, /height: 63px !important/);
