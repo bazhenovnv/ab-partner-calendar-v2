@@ -11,7 +11,7 @@ interface EventResultsGridProps {
   onScrollComplete: () => void;
 }
 
-const CARD_REVEAL_STEP_MS = 200;
+const CARD_REVEAL_STEP_MS = 100;
 
 export function EventResultsGrid({
   events,
