@@ -19,8 +19,8 @@ The only approved production frontend is defined by:
 
 Current approved values:
 
-- commit: `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`;
-- image: `ab-afisha/frontend:frontend-release-85b1a65`.
+- commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
+- image: `ab-afisha/frontend:frontend-release-d4fe868`.
 
 Do not infer production approval from `main`, `latest`, an old release tag, a rollback image, staging, a successful build, or a previously used deploy script.
 
@@ -49,9 +49,9 @@ The script must finish with:
 
 ```text
 PRODUCTION_PIN_OK
-PRODUCTION_COMMIT=85b1a65c52bfd5f0c4ec16f82702e9604a5d162c
-PRODUCTION_FRONTEND=ab-afisha/frontend:frontend-release-85b1a65
-PRODUCTION_REVISION=85b1a65c52bfd5f0c4ec16f82702e9604a5d162c
+PRODUCTION_COMMIT=d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7
+PRODUCTION_FRONTEND=ab-afisha/frontend:frontend-release-d4fe868
+PRODUCTION_REVISION=d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7
 PUBLIC_HTTP=200
 NGINX_PRESERVED=true
 ```
@@ -74,7 +74,7 @@ The cleanup script:
 - removes stopped containers belonging to old frontend images;
 - removes old unused `ab-afisha/frontend:*` images;
 - leaves running non-production containers untouched;
-- keeps `ab-afisha/frontend:frontend-release-85b1a65`.
+- keeps `ab-afisha/frontend:frontend-release-d4fe868`.
 
 Expected final marker:
 

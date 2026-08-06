@@ -9,8 +9,8 @@
 
 Единственная утверждённая production-версия frontend:
 
-- commit: `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`;
-- image: `ab-afisha/frontend:frontend-release-85b1a65`;
+- commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
+- image: `ab-afisha/frontend:frontend-release-d4fe868`;
 - deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
 Нельзя определять production по `main`, `latest`, старому Docker-тегу или старому deploy-скрипту. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
