@@ -103,6 +103,22 @@ interface LocationMultiSelectProps {
   onChange: (cities: string[]) => void;
 }
 
+interface CityFilterOption {
+  id: string;
+  name: string;
+  values: string[];
+}
+
+function getCityLabel(value: string): string {
+  const parts = value
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const city = parts.at(-1) ?? value.trim();
+
+  return city.replace(/^(?:г\.|город)\s*/iu, '').trim();
+}
+
 function LocationMultiSelect({
   cities,
   selectedCities,
@@ -112,30 +128,41 @@ function LocationMultiSelect({
   const closeMenu = () => setIsOpen(false);
   const containerRef = useCloseableMenu({ isOpen, onClose: closeMenu });
   const availableCities = useMemo(() => {
-    const uniqueCities = new Map<string, CityOption>();
+    const uniqueCities = new Map<string, CityFilterOption>();
 
     for (const city of cities) {
-      const name = city.name.trim();
+      const rawName = city.name.trim();
+      const name = getCityLabel(rawName);
       if (!name || name.toLocaleLowerCase('ru') === 'онлайн') continue;
 
       const key = name.toLocaleLowerCase('ru');
-      if (!uniqueCities.has(key)) uniqueCities.set(key, { ...city, name });
+      const existingCity = uniqueCities.get(key);
+      if (existingCity) {
+        if (!existingCity.values.includes(rawName)) existingCity.values.push(rawName);
+        continue;
+      }
+
+      uniqueCities.set(key, { id: city.id, name, values: [rawName] });
     }
 
     return Array.from(uniqueCities.values()).sort((a, b) =>
       a.name.localeCompare(b.name, 'ru'),
     );
   }, [cities]);
-  const selectionLabel = selectedCities.length > 0
-    ? selectedCities.join(', ')
+  const selectedCityNames = availableCities
+    .filter((city) => city.values.some((value) => selectedCities.includes(value)))
+    .map((city) => city.name);
+  const selectionLabel = selectedCityNames.length > 0
+    ? selectedCityNames.join(', ')
     : 'Все города';
 
-  const toggleCity = (city: CityOption) => {
-    const cityIsSelected = selectedCities.includes(city.name);
+  const toggleCity = (city: CityFilterOption) => {
+    const cityValues = new Set(city.values);
+    const cityIsSelected = city.values.some((value) => selectedCities.includes(value));
     onChange(
       cityIsSelected
-        ? selectedCities.filter((item) => item !== city.name)
-        : [...selectedCities, city.name],
+        ? selectedCities.filter((item) => !cityValues.has(item))
+        : Array.from(new Set([...selectedCities, ...city.values])),
     );
   };
 
@@ -173,22 +200,26 @@ function LocationMultiSelect({
             <span>Все</span>
           </label>
 
-          {availableCities.map((city) => (
-            <label
-              key={city.id}
-              className="pub-filter-multi-option"
-              role="option"
-              aria-selected={selectedCities.includes(city.name)}
-            >
-              <input
-                type="checkbox"
-                className="pub-filter-checkbox"
-                checked={selectedCities.includes(city.name)}
-                onChange={() => toggleCity(city)}
-              />
-              <span>{city.name}</span>
-            </label>
-          ))}
+          {availableCities.map((city) => {
+            const cityIsSelected = city.values.some((value) => selectedCities.includes(value));
+
+            return (
+              <label
+                key={city.id}
+                className="pub-filter-multi-option"
+                role="option"
+                aria-selected={cityIsSelected}
+              >
+                <input
+                  type="checkbox"
+                  className="pub-filter-checkbox"
+                  checked={cityIsSelected}
+                  onChange={() => toggleCity(city)}
+                />
+                <span>{city.name}</span>
+              </label>
+            );
+          })}
 
           {availableCities.length === 0 && (
             <p className="pub-filter-multi-empty">Города пока не добавлены</p>
