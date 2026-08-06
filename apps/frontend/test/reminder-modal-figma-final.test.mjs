@@ -14,7 +14,10 @@ const layout = readFileSync(LAYOUT, 'utf8');
 
 describe('Reminder chooser final Figma contract', () => {
   test('locks the chooser to the approved 240 × 310 desktop frame', () => {
-    assert.match(reminderStyles, /width: 240px !important;/);
+    assert.match(
+      reminderStyles,
+      /width: min\(240px, calc\(100% - 24px\)\) !important;/,
+    );
     assert.match(reminderStyles, /min-width: 240px !important;/);
     assert.match(reminderStyles, /max-width: 240px !important;/);
     assert.match(reminderStyles, /height: 310px !important;/);
