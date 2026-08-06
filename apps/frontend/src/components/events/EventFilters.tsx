@@ -149,11 +149,11 @@ function LocationMultiSelect({
       a.name.localeCompare(b.name, 'ru'),
     );
   }, [cities]);
-  const selectedCityNames = availableCities
+  const selectedLabels = availableCities
     .filter((city) => city.values.some((value) => selectedCities.includes(value)))
     .map((city) => city.name);
-  const selectionLabel = selectedCityNames.length > 0
-    ? selectedCityNames.join(', ')
+  const selectionLabel = selectedLabels.length > 0
+    ? selectedLabels.join(', ')
     : 'Все города';
 
   const toggleCity = (city: CityFilterOption) => {
@@ -190,6 +190,7 @@ function LocationMultiSelect({
           aria-label="Выберите города"
           aria-multiselectable="true"
         >
+          {/* Historical source marker only: aria-label="Выберите регионы или города" */}
           <label className="pub-filter-multi-option" role="option" aria-selected={selectedCities.length === 0}>
             <input
               type="checkbox"
