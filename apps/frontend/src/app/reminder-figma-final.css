@@ -1,4 +1,4 @@
-/* Reminder destination chooser: isolated Figma geometry for the 390 layout. */
+/* Reminder destination chooser: exact Figma 240 × 310 geometry. */
 
 [class*='event-modal-v2_chooserOverlay__'] {
   padding: 12px !important;
@@ -6,9 +6,15 @@
 
 [class*='event-modal-v2_chooser__'] {
   box-sizing: border-box !important;
-  width: min(240px, calc(100% - 24px)) !important;
-  max-height: calc(100% - 24px) !important;
-  overflow-y: auto !important;
+  display: flex !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+  height: 310px !important;
+  min-height: 310px !important;
+  max-height: 310px !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
   border-radius: 12px !important;
   padding: 24px 23px 39px 22px !important;
   background: #fff !important;
@@ -18,6 +24,7 @@
   display: block !important;
   width: 107px !important;
   height: 59px !important;
+  flex: 0 0 59px !important;
   margin: 0 auto 8px !important;
   object-fit: contain !important;
 }
@@ -46,6 +53,8 @@
 
 [class*='event-modal-v2_platforms__'] {
   display: grid !important;
+  width: 195px !important;
+  flex: 0 0 auto !important;
   gap: 12px !important;
 }
 
@@ -192,12 +201,20 @@
   transform: none !important;
 }
 
-@media (max-width: 250px) {
+@media (max-width: 263px), (max-height: 333px) {
   [class*='event-modal-v2_chooser__'] {
+    width: min(240px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+    height: min(310px, calc(100dvh - 24px)) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto !important;
     padding-right: 12px !important;
     padding-left: 12px !important;
   }
 
+  [class*='event-modal-v2_platforms__'],
   [class*='event-modal-v2_platform__'] {
     width: 100% !important;
   }
