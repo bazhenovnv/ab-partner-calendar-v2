@@ -143,17 +143,18 @@ describe('Pinned production homepage', () => {
     assert.doesNotMatch(content, /stage76-figma-interactions\.css/);
   });
 
-  test('region, city and direction filters support visible multi-selection', () => {
+  test('city and direction filters support visible multi-selection', () => {
     const filters = readFileSync(lib('components/events/EventFilters.tsx'), 'utf8');
     const section = readFileSync(lib('components/events/EventsSection.tsx'), 'utf8');
 
     assert.match(filters, /regions: string\[\]/);
     assert.match(filters, /cities: string\[\]/);
-    assert.match(filters, /aria-label="Выберите регионы или города"/);
+    assert.match(filters, /aria-label="Выберите города"/);
+    assert.doesNotMatch(filters, /aria-label="Выберите регионы или города"/);
+    assert.doesNotMatch(filters, /groupedCities|toggleRegion|pub-filter-location-region/);
     assert.match(filters, /aria-label="Выберите одно или несколько направлений"/);
     assert.match(filters, /selectedLabels\.join\(', '\)/);
-    assert.match(filters, /\.join\(', '\)/);
-    assert.match(section, /qs\.append\('regions', region\)/);
+    assert.match(filters, /regions: \[\]/);
     assert.match(section, /qs\.append\('cities', city\)/);
     assert.match(section, /qs\.append\('directions', direction\)/);
   });
