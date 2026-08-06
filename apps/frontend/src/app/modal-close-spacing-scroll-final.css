@@ -13,12 +13,50 @@ button[aria-label="Закрыть"]:active {
 }
 
 /*
- * Move the facts panel and the following online/location/speaker rows upward
- * by exactly one facts-panel height. The title and description geometry stays
- * unchanged; only the unused space below the metadata group is increased.
+ * Keep the facts panel and following rows in their approved lower position,
+ * while moving only the title/description start farther below the status badge.
  */
 @media (min-width: 768px) {
   [class*="event-modal-v2_scrollArea__"] {
+    padding-top: calc(clamp(96px, 6.4vw, 123px) + 12px) !important;
     padding-bottom: calc(clamp(58px, 3.542vw, 68px) + 10px) !important;
+  }
+
+  /* Slightly larger icon cells with visually equal artwork sizes. */
+  [class*="event-modal-v2_fact__"] {
+    grid-template-columns: clamp(35px, 2.396vw, 46px) minmax(0, 1fr) !important;
+  }
+
+  [class*="event-modal-v2_factIconWrap__"],
+  [class*="event-modal-v2_factIcon_calendar__"],
+  [class*="event-modal-v2_factIcon_clock__"],
+  [class*="event-modal-v2_factIcon_price__"] {
+    width: clamp(35px, 2.396vw, 46px) !important;
+    height: clamp(35px, 2.396vw, 46px) !important;
+  }
+
+  [class*="event-modal-v2_factIcon__"] {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    transform-origin: center !important;
+  }
+
+  [class*="event-modal-v2_factIcon_calendar__"] [class*="event-modal-v2_factIcon__"] {
+    transform: scale(1.12) !important;
+  }
+
+  [class*="event-modal-v2_factIcon_clock__"] [class*="event-modal-v2_factIcon__"] {
+    transform: scale(1) !important;
+  }
+
+  [class*="event-modal-v2_factIcon_price__"] [class*="event-modal-v2_factIcon__"] {
+    transform: scale(1.22) !important;
+  }
+
+  /* Enlarge both labels and values in the location/speaker rows. */
+  [class*="event-modal-v2_lines__"],
+  [class*="event-modal-v2_detailValue__"] {
+    font-size: clamp(15px, 0.99vw, 19px) !important;
   }
 }
