@@ -7,6 +7,7 @@ import type { CalendarMarker } from '@/types/event';
 import type { ActiveFilters } from './EventFilters';
 
 const DAYS_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const;
+const LIVE_REFRESH_INTERVAL_MS = 60_000;
 
 interface EventCalendarProps {
   filters: ActiveFilters;
@@ -74,11 +75,13 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
     return query.toString();
   }, [filters]);
 
-  const loadMarkers = useCallback(async (y: number, m: number) => {
-    setLoading(true);
+  const loadMarkers = useCallback(async (y: number, m: number, showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const filterSuffix = markerFilterQuery ? `&${markerFilterQuery}` : '';
-      const res = await fetch(`/api/events/public/calendar?year=${y}&month=${m + 1}${filterSuffix}`);
+      const res = await fetch(`/api/events/public/calendar?year=${y}&month=${m + 1}${filterSuffix}`, {
+        cache: 'no-store',
+      });
       if (res.ok) {
         const data = (await res.json()) as CalendarMarker[];
         setMarkers(data);
@@ -86,12 +89,33 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
     } catch {
       // The displayed month remains selectable if marker loading fails.
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, [markerFilterQuery]);
 
   useEffect(() => {
     void loadMarkers(year, month);
+  }, [year, month, loadMarkers]);
+
+  useEffect(() => {
+    const refreshVisibleCalendar = () => {
+      if (document.visibilityState === 'visible') {
+        void loadMarkers(year, month, false);
+      }
+    };
+
+    const intervalId = window.setInterval(
+      refreshVisibleCalendar,
+      LIVE_REFRESH_INTERVAL_MS,
+    );
+    window.addEventListener('focus', refreshVisibleCalendar);
+    document.addEventListener('visibilitychange', refreshVisibleCalendar);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refreshVisibleCalendar);
+      document.removeEventListener('visibilitychange', refreshVisibleCalendar);
+    };
   }, [year, month, loadMarkers]);
 
   useEffect(() => {
@@ -104,7 +128,7 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
     onSelectDate(date);
   };
 
-  const selectNextMonthDate = (nextYear: number, nextMonth: number, day: number) => {
+  const selectAdjacentMonthDate = (nextYear: number, nextMonth: number, day: number) => {
     setYear(nextYear);
     setMonth(nextMonth);
     selectDate(toDateString(nextYear, nextMonth, day));
@@ -168,19 +192,27 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
             const previousYear = month === 0 ? year - 1 : year;
             const previousMonthDays = getDaysInMonth(previousYear, previousMonth);
             const previousDay = previousMonthDays - firstDow + index + 1;
+            const previousDateStr = toDateString(previousYear, previousMonth, previousDay);
             const isWeekend = index >= 5;
 
             return (
               <div
                 key={`previous-${index}`}
                 role="gridcell"
-                aria-disabled="true"
                 className={cn(
                   'pub-calendar-cell pub-calendar-cell--outside',
                   isWeekend && 'pub-calendar-cell--weekend',
                 )}
               >
-                {previousDay}
+                <button
+                  type="button"
+                  className="pub-calendar-day"
+                  aria-label={`${previousDay} числа предыдущего месяца, открыть дату`}
+                  aria-selected={selectedDate === previousDateStr}
+                  onClick={() => selectAdjacentMonthDate(previousYear, previousMonth, previousDay)}
+                >
+                  <span className="pub-calendar-day-number">{previousDay}</span>
+                </button>
               </div>
             );
           })}
@@ -262,7 +294,7 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
                   className="pub-calendar-day"
                   aria-label={`${nextDay} числа следующего месяца, открыть дату`}
                   aria-selected={selectedDate === nextDateStr}
-                  onClick={() => selectNextMonthDate(nextYear, nextMonth, nextDay)}
+                  onClick={() => selectAdjacentMonthDate(nextYear, nextMonth, nextDay)}
                 >
                   <span className="pub-calendar-day-number">{nextDay}</span>
                 </button>
