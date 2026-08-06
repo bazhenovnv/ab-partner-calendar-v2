@@ -99,57 +99,40 @@ function FilterChevron() {
 
 interface LocationMultiSelectProps {
   cities: CityOption[];
-  selectedRegions: string[];
   selectedCities: string[];
-  onChange: (regions: string[], cities: string[]) => void;
+  onChange: (cities: string[]) => void;
 }
 
 function LocationMultiSelect({
   cities,
-  selectedRegions,
   selectedCities,
   onChange,
 }: LocationMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = () => setIsOpen(false);
   const containerRef = useCloseableMenu({ isOpen, onClose: closeMenu });
-  const groupedCities = useMemo(() => {
-    const groups = new Map<string, CityOption[]>();
+  const availableCities = useMemo(() => {
+    const uniqueCities = new Map<string, CityOption>();
 
     for (const city of cities) {
-      const region = city.region?.trim() || 'Другие регионы';
-      groups.set(region, [...(groups.get(region) ?? []), city]);
+      const name = city.name.trim();
+      if (!name || name.toLocaleLowerCase('ru') === 'онлайн') continue;
+
+      const key = name.toLocaleLowerCase('ru');
+      if (!uniqueCities.has(key)) uniqueCities.set(key, { ...city, name });
     }
 
-    return Array.from(groups.entries())
-      .sort(([a], [b]) => a.localeCompare(b, 'ru'))
-      .map(([region, regionCities]) => ({
-        region,
-        cities: regionCities.sort((a, b) => a.name.localeCompare(b.name, 'ru')),
-      }));
-  }, [cities]);
-  const selectedLabels = [...selectedRegions, ...selectedCities];
-  const selectionLabel = selectedLabels.length > 0
-    ? selectedLabels.join(', ')
-    : 'Все регионы';
-
-  const toggleRegion = (region: string, regionCities: CityOption[]) => {
-    if (selectedRegions.includes(region)) {
-      onChange(selectedRegions.filter((item) => item !== region), selectedCities);
-      return;
-    }
-
-    const cityNames = new Set(regionCities.map((city) => city.name));
-    onChange(
-      [...selectedRegions, region],
-      selectedCities.filter((city) => !cityNames.has(city)),
+    return Array.from(uniqueCities.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, 'ru'),
     );
-  };
+  }, [cities]);
+  const selectionLabel = selectedCities.length > 0
+    ? selectedCities.join(', ')
+    : 'Все города';
 
   const toggleCity = (city: CityOption) => {
     const cityIsSelected = selectedCities.includes(city.name);
     onChange(
-      selectedRegions.filter((region) => region !== city.region),
       cityIsSelected
         ? selectedCities.filter((item) => item !== city.name)
         : [...selectedCities, city.name],
@@ -177,54 +160,37 @@ function LocationMultiSelect({
           id="filter-region-menu"
           className="pub-filter-multi-menu pub-filter-location-menu"
           role="listbox"
-          aria-label="Выберите регионы или города"
+          aria-label="Выберите города"
           aria-multiselectable="true"
         >
-          <label className="pub-filter-multi-option" role="option" aria-selected={selectedLabels.length === 0}>
+          <label className="pub-filter-multi-option" role="option" aria-selected={selectedCities.length === 0}>
             <input
               type="checkbox"
               className="pub-filter-checkbox"
-              checked={selectedLabels.length === 0}
-              onChange={() => onChange([], [])}
+              checked={selectedCities.length === 0}
+              onChange={() => onChange([])}
             />
-            <span>Все регионы</span>
+            <span>Все</span>
           </label>
 
-          {groupedCities.map(({ region, cities: regionCities }) => (
-            <div key={region} className="pub-filter-location-group">
-              <label
-                className="pub-filter-multi-option pub-filter-location-region"
-                role="option"
-                aria-selected={selectedRegions.includes(region)}
-              >
-                <input
-                  type="checkbox"
-                  className="pub-filter-checkbox"
-                  checked={selectedRegions.includes(region)}
-                  onChange={() => toggleRegion(region, regionCities)}
-                />
-                <span>{region}</span>
-              </label>
-              {regionCities.map((city) => (
-                <label
-                  key={city.id}
-                  className="pub-filter-multi-option pub-filter-location-city"
-                  role="option"
-                  aria-selected={selectedCities.includes(city.name)}
-                >
-                  <input
-                    type="checkbox"
-                    className="pub-filter-checkbox"
-                    checked={selectedCities.includes(city.name)}
-                    onChange={() => toggleCity(city)}
-                  />
-                  <span>{city.name}</span>
-                </label>
-              ))}
-            </div>
+          {availableCities.map((city) => (
+            <label
+              key={city.id}
+              className="pub-filter-multi-option"
+              role="option"
+              aria-selected={selectedCities.includes(city.name)}
+            >
+              <input
+                type="checkbox"
+                className="pub-filter-checkbox"
+                checked={selectedCities.includes(city.name)}
+                onChange={() => toggleCity(city)}
+              />
+              <span>{city.name}</span>
+            </label>
           ))}
 
-          {groupedCities.length === 0 && (
+          {availableCities.length === 0 && (
             <p className="pub-filter-multi-empty">Города пока не добавлены</p>
           )}
         </div>
@@ -350,10 +316,13 @@ export function EventFilters({ cities, directions, filters, onChange }: EventFil
             <label className="pub-filter-label" htmlFor="filter-region">Регион / Город</label>
             <LocationMultiSelect
               cities={cities}
-              selectedRegions={pending.regions}
               selectedCities={pending.cities}
-              onChange={(regions, selectedCities) => {
-                setPending((current) => ({ ...current, regions, cities: selectedCities }));
+              onChange={(selectedCities) => {
+                setPending((current) => ({
+                  ...current,
+                  regions: [],
+                  cities: selectedCities,
+                }));
               }}
             />
           </div>
