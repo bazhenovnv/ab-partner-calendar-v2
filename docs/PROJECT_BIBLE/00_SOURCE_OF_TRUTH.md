@@ -2,19 +2,35 @@
 
 ## Purpose
 
-This document defines which source wins when project documents, code, screenshots, or historical reports conflict.
+This document defines which source wins when project documents, code, screenshots, runtime state or historical reports conflict.
+
+## Production runtime authority
+
+For the question **which frontend version is allowed in production**, the highest authority is:
+
+1. explicit approval by the project owner;
+2. root file `PRODUCTION_RELEASE.md`;
+3. machine-readable lock `infra/deploy/production-frontend.env`.
+
+The current production frontend is fixed to:
+
+- commit `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
+- image `ab-afisha/frontend:frontend-release-3e308c5`.
+
+`main`, `latest`, historical release tags, rollback images and old deployment scripts do not override this lock.
 
 ## Authority order
 
-1. Approved Figma design.
-2. Approved homepage PDF/reference screenshots.
-3. Canonical documents in `docs/PROJECT_BIBLE/`.
-4. `docs/BUSINESS_RULES.md`.
-5. `docs/ADR.md`.
-6. Main TZ and approved additions v7–v11.
-7. Current code in `main`.
-8. Stage reports, audit reports and release reports.
-9. `docs/CHANGELOG.md` and other historical material.
+1. Explicit owner approval and the production lock files for production runtime selection.
+2. Approved Figma design.
+3. Approved homepage PDF/reference screenshots.
+4. Canonical documents in `docs/PROJECT_BIBLE/`.
+5. `docs/BUSINESS_RULES.md`.
+6. `docs/ADR.md`.
+7. Main TZ and approved additions v7–v11.
+8. Current code in `main`.
+9. Stage reports, audit reports and release reports.
+10. `docs/CHANGELOG.md` and other historical material.
 
 ## Proof rules
 
@@ -29,6 +45,8 @@ Current compliance is proven only by:
 - current staging verification;
 - desktop/mobile screenshots when visual behaviour changed.
 
+Production deployment approval additionally requires an exact match with `infra/deploy/production-frontend.env`.
+
 ## Canonical project facts
 
 - Repository: `bazhenovnv/ab-partner-calendar-v2`.
@@ -37,6 +55,8 @@ Current compliance is proven only by:
 - Historical repository: `bazhenovnv/ab-partner-calendar` — do not use for current work.
 - Historical long-lived branch: `claude/ab-afisha-architecture-plan-805f5o` — no longer the canonical working branch.
 - Production: `ab-event.pro`.
+- Production frontend commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
+- Production frontend image: `ab-afisha/frontend:frontend-release-3e308c5`.
 - Staging: `test.ab-event.pro`.
 - Deploy path: `/srv/ab-afisha`.
 - Current VPS IPv4: `5.129.243.179`.

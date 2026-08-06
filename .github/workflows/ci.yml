@@ -10,7 +10,7 @@ on:
 
 jobs:
   ci:
-    name: Install / Lint / Typecheck / Build
+    name: Install / Lint / Typecheck / Test / Build
     runs-on: ubuntu-latest
 
     services:
@@ -90,6 +90,9 @@ jobs:
 
       - name: Typecheck (shared + bots + frontend + backend)
         run: pnpm typecheck
+
+      - name: Frontend regression tests
+        run: node --test apps/frontend/test/*.test.mjs
 
       # Apply migrations to the service-container postgres before building backend,
       # so that any migration-time SQL errors surface in CI rather than at deploy.

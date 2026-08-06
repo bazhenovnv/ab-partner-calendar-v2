@@ -1,5 +1,20 @@
 # AGENTS.md
 
+## Production release lock — read first
+
+Перед любыми frontend-изменениями, сборкой, откатом или деплоем обязательно прочитать:
+
+- `PRODUCTION_RELEASE.md`;
+- `infra/deploy/production-frontend.env`.
+
+Единственная утверждённая production-версия frontend:
+
+- commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
+- image: `ab-afisha/frontend:frontend-release-3e308c5`;
+- deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
+
+Нельзя определять production по `main`, `latest`, старому Docker-тегу или старому deploy-скрипту. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
+
 ## Project
 
 AB Partner Calendar v2 — календарь бухгалтерских, налоговых и партнёрских событий.
@@ -24,15 +39,17 @@ Run available checks:
 npm run lint
 npm run typecheck
 npm run build
-or pnpm equivalents if the project uses pnpm.
+# or pnpm equivalents if the project uses pnpm
+```
 
-Never commit
-.env
-.env.*
-secrets
-tokens
-patch files
-build cache
-tsbuildinfo
-node_modules
-temporary files
+## Never commit
+
+- `.env`;
+- `.env.*`;
+- secrets;
+- tokens;
+- patch files;
+- build cache;
+- `tsbuildinfo`;
+- `node_modules`;
+- temporary files.
