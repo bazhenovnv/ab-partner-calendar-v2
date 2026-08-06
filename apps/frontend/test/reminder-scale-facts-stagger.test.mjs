@@ -57,9 +57,8 @@ describe('Visible reminder size, facts typography and card stagger', () => {
     );
   });
 
-  test('reveals event cards one-by-one every 200 milliseconds', () => {
-    assert.match(resultsGrid, /const CARD_REVEAL_STEP_MS = 200;/);
-    assert.match(resultsGrid, /const CARD_REVEAL_DURATION_MS = 320;/);
+  test('reveals event cards one-by-one every 100 milliseconds', () => {
+    assert.match(resultsGrid, /const CARD_REVEAL_STEP_MS = 100;/);
     assert.match(
       resultsGrid,
       /'--event-card-delay': `\$\{index \* CARD_REVEAL_STEP_MS\}ms`/,
@@ -73,6 +72,12 @@ describe('Visible reminder size, facts typography and card stagger', () => {
       resultsStyles,
       /animation-delay: var\(--event-card-delay, 0ms\);/,
     );
+  });
+
+  test('starts scrolling in the same frame as the first card reveal', () => {
+    assert.match(resultsGrid, /window\.requestAnimationFrame\(\(\) => \{/);
+    assert.match(resultsGrid, /window\.cancelAnimationFrame\(frame\)/);
+    assert.doesNotMatch(resultsGrid, /lastCardDelay|scrollDelay|setTimeout/);
   });
 
   test('keeps the accessibility fallback for reduced motion', () => {
