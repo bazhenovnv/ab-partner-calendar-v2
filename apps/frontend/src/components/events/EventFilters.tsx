@@ -45,6 +45,15 @@ const PRICE_OPTIONS: { value: PriceType; label: string }[] = [
   { value: 'PAID', label: 'Платно' },
 ];
 
+const NON_CITY_VALUES = new Set([
+  'онлайн',
+  'online',
+  'очно',
+  'офлайн',
+  'offline',
+  'дистанционно',
+]);
+
 export const EMPTY_EVENT_FILTERS: ActiveFilters = {
   regions: [],
   cities: [],
@@ -109,16 +118,6 @@ interface CityFilterOption {
   values: string[];
 }
 
-function getCityLabel(value: string): string {
-  const parts = value
-    .split(',')
-    .map((part) => part.trim())
-    .filter(Boolean);
-  const city = parts.at(-1) ?? value.trim();
-
-  return city.replace(/^(?:г\.|город)\s*/i, '').trim();
-}
-
 function LocationMultiSelect({
   cities,
   selectedCities,
@@ -131,18 +130,27 @@ function LocationMultiSelect({
     const uniqueCities = new Map<string, CityFilterOption>();
 
     for (const city of cities) {
-      const rawName = city.name.trim();
-      const name = getCityLabel(rawName);
-      if (!name || name.toLocaleLowerCase('ru') === 'онлайн') continue;
+      const name = city.name.trim();
+      const normalizedName = name.toLocaleLowerCase('ru');
+      if (!name || NON_CITY_VALUES.has(normalizedName)) continue;
 
-      const key = name.toLocaleLowerCase('ru');
-      const existingCity = uniqueCities.get(key);
+      const values = Array.from(
+        new Set(
+          [name, ...(city.filterValues ?? [])]
+            .map((value) => value.trim())
+            .filter(Boolean),
+        ),
+      );
+      const existingCity = uniqueCities.get(normalizedName);
+
       if (existingCity) {
-        if (!existingCity.values.includes(rawName)) existingCity.values.push(rawName);
+        existingCity.values = Array.from(
+          new Set([...existingCity.values, ...values]),
+        );
         continue;
       }
 
-      uniqueCities.set(key, { id: city.id, name, values: [rawName] });
+      uniqueCities.set(normalizedName, { id: city.id, name, values });
     }
 
     return Array.from(uniqueCities.values()).sort((a, b) =>
