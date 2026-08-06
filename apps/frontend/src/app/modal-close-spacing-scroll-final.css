@@ -54,9 +54,53 @@ button[aria-label="Закрыть"]:active {
     transform: scale(1.22) !important;
   }
 
-  /* Enlarge both labels and values in the location/speaker rows. */
-  [class*="event-modal-v2_lines__"],
+  /*
+   * Keep the existing speaker-name size as the reference size.
+   * Match the format/location/speaker labels and venue text to it.
+   */
+  [class*="event-modal-v2_lines__"] {
+    --event-modal-detail-text-size: clamp(15px, 0.99vw, 19px);
+    font-size: var(--event-modal-detail-text-size) !important;
+  }
+
+  [class*="event-modal-v2_detailLine__"] {
+    min-width: 0 !important;
+    align-items: baseline !important;
+    line-height: 1.25 !important;
+  }
+
+  [class*="event-modal-v2_detailLabel__"],
   [class*="event-modal-v2_detailValue__"] {
-    font-size: clamp(15px, 0.99vw, 19px) !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+  }
+
+  [class*="event-modal-v2_detailLabel__"] {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  [class*="event-modal-v2_detailValue__"] {
+    min-width: 0 !important;
+  }
+
+  /* Slightly larger line icons, scaled to the unchanged speaker-name text. */
+  [class*="event-modal-v2_detailLine__"] svg {
+    width: clamp(20px, 1.094vw, 21px) !important;
+    height: clamp(20px, 1.094vw, 21px) !important;
+    flex: 0 0 clamp(20px, 1.094vw, 21px) !important;
+    align-self: center !important;
+  }
+
+  /* Keep “Спикер:” and the first name on one shared baseline. */
+  [data-event-modal-speakers] {
+    display: grid !important;
+    grid-template-columns: auto auto minmax(0, 1fr) !important;
+    align-items: baseline !important;
+    column-gap: 7px !important;
+  }
+
+  [data-event-modal-speakers] svg {
+    align-self: center !important;
   }
 }
