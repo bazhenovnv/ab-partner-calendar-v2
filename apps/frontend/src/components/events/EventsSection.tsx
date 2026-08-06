@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useTransition } from 'react';
+import { useState, useCallback, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { EventResultsGrid } from './EventResultsGrid';
 import { EventGridSkeleton } from './EventCardSkeleton';
@@ -18,6 +18,8 @@ import type {
 } from '@/types/event';
 
 const LIMIT = 6;
+const LIVE_REFRESH_INTERVAL_MS = 60_000;
+
 interface EventsSectionProps {
   initialData: PublicEventsResponse;
   cities: CityOption[];
@@ -50,9 +52,13 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
       currentDate: string | null,
       currentFilters: ActiveFilters,
       scrollAfterLoad = false,
+      silent = false,
     ) => {
-      setIsLoading(true);
-      setScrollDateResults(false);
+      if (!silent) {
+        setIsLoading(true);
+        setScrollDateResults(false);
+      }
+
       try {
         const qs = new URLSearchParams();
         qs.set('page', String(currentPage));
@@ -60,25 +66,52 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
         if (currentDate) qs.set('date', currentDate);
         appendFilters(qs, currentFilters);
 
-        const response = await fetch(`/api/events/public?${qs.toString()}`);
+        const response = await fetch(`/api/events/public?${qs.toString()}`, {
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error(`Events request failed: ${response.status}`);
 
         const data = (await response.json()) as PublicEventsResponse;
         setEvents(data.events);
         setTotal(data.total);
         setIsFallback(data.isFallback);
-        setScrollDateResults(scrollAfterLoad && data.events.length > 0);
+        if (!silent) {
+          setScrollDateResults(scrollAfterLoad && data.events.length > 0);
+        }
       } catch {
-        setEvents([]);
-        setTotal(0);
-        setIsFallback(false);
-        setScrollDateResults(false);
+        if (!silent) {
+          setEvents([]);
+          setTotal(0);
+          setIsFallback(false);
+          setScrollDateResults(false);
+        }
       } finally {
-        setIsLoading(false);
+        if (!silent) setIsLoading(false);
       }
     },
     [],
   );
+
+  useEffect(() => {
+    const refreshVisibleEvents = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchEvents(page, selectedDate, filters, false, true);
+      }
+    };
+
+    const intervalId = window.setInterval(
+      refreshVisibleEvents,
+      LIVE_REFRESH_INTERVAL_MS,
+    );
+    window.addEventListener('focus', refreshVisibleEvents);
+    document.addEventListener('visibilitychange', refreshVisibleEvents);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', refreshVisibleEvents);
+      document.removeEventListener('visibilitychange', refreshVisibleEvents);
+    };
+  }, [fetchEvents, filters, page, selectedDate]);
 
   const handleFilterChange = (nextFilters: ActiveFilters) => {
     setFilters(nextFilters);
