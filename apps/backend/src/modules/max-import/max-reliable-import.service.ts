@@ -37,7 +37,7 @@ export class MaxReliableImportService extends MaxImportService {
     super(reliablePrisma, parser, reliableConfig);
   }
 
-  @Cron('0 * * * *', { timeZone: 'Europe/Moscow' })
+  @Cron('*/5 * * * *', { timeZone: 'Europe/Moscow' })
   override async runHeartbeat(): Promise<void> {
     if (!this.isReliableImportEnabled()) {
       this.reliableLogger.debug(
@@ -48,7 +48,7 @@ export class MaxReliableImportService extends MaxImportService {
 
     const { log } = await this.runReliableManual();
     this.reliableLogger.log(
-      `MAX reliable hourly sync: found=${log.postsFound}, ` +
+      `MAX reliable 5-minute sync: found=${log.postsFound}, ` +
         `imported=${log.imported}, updated=${log.updated}, ` +
         `skipped=${log.skipped}, errors=${log.errors}`,
     );
