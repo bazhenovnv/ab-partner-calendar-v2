@@ -9,7 +9,7 @@ const FILTERS = readFileSync(
   'utf8',
 );
 const SHARED_LOCATION = readFileSync(
-  resolve(ROOT, '../../../packages/shared/src/location-city.ts'),
+  resolve(ROOT, '../../packages/shared/src/location-city.ts'),
   'utf8',
 );
 
