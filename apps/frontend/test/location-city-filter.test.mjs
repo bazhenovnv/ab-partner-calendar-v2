@@ -25,11 +25,22 @@ describe('City-only public location filter', () => {
     assert.doesNotMatch(filterSource, /eventCount|cityCount|regionCount/);
   });
 
-  test('deduplicates and alphabetically sorts city names', () => {
-    assert.match(filterSource, /new Map<string, CityOption>\(\)/);
+  test('normalizes, deduplicates and alphabetically sorts visible city names', () => {
+    assert.match(filterSource, /function getCityLabel\(value: string\)/);
+    assert.match(filterSource, /\.split\(','\)/);
+    assert.match(filterSource, /replace\(\/\^\(\?:г\\\.|город\)\\s\*\/iu, ''\)/);
+    assert.match(filterSource, /new Map<string, CityFilterOption>\(\)/);
     assert.match(filterSource, /name\.toLocaleLowerCase\('ru'\)/);
     assert.match(filterSource, /a\.name\.localeCompare\(b\.name, 'ru'\)/);
     assert.match(filterSource, /name\.toLocaleLowerCase\('ru'\) === 'онлайн'/);
+  });
+
+  test('keeps every raw location value behind one visible city option', () => {
+    assert.match(filterSource, /values: string\[\]/);
+    assert.match(filterSource, /existingCity\.values\.push\(rawName\)/);
+    assert.match(filterSource, /new Set\(city\.values\)/);
+    assert.match(filterSource, /\.\.\.selectedCities, \.\.\.city\.values/);
+    assert.match(filterSource, /selectedCityNames\.join\(', '\)/);
   });
 
   test('clears obsolete region selections when a city changes', () => {
