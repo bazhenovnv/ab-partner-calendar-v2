@@ -116,7 +116,7 @@ function getCityLabel(value: string): string {
     .filter(Boolean);
   const city = parts.at(-1) ?? value.trim();
 
-  return city.replace(/^(?:г\.|город)\s*/iu, '').trim();
+  return city.replace(/^(?:г\.|город)\s*/i, '').trim();
 }
 
 function LocationMultiSelect({
