@@ -1,5 +1,20 @@
 # README: Деплой АБ Афиша Бухгалтера
 
+## Закреплённый production frontend
+
+Перед любым frontend-деплоем прочитать `PRODUCTION_RELEASE.md` и `infra/deploy/production-frontend.env`.
+
+Единственная утверждённая версия:
+
+- commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
+- image: `ab-afisha/frontend:frontend-release-3e308c5`;
+- server root: `/srv/ab-afisha`;
+- compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
+- deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`;
+- cleanup old frontend releases: `/srv/ab-afisha/infra/scripts/cleanup-old-frontend-releases.sh`.
+
+Для frontend запрещено использовать `latest`, произвольный `origin/main`, старый `frontend-release-*`, rollback-образ или старый deploy-скрипт. Команды ниже, использующие общий `APP_VERSION` или `docker-compose.prod.yml`, являются историческими для общей инфраструктуры и не определяют текущий production frontend.
+
 Production: `ab-event.pro` | Staging: `test.ab-event.pro`  
 VPS: Timeweb Cloud, IP `77.232.136.248`, host `kvnvm-277`
 
@@ -80,7 +95,7 @@ echo "0 3 * * * /home/deploy/ab-partner-calendar-v2/infra/scripts/backup.sh >> /
 
 ---
 
-## Обновление (rolling deploy)
+## Обновление общего приложения (не frontend production lock)
 
 ```bash
 cd /home/deploy/ab-partner-calendar-v2
@@ -88,6 +103,8 @@ git pull origin main
 docker compose -f docker-compose.prod.yml build
 ./infra/scripts/deploy.sh
 ```
+
+Для production frontend эта команда не применяется. Использовать только `infra/scripts/deploy-pinned-frontend.sh`.
 
 ---
 
