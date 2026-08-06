@@ -2,19 +2,21 @@
 
 ## Критическая фиксация production — читать первой
 
-Перед любыми frontend-изменениями, сборкой, откатом или деплоем обязательно прочитать:
+Перед любыми изменениями, сборкой, откатом или deployment обязательно прочитать:
 
 - `PRODUCTION_RELEASE.md`;
 - `infra/deploy/production-frontend.env`.
 
-Единственная утверждённая production-версия frontend:
+Единственная утверждённая production-версия приложения:
 
-- commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
-- Docker image: `ab-afisha/frontend:frontend-release-d4fe868`;
+- commit: `eaada79ef32bd28a874d828ad71b4d87a6775376`;
+- backend image: `ab-afisha/backend:backend-release-eaada79`;
+- frontend image: `ab-afisha/frontend:frontend-release-eaada79`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
-- единственный разрешённый frontend-деплой: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
+- полный backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`;
+- frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Запрещено считать `main`, `latest`, старый release-тег, rollback-образ или ранее использованный скрипт текущей production-версией. Новая версия становится production только после отдельного явного утверждения владельцем проекта и обновления production lock-файлов.
+Запрещено считать `main`, `latest`, старый release-тег, rollback-образ или ранее использованный скрипт текущей production-версией. Запрещено выбирать backend через общий `APP_VERSION`, потому что он также используется bots. Новая версия становится production только после отдельного явного утверждения владельцем проекта и обновления production lock-файлов.
 
 ## Роль Claude Code
 
