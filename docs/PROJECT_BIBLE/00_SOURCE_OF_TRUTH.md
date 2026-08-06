@@ -14,8 +14,8 @@ For the question **which frontend version is allowed in production**, the highes
 
 The current production frontend is fixed to:
 
-- commit `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
-- image `ab-afisha/frontend:frontend-release-3e308c5`.
+- commit `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
+- image `ab-afisha/frontend:frontend-release-d4fe868`.
 
 `main`, `latest`, historical release tags, rollback images and old deployment scripts do not override this lock.
 
@@ -55,8 +55,8 @@ Production deployment approval additionally requires an exact match with `infra/
 - Historical repository: `bazhenovnv/ab-partner-calendar` — do not use for current work.
 - Historical long-lived branch: `claude/ab-afisha-architecture-plan-805f5o` — no longer the canonical working branch.
 - Production: `ab-event.pro`.
-- Production frontend commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
-- Production frontend image: `ab-afisha/frontend:frontend-release-3e308c5`.
+- Production frontend commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`.
+- Production frontend image: `ab-afisha/frontend:frontend-release-d4fe868`.
 - Staging: `test.ab-event.pro`.
 - Deploy path: `/srv/ab-afisha`.
 - Current VPS IPv4: `5.129.243.179`.
