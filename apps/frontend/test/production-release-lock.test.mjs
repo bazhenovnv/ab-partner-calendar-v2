@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, test } from 'node:test';
@@ -12,6 +13,8 @@ const RELEASE = read('PRODUCTION_RELEASE.md');
 const COMPOSE = read('docker-compose.production.v2.yml');
 const AGENTS = read('AGENTS.md');
 const CLAUDE = read('CLAUDE.md');
+const DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-frontend.sh');
+const CLEANUP_PATH = resolve(ROOT, 'infra/scripts/cleanup-old-frontend-releases.sh');
 const DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
@@ -54,5 +57,10 @@ describe('Pinned production frontend release', () => {
     assert.match(CLEANUP, /refusing cleanup: production does not use pinned image/);
     assert.match(CLEANUP, /ONLY_PINNED_FRONTEND_IMAGE_REMAINS=true/);
     assert.match(CLEANUP, /SKIP_RUNNING_CONTAINER/);
+  });
+
+  test('keeps both production scripts valid Bash', () => {
+    execFileSync('bash', ['-n', DEPLOY_PATH], { stdio: 'pipe' });
+    execFileSync('bash', ['-n', CLEANUP_PATH], { stdio: 'pipe' });
   });
 });
