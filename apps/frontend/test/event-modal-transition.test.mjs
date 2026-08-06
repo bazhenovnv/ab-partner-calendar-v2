@@ -12,7 +12,7 @@ const CAROUSEL = join(FRONTEND, 'src/components/events/MainEventsBanner.tsx');
 const MODAL = join(FRONTEND, 'src/components/events/EventModalProvider.tsx');
 
 describe('Sharp event image flight into a static modal', () => {
-  test('moves the image by real coordinates and dimensions without blur or scaling transforms', () => {
+  test('moves the image between the exact rendered image rectangles without blur or scaling transforms', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
     const flightStart = transition.indexOf('function imageRectKeyframe');
     const flightEnd = transition.indexOf('function createShellOpeningAnimations');
@@ -28,18 +28,27 @@ describe('Sharp event image flight into a static modal', () => {
     assert.doesNotMatch(flight, /filter|blur|transform|scale/);
     assert.doesNotMatch(transition, /startViewTransition/);
     assert.doesNotMatch(transition, /transformForRect|getIntermediateRect/);
-  });
-
-  test('speeds up only the image flight by 1.5 times', () => {
-    const transition = readFileSync(TRANSITION, 'utf8');
-
-    assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 1400/);
-    assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 1200/);
-    assert.match(transition, /EVENT_IMAGE_SPEED_MULTIPLIER = 1\.5/);
     assert.match(
       transition,
-      /duration: Math\.round\(duration \/ EVENT_IMAGE_SPEED_MULTIPLIER\)/,
+      /finalImageRect = copyRect\(elements\.image\.getBoundingClientRect\(\)\)/,
     );
+    assert.match(
+      transition,
+      /startRect = copyRect\(elements\.image\.getBoundingClientRect\(\)\)/,
+    );
+    assert.doesNotMatch(
+      transition,
+      /(?:finalImageRect|startRect) = copyRect\(elements\.imageStage\.getBoundingClientRect\(\)\)/,
+    );
+  });
+
+  test('uses faster synchronized durations for the image flight and modal shell', () => {
+    const transition = readFileSync(TRANSITION, 'utf8');
+
+    assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 600/);
+    assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 500/);
+    assert.doesNotMatch(transition, /EVENT_IMAGE_SPEED_MULTIPLIER/);
+    assert.match(transition, /\{\s*duration,\s*easing,\s*fill: 'both'/);
     assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.28/);
     assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_END = 0\.88/);
   });
