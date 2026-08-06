@@ -5,9 +5,9 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Git commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`
-- Docker tag: `frontend-release-3e308c5`
-- Docker image: `ab-afisha/frontend:frontend-release-3e308c5`
+- Git commit: `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`
+- Docker tag: `frontend-release-85b1a65`
+- Docker image: `ab-afisha/frontend:frontend-release-85b1a65`
 - Дата утверждения: `2026-08-06`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -31,7 +31,7 @@
 ## Запрещено
 
 - деплоить frontend с тегом `latest`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-3e308c5`;
+- деплоить любой `frontend-release-*`, кроме `frontend-release-85b1a65`;
 - использовать старые `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
 - определять production-версию по последнему коммиту `main`;
 - менять закреплённую версию без отдельного явного утверждения владельца проекта;
@@ -47,4 +47,4 @@
 - `docker-compose.production.v2.yml`;
 - теста `apps/frontend/test/production-release-lock.test.mjs`.
 
-До этого момента действующей остаётся версия `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
+До этого момента действующей остаётся версия `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`.

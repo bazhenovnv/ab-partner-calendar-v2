@@ -8,9 +8,8 @@ export const EVENT_BACKDROP_TRANSITION_NAME = 'event-modal-backdrop';
 
 export const EVENT_MODAL_STATE_EVENT = 'ab:event-modal-state';
 
-export const EVENT_MODAL_OPEN_DURATION_MS = 1400;
-export const EVENT_MODAL_CLOSE_DURATION_MS = 1200;
-export const EVENT_IMAGE_SPEED_MULTIPLIER = 1.5;
+export const EVENT_MODAL_OPEN_DURATION_MS = 600;
+export const EVENT_MODAL_CLOSE_DURATION_MS = 500;
 export const EVENT_MODAL_CONTENT_REVEAL_START = 0.28;
 export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 
@@ -296,7 +295,7 @@ function animateImageFlight(
       ),
     ],
     {
-      duration: Math.round(duration / EVENT_IMAGE_SPEED_MULTIPLIER),
+      duration,
       easing,
       fill: 'both',
     },
@@ -601,7 +600,7 @@ export function openEventWithTransition(
       return;
     }
 
-    const finalImageRect = copyRect(elements.imageStage.getBoundingClientRect());
+    const finalImageRect = copyRect(elements.image.getBoundingClientRect());
     const sourceRadius = getBorderRadius(originImageElement.parentElement);
     const finalRadius = getBorderRadius(elements.imageStage, '20px');
     const clone = createImageFlightClone(
@@ -674,7 +673,7 @@ export function closeEventWithTransition(
     return;
   }
 
-  const startRect = copyRect(elements.imageStage.getBoundingClientRect());
+  const startRect = copyRect(elements.image.getBoundingClientRect());
   const startRadius = getBorderRadius(elements.imageStage, '20px');
   const destinationRadius = getBorderRadius(originImage?.parentElement);
   const clone = createImageFlightClone(modalImage, startRect, startRadius);

@@ -18,8 +18,8 @@
 
 Единственная утверждённая версия:
 
-- commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
-- image: `ab-afisha/frontend:frontend-release-3e308c5`;
+- commit: `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`;
+- image: `ab-afisha/frontend:frontend-release-85b1a65`;
 - deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`;
 - cleanup script: `/srv/ab-afisha/infra/scripts/cleanup-old-frontend-releases.sh`.
 
@@ -41,9 +41,9 @@ bash /srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh
 
 ```text
 PRODUCTION_PIN_OK
-PRODUCTION_COMMIT=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
-PRODUCTION_FRONTEND=ab-afisha/frontend:frontend-release-3e308c5
-PRODUCTION_REVISION=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
+PRODUCTION_COMMIT=85b1a65c52bfd5f0c4ec16f82702e9604a5d162c
+PRODUCTION_FRONTEND=ab-afisha/frontend:frontend-release-85b1a65
+PRODUCTION_REVISION=85b1a65c52bfd5f0c4ec16f82702e9604a5d162c
 PUBLIC_HTTP=200
 NGINX_PRESERVED=true
 ```
@@ -64,8 +64,8 @@ bash /srv/ab-afisha/infra/scripts/cleanup-old-frontend-releases.sh
 
 ```text
 ONLY_PINNED_FRONTEND_IMAGE_REMAINS=true
-PINNED_FRONTEND_IMAGE=ab-afisha/frontend:frontend-release-3e308c5
-PINNED_FRONTEND_COMMIT=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
+PINNED_FRONTEND_IMAGE=ab-afisha/frontend:frontend-release-85b1a65
+PINNED_FRONTEND_COMMIT=85b1a65c52bfd5f0c4ec16f82702e9604a5d162c
 ```
 
 ## Запрещено
@@ -74,7 +74,7 @@ PINNED_FRONTEND_COMMIT=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
 - использовать старый репозиторий;
 - деплоить frontend с тегом `latest`;
 - деплоить произвольный `origin/main`;
-- использовать любой `frontend-release-*`, кроме `frontend-release-3e308c5`;
+- использовать любой `frontend-release-*`, кроме `frontend-release-85b1a65`;
 - использовать `rollback-before-*`, `temporary-rollback-*` или preflight-образы как production;
 - запускать старые frontend deploy-скрипты вместо `deploy-pinned-frontend.sh`;
 - выполнять `git reset --hard` или `git clean` на production-сервере;
@@ -90,4 +90,4 @@ PINNED_FRONTEND_COMMIT=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
 - `docker-compose.production.v2.yml`;
 - `apps/frontend/test/production-release-lock.test.mjs`.
 
-До этого момента используется только закреплённый релиз `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
+До этого момента используется только закреплённый релиз `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`.
