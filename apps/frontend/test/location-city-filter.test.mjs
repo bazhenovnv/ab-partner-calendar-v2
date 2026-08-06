@@ -28,7 +28,7 @@ describe('City-only public location filter', () => {
   test('normalizes, deduplicates and alphabetically sorts visible city names', () => {
     assert.match(filterSource, /function getCityLabel\(value: string\)/);
     assert.match(filterSource, /\.split\(','\)/);
-    assert.match(filterSource, /replace\(\/\^\(\?:г\\\.|город\)\\s\*\/iu, ''\)/);
+    assert.match(filterSource, /replace\(\/\^\(\?:г\\\.|город\)\\s\*\/i, ''\)/);
     assert.match(filterSource, /new Map<string, CityFilterOption>\(\)/);
     assert.match(filterSource, /name\.toLocaleLowerCase\('ru'\)/);
     assert.match(filterSource, /a\.name\.localeCompare\(b\.name, 'ru'\)/);
