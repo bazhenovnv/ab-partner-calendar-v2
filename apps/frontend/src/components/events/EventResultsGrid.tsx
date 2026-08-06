@@ -12,7 +12,6 @@ interface EventResultsGridProps {
 }
 
 const CARD_REVEAL_STEP_MS = 200;
-const CARD_REVEAL_DURATION_MS = 320;
 
 export function EventResultsGrid({
   events,
@@ -24,10 +23,7 @@ export function EventResultsGrid({
   useEffect(() => {
     if (!scrollAfterDateSelect) return;
 
-    const lastCardDelay = Math.max(0, events.length - 1) * CARD_REVEAL_STEP_MS;
-    const scrollDelay = lastCardDelay + CARD_REVEAL_DURATION_MS + 50;
-
-    const timer = window.setTimeout(() => {
+    const frame = window.requestAnimationFrame(() => {
       const grid = gridRef.current;
       if (!grid) {
         onScrollComplete();
@@ -76,9 +72,9 @@ export function EventResultsGrid({
       }
 
       onScrollComplete();
-    }, scrollDelay);
+    });
 
-    return () => window.clearTimeout(timer);
+    return () => window.cancelAnimationFrame(frame);
   }, [events, onScrollComplete, scrollAfterDateSelect]);
 
   return (
