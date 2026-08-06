@@ -7,7 +7,7 @@
 [class*='event-modal-v2_chooser__'] {
   box-sizing: border-box !important;
   display: flex !important;
-  width: 240px !important;
+  width: min(240px, calc(100% - 24px)) !important;
   min-width: 240px !important;
   max-width: 240px !important;
   height: 310px !important;
