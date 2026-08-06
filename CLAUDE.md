@@ -1,5 +1,21 @@
 # AB Partner Calendar v2 — правила работы Claude Code
 
+## Критическая фиксация production — читать первой
+
+Перед любыми frontend-изменениями, сборкой, откатом или деплоем обязательно прочитать:
+
+- `PRODUCTION_RELEASE.md`;
+- `infra/deploy/production-frontend.env`.
+
+Единственная утверждённая production-версия frontend:
+
+- commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
+- Docker image: `ab-afisha/frontend:frontend-release-3e308c5`;
+- production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
+- единственный разрешённый frontend-деплой: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
+
+Запрещено считать `main`, `latest`, старый release-тег, rollback-образ или ранее использованный скрипт текущей production-версией. Новая версия становится production только после отдельного явного утверждения владельцем проекта и обновления production lock-файлов.
+
 ## Роль Claude Code
 
 Ты работаешь как аккуратный senior fullstack-разработчик проекта календаря бухгалтерских событий.
@@ -108,6 +124,6 @@
 - пушить напрямую в main;
 - делать force push;
 - коммитить секреты;
-- коммитить .env;
+- коммитить `.env`;
 - коммитить patch-файлы;
-- коммитить tsbuildinfo.
+- коммитить `tsbuildinfo`.
