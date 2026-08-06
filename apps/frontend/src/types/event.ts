@@ -72,6 +72,7 @@ export interface CityOption {
   id: string;
   name: string;
   region: string;
+  filterValues?: string[];
 }
 
 export type EventAutoStatus = 'PLANNED' | 'LIVE' | 'COMPLETED';
