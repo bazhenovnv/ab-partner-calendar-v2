@@ -9,8 +9,8 @@
 
 Единственная утверждённая production-версия frontend:
 
-- commit: `85b1a65c52bfd5f0c4ec16f82702e9604a5d162c`;
-- Docker image: `ab-afisha/frontend:frontend-release-85b1a65`;
+- commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
+- Docker image: `ab-afisha/frontend:frontend-release-d4fe868`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - единственный разрешённый frontend-деплой: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
