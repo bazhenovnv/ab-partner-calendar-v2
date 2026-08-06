@@ -190,7 +190,6 @@ function LocationMultiSelect({
           aria-label="Выберите города"
           aria-multiselectable="true"
         >
-          {/* Historical source marker only: aria-label="Выберите регионы или города" */}
           <label className="pub-filter-multi-option" role="option" aria-selected={selectedCities.length === 0}>
             <input
               type="checkbox"
