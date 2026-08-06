@@ -7,10 +7,12 @@ const ROOT = resolve(import.meta.dirname, '../../..');
 const FILTERS = join(ROOT, 'apps/frontend/src/components/events/EventFilters.tsx');
 const API = join(ROOT, 'apps/frontend/src/lib/api.ts');
 const EVENT_TYPES = join(ROOT, 'apps/frontend/src/types/event.ts');
+const SHARED_LOCATION = join(ROOT, 'packages/shared/src/location-city.ts');
 
 const filterSource = readFileSync(FILTERS, 'utf8');
 const apiSource = readFileSync(API, 'utf8');
 const eventTypesSource = readFileSync(EVENT_TYPES, 'utf8');
+const sharedLocationSource = readFileSync(SHARED_LOCATION, 'utf8');
 
 describe('City-only public location filter', () => {
   test('renders one flat city list without regions, groups or counters', () => {
@@ -27,31 +29,42 @@ describe('City-only public location filter', () => {
     assert.doesNotMatch(filterSource, /eventCount|cityCount|regionCount/);
   });
 
-  test('uses approved city labels instead of parsing venue strings in the component', () => {
-    assert.match(filterSource, /const name = city\.name\.trim\(\)/);
-    assert.match(filterSource, /city\.filterValues \?\? \[\]/);
-    assert.match(filterSource, /new Map<string, CityFilterOption>\(\)/);
-    assert.match(filterSource, /name\.toLocaleLowerCase\('ru'\)/);
-    assert.match(filterSource, /a\.name\.localeCompare\(b\.name, 'ru'\)/);
-    assert.doesNotMatch(filterSource, /function getCityLabel/);
-    assert.doesNotMatch(filterSource, /\.split\(','\)/);
+  test('uses the shared location parser for city, address and venue fields', () => {
+    assert.match(apiSource, /extractCityFromEventLocation/);
+    assert.match(apiSource, /isPlausibleCityName/);
+    assert.match(apiSource, /normalizeLocationValue/);
+    assert.match(apiSource, /const rawValues = \[event\.cityName, event\.address, event\.venue\]/);
+    assert.match(apiSource, /address: event\.address/);
+    assert.match(apiSource, /venue: event\.venue/);
+    assert.doesNotMatch(apiSource, /function getCityLabel/);
   });
 
-  test('keeps every raw card location behind one visible city option', () => {
+  test('keeps raw event location values behind one visible city option', () => {
     assert.match(eventTypesSource, /filterValues\?: string\[\]/);
+    assert.match(apiSource, /filterValues: Set<string>/);
+    assert.match(apiSource, /values\.forEach\(\(value\) => existing\.filterValues\.add\(value\)\)/);
+    assert.match(apiSource, /filterValues: Array\.from\(city\.filterValues\)/);
     assert.match(filterSource, /\[name, \.\.\.\(city\.filterValues \?\? \[\]\)\]/);
-    assert.match(filterSource, /\.\.\.existingCity\.values, \.\.\.values/);
     assert.match(filterSource, /new Set\(city\.values\)/);
     assert.match(filterSource, /\.\.\.selectedCities, \.\.\.city\.values/);
-    assert.match(filterSource, /selectedLabels\.join\(', '\)/);
   });
 
-  test('blocks format and delivery labels from the city menu', () => {
-    assert.match(filterSource, /const NON_CITY_VALUES = new Set/);
-    assert.match(filterSource, /'онлайн'/);
-    assert.match(filterSource, /'очно'/);
-    assert.match(filterSource, /'офлайн'/);
-    assert.match(filterSource, /NON_CITY_VALUES\.has\(normalizedName\)/);
+  test('blocks format, venue, street and region values from visible cities', () => {
+    assert.match(sharedLocationSource, /const NON_CITY_VALUES = new Set/);
+    assert.match(sharedLocationSource, /const VENUE_MARKERS = \[/);
+    assert.match(sharedLocationSource, /const STREET_PREFIX =/);
+    assert.match(sharedLocationSource, /const REGION_PART =/);
+    assert.match(sharedLocationSource, /isPlausibleCityName/);
+    assert.match(sharedLocationSource, /FORMAT_WORDS\.test\(normalized\)/);
+  });
+
+  test('extracts a city from hybrid labels and venue-first addresses', () => {
+    assert.match(sharedLocationSource, /function extractHybridCity/);
+    assert.match(sharedLocationSource, /(?:очно\|офлайн\|offline)/);
+    assert.match(sharedLocationSource, /function extractCityFromValue/);
+    assert.match(sharedLocationSource, /for \(let index = parts\.length - 1; index >= 0; index -= 1\)/);
+    assert.match(sharedLocationSource, /findCatalogueCity/);
+    assert.match(sharedLocationSource, /cityStem\(hybridCity\)/);
   });
 
   test('clears obsolete region selections when a city changes', () => {
@@ -76,32 +89,9 @@ describe('City-only public location filter', () => {
   test('derives visible options only from published event cards', () => {
     assert.match(apiSource, /function buildPublishedEventCityOptions/);
     assert.match(apiSource, /for \(const event of events\)/);
-    assert.match(apiSource, /if \(event\.city\?\.name\)/);
-    assert.match(apiSource, /const rawLocation = event\.cityName\?\.trim\(\) \?\? ''/);
+    assert.match(apiSource, /if \(event\.city\?\.name && isPlausibleCityName\(event\.city\.name\)\)/);
+    assert.match(apiSource, /extractCityFromEventLocation/);
     assert.match(apiSource, /return buildPublishedEventCityOptions\(events, catalogueCities\)/);
     assert.doesNotMatch(apiSource, /return serverFetch<CityOption\[]>\('\/filters\/cities'\)/);
-  });
-
-  test('maps venue text to a catalogue city and preserves its exact filter value', () => {
-    assert.match(apiSource, /function splitLocationParts/);
-    assert.match(apiSource, /function locationMatchesCity/);
-    assert.match(apiSource, /catalogueCandidates\.find\(\(city\) =>/);
-    assert.match(apiSource, /locationMatchesCity\(rawLocation, city\.name\)/);
-    assert.match(apiSource, /filterValues: Set<string>/);
-    assert.match(apiSource, /filterValues: Array\.from\(city\.filterValues\)/);
-  });
-
-  test('rejects non-city values and venue-only fallbacks', () => {
-    assert.match(apiSource, /const NON_CITY_LOCATION_VALUES = new Set/);
-    assert.match(apiSource, /'онлайн'/);
-    assert.match(apiSource, /'очно'/);
-    assert.match(apiSource, /'офлайн'/);
-    assert.match(apiSource, /function looksLikeVenue/);
-    assert.match(apiSource, /parts\.length !== 1 \|\| looksLikeVenue\(parts\[0\]\)/);
-  });
-
-  test('remains a frontend-only change and uses the existing backend endpoints', () => {
-    assert.match(apiSource, /serverFetch<PublicEventsResponse>\(`\/events\/public\?\$\{qs\.toString\(\)\}`\)/);
-    assert.match(apiSource, /serverFetch<CityOption\[]>\('\/filters\/cities'\)\.catch\(\(\) => \[\]\)/);
   });
 });

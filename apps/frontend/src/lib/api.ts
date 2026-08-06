@@ -1,3 +1,8 @@
+import {
+  extractCityFromEventLocation,
+  isPlausibleCityName,
+  normalizeLocationValue,
+} from '@ab-afisha/shared';
 import type {
   PublicEvent,
   PublicEventsResponse,
@@ -77,66 +82,6 @@ export async function fetchDirections(): Promise<DirectionOption[]> {
 
 const CITY_EVENT_PAGE_LIMIT = 50;
 const CITY_EVENT_STATUSES = ['PLANNED', 'LIVE', 'COMPLETED'] as const;
-const NON_CITY_LOCATION_VALUES = new Set([
-  'онлайн',
-  'online',
-  'очно',
-  'офлайн',
-  'offline',
-  'дистанционно',
-]);
-const VENUE_MARKERS = [
-  'центр',
-  'отель',
-  'гостиниц',
-  'конференц',
-  'офис',
-  'зал',
-  'площадк',
-  'рбк',
-  'адрес',
-  'улиц',
-  'ул.',
-  'проспект',
-  'дом ',
-];
-
-function normalizeLocationValue(value: string) {
-  return value
-    .trim()
-    .replace(/^(?:г\.|город)\s*/i, '')
-    .replace(/\s+/g, ' ')
-    .toLocaleLowerCase('ru');
-}
-
-function splitLocationParts(value: string) {
-  return value
-    .split(/\s*(?:,|;|\||—|–)\s*|\s+-\s+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
-function isNonCityValue(value: string) {
-  return NON_CITY_LOCATION_VALUES.has(normalizeLocationValue(value));
-}
-
-function looksLikeVenue(value: string) {
-  const normalized = normalizeLocationValue(value);
-  return VENUE_MARKERS.some((marker) => normalized.includes(marker));
-}
-
-function locationMatchesCity(location: string, cityName: string) {
-  const normalizedCity = normalizeLocationValue(cityName);
-  if (!normalizedCity) return false;
-
-  const normalizedLocation = normalizeLocationValue(location);
-  if (normalizedLocation === normalizedCity) return true;
-  if (normalizedLocation.startsWith(`${normalizedCity} (`)) return true;
-
-  return splitLocationParts(location).some(
-    (part) => normalizeLocationValue(part) === normalizedCity,
-  );
-}
 
 async function fetchPublishedEventCityPage(page: number): Promise<PublicEventsResponse> {
   const qs = new URLSearchParams({
@@ -175,26 +120,25 @@ function buildPublishedEventCityOptions(
 ): CityOption[] {
   const catalogueCandidates = catalogueCities
     .map((city) => ({ ...city, name: city.name.trim() }))
-    .filter((city) =>
-      city.name &&
-      splitLocationParts(city.name).length === 1 &&
-      !isNonCityValue(city.name) &&
-      !looksLikeVenue(city.name),
-    )
+    .filter((city) => isPlausibleCityName(city.name))
     .sort((a, b) => b.name.length - a.name.length);
+  const catalogueNames = catalogueCandidates.map((city) => city.name);
+  const catalogueByName = new Map(
+    catalogueCandidates.map((city) => [normalizeLocationValue(city.name), city]),
+  );
   const collected = new Map<string, CollectedCity>();
 
   const addCity = (
     city: { id: string; name: string; region: string },
-    rawLocation?: string | null,
+    rawValues: Array<string | null | undefined>,
   ) => {
     const name = city.name.trim().replace(/^(?:г\.|город)\s*/i, '').trim();
     const normalizedName = normalizeLocationValue(name);
-    if (!name || !normalizedName || isNonCityValue(name)) return;
+    if (!name || !normalizedName || !isPlausibleCityName(name)) return;
 
-    const values = [name];
-    const raw = rawLocation?.trim();
-    if (raw && !isNonCityValue(raw)) values.push(raw);
+    const values = [name, ...rawValues]
+      .map((value) => value?.trim() ?? '')
+      .filter(Boolean);
 
     const existing = collected.get(normalizedName);
     if (existing) {
@@ -211,43 +155,38 @@ function buildPublishedEventCityOptions(
   };
 
   for (const event of events) {
-    const rawLocation = event.cityName?.trim() ?? '';
+    const rawValues = [event.cityName, event.address, event.venue];
 
-    if (event.city?.name) {
+    if (event.city?.name && isPlausibleCityName(event.city.name)) {
       addCity(
         {
           id: `event-city:${normalizeLocationValue(event.city.name)}`,
           name: event.city.name,
           region: event.city.region,
         },
-        rawLocation,
+        rawValues,
       );
       continue;
     }
 
-    if (!rawLocation || isNonCityValue(rawLocation)) continue;
-
-    const matchedCity = catalogueCandidates.find((city) =>
-      locationMatchesCity(rawLocation, city.name),
-    );
-    if (matchedCity) {
-      addCity(matchedCity, rawLocation);
-      continue;
-    }
-
-    const parts = splitLocationParts(rawLocation);
-    if (parts.length !== 1 || looksLikeVenue(parts[0])) continue;
-
-    const fallbackName = parts[0].replace(/^(?:г\.|город)\s*/i, '').trim();
-    if (!fallbackName || isNonCityValue(fallbackName)) continue;
-
-    addCity(
+    const cityName = extractCityFromEventLocation(
       {
-        id: `event-city:${normalizeLocationValue(fallbackName)}`,
-        name: fallbackName,
+        cityName: event.cityName,
+        address: event.address,
+        venue: event.venue,
+      },
+      catalogueNames,
+    );
+    if (!cityName) continue;
+
+    const catalogueCity = catalogueByName.get(normalizeLocationValue(cityName));
+    addCity(
+      catalogueCity ?? {
+        id: `event-city:${normalizeLocationValue(cityName)}`,
+        name: cityName,
         region: 'Другие регионы',
       },
-      rawLocation,
+      rawValues,
     );
   }
 
