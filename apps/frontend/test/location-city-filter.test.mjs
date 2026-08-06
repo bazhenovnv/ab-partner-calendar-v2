@@ -40,7 +40,7 @@ describe('City-only public location filter', () => {
     assert.match(filterSource, /existingCity\.values\.push\(rawName\)/);
     assert.match(filterSource, /new Set\(city\.values\)/);
     assert.match(filterSource, /\.\.\.selectedCities, \.\.\.city\.values/);
-    assert.match(filterSource, /selectedCityNames\.join\(', '\)/);
+    assert.match(filterSource, /selectedLabels\.join\(', '\)/);
   });
 
   test('clears obsolete region selections when a city changes', () => {
