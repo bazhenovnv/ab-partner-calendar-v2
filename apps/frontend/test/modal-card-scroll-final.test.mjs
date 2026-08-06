@@ -29,6 +29,26 @@ describe('Final modal, card title and page-load contracts', () => {
     assert.match(styles, /filter: none !important;/);
   });
 
+  test('removes the mint reminder focus ring without changing the resting button', () => {
+    const styles = readFileSync(FINAL_MODAL, 'utf8');
+
+    assert.match(
+      styles,
+      /event-modal-v2_remind__"\]:focus,[\s\S]*event-modal-v2_remind__"\]:focus-visible/,
+    );
+    assert.match(styles, /outline: 0 !important;/);
+    assert.match(styles, /outline-offset: 0 !important;/);
+    assert.match(styles, /border-color: rgba\(13, 35, 68, 0\.22\) !important;/);
+    assert.match(
+      styles,
+      /box-shadow:[\s\S]*0 6px 14px rgba\(13, 35, 68, 0\.18\),[\s\S]*0 2px 5px rgba\(13, 35, 68, 0\.12\) !important;/,
+    );
+    assert.match(
+      styles,
+      /event-modal-v2_remindBellBody__[\s\S]*fill: transparent !important;/,
+    );
+  });
+
   test('moves title copy farther below the status while preserving metadata placement', () => {
     const styles = readFileSync(FINAL_MODAL, 'utf8');
 
@@ -67,7 +87,7 @@ describe('Final modal, card title and page-load contracts', () => {
     );
   });
 
-  test('keeps speaker names unchanged and matches labels and venue text to that size', () => {
+  test('keeps speaker names as the reference and matches labels and venue text to that size', () => {
     const styles = readFileSync(FINAL_MODAL, 'utf8');
 
     assert.match(
@@ -80,20 +100,16 @@ describe('Final modal, card title and page-load contracts', () => {
     );
     assert.match(
       styles,
-      /event-modal-v2_detailLabel__[\s\S]*event-modal-v2_detailValue__[\s\S]*font-size: inherit !important;/,
-    );
-    assert.doesNotMatch(
-      styles,
-      /event-modal-v2_detailValue__[\s\S]*font-size: clamp\((?!15px, 0\.99vw, 19px)/,
+      /event-modal-v2_detailLabel__[\s\S]*event-modal-v2_detailValue__[\s\S]*font-size: var\(--event-modal-detail-text-size\) !important;/,
     );
   });
 
-  test('slightly enlarges detail icons and aligns speaker label with names on one baseline', () => {
+  test('enlarges detail icons and aligns speaker label with names on one baseline', () => {
     const styles = readFileSync(FINAL_MODAL, 'utf8');
 
     assert.match(
       styles,
-      /event-modal-v2_detailLine__[\s\S]*svg[\s\S]*width: clamp\(20px, 1\.094vw, 21px\) !important;[\s\S]*height: clamp\(20px, 1\.094vw, 21px\) !important;/,
+      /event-modal-v2_detailLine__[\s\S]*svg[\s\S]*width: clamp\(21px, 1\.2vw, 23px\) !important;[\s\S]*height: clamp\(21px, 1\.2vw, 23px\) !important;/,
     );
     assert.match(
       styles,
