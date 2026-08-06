@@ -8,7 +8,7 @@
 [class*='event-modal-v2_chooser__'] {
   box-sizing: border-box !important;
   width: min(380px, calc(100% - 24px)) !important;
-  height: min(491px, calc(100% - 24px)) !important;
+  height: min(493px, calc(100% - 24px)) !important;
   max-height: calc(100% - 24px) !important;
   overflow-y: auto !important;
   border-radius: 19px !important;
