@@ -1,147 +1,93 @@
-# README: Деплой АБ Афиша Бухгалтера
+# README: текущий деплой АБ Афиша Бухгалтера
+
+## Канонический production
+
+- Production: `https://ab-event.pro`.
+- Staging: `https://test.ab-event.pro`.
+- Current VPS: `5.129.243.179`.
+- Server root: `/srv/ab-afisha`.
+- Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`.
 
 ## Закреплённый production frontend
 
-Перед любым frontend-деплоем прочитать `PRODUCTION_RELEASE.md` и `infra/deploy/production-frontend.env`.
+Перед любым frontend-деплоем прочитать:
+
+1. `PRODUCTION_RELEASE.md`;
+2. `infra/deploy/production-frontend.env`;
+3. `docs/PROJECT_BIBLE/06_DEPLOYMENT_CURRENT.md`.
 
 Единственная утверждённая версия:
 
 - commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`;
 - image: `ab-afisha/frontend:frontend-release-3e308c5`;
-- server root: `/srv/ab-afisha`;
-- compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
-- deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`;
-- cleanup old frontend releases: `/srv/ab-afisha/infra/scripts/cleanup-old-frontend-releases.sh`.
+- deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`;
+- cleanup script: `/srv/ab-afisha/infra/scripts/cleanup-old-frontend-releases.sh`.
 
-Для frontend запрещено использовать `latest`, произвольный `origin/main`, старый `frontend-release-*`, rollback-образ или старый deploy-скрипт. Команды ниже, использующие общий `APP_VERSION` или `docker-compose.prod.yml`, являются историческими для общей инфраструктуры и не определяют текущий production frontend.
-
-Production: `ab-event.pro` | Staging: `test.ab-event.pro`  
-VPS: Timeweb Cloud, IP `77.232.136.248`, host `kvnvm-277`
-
----
-
-## Локальный запуск (разработка)
+## Единственный разрешённый frontend-деплой
 
 ```bash
-# 1. Установить pnpm >= 9
-npm install -g pnpm@9.15.0
+cd /srv/ab-afisha
 
-# 2. Клонировать и настроить окружение
-git clone https://github.com/bazhenovnv/ab-partner-calendar-v2
-cd ab-partner-calendar-v2
-cp .env.example .env
+git fetch --prune origin main
+git checkout main
+git pull --ff-only origin main
 
-# 3. Установить зависимости
-pnpm install
-
-# 4. Запустить через Docker Compose
-docker compose up -d
-
-# 5. Применить миграции и seed
-docker compose exec backend sh -c "cd /app/apps/backend && npx prisma migrate dev && npx prisma db seed"
-
-# 6. Открыть
-# Frontend:  http://localhost:3000
-# Backend API: http://localhost:3001/api
-# Swagger:   http://localhost:3001/api/docs
-# Healthcheck: http://localhost:3001/api/health
+ROOT=/srv/ab-afisha \
+COMPOSE_FILE=/srv/ab-afisha/docker-compose.production.v2.yml \
+bash /srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh
 ```
 
----
+Успешный результат обязан содержать:
 
-## Первый деплой на Timeweb Cloud VPS
+```text
+PRODUCTION_PIN_OK
+PRODUCTION_COMMIT=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
+PRODUCTION_FRONTEND=ab-afisha/frontend:frontend-release-3e308c5
+PRODUCTION_REVISION=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
+PUBLIC_HTTP=200
+NGINX_PRESERVED=true
+```
 
-### 1. Подготовка сервера
+## Удаление старых frontend-релизов
+
+Только после успешного закреплённого деплоя и визуальной проверки:
 
 ```bash
-ssh root@77.232.136.248
-adduser deploy
-usermod -aG sudo,docker deploy
-mkdir -p /home/deploy/.ssh
-chmod 700 /home/deploy/.ssh && chmod 600 /home/deploy/.ssh/authorized_keys
-chown -R deploy:deploy /home/deploy/.ssh
-curl -fsSL https://get.docker.com | sh
-systemctl enable --now docker
+cd /srv/ab-afisha
+
+ROOT=/srv/ab-afisha \
+COMPOSE_FILE=/srv/ab-afisha/docker-compose.production.v2.yml \
+bash /srv/ab-afisha/infra/scripts/cleanup-old-frontend-releases.sh
 ```
 
-### 2. SSL (Let's Encrypt)
+Ожидаемый итог:
 
-```bash
-apt install -y certbot
-certbot certonly --standalone -d ab-event.pro -d www.ab-event.pro
-certbot certonly --standalone -d test.ab-event.pro
-echo "0 3 * * * certbot renew --quiet --post-hook 'docker compose -f /home/deploy/ab-partner-calendar-v2/docker-compose.prod.yml exec nginx nginx -s reload'" | crontab -
+```text
+ONLY_PINNED_FRONTEND_IMAGE_REMAINS=true
+PINNED_FRONTEND_IMAGE=ab-afisha/frontend:frontend-release-3e308c5
+PINNED_FRONTEND_COMMIT=3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca
 ```
 
-### 3. Деплой приложения
+## Запрещено
 
-```bash
-su - deploy
-git clone https://github.com/bazhenovnv/ab-partner-calendar-v2
-cd ab-partner-calendar-v2
-cp .env.example .env
-# Заполнить .env: POSTGRES_PASSWORD, REDIS_PASSWORD, JWT_SECRET, TELEGRAM_BOT_TOKEN, MAX_BOT_TOKEN, ADMIN_TELEGRAM_CHAT_ID
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml run --rm backend sh -c \
-  "cd /app/apps/backend && npx prisma migrate deploy && npx prisma db seed"
-```
+- использовать старый VPS `77.232.136.248`;
+- использовать старый репозиторий;
+- деплоить frontend с тегом `latest`;
+- деплоить произвольный `origin/main`;
+- использовать любой `frontend-release-*`, кроме `frontend-release-3e308c5`;
+- использовать `rollback-before-*`, `temporary-rollback-*` или preflight-образы как production;
+- запускать старые frontend deploy-скрипты вместо `deploy-pinned-frontend.sh`;
+- выполнять `git reset --hard` или `git clean` на production-сервере;
+- менять или перезапускать backend, bots и nginx при frontend-деплое;
+- коммитить `.env`, секреты, токены и пароли.
 
-### 4. Бэкапы
+## Новая production-версия
 
-```bash
-echo "0 3 * * * /home/deploy/ab-partner-calendar-v2/infra/scripts/backup.sh >> /var/log/ab-afisha-backup.log 2>&1" | crontab -
-```
+Новая версия допускается только после отдельного явного утверждения владельцем проекта и одновременного обновления:
 
----
+- `PRODUCTION_RELEASE.md`;
+- `infra/deploy/production-frontend.env`;
+- `docker-compose.production.v2.yml`;
+- `apps/frontend/test/production-release-lock.test.mjs`.
 
-## Обновление общего приложения (не frontend production lock)
-
-```bash
-cd /home/deploy/ab-partner-calendar-v2
-git pull origin main
-docker compose -f docker-compose.prod.yml build
-./infra/scripts/deploy.sh
-```
-
-Для production frontend эта команда не применяется. Использовать только `infra/scripts/deploy-pinned-frontend.sh`.
-
----
-
-## Структура проекта
-
-```
-apps/
-  frontend/   — Next.js 14 (порт 3000)
-  backend/    — NestJS (порт 3001)
-  bots/       — Telegram + MAX боты (отдельный процесс)
-packages/
-  shared/     — Общие типы, константы
-  config/     — ESLint, Prettier конфиги
-infra/
-  nginx/      — Nginx конфиги (dev + prod)
-  scripts/    — deploy.sh, backup.sh
-```
-
----
-
-## Переменные окружения (обязательные для production)
-
-| Переменная | Описание |
-|---|---|
-| `POSTGRES_PASSWORD` | Пароль PostgreSQL |
-| `REDIS_PASSWORD` | Пароль Redis |
-| `JWT_SECRET` | Секрет JWT (мин. 32 символа) |
-| `TELEGRAM_BOT_TOKEN` | Токен Telegram-бота |
-| `MAX_BOT_TOKEN` | Токен MAX-бота |
-| `ADMIN_TELEGRAM_CHAT_ID` | Chat ID для уведомлений |
-
-> Никогда не коммитить `.env` в GitHub!
-
----
-
-## Порты (production)
-
-- `80` → Nginx (redirect → 443)
-- `443` → Nginx → frontend:3000 / backend:3001
-- Все остальные порты закрыты firewall-ом
+До этого момента используется только закреплённый релиз `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
