@@ -67,12 +67,41 @@ describe('Final modal, card title and page-load contracts', () => {
     );
   });
 
-  test('enlarges every label and value in location and speaker rows', () => {
+  test('keeps speaker names unchanged and matches labels and venue text to that size', () => {
     const styles = readFileSync(FINAL_MODAL, 'utf8');
 
     assert.match(
       styles,
-      /event-modal-v2_lines__[\s\S]*event-modal-v2_detailValue__[\s\S]*font-size: clamp\(15px, 0\.99vw, 19px\) !important;/,
+      /--event-modal-detail-text-size: clamp\(15px, 0\.99vw, 19px\);/,
+    );
+    assert.match(
+      styles,
+      /event-modal-v2_lines__[\s\S]*font-size: var\(--event-modal-detail-text-size\) !important;/,
+    );
+    assert.match(
+      styles,
+      /event-modal-v2_detailLabel__[\s\S]*event-modal-v2_detailValue__[\s\S]*font-size: inherit !important;/,
+    );
+    assert.doesNotMatch(
+      styles,
+      /event-modal-v2_detailValue__[\s\S]*font-size: clamp\((?!15px, 0\.99vw, 19px)/,
+    );
+  });
+
+  test('slightly enlarges detail icons and aligns speaker label with names on one baseline', () => {
+    const styles = readFileSync(FINAL_MODAL, 'utf8');
+
+    assert.match(
+      styles,
+      /event-modal-v2_detailLine__[\s\S]*svg[\s\S]*width: clamp\(20px, 1\.094vw, 21px\) !important;[\s\S]*height: clamp\(20px, 1\.094vw, 21px\) !important;/,
+    );
+    assert.match(
+      styles,
+      /\[data-event-modal-speakers\][\s\S]*display: grid !important;[\s\S]*grid-template-columns: auto auto minmax\(0, 1fr\) !important;[\s\S]*align-items: baseline !important;/,
+    );
+    assert.match(
+      styles,
+      /event-modal-v2_detailLabel__[\s\S]*white-space: nowrap !important;/,
     );
   });
 
