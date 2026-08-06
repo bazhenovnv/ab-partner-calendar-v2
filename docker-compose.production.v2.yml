@@ -80,7 +80,7 @@ services:
   frontend:
     # Production frontend is pinned by PRODUCTION_RELEASE.md and
     # infra/deploy/production-frontend.env. APP_VERSION must not select it.
-    image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-3e308c5}
+    image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-85b1a65}
     restart: always
     environment:
       NODE_ENV: production
