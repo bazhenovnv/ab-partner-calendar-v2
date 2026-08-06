@@ -76,6 +76,17 @@ button[aria-label="Закрыть"]:active {
     transform: scale(1.22) !important;
   }
 
+  /* Increase only the facts typography; panel geometry remains unchanged. */
+  [class*="event-modal-v2_label__"] {
+    font-size: clamp(10px, 0.625vw, 12px) !important;
+    line-height: 1.1 !important;
+  }
+
+  [class*="event-modal-v2_value__"] {
+    font-size: clamp(12px, 0.781vw, 15px) !important;
+    line-height: 1.15 !important;
+  }
+
   /*
    * Keep the existing speaker-name size as the reference size.
    * Match the format/location/speaker labels and venue text to it.

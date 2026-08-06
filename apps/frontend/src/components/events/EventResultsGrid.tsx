@@ -12,7 +12,6 @@ interface EventResultsGridProps {
 }
 
 const CARD_REVEAL_STEP_MS = 100;
-const CARD_REVEAL_DURATION_MS = 100;
 
 export function EventResultsGrid({
   events,
@@ -24,10 +23,7 @@ export function EventResultsGrid({
   useEffect(() => {
     if (!scrollAfterDateSelect) return;
 
-    const lastCardDelay = Math.max(0, events.length - 1) * CARD_REVEAL_STEP_MS;
-    const scrollDelay = lastCardDelay + CARD_REVEAL_DURATION_MS + 50;
-
-    const timer = window.setTimeout(() => {
+    const frame = window.requestAnimationFrame(() => {
       const grid = gridRef.current;
       if (!grid) {
         onScrollComplete();
@@ -76,9 +72,9 @@ export function EventResultsGrid({
       }
 
       onScrollComplete();
-    }, scrollDelay);
+    });
 
-    return () => window.clearTimeout(timer);
+    return () => window.cancelAnimationFrame(frame);
   }, [events, onScrollComplete, scrollAfterDateSelect]);
 
   return (
@@ -91,7 +87,10 @@ export function EventResultsGrid({
         <div
           key={event.id}
           className={styles.cardReveal}
-          style={{ '--event-card-delay': `${index * 0.1}s` } as CSSProperties}
+          data-event-card-reveal
+          style={{
+            '--event-card-delay': `${index * CARD_REVEAL_STEP_MS}ms`,
+          } as CSSProperties}
         >
           <EventCard event={event} />
         </div>

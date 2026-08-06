@@ -18,6 +18,8 @@
   border-radius: 12px !important;
   padding: 24px 23px 39px 22px !important;
   background: #fff !important;
+  transform: scale(1.25) !important;
+  transform-origin: center !important;
 }
 
 [class*='event-modal-v2_chooserHeaderImage__'] {
@@ -201,6 +203,12 @@
   transform: none !important;
 }
 
+@media (max-width: 767px), (max-height: 500px) {
+  [class*='event-modal-v2_chooser__'] {
+    transform: none !important;
+  }
+}
+
 @media (max-width: 263px), (max-height: 333px) {
   [class*='event-modal-v2_chooser__'] {
     width: min(240px, calc(100vw - 24px)) !important;
@@ -212,6 +220,7 @@
     overflow-y: auto !important;
     padding-right: 12px !important;
     padding-left: 12px !important;
+    transform: none !important;
   }
 
   [class*='event-modal-v2_platforms__'],
