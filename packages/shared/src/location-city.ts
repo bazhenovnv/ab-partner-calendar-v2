@@ -94,6 +94,12 @@ function cleanCityCandidate(value: string): string {
     .trim();
 }
 
+function cityStem(value: string): string {
+  return normalizeLocationValue(value)
+    .replace(/[аеёиоуыэюяьй]$/i, '')
+    .replace(/е$/i, '');
+}
+
 export function isPlausibleCityName(value: string): boolean {
   const candidate = cleanCityCandidate(value);
   if (!candidate || candidate.length < 2 || candidate.length > 80) return false;
@@ -136,6 +142,15 @@ function findCatalogueCity(
       if (
         parts.some((part) => normalizeLocationValue(part) === normalizedCity) ||
         normalizeLocationValue(value).startsWith(`${normalizedCity} (`)
+      ) {
+        return city;
+      }
+
+      const hybridCity = extractHybridCity(value);
+      if (
+        hybridCity &&
+        cityStem(hybridCity).length >= 4 &&
+        cityStem(hybridCity) === cityStem(city)
       ) {
         return city;
       }
