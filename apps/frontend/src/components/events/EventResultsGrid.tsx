@@ -11,8 +11,8 @@ interface EventResultsGridProps {
   onScrollComplete: () => void;
 }
 
-const CARD_REVEAL_STEP_MS = 100;
-const CARD_REVEAL_DURATION_MS = 100;
+const CARD_REVEAL_STEP_MS = 200;
+const CARD_REVEAL_DURATION_MS = 320;
 
 export function EventResultsGrid({
   events,
@@ -91,7 +91,10 @@ export function EventResultsGrid({
         <div
           key={event.id}
           className={styles.cardReveal}
-          style={{ '--event-card-delay': `${index * 0.1}s` } as CSSProperties}
+          data-event-card-reveal
+          style={{
+            '--event-card-delay': `${index * CARD_REVEAL_STEP_MS}ms`,
+          } as CSSProperties}
         >
           <EventCard event={event} />
         </div>
