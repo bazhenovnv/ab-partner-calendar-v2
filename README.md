@@ -29,8 +29,8 @@ Stage/audit/release reports являются историческими свид
 
 ## Закреплённый production frontend
 
-- Commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
-- Docker image: `ab-afisha/frontend:frontend-release-3e308c5`.
+- Commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`.
+- Docker image: `ab-afisha/frontend:frontend-release-d4fe868`.
 - Единственный разрешённый деплой: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
 Нельзя определять production по `main`, `latest`, старому release-тегу, rollback-образу или ранее использованному deploy-скрипту.
