@@ -18,8 +18,8 @@ const CLEANUP_PATH = resolve(ROOT, 'infra/scripts/cleanup-old-frontend-releases.
 const DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const COMMIT = '41cd224f730f296c6a1a6d4ea11a3c7be303c8b2';
-const TAG = 'frontend-release-41cd224';
+const COMMIT = '457a35e848899b5fc50e3d98449551b2ee543a9c';
+const TAG = 'frontend-release-457a35e';
 const IMAGE = `ab-afisha/frontend:${TAG}`;
 
 describe('Pinned production frontend release', () => {
@@ -40,7 +40,7 @@ describe('Pinned production frontend release', () => {
   test('pins compose independently from the shared APP_VERSION', () => {
     assert.match(
       COMPOSE,
-      /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-41cd224\}/,
+      /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-457a35e\}/,
     );
     assert.doesNotMatch(COMPOSE, /frontend:\s*[\s\S]*?image: ab-afisha\/frontend:\$\{APP_VERSION/);
   });
