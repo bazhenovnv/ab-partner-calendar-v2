@@ -2,18 +2,20 @@
 
 ## Production release lock — read first
 
-Перед любыми frontend-изменениями, сборкой, откатом или деплоем обязательно прочитать:
+Перед любыми изменениями, сборкой, откатом или deployment обязательно прочитать:
 
 - `PRODUCTION_RELEASE.md`;
 - `infra/deploy/production-frontend.env`.
 
-Единственная утверждённая production-версия frontend:
+Единственная утверждённая production-версия приложения:
 
-- commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
-- image: `ab-afisha/frontend:frontend-release-d4fe868`;
-- deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
+- commit: `eaada79ef32bd28a874d828ad71b4d87a6775376`;
+- backend image: `ab-afisha/backend:backend-release-eaada79`;
+- frontend image: `ab-afisha/frontend:frontend-release-eaada79`;
+- full deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`;
+- frontend-only deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Нельзя определять production по `main`, `latest`, старому Docker-тегу или старому deploy-скрипту. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
+Нельзя определять production по `main`, `latest`, старому Docker-тегу или старому deploy-скрипту. Нельзя выбирать backend через общий `APP_VERSION`, потому что он также используется bots. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
 
 ## Project
 
