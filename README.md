@@ -12,18 +12,28 @@
 
 Перед любыми изменениями открыть:
 
-1. [`docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md`](docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md) — какой источник побеждает при конфликте.
-2. [`docs/PROJECT_BIBLE/README.md`](docs/PROJECT_BIBLE/README.md) — навигация по проектной книге.
-3. [`docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md`](docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md) — утверждённый процесс текущего этапа дизайна.
-4. [`docs/PROJECT_BIBLE/12_DESIGN_AUDIT_2026-07.md`](docs/PROJECT_BIBLE/12_DESIGN_AUDIT_2026-07.md) — текущая база несоответствий главной страницы.
-5. Спецификацию нужного блока.
-6. [`docs/BUSINESS_RULES.md`](docs/BUSINESS_RULES.md).
-7. [`docs/ADR.md`](docs/ADR.md).
-8. [`docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md`](docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md).
-9. [`docs/PROJECT_BIBLE/08_OPEN_ISSUES.md`](docs/PROJECT_BIBLE/08_OPEN_ISSUES.md).
-10. [`docs/PROJECT_BIBLE/09B_RELEASE_ACCEPTANCE_CHECKLIST.md`](docs/PROJECT_BIBLE/09B_RELEASE_ACCEPTANCE_CHECKLIST.md) — обязательные доказательства приёмки.
+1. [`PRODUCTION_RELEASE.md`](PRODUCTION_RELEASE.md) — единственная закреплённая production-версия frontend.
+2. [`infra/deploy/production-frontend.env`](infra/deploy/production-frontend.env) — машиночитаемый production lock.
+3. [`docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md`](docs/PROJECT_BIBLE/00_SOURCE_OF_TRUTH.md) — какой источник побеждает при конфликте.
+4. [`docs/PROJECT_BIBLE/README.md`](docs/PROJECT_BIBLE/README.md) — навигация по проектной книге.
+5. [`docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md`](docs/PROJECT_BIBLE/11_DESIGN_PHASE_WORKFLOW.md) — утверждённый процесс текущего этапа дизайна.
+6. [`docs/PROJECT_BIBLE/12_DESIGN_AUDIT_2026-07.md`](docs/PROJECT_BIBLE/12_DESIGN_AUDIT_2026-07.md) — текущая база несоответствий главной страницы.
+7. Спецификацию нужного блока.
+8. [`docs/BUSINESS_RULES.md`](docs/BUSINESS_RULES.md).
+9. [`docs/ADR.md`](docs/ADR.md).
+10. [`docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md`](docs/PROJECT_BIBLE/05_ASSET_REGISTRY.md).
+11. [`docs/PROJECT_BIBLE/08_OPEN_ISSUES.md`](docs/PROJECT_BIBLE/08_OPEN_ISSUES.md).
+12. [`docs/PROJECT_BIBLE/09B_RELEASE_ACCEPTANCE_CHECKLIST.md`](docs/PROJECT_BIBLE/09B_RELEASE_ACCEPTANCE_CHECKLIST.md) — обязательные доказательства приёмки.
 
-Stage/audit/release reports являются историческими свидетельствами и не могут переопределять утверждённый дизайн или канонические документы PROJECT_BIBLE.
+Stage/audit/release reports являются историческими свидетельствами и не могут переопределять утверждённый дизайн, канонические документы PROJECT_BIBLE или production lock.
+
+## Закреплённый production frontend
+
+- Commit: `3e308c5355ad5ebd09c4fd634ba7df965a7bf6ca`.
+- Docker image: `ab-afisha/frontend:frontend-release-3e308c5`.
+- Единственный разрешённый деплой: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
+
+Нельзя определять production по `main`, `latest`, старому release-тегу, rollback-образу или ранее использованному deploy-скрипту.
 
 ## Основные документы
 
@@ -42,7 +52,7 @@ Stage/audit/release reports являются историческими свид
 - Staging: `https://test.ab-event.pro`.
 - Каноническая интеграционная ветка: `main`.
 - Новые изменения выполняются в короткоживущих feature-ветках от актуальной `main` и после приёмки сливаются обратно.
-- Проверенная исходная точка дизайн-этапа: commit `b6c333a`, tag `release-20260723`.
+- Проверенная исходная точка дизайн-этапа `b6c333a` / `release-20260723` является исторической и не определяет production.
 - Исторические вершины удалённых веток сохранены тегами `archive-20260723-*`.
 - Путь проекта на сервере: `/srv/ab-afisha`.
 - Рабочая почта: `info-event@a-b.ru`.
