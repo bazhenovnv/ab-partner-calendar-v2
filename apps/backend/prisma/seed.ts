@@ -7,19 +7,26 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'changeme_in_production';
-  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@ab-event.pro';
+  const adminEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@ab-event.pro').trim().toLocaleLowerCase('ru');
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
 
-  await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {},
-    create: {
-      email: adminEmail,
-      passwordHash: await bcrypt.hash(adminPassword, 12),
-      name: 'Администратор',
-      role: 'ADMIN',
-    },
-  });
+  if (!existingAdmin && (!adminPassword || adminPassword.length < 12)) {
+    throw new Error(
+      'SEED_ADMIN_PASSWORD (minimum 12 characters) is required to create the initial administrator account.',
+    );
+  }
+
+  if (!existingAdmin && adminPassword) {
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        passwordHash: await bcrypt.hash(adminPassword, 12),
+        name: 'Администратор',
+        role: 'ADMIN',
+      },
+    });
+  }
 
   for (let i = 0; i < DEFAULT_DIRECTIONS.length; i++) {
     const d = DEFAULT_DIRECTIONS[i];
