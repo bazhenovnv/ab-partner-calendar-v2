@@ -5,10 +5,10 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Git commit: `eaada79ef32bd28a874d828ad71b4d87a6775376`
-- Backend image: `ab-afisha/backend:backend-release-eaada79`
-- Frontend image: `ab-afisha/frontend:frontend-release-eaada79`
-- Дата утверждения: `2026-08-06`
+- Git commit: `a8a91ced755eb0ee036176336bc12b4d230f7b75`
+- Backend image: `ab-afisha/backend:backend-release-a8a91ce`
+- Frontend image: `ab-afisha/frontend:frontend-release-a8a91ce`
+- Дата утверждения: `2026-08-10`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Полный backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`
@@ -18,12 +18,18 @@
 
 ## Что входит в этот релиз
 
-- переход по серым датам предыдущего месяца;
-- тихое обновление карточек и календарных маркеров раз в 60 секунд;
-- немедленное обновление после возврата на вкладку;
-- запросы событий и маркеров без браузерного кеша;
-- резервная MAX-синхронизация каждые 5 минут;
-- повторная обработка недавних MAX-обновлений при deployment.
+- полный ролевой ЛК администратора по утверждённому ТЗ;
+- Dashboard и управление мероприятиями;
+- раздел `Требует внимания` и управление `Главными событиями`;
+- фильтры, города/регионы, цитаты и конструктор сайта;
+- MAX import и интеграции/API sources;
+- боты, напоминания, контакты и рассылки;
+- внутренняя аналитика;
+- пользователи и роли `ADMIN` / `EDITOR`;
+- архив/удалённые, журнал действий и журнал технических ошибок;
+- реальная проверка административной JWT-сессии через `/auth/me`;
+- безопасный seed первого администратора без известного fallback-пароля;
+- сохранены предыдущие исправления календаря и живая MAX-синхронизация.
 
 ## Обязательное правило для новых чатов и AI-агентов
 
@@ -42,8 +48,8 @@
 
 - деплоить backend или frontend с тегом `latest`;
 - выбирать backend через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-eaada79`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-eaada79`;
+- деплоить любой `backend-release-*`, кроме `backend-release-a8a91ce`;
+- деплоить любой `frontend-release-*`, кроме `frontend-release-a8a91ce`;
 - использовать старые `max-ingestion-*`, `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
 - определять production-версию по последнему commit в `main`;
 - менять закреплённую версию без отдельного явного утверждения владельца проекта;
@@ -61,4 +67,4 @@
 - `CLAUDE.md`;
 - теста `apps/frontend/test/production-release-lock.test.mjs`.
 
-До этого момента действующей остаётся версия `eaada79ef32bd28a874d828ad71b4d87a6775376`.
+До следующего отдельного утверждения действующей остаётся версия `a8a91ced755eb0ee036176336bc12b4d230f7b75`.
