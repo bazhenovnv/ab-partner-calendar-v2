@@ -36,14 +36,26 @@ export class ApiSourcesService {
   }
 
   create(input: ApiSourceInput) {
-    return this.prisma.apiSource.create({ data: this.toData(input) });
+    const data: Prisma.ApiSourceCreateInput = {
+      name: input.name.trim(),
+      url: input.url.trim(),
+      method: input.method?.trim().toUpperCase() || 'GET',
+      headers: (input.headers ?? {}) as Prisma.InputJsonValue,
+      authType: input.authType ?? 'none',
+      authConfig: (input.authConfig ?? {}) as Prisma.InputJsonValue,
+      syncPeriod: input.syncPeriod ?? 60,
+      fieldMapping: (input.fieldMapping ?? {}) as Prisma.InputJsonValue,
+      syncMode: input.syncMode ?? 'new_and_update',
+      isEnabled: input.isEnabled ?? false,
+    };
+    return this.prisma.apiSource.create({ data });
   }
 
   async update(id: string, input: Partial<ApiSourceInput>) {
     await this.get(id);
     return this.prisma.apiSource.update({
       where: { id },
-      data: this.toData(input),
+      data: this.toUpdateData(input),
     });
   }
 
@@ -88,7 +100,7 @@ export class ApiSourcesService {
     }
   }
 
-  private toData(input: Partial<ApiSourceInput>): Prisma.ApiSourceUpdateInput {
+  private toUpdateData(input: Partial<ApiSourceInput>): Prisma.ApiSourceUpdateInput {
     return {
       ...(input.name !== undefined && { name: input.name.trim() }),
       ...(input.url !== undefined && { url: input.url.trim() }),
