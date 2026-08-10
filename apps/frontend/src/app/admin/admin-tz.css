@@ -1,0 +1,78 @@
+.adm-sidebar__account {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 .75rem .75rem;
+  color: #fff;
+  font-size: .8rem;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  margin-bottom: .35rem;
+}
+.adm-sidebar__account span { color: rgba(255,255,255,.5); font-size: .7rem; }
+
+.adm-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.adm-page-title { margin: 0; color: var(--color-primary); font-size: 1.5rem; font-weight: 700; }
+
+.adm-content > div:not(.adm-login-wrap) { padding: 2rem; max-width: 1180px; }
+
+.adm-card {
+  display: block;
+  background: #fff;
+  color: var(--color-primary);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(13,35,68,.04);
+}
+.adm-card h2 { margin: 0 0 .65rem; font-size: 1rem; font-weight: 700; }
+a.adm-card:hover { border-color: #cbd5e1; box-shadow: 0 3px 10px rgba(13,35,68,.08); }
+
+.adm-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.adm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.adm-btn--small { font-size: .8rem; padding: .35rem .7rem; }
+
+.adm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+.adm-stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+.adm-stat-card span { color: #6b7280; font-size: .78rem; }
+.adm-stat-card strong { color: var(--color-primary); font-size: 1.5rem; }
+
+.adm-log-pre {
+  max-width: 520px;
+  max-height: 260px;
+  overflow: auto;
+  margin: .5rem 0 0;
+  padding: .75rem;
+  border-radius: 6px;
+  background: #111827;
+  color: #e5e7eb;
+  font: 12px/1.45 monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .adm-grid-2 { grid-template-columns: 1fr; }
+  .adm-sidebar { width: 200px; }
+  .adm-content > div:not(.adm-login-wrap) { padding: 1.25rem; }
+}
