@@ -6,16 +6,17 @@ This document defines which source wins when project documents, code, screenshot
 
 ## Production runtime authority
 
-For the question **which frontend version is allowed in production**, the highest authority is:
+For the question **which application version is allowed in production**, the highest authority is:
 
 1. explicit approval by the project owner;
 2. root file `PRODUCTION_RELEASE.md`;
 3. machine-readable lock `infra/deploy/production-frontend.env`.
 
-The current production frontend is fixed to:
+The current production application is fixed to:
 
-- commit `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`;
-- image `ab-afisha/frontend:frontend-release-d4fe868`.
+- commit `a8a91ced755eb0ee036176336bc12b4d230f7b75`;
+- backend image `ab-afisha/backend:backend-release-a8a91ce`;
+- frontend image `ab-afisha/frontend:frontend-release-a8a91ce`.
 
 `main`, `latest`, historical release tags, rollback images and old deployment scripts do not override this lock.
 
@@ -55,8 +56,9 @@ Production deployment approval additionally requires an exact match with `infra/
 - Historical repository: `bazhenovnv/ab-partner-calendar` — do not use for current work.
 - Historical long-lived branch: `claude/ab-afisha-architecture-plan-805f5o` — no longer the canonical working branch.
 - Production: `ab-event.pro`.
-- Production frontend commit: `d4fe868a9f42ea66cf6a0760bb33dd3b3d6ed6c7`.
-- Production frontend image: `ab-afisha/frontend:frontend-release-d4fe868`.
+- Production application commit: `a8a91ced755eb0ee036176336bc12b4d230f7b75`.
+- Production backend image: `ab-afisha/backend:backend-release-a8a91ce`.
+- Production frontend image: `ab-afisha/frontend:frontend-release-a8a91ce`.
 - Staging: `test.ab-event.pro`.
 - Deploy path: `/srv/ab-afisha`.
 - Current VPS IPv4: `5.129.243.179`.
