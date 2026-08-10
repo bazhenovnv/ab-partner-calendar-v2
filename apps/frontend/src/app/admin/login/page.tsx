@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     try {
       const data = await adminApi.post<{ access_token: string }>('/auth/login', { email, password });
       setToken(data.access_token);
-      router.replace('/admin/broadcasts');
+      router.replace('/admin');
     } catch (err) {
       setError(err instanceof ApiError && err.status === 401 ? 'Неверный email или пароль' : 'Ошибка входа');
     } finally {

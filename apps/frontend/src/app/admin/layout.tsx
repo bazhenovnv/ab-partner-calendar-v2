@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import './admin-tz.css';
 import AdminLayoutClient from './AdminLayoutClient';
 
 export const metadata: Metadata = {
