@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,9 +22,9 @@ export class AnalyticsController {
 
   @Post('events/:eventId')
   trackEvent(
-    @Body() body: { eventId?: string; action?: string; sessionId?: string | null },
+    @Param('eventId') eventId: string,
+    @Body() body: { action?: string; sessionId?: string | null },
   ) {
-    const eventId = body.eventId ?? '';
     return this.analyticsService.trackEvent(eventId, body.action ?? 'view', body.sessionId);
   }
 
