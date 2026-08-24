@@ -7,7 +7,14 @@ export class FiltersService {
 
   getDirections() {
     return this.prisma.direction.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        events: {
+          some: {
+            event: { status: 'PUBLISHED' },
+          },
+        },
+      },
       select: { id: true, name: true, slug: true },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
     });
