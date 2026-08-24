@@ -35,21 +35,25 @@ export class CitiesController {
   }
 
   @Post()
+  @Roles('ADMIN')
   create(@Body() dto: CreateCityDto) {
     return this.citiesService.create(dto);
   }
 
   @Put(':id')
+  @Roles('ADMIN')
   update(@Param('id') id: string, @Body() dto: UpdateCityDto) {
     return this.citiesService.update(id, dto);
   }
 
   @Patch(':id/toggle')
+  @Roles('ADMIN')
   toggle(@Param('id') id: string) {
     return this.citiesService.toggle(id);
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   remove(@Param('id') id: string) {
     return this.citiesService.remove(id);
   }
