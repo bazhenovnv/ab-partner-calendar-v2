@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { adminApi, ApiError, type AdminEvent, type AdminEventsResponse, type EventStatus } from '@/lib/admin-api';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
@@ -27,6 +28,7 @@ function fmtDate(iso: string) {
 }
 
 export default function EventsListPage() {
+  const router = useRouter();
   const [data, setData] = useState<AdminEventsResponse | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -100,29 +102,27 @@ export default function EventsListPage() {
         </Link>
       </div>
 
-      {/* Quick-filter tabs */}
-      <div className="adm-tabs" role="tablist" aria-label="Фильтр мероприятий">
-        <button
+      {/* Quick navigation between event administration sections */}
+      <div className="adm-tabs" role="tablist" aria-label="Разделы мероприятий">
+        <Link
           role="tab"
-          type="button"
-          aria-selected={status !== 'NEEDS_ATTENTION'}
-          className={`adm-tab${status !== 'NEEDS_ATTENTION' ? ' adm-tab--active' : ''}`}
-          onClick={() => { setStatus(''); setPage(1); }}
+          aria-selected="true"
+          className="adm-tab adm-tab--active"
+          href="/admin/events"
         >
           Все мероприятия
-        </button>
-        <button
+        </Link>
+        <Link
           role="tab"
-          type="button"
-          aria-selected={status === 'NEEDS_ATTENTION'}
-          className={`adm-tab${status === 'NEEDS_ATTENTION' ? ' adm-tab--active' : ''}`}
-          onClick={() => { setStatus('NEEDS_ATTENTION'); setPage(1); }}
+          aria-selected="false"
+          className="adm-tab"
+          href="/admin/needs-attention"
         >
           Требует внимания
           {attentionCount > 0 && (
             <span className="adm-tab__badge">{attentionCount}</span>
           )}
-        </button>
+        </Link>
       </div>
 
       <form className="adm-toolbar" onSubmit={handleSearch}>
@@ -138,7 +138,15 @@ export default function EventsListPage() {
           <select
             className="adm-select"
             value={status}
-            onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              const nextStatus = e.target.value;
+              if (nextStatus === 'NEEDS_ATTENTION') {
+                router.push('/admin/needs-attention');
+                return;
+              }
+              setStatus(nextStatus);
+              setPage(1);
+            }}
           >
             <option value="">Все статусы</option>
             {(Object.keys(STATUS_LABELS) as EventStatus[]).map((s) => (
