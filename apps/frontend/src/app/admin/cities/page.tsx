@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   adminApi,
   ApiError,
@@ -14,6 +14,14 @@ function fmtDate(iso: string) {
 
 const EMPTY_FORM = { name: '', region: '', sortOrder: 0, isActive: true };
 
+type ReconcileResult = {
+  scanned: number;
+  detected: number;
+  created: number;
+  linked: number;
+  corrected: number;
+};
+
 export default function CitiesPage() {
   const [data, setData] = useState<AdminCitiesResponse | null>(null);
   const [page, setPage] = useState(1);
@@ -23,6 +31,9 @@ export default function CitiesPage() {
   const [filterActive, setFilterActive] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('');
+  const didAutoReconcile = useRef(false);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<AdminCity | null>(null);
@@ -32,23 +43,52 @@ export default function CitiesPage() {
 
   const LIMIT = 20;
 
+  const buildParams = useCallback(() => {
+    const params = new URLSearchParams({ page: String(page), limit: String(LIMIT), sortBy, sortDir });
+    if (search) params.set('search', search);
+    if (filterActive) params.set('isActive', filterActive);
+    return params;
+  }, [page, search, sortBy, sortDir, filterActive]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ page: String(page), limit: String(LIMIT), sortBy, sortDir });
-      if (search) params.set('search', search);
-      if (filterActive) params.set('isActive', filterActive);
-      const res = await adminApi.get<AdminCitiesResponse>(`/admin/cities?${params}`);
+      let res = await adminApi.get<AdminCitiesResponse>(`/admin/cities?${buildParams()}`);
+
+      if (res.total === 0 && !search && !filterActive && !didAutoReconcile.current) {
+        didAutoReconcile.current = true;
+        await adminApi.post<ReconcileResult>('/admin/cities/reconcile', {});
+        res = await adminApi.get<AdminCitiesResponse>(`/admin/cities?${buildParams()}`);
+      }
+
       setData(res);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Ошибка загрузки');
     } finally {
       setLoading(false);
     }
-  }, [page, search, sortBy, sortDir, filterActive]);
+  }, [buildParams, filterActive, search]);
 
   useEffect(() => { void load(); }, [load]);
+
+  async function handleReconcile() {
+    setSyncing(true);
+    setSyncMessage('');
+    try {
+      const result = await adminApi.post<ReconcileResult>('/admin/cities/reconcile', {});
+      setSyncMessage(
+        `Проверено событий: ${result.scanned}. Найдено городов: ${result.detected}. ` +
+        `Добавлено: ${result.created}. Связано: ${result.linked}. Исправлено названий: ${result.corrected}.`,
+      );
+      setPage(1);
+      await load();
+    } catch (err) {
+      setSyncMessage(err instanceof ApiError ? `Ошибка: ${err.message}` : 'Не удалось синхронизировать города');
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   function openCreate() {
     setEditTarget(null);
@@ -126,10 +166,17 @@ export default function CitiesPage() {
           Города
           {data && <span className="adm-count">{data.total}</span>}
         </h1>
-        <button className="adm-btn adm-btn--primary" type="button" onClick={openCreate}>
-          + Добавить город
-        </button>
+        <div className="adm-actions">
+          <button className="adm-btn adm-btn--secondary" type="button" onClick={handleReconcile} disabled={syncing}>
+            {syncing ? 'Синхронизация…' : '↻ Синхронизировать из мероприятий'}
+          </button>
+          <button className="adm-btn adm-btn--primary" type="button" onClick={openCreate}>
+            + Добавить город
+          </button>
+        </div>
       </div>
+
+      {syncMessage && <p className="adm-flash">{syncMessage}</p>}
 
       <div className="adm-toolbar">
         <div className="adm-toolbar__group">
@@ -233,7 +280,6 @@ export default function CitiesPage() {
         </>
       )}
 
-      {/* Form panel */}
       {formOpen && (
         <div className="adm-modal-overlay" onClick={() => setFormOpen(false)}>
           <div className="adm-modal" onClick={(e) => e.stopPropagation()}>

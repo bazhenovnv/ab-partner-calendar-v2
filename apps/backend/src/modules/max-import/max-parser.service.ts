@@ -78,6 +78,39 @@ const CYRILLIC_DIRECTION_HINTS: Array<{
   },
 ];
 
+const VENUE_PREFIX = /^(?:отель|гостиниц|бизнес[-\s]?центр|бц\b|конференц|центр\b|зал\b|офис\b|ресторан\b|кафе\b)/i;
+const STREET_PART = /^(?:ул\.?|улица|проспект|пр-т|пер\.?|переулок|шоссе|наб\.?|набережная|бульвар|бул\.?|пл\.?|площадь|д\.?\s*\d|дом\b)/i;
+const REGION_PART = /(?:обл\.?|область|край|респ\.?|республика|автономн|округ|ао)$/i;
+
+function cleanLocationPart(value: string) {
+  return value.trim().replace(/^(?:г\.|город)\s*/i, '').trim();
+}
+
+function repairVenueFirstLocation(result: ParsedMaxPost) {
+  if (result.format !== 'OFFLINE' || !result.city || !result.address) return;
+  if (!VENUE_PREFIX.test(result.city)) return;
+
+  const parts = result.address
+    .split(',')
+    .map(cleanLocationPart)
+    .filter(Boolean);
+  if (parts.length < 2) return;
+
+  let regionIndex = parts.findIndex((part) => REGION_PART.test(part));
+  if (regionIndex < 0) regionIndex = parts.length;
+
+  for (let index = regionIndex - 1; index >= 0; index -= 1) {
+    const candidate = parts[index];
+    if (/^\d+[а-яa-z/-]*$/i.test(candidate)) continue;
+    if (STREET_PART.test(candidate) || REGION_PART.test(candidate)) continue;
+    if (!/[а-яёa-z]/i.test(candidate)) continue;
+
+    result.venue = result.venue ?? result.city;
+    result.city = candidate;
+    return;
+  }
+}
+
 @Injectable()
 export class MaxParserService extends BaseMaxParserService {
   override parse(
@@ -86,6 +119,8 @@ export class MaxParserService extends BaseMaxParserService {
     supplementalUrls: string[] = [],
   ): ParsedMaxPost {
     const result = super.parse(text, postDate, supplementalUrls);
+    repairVenueFirstLocation(result);
+
     const usedFallback =
       result.directionSlugs.length === 1 &&
       result.directionSlugs[0] === 'accounting' &&
