@@ -14,11 +14,9 @@ const RESTORABLE_STATUSES: EventStatus[] = [
   EventStatus.NEEDS_ATTENTION,
 ];
 
-type StatusSnapshot = { status?: unknown } | null | undefined;
-
 function statusFromJson(value: Prisma.JsonValue | null): EventStatus | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-  const candidate = (value as StatusSnapshot).status;
+  const candidate = (value as Record<string, unknown>).status;
   if (typeof candidate !== 'string') return null;
   return RESTORABLE_STATUSES.includes(candidate as EventStatus)
     ? (candidate as EventStatus)
@@ -95,7 +93,10 @@ export class EventLifecycleService {
   async restoreEvent(id: string, userId: string) {
     const existing = await this.prisma.event.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Event not found');
-    if (![EventStatus.ARCHIVE, EventStatus.DELETED].includes(existing.status)) {
+    if (
+      existing.status !== EventStatus.ARCHIVE &&
+      existing.status !== EventStatus.DELETED
+    ) {
       throw new BadRequestException('Восстановить можно только архивное или удалённое мероприятие');
     }
 
