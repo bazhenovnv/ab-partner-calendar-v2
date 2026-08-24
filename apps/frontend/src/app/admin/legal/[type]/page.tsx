@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { adminApi, ApiError, type LegalDoc, type LegalDocVersion } from '@/lib/admin-api';
@@ -22,6 +22,7 @@ const TYPE_SLUGS: Record<string, string> = {
 };
 
 type Tab = 'edit' | 'versions' | 'preview';
+type EditorCommand = 'bold' | 'italic' | 'underline' | 'insertUnorderedList' | 'insertOrderedList' | 'unlink' | 'undo' | 'redo';
 
 function fmtDateTime(iso: string): string {
   return new Date(iso).toLocaleString('ru-RU', {
@@ -32,6 +33,7 @@ function fmtDateTime(iso: string): string {
 
 export default function LegalDocPage() {
   const { type } = useParams<{ type: string }>();
+  const editorRef = useRef<HTMLDivElement | null>(null);
 
   const [doc, setDoc] = useState<LegalDoc | null>(null);
   const [versions, setVersions] = useState<LegalDocVersion[] | null>(null);
@@ -42,7 +44,7 @@ export default function LegalDocPage() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
-  // editor state — mirrors doc.content until saved
+  // HTML remains the storage format; the administrator edits it visually.
   const [draftContent, setDraftContent] = useState('');
   const [draftTitle, setDraftTitle] = useState('');
 
@@ -50,7 +52,6 @@ export default function LegalDocPage() {
     setLoading(true);
     setError('');
     try {
-      // Public GET /legal/:type returns full LegalDoc (same shape needed here)
       const d = await adminApi.get<LegalDoc>(`/legal/${type}`);
       setDoc(d);
       setDraftContent(d.content);
@@ -72,9 +73,41 @@ export default function LegalDocPage() {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (tab === 'versions') void loadVersions(); }, [tab, loadVersions]);
 
+  useEffect(() => {
+    if (tab !== 'edit' || !editorRef.current) return;
+    if (editorRef.current.innerHTML !== draftContent) {
+      editorRef.current.innerHTML = draftContent;
+    }
+  }, [tab, draftContent]);
+
   function flash(msg: string) {
     setActionMsg(msg);
     setTimeout(() => setActionMsg(''), 4000);
+  }
+
+  function syncEditorContent() {
+    if (!editorRef.current) return;
+    setDraftContent(editorRef.current.innerHTML);
+  }
+
+  function runEditorCommand(command: EditorCommand) {
+    editorRef.current?.focus();
+    document.execCommand(command, false);
+    syncEditorContent();
+  }
+
+  function setBlock(block: 'p' | 'h2' | 'h3') {
+    editorRef.current?.focus();
+    document.execCommand('formatBlock', false, block);
+    syncEditorContent();
+  }
+
+  function addLink() {
+    const href = window.prompt('Введите адрес ссылки, например https://example.ru');
+    if (!href) return;
+    editorRef.current?.focus();
+    document.execCommand('createLink', false, href.trim());
+    syncEditorContent();
   }
 
   async function handleSaveDraft() {
@@ -172,16 +205,50 @@ export default function LegalDocPage() {
                 maxLength={300}
               />
             </label>
-            <label className="adm-label">
-              Содержимое (HTML)
-              <textarea
-                className="adm-textarea adm-textarea--legal"
-                value={draftContent}
-                onChange={(e) => setDraftContent(e.target.value)}
-                rows={24}
-                placeholder="HTML-содержимое документа…"
-              />
-            </label>
+
+            <div className="adm-label">
+              Содержимое документа
+              <div className="adm-rich-editor" role="group" aria-label="Редактор юридического документа">
+                <div className="adm-rich-editor__toolbar" aria-label="Панель форматирования">
+                  <select
+                    className="adm-rich-editor__select"
+                    defaultValue="p"
+                    onChange={(e) => setBlock(e.target.value as 'p' | 'h2' | 'h3')}
+                    aria-label="Стиль абзаца"
+                  >
+                    <option value="p">Обычный текст</option>
+                    <option value="h2">Заголовок 1</option>
+                    <option value="h3">Заголовок 2</option>
+                  </select>
+                  <span className="adm-rich-editor__separator" />
+                  <button type="button" onClick={() => runEditorCommand('bold')} title="Жирный"><strong>Ж</strong></button>
+                  <button type="button" onClick={() => runEditorCommand('italic')} title="Курсив"><em>К</em></button>
+                  <button type="button" onClick={() => runEditorCommand('underline')} title="Подчёркнутый"><u>Ч</u></button>
+                  <span className="adm-rich-editor__separator" />
+                  <button type="button" onClick={() => runEditorCommand('insertUnorderedList')} title="Маркированный список">• Список</button>
+                  <button type="button" onClick={() => runEditorCommand('insertOrderedList')} title="Нумерованный список">1. Список</button>
+                  <span className="adm-rich-editor__separator" />
+                  <button type="button" onClick={addLink} title="Добавить ссылку">Ссылка</button>
+                  <button type="button" onClick={() => runEditorCommand('unlink')} title="Удалить ссылку">Убрать ссылку</button>
+                  <span className="adm-rich-editor__separator" />
+                  <button type="button" onClick={() => runEditorCommand('undo')} title="Отменить">↶</button>
+                  <button type="button" onClick={() => runEditorCommand('redo')} title="Повторить">↷</button>
+                </div>
+                <div
+                  ref={editorRef}
+                  className="adm-rich-editor__surface"
+                  contentEditable
+                  suppressContentEditableWarning
+                  role="textbox"
+                  aria-multiline="true"
+                  aria-label="Текст юридического документа"
+                  onInput={syncEditorContent}
+                  onBlur={syncEditorContent}
+                />
+              </div>
+              <span className="adm-rich-editor__hint">Редактируйте документ прямо в его обычном виде. HTML-код сохраняется автоматически и в редакторе не показывается.</span>
+            </div>
+
             <div className="adm-form__footer">
               <button
                 className="adm-btn adm-btn--secondary"
