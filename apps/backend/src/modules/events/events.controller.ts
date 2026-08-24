@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { EventsService } from './events.service';
+import { EventLifecycleService } from './event-lifecycle.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventsQueryDto } from './dto/events-query.dto';
@@ -16,7 +17,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 @ApiTags('events')
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly eventLifecycleService: EventLifecycleService,
+  ) {}
 
   @Get('public')
   getPublicEvents(@Query() query: EventsQueryDto) {
@@ -114,7 +118,15 @@ export class EventsController {
   @Patch('admin/:id/archive')
   @Roles('ADMIN', 'EDITOR')
   archiveEvent(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
-    return this.eventsService.archiveEvent(id, req.user.id);
+    return this.eventLifecycleService.archiveEvent(id, req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Patch('admin/:id/restore')
+  @Roles('ADMIN', 'EDITOR')
+  restoreEvent(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+    return this.eventLifecycleService.restoreEvent(id, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -122,8 +134,8 @@ export class EventsController {
   @Delete('admin/:id')
   @Roles('ADMIN')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteEvent(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
-    return this.eventsService.deleteEvent(id, req.user.id);
+  async deleteEvent(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+    await this.eventLifecycleService.deleteEvent(id, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

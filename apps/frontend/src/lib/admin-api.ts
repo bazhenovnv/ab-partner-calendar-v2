@@ -33,7 +33,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await res.json().catch(() => ({})) as { message?: string };
     throw new ApiError(res.status, body.message ?? `API ${res.status}`);
   }
-  return res.json() as Promise<T>;
+
+  // Several administrative commands intentionally return 204 No Content.
+  // Treat a successful empty response as success instead of attempting JSON
+  // parsing and surfacing a false UI error after the backend already changed data.
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
 }
 
 export const adminApi = {
