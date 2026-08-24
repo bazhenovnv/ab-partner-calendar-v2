@@ -6,22 +6,36 @@ interface MainEventsCarouselBridgeProps {
 }
 
 /**
- * The public backend endpoint already returns only published `mainEvent=true`
- * records with usable artwork. The legacy carousel performs an additional
- * source-text `#хит` check, which can hide recovered or manually approved
- * main events. Supply an invisible HTML-comment marker in-memory so the visual
- * component receives every event selected by the backend without changing
- * persisted data or user-visible modal text.
+ * The backend endpoint is the source of truth for public main-event selection.
+ * MainEventsBanner still contains two legacy assumptions: a source-text #хит
+ * marker and originalUrl-first image resolution. Normalize only the in-memory
+ * presentation payload here so persisted event data and the carousel geometry
+ * remain untouched while the canonical contract is enforced:
+ * - every backend-selected main event reaches the banner;
+ * - only the dedicated mainEventUrl can become the rendered poster.
  */
 export function MainEventsCarouselBridge({
   events,
 }: MainEventsCarouselBridgeProps) {
-  const canonicalEvents = events.map((event) => ({
-    ...event,
-    fullDescription: event.mainEvent
-      ? `${event.fullDescription ?? ''}\n<!-- #хит -->`.trim()
-      : event.fullDescription,
-  }));
+  const canonicalEvents = events
+    .filter((event) => Boolean(event.images?.[0]?.mainEventUrl?.trim()))
+    .map((event) => ({
+      ...event,
+      fullDescription: event.mainEvent
+        ? `${event.fullDescription ?? ''}\n<!-- #хит -->`.trim()
+        : event.fullDescription,
+      images: event.images?.map((image, index) =>
+        index === 0
+          ? {
+              ...image,
+              // MainEventsBanner resolves originalUrl first. Point that legacy
+              // slot at the approved dedicated cover instead of allowing a
+              // fallback to the source image.
+              originalUrl: image.mainEventUrl?.trim() || null,
+            }
+          : image,
+      ),
+    }));
 
   return <MainEventsBanner events={canonicalEvents} />;
 }
