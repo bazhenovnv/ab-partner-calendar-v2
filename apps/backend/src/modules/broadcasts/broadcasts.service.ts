@@ -472,13 +472,15 @@ export class BroadcastsService {
       const token = process.env.MAX_BOT_TOKEN;
       if (!token) return { success: false, reason: 'MAX_BOT_TOKEN not configured' };
       try {
-        const res = await fetch('https://platform-api2.max.ru/messages', {
+        const userId = encodeURIComponent(user.externalId);
+        const res = await fetch(`https://platform-api2.max.ru/messages?user_id=${userId}`, {
           method: 'POST',
           headers: { Authorization: token, 'Content-Type': 'application/json' }, // MAX API: bare token
-          body: JSON.stringify({ chat_id: user.externalId, text }),
+          body: JSON.stringify({ text }),
         });
         if (res.ok) return { success: true };
-        return { success: false, reason: `HTTP ${res.status}` };
+        const body = await res.text().catch(() => '');
+        return { success: false, reason: body || `HTTP ${res.status}` };
       } catch (err: unknown) {
         return { success: false, reason: String(err) };
       }
