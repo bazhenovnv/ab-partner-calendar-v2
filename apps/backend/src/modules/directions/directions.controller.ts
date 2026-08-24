@@ -40,21 +40,25 @@ export class DirectionsController {
   }
 
   @Post()
+  @Roles('ADMIN')
   create(@Body() dto: CreateDirectionDto) {
     return this.directionsService.create(dto);
   }
 
   @Put(':id')
+  @Roles('ADMIN')
   update(@Param('id') id: string, @Body() dto: UpdateDirectionDto) {
     return this.directionsService.update(id, dto);
   }
 
   @Patch(':id/toggle')
+  @Roles('ADMIN')
   toggle(@Param('id') id: string) {
     return this.directionsService.toggle(id);
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   remove(@Param('id') id: string) {
     return this.directionsService.remove(id);
   }
