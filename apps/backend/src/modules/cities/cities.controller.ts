@@ -29,6 +29,11 @@ export class CitiesController {
     return this.citiesService.list(query);
   }
 
+  @Post('reconcile')
+  reconcileFromEvents() {
+    return this.citiesService.reconcileFromEvents();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.citiesService.findById(id);
