@@ -71,8 +71,108 @@ a.adm-card:hover { border-color: #cbd5e1; box-shadow: 0 3px 10px rgba(13,35,68,.
   word-break: break-word;
 }
 
+.adm-rich-editor {
+  overflow: hidden;
+  margin-top: .45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(13,35,68,.04);
+}
+.adm-rich-editor:focus-within {
+  border-color: #3a8b76;
+  box-shadow: 0 0 0 2px rgba(58,139,118,.12);
+}
+.adm-rich-editor__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .3rem;
+  padding: .55rem .65rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+.adm-rich-editor__toolbar button,
+.adm-rich-editor__select {
+  min-height: 32px;
+  border: 1px solid #d7dde5;
+  border-radius: 5px;
+  background: #fff;
+  color: #0d2344;
+  font: inherit;
+  font-size: .78rem;
+}
+.adm-rich-editor__toolbar button {
+  min-width: 34px;
+  padding: .3rem .55rem;
+  cursor: pointer;
+}
+.adm-rich-editor__toolbar button:hover {
+  border-color: #3a8b76;
+  background: #eef8f4;
+}
+.adm-rich-editor__select {
+  min-width: 150px;
+  padding: .3rem .5rem;
+}
+.adm-rich-editor__separator {
+  width: 1px;
+  height: 24px;
+  margin: 0 .15rem;
+  background: #d7dde5;
+}
+.adm-rich-editor__surface {
+  min-height: 520px;
+  max-height: 68vh;
+  overflow: auto;
+  padding: 2.25rem 2.5rem;
+  outline: none;
+  color: #172033;
+  background: #fff;
+  font-size: 15px;
+  line-height: 1.62;
+}
+.adm-rich-editor__surface p { margin: 0 0 1em; }
+.adm-rich-editor__surface h1,
+.adm-rich-editor__surface h2,
+.adm-rich-editor__surface h3 {
+  margin: 1.35em 0 .6em;
+  color: #0d2344;
+  line-height: 1.25;
+}
+.adm-rich-editor__surface h1 { font-size: 1.7em; }
+.adm-rich-editor__surface h2 { font-size: 1.42em; }
+.adm-rich-editor__surface h3 { font-size: 1.18em; }
+.adm-rich-editor__surface ul,
+.adm-rich-editor__surface ol { padding-left: 1.6rem; }
+.adm-rich-editor__surface a { color: #18775f; text-decoration: underline; }
+.adm-rich-editor__surface table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+}
+.adm-rich-editor__surface th,
+.adm-rich-editor__surface td {
+  padding: .55rem .7rem;
+  border: 1px solid #d7dde5;
+  vertical-align: top;
+}
+.adm-rich-editor__surface th { background: #f6f8fa; font-weight: 700; }
+.adm-rich-editor__hint {
+  display: block;
+  margin-top: .45rem;
+  color: #7b8491;
+  font-size: .75rem;
+  font-weight: 400;
+}
+
 @media (max-width: 900px) {
   .adm-grid-2 { grid-template-columns: 1fr; }
   .adm-sidebar { width: 200px; }
   .adm-content > div:not(.adm-login-wrap) { padding: 1.25rem; }
+  .adm-rich-editor__surface { min-height: 420px; padding: 1.25rem; }
+  .adm-rich-editor__separator { display: none; }
 }
