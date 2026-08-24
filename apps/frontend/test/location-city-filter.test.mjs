@@ -37,7 +37,7 @@ describe('City-only public location filter', () => {
     assert.doesNotMatch(filterSource, /\.split\(','\)/);
   });
 
-  test('keeps every raw card location behind one visible city option', () => {
+  test('keeps every canonical filter value behind one visible city option', () => {
     assert.match(eventTypesSource, /filterValues\?: string\[\]/);
     assert.match(filterSource, /\[name, \.\.\.\(city\.filterValues \?\? \[\]\)\]/);
     assert.match(filterSource, /\.\.\.existingCity\.values, \.\.\.values/);
@@ -63,45 +63,45 @@ describe('City-only public location filter', () => {
     assert.doesNotMatch(filterSource, /selectedRegions=\{pending\.regions\}/);
   });
 
-  test('collects every published event page through the existing public API', () => {
-    assert.match(apiSource, /const CITY_EVENT_PAGE_LIMIT = 50/);
-    assert.match(apiSource, /const CITY_EVENT_STATUSES = \['PLANNED', 'LIVE', 'COMPLETED'\]/);
-    assert.match(apiSource, /CITY_EVENT_STATUSES\.forEach\(\(status\) => qs\.append\('autoStatus', status\)\)/);
-    assert.match(apiSource, /fetchPublishedEventCityPage\(1\)/);
-    assert.match(apiSource, /Math\.ceil\(firstPage\.total \/ CITY_EVENT_PAGE_LIMIT\)/);
-    assert.match(apiSource, /fetchPublishedEventCityPage\(index \+ 2\)/);
-    assert.match(apiSource, /flatMap\(\(page\) => page\.events\)/);
+  test('uses the synchronized city catalogue as the single public source', () => {
+    assert.match(
+      apiSource,
+      /serverFetch<CityOption\[]>\('\/filters\/cities',\s*\{\s*cache:\s*'no-store'/,
+    );
+    assert.doesNotMatch(apiSource, /CITY_EVENT_PAGE_LIMIT/);
+    assert.doesNotMatch(apiSource, /CITY_EVENT_STATUSES/);
+    assert.doesNotMatch(apiSource, /fetchPublishedEventCityPage/);
+    assert.doesNotMatch(apiSource, /buildPublishedEventCityOptions/);
   });
 
-  test('derives visible options only from published event cards', () => {
-    assert.match(apiSource, /function buildPublishedEventCityOptions/);
-    assert.match(apiSource, /for \(const event of events\)/);
-    assert.match(apiSource, /if \(event\.city\?\.name\)/);
-    assert.match(apiSource, /const rawLocation = event\.cityName\?\.trim\(\) \?\? ''/);
-    assert.match(apiSource, /return buildPublishedEventCityOptions\(events, catalogueCities\)/);
-    assert.doesNotMatch(apiSource, /return serverFetch<CityOption\[]>\('\/filters\/cities'\)/);
+  test('filters catalogue rows down to canonical city names only', () => {
+    assert.match(apiSource, /function isPublicCityName/);
+    assert.match(apiSource, /splitLocationParts\(name\)\.length !== 1/);
+    assert.match(apiSource, /\/\\d\/\.test\(name\)/);
+    assert.match(apiSource, /NON_CITY_MARKERS\.some\(\(marker\) => normalized\.includes\(marker\)\)/);
   });
 
-  test('maps venue text to a catalogue city and preserves its exact filter value', () => {
-    assert.match(apiSource, /function splitLocationParts/);
-    assert.match(apiSource, /function locationMatchesCity/);
-    assert.match(apiSource, /catalogueCandidates\.find\(\(city\) =>/);
-    assert.match(apiSource, /locationMatchesCity\(rawLocation, city\.name\)/);
-    assert.match(apiSource, /filterValues: Set<string>/);
-    assert.match(apiSource, /filterValues: Array\.from\(city\.filterValues\)/);
+  test('uses the canonical city name as the backend filter value', () => {
+    assert.match(apiSource, /filterValues:\s*\[name\]/);
+    assert.match(apiSource, /new Map<string, CityOption>\(\)/);
+    assert.match(apiSource, /normalizeLocationValue\(name\)/);
   });
 
-  test('rejects non-city values and venue-only fallbacks', () => {
+  test('rejects non-city values and obvious venue or address rows', () => {
     assert.match(apiSource, /const NON_CITY_LOCATION_VALUES = new Set/);
     assert.match(apiSource, /'онлайн'/);
     assert.match(apiSource, /'очно'/);
     assert.match(apiSource, /'офлайн'/);
-    assert.match(apiSource, /function looksLikeVenue/);
-    assert.match(apiSource, /parts\.length !== 1 \|\| looksLikeVenue\(parts\[0\]\)/);
+    for (const marker of ['отель', 'центр', 'переул', 'улиц', 'проспект']) {
+      assert.match(apiSource, new RegExp(`'${marker}'`));
+    }
   });
 
-  test('remains a frontend-only change and uses the existing backend endpoints', () => {
-    assert.match(apiSource, /serverFetch<PublicEventsResponse>\(`\/events\/public\?\$\{qs\.toString\(\)\}`\)/);
-    assert.match(apiSource, /serverFetch<CityOption\[]>\('\/filters\/cities'\)\.catch\(\(\) => \[\]\)/);
+  test('keeps existing public event filtering and changes only city option sourcing', () => {
+    assert.match(
+      apiSource,
+      /serverFetch<PublicEventsResponse>\(`\/events\/public\$\{query\}`, \{ cache: 'no-store' \}\)/,
+    );
+    assert.match(apiSource, /serverFetch<CityOption\[]>\('\/filters\/cities'/);
   });
 });
