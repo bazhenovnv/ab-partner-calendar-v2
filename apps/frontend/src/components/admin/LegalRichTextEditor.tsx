@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import styles from './legal-rich-text-editor.module.css';
 
 interface LegalRichTextEditorProps {
   value: string;
@@ -51,10 +52,10 @@ export function LegalRichTextEditor({ value, onChange }: LegalRichTextEditorProp
   }
 
   return (
-    <div className="adm-rich-editor">
-      <div className="adm-rich-editor__toolbar" role="toolbar" aria-label="Форматирование документа">
+    <div className={styles.editor}>
+      <div className={styles.toolbar} role="toolbar" aria-label="Форматирование документа">
         <select
-          className="adm-select adm-rich-editor__block-select"
+          className={`adm-select ${styles.blockSelect}`}
           defaultValue="p"
           onChange={(event) => setBlock(event.target.value as 'p' | 'h2' | 'h3')}
           aria-label="Стиль абзаца"
@@ -63,17 +64,17 @@ export function LegalRichTextEditor({ value, onChange }: LegalRichTextEditorProp
           <option value="h2">Заголовок</option>
           <option value="h3">Подзаголовок</option>
         </select>
-        <button className="adm-rich-editor__tool" type="button" onClick={() => run('bold')} aria-label="Полужирный"><strong>Ж</strong></button>
-        <button className="adm-rich-editor__tool" type="button" onClick={() => run('italic')} aria-label="Курсив"><em>К</em></button>
-        <button className="adm-rich-editor__tool" type="button" onClick={() => run('underline')} aria-label="Подчёркивание"><u>Ч</u></button>
-        <button className="adm-rich-editor__tool" type="button" onClick={() => run('insertUnorderedList')} aria-label="Маркированный список">• Список</button>
-        <button className="adm-rich-editor__tool" type="button" onClick={() => run('insertOrderedList')} aria-label="Нумерованный список">1. Список</button>
-        <button className="adm-rich-editor__tool" type="button" onClick={insertLink}>Ссылка</button>
-        <button className="adm-rich-editor__tool" type="button" onClick={() => run('removeFormat')}>Очистить формат</button>
+        <button className={styles.tool} type="button" onClick={() => run('bold')} aria-label="Полужирный"><strong>Ж</strong></button>
+        <button className={styles.tool} type="button" onClick={() => run('italic')} aria-label="Курсив"><em>К</em></button>
+        <button className={styles.tool} type="button" onClick={() => run('underline')} aria-label="Подчёркивание"><u>Ч</u></button>
+        <button className={styles.tool} type="button" onClick={() => run('insertUnorderedList')} aria-label="Маркированный список">• Список</button>
+        <button className={styles.tool} type="button" onClick={() => run('insertOrderedList')} aria-label="Нумерованный список">1. Список</button>
+        <button className={styles.tool} type="button" onClick={insertLink}>Ссылка</button>
+        <button className={styles.tool} type="button" onClick={() => run('removeFormat')}>Очистить формат</button>
       </div>
       <div
         ref={editorRef}
-        className="adm-rich-editor__surface"
+        className={styles.surface}
         contentEditable
         suppressContentEditableWarning
         onInput={emitChange}
@@ -83,7 +84,7 @@ export function LegalRichTextEditor({ value, onChange }: LegalRichTextEditorProp
         aria-label="Содержимое документа"
         data-placeholder="Введите текст документа…"
       />
-      <p className="adm-rich-editor__hint">HTML сохраняется системой автоматически, но в редакторе отображается только оформленный текст.</p>
+      <p className={styles.hint}>HTML сохраняется системой автоматически, но в редакторе отображается только оформленный текст.</p>
     </div>
   );
 }
