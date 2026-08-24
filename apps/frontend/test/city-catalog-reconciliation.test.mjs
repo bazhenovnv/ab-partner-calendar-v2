@@ -10,11 +10,11 @@ const CITIES_PAGE = readFileSync(
   'utf8',
 );
 const CITIES_SERVICE = readFileSync(
-  resolve(ROOT, 'backend/src/modules/cities/cities.service.ts'),
+  resolve(ROOT, 'apps/backend/src/modules/cities/cities.service.ts'),
   'utf8',
 );
 const MAX_PARSER = readFileSync(
-  resolve(ROOT, 'backend/src/modules/max-import/max-parser.service.ts'),
+  resolve(ROOT, 'apps/backend/src/modules/max-import/max-parser.service.ts'),
   'utf8',
 );
 
