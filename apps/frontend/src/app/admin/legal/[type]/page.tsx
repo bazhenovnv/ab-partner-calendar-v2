@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { adminApi, ApiError, type LegalDoc, type LegalDocVersion } from '@/lib/admin-api';
+import { LegalRichTextEditor } from '@/components/admin/LegalRichTextEditor';
 
 const TYPE_LABELS: Record<string, string> = {
   PRIVACY_POLICY: 'Политика конфиденциальности',
@@ -42,7 +43,6 @@ export default function LegalDocPage() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
-  // editor state — mirrors doc.content until saved
   const [draftContent, setDraftContent] = useState('');
   const [draftTitle, setDraftTitle] = useState('');
 
@@ -50,7 +50,6 @@ export default function LegalDocPage() {
     setLoading(true);
     setError('');
     try {
-      // Public GET /legal/:type returns full LegalDoc (same shape needed here)
       const d = await adminApi.get<LegalDoc>(`/legal/${type}`);
       setDoc(d);
       setDraftContent(d.content);
@@ -172,16 +171,10 @@ export default function LegalDocPage() {
                 maxLength={300}
               />
             </label>
-            <label className="adm-label">
-              Содержимое (HTML)
-              <textarea
-                className="adm-textarea adm-textarea--legal"
-                value={draftContent}
-                onChange={(e) => setDraftContent(e.target.value)}
-                rows={24}
-                placeholder="HTML-содержимое документа…"
-              />
-            </label>
+            <div className="adm-label">
+              Содержимое документа
+              <LegalRichTextEditor value={draftContent} onChange={setDraftContent} />
+            </div>
             <div className="adm-form__footer">
               <button
                 className="adm-btn adm-btn--secondary"
