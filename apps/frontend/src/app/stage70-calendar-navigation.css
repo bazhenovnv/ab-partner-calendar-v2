@@ -4,6 +4,12 @@
   scroll-margin-top: 28px;
 }
 
+/* Tooltips for the first calendar columns extend beyond the rounded calendar card.
+   Keep the card visually unchanged, but do not clip those overlays. */
+.pub-events-calendar-col {
+  overflow: visible;
+}
+
 .pub-calendar-grid,
 .pub-calendar-cell {
   overflow: visible;
