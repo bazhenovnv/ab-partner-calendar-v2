@@ -21,7 +21,12 @@ function formatMsk(date: Date): string {
 
 function errorMessage(error: unknown): string {
   if (!(error instanceof Error)) return String(error);
-  const cause = error.cause instanceof Error ? `: ${error.cause.message}` : '';
+  const withCause = error as Error & { cause?: unknown };
+  const cause = withCause.cause instanceof Error
+    ? `: ${withCause.cause.message}`
+    : withCause.cause != null
+      ? `: ${String(withCause.cause)}`
+      : '';
   return `${error.message}${cause}`;
 }
 
