@@ -2,6 +2,7 @@
 
 import { generateIcs, downloadIcs } from '@/lib/ics';
 import { ym } from '@/lib/metrika';
+import { trackEventAction } from '@/lib/internal-analytics';
 import type { PublicEvent } from '@/types/event';
 
 const TG_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? '';
@@ -36,6 +37,12 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
     downloadIcs(ics, `${slug}.ics`);
   };
 
+  const handleRegistration = () => {
+    const action = event.ticketSalesEnabled ? 'ticket' : 'register';
+    ym.goal(event.ticketSalesEnabled ? 'ticket_buy' : 'event_register', { event_id: event.id });
+    trackEventAction(event.id, action);
+  };
+
   return (
     <div
       className="flex flex-col tablet:flex-row tablet:flex-wrap gap-3 mb-6"
@@ -47,7 +54,7 @@ export function EventDetailActions({ event }: EventDetailActionsProps) {
           href={registrationUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => ym.goal(event.ticketSalesEnabled ? 'ticket_buy' : 'event_register', { event_id: event.id })}
+          onClick={handleRegistration}
           className="w-full tablet:w-auto inline-flex items-center justify-center gap-2 bg-mint text-primary font-semibold px-6 py-3.5 rounded-xl text-base hover:bg-mint/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-offset-2"
         >
           {event.ticketSalesEnabled ? 'Купить билет' : 'Зарегистрироваться'}

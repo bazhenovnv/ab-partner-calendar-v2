@@ -1,9 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
+
+const EVENT_ACTIONS = new Set(['view', 'register', 'ticket', 'participate']);
 
 @Injectable()
 export class AnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async trackVisit(page: string, sessionId?: string | null) {
+    const normalizedPage = page.trim().slice(0, 500) || '/';
+    return this.prisma.siteVisit.create({
+      data: {
+        page: normalizedPage,
+        sessionId: sessionId?.trim().slice(0, 100) || null,
+      },
+      select: { id: true },
+    });
+  }
+
+  async trackEvent(eventId: string, action: string, sessionId?: string | null) {
+    if (!EVENT_ACTIONS.has(action)) {
+      throw new NotFoundException('Unsupported analytics action');
+    }
+    const event = await this.prisma.event.findFirst({
+      where: { id: eventId, status: 'PUBLISHED' },
+      select: { id: true },
+    });
+    if (!event) throw new NotFoundException('Event not found');
+
+    return this.prisma.eventView.create({
+      data: {
+        eventId,
+        action,
+        sessionId: sessionId?.trim().slice(0, 100) || null,
+      },
+      select: { id: true },
+    });
+  }
 
   async getAdminOverview() {
     const now = new Date();
@@ -25,7 +58,7 @@ export class AnalyticsService {
       this.prisma.siteVisit.count({ where: { createdAt: { gte: dayAgo } } }),
       this.prisma.siteVisit.count({ where: { createdAt: { gte: weekAgo } } }),
       this.prisma.siteVisit.count({ where: { createdAt: { gte: monthAgo } } }),
-      this.prisma.eventView.count({ where: { createdAt: { gte: monthAgo } } }),
+      this.prisma.eventView.count({ where: { createdAt: { gte: monthAgo }, action: 'view' } }),
       this.prisma.eventView.count({
         where: { createdAt: { gte: monthAgo }, action: { in: ['register', 'ticket', 'participate'] } },
       }),
@@ -33,7 +66,7 @@ export class AnalyticsService {
       this.prisma.botUser.count(),
       this.prisma.eventView.groupBy({
         by: ['eventId'],
-        where: { createdAt: { gte: monthAgo } },
+        where: { createdAt: { gte: monthAgo }, action: 'view' },
         _count: { _all: true },
         orderBy: { _count: { eventId: 'desc' } },
         take: 10,

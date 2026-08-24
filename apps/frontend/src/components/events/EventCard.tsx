@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { formatEventDateParts } from '@/lib/format';
 import { openEventWithTransition } from '@/lib/event-modal-transition';
+import { trackEventAction } from '@/lib/internal-analytics';
 import type { PublicEvent } from '@/types/event';
 import { useEventModal } from './EventModalProvider';
 import styles from './events-runtime.module.css';
@@ -34,6 +35,7 @@ export function EventCard({ event, className }: EventCardProps) {
         className={ui.cardOpen}
         aria-label={`Подробнее о мероприятии: ${event.title}`}
         onClick={(clickEvent) => {
+          trackEventAction(event.id, 'view');
           const sourceImage = clickEvent.currentTarget.querySelector<HTMLElement>('img');
           openEventWithTransition(sourceImage, () => openEvent(event));
         }}
