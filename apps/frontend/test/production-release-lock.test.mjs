@@ -19,10 +19,10 @@ const APP_DEPLOY = read('infra/scripts/deploy-pinned-app.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const COMMIT = 'a8a91ced755eb0ee036176336bc12b4d230f7b75';
-const BACKEND_TAG = 'backend-release-a8a91ce';
+const COMMIT = '3923a40f92a786c071bf15887ed5ec6d5759da4e';
+const BACKEND_TAG = 'backend-release-3923a40';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
-const FRONTEND_TAG = 'frontend-release-a8a91ce';
+const FRONTEND_TAG = 'frontend-release-3923a40';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 
 describe('Pinned production application release', () => {
@@ -49,11 +49,11 @@ describe('Pinned production application release', () => {
   test('pins backend and frontend independently from the bots APP_VERSION', () => {
     assert.match(
       COMPOSE,
-      /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-a8a91ce\}/,
+      /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-3923a40\}/,
     );
     assert.match(
       COMPOSE,
-      /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-a8a91ce\}/,
+      /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-3923a40\}/,
     );
     assert.match(COMPOSE, /bots:[\s\S]*?image: ab-afisha\/bots:\$\{APP_VERSION:-latest\}/);
     assert.doesNotMatch(COMPOSE, /backend:[\s\S]*?image: ab-afisha\/backend:\$\{APP_VERSION/);
