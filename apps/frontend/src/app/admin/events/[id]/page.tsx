@@ -82,6 +82,7 @@ export default function EventEditPage() {
   const [directionIds, setDirectionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const [error, setError] = useState('');
   const [ok, setOk] = useState('');
 
@@ -100,6 +101,12 @@ export default function EventEditPage() {
     })();
   }, [id]);
 
+  function applyEvent(ev: AdminEvent) {
+    setEvent(ev);
+    setForm(eventToForm(ev));
+    setDirectionIds(ev.directions?.map((d) => d.direction.id) ?? []);
+  }
+
   function setField(field: keyof FormState, value: string | boolean) {
     setForm((prev) => prev ? { ...prev, [field]: value } : prev);
   }
@@ -113,7 +120,11 @@ export default function EventEditPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!form) return;
+    if (!form || !event) return;
+    if (event.status === 'DELETED') {
+      setError('Удалённое мероприятие сначала нужно восстановить');
+      return;
+    }
     const err = validate();
     if (err) { setError(err); return; }
 
@@ -146,11 +157,7 @@ export default function EventEditPage() {
       };
 
       const updated = await adminApi.put<AdminEvent>(`/events/admin/${id}`, body);
-      setEvent(updated);
-      setForm(eventToForm(updated));
-      if (updated.directions) {
-        setDirectionIds(updated.directions.map((d) => d.direction.id));
-      }
+      applyEvent(updated);
       setOk('Сохранено');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Ошибка при сохранении');
@@ -184,35 +191,64 @@ export default function EventEditPage() {
   }
 
   async function handleArchive() {
-    if (!confirm('Перевести в архив?')) return;
+    if (!confirm('Перевести мероприятие в архив?')) return;
+    setLifecycleBusy(true);
     setError('');
+    setOk('');
     try {
-      await adminApi.patch(`/events/admin/${id}/archive`, {});
-      router.push('/admin/events');
+      await adminApi.patch<AdminEvent>(`/events/admin/${id}/archive`, {});
+      router.push('/admin/archive');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Ошибка');
+      setError(err instanceof ApiError ? err.message : 'Не удалось архивировать мероприятие');
+    } finally {
+      setLifecycleBusy(false);
+    }
+  }
+
+  async function handleRestore() {
+    if (!confirm('Восстановить мероприятие?')) return;
+    setLifecycleBusy(true);
+    setError('');
+    setOk('');
+    try {
+      const restored = await adminApi.patch<AdminEvent>(`/events/admin/${id}/restore`, {});
+      applyEvent(restored);
+      setOk(`Мероприятие восстановлено. Статус: ${STATUS_LABELS[restored.status]}`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Не удалось восстановить мероприятие');
+    } finally {
+      setLifecycleBusy(false);
     }
   }
 
   async function handleDelete() {
-    if (!confirm('Удалить мероприятие? Действие необратимо.')) return;
+    if (!confirm('Переместить мероприятие в удалённые? Запись и история сохранятся.')) return;
+    setLifecycleBusy(true);
     setError('');
+    setOk('');
     try {
-      await adminApi.del(`/events/admin/${id}`);
-      router.push('/admin/events');
+      await adminApi.del<void>(`/events/admin/${id}`);
+      router.push('/admin/archive');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Ошибка');
+      setError(err instanceof ApiError ? err.message : 'Не удалось удалить мероприятие');
+    } finally {
+      setLifecycleBusy(false);
     }
   }
 
   if (loading) return <div className="adm-page"><p className="adm-muted">Загрузка…</p></div>;
   if (!event || !form) return <div className="adm-page"><p className="adm-error">{error || 'Мероприятие не найдено'}</p></div>;
 
+  const isArchivedOrDeleted = event.status === 'ARCHIVE' || event.status === 'DELETED';
+  const isDeleted = event.status === 'DELETED';
+
   return (
     <div className="adm-page">
       <div className="adm-page__header">
         <div>
-          <Link href="/admin/events" className="adm-back">← Мероприятия</Link>
+          <Link href={isArchivedOrDeleted ? '/admin/archive' : '/admin/events'} className="adm-back">
+            ← {isArchivedOrDeleted ? 'Архив / удалённые' : 'Мероприятия'}
+          </Link>
           <h1 className="adm-page__title">{event.title}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -240,19 +276,44 @@ export default function EventEditPage() {
               Опубликовать
             </button>
           )}
-          {!['ARCHIVE', 'DELETED'].includes(event.status) && (
-            <button className="adm-btn adm-btn--warn adm-btn--sm" onClick={handleArchive} type="button">
+          {!isArchivedOrDeleted && (
+            <button
+              className="adm-btn adm-btn--warn adm-btn--sm"
+              onClick={handleArchive}
+              disabled={lifecycleBusy}
+              type="button"
+            >
               Архив
             </button>
           )}
-          <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={handleDelete} type="button">
-            Удалить
-          </button>
+          {isArchivedOrDeleted && (
+            <button
+              className="adm-btn adm-btn--primary adm-btn--sm"
+              onClick={handleRestore}
+              disabled={lifecycleBusy}
+              type="button"
+            >
+              Восстановить
+            </button>
+          )}
+          {!isDeleted && (
+            <button
+              className="adm-btn adm-btn--danger adm-btn--sm"
+              onClick={handleDelete}
+              disabled={lifecycleBusy}
+              type="button"
+            >
+              Удалить
+            </button>
+          )}
         </div>
       </div>
 
       {error && <p className="adm-error">{error}</p>}
       {ok && <p className="adm-ok">{ok}</p>}
+      {isDeleted && (
+        <p className="adm-muted">Удалённое мероприятие доступно для просмотра. Для редактирования сначала восстановите его.</p>
+      )}
 
       <form className="adm-form" onSubmit={handleSave}>
         <label className="adm-label">
@@ -448,10 +509,12 @@ export default function EventEditPage() {
         </div>
 
         <div className="adm-form__footer">
-          <button className="adm-btn adm-btn--primary" type="submit" disabled={saving}>
-            {saving ? 'Сохранение…' : 'Сохранить'}
-          </button>
-          <Link href="/admin/events" className="adm-btn adm-btn--secondary">
+          {!isDeleted && (
+            <button className="adm-btn adm-btn--primary" type="submit" disabled={saving}>
+              {saving ? 'Сохранение…' : 'Сохранить'}
+            </button>
+          )}
+          <Link href={isArchivedOrDeleted ? '/admin/archive' : '/admin/events'} className="adm-btn adm-btn--secondary">
             К списку
           </Link>
         </div>
