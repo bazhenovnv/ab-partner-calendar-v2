@@ -1,0 +1,96 @@
+.editor {
+  margin-top: .45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.editor:focus-within {
+  border-color: #5e9f8b;
+  box-shadow: 0 0 0 2px rgba(94, 159, 139, .14);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem;
+  padding: .55rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.blockSelect {
+  width: 150px;
+  min-height: 34px;
+}
+
+.tool {
+  min-height: 34px;
+  padding: .35rem .55rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #fff;
+  color: #0d2344;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tool:hover,
+.tool:focus-visible {
+  border-color: #5e9f8b;
+  background: #eef8f4;
+  outline: none;
+}
+
+.surface {
+  min-height: 520px;
+  max-height: 720px;
+  overflow: auto;
+  padding: 1rem 1.15rem;
+  color: #1f2937;
+  font-size: 15px;
+  line-height: 1.6;
+  outline: none;
+  white-space: normal;
+}
+
+.surface:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.surface h2 {
+  margin: 1.25rem 0 .6rem;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+.surface h3 {
+  margin: 1rem 0 .5rem;
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.surface p { margin: .45rem 0; }
+.surface ul,
+.surface ol { padding-left: 1.5rem; }
+.surface table { width: 100%; border-collapse: collapse; margin: .75rem 0; }
+.surface th,
+.surface td { border: 1px solid #d1d5db; padding: .45rem .55rem; vertical-align: top; }
+.surface a { color: #247d67; text-decoration: underline; }
+
+.hint {
+  margin: 0;
+  padding: .45rem .65rem;
+  border-top: 1px solid #eef2f7;
+  color: #6b7280;
+  background: #fbfcfd;
+  font-size: .72rem;
+}
+
+@media (max-width: 900px) {
+  .surface { min-height: 420px; }
+}
