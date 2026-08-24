@@ -74,6 +74,7 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
     if (filters.priceType) query.set('priceType', filters.priceType);
     return query.toString();
   }, [filters]);
+  const previousMarkerFilterQuery = useRef(markerFilterQuery);
 
   const loadMarkers = useCallback(async (y: number, m: number, showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -92,6 +93,13 @@ export function EventCalendar({ filters, selectedDate, onSelectDate }: EventCale
       if (showLoading) setLoading(false);
     }
   }, [markerFilterQuery]);
+
+  useEffect(() => {
+    if (previousMarkerFilterQuery.current === markerFilterQuery) return;
+    previousMarkerFilterQuery.current = markerFilterQuery;
+    setYear(today.getFullYear());
+    setMonth(today.getMonth());
+  }, [markerFilterQuery, today]);
 
   useEffect(() => {
     void loadMarkers(year, month);
