@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EventAutoStatus } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
@@ -20,16 +21,20 @@ export class FiltersService {
     });
   }
 
-  async getCities() {
+  async getCities(autoStatus: EventAutoStatus[] = []) {
+    const hasStatusFilter = autoStatus.length > 0;
     const [catalogueCities, eventLocations] = await Promise.all([
-      this.prisma.city.findMany({
-        where: { isActive: true },
-        select: { id: true, name: true, region: true },
-        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-      }),
+      hasStatusFilter
+        ? Promise.resolve([])
+        : this.prisma.city.findMany({
+            where: { isActive: true },
+            select: { id: true, name: true, region: true },
+            orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+          }),
       this.prisma.event.findMany({
         where: {
           status: 'PUBLISHED',
+          ...(hasStatusFilter ? { autoStatus: { in: autoStatus } } : {}),
           OR: [
             { cityId: { not: null } },
             { cityName: { not: null } },

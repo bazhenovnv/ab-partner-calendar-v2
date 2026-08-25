@@ -230,7 +230,7 @@ function LocationMultiSelect({
           })}
 
           {availableCities.length === 0 && (
-            <p className="pub-filter-multi-empty">Города пока не добавлены</p>
+            <p className="pub-filter-multi-empty">Для выбранного статуса городов нет</p>
           )}
         </div>
       )}
@@ -317,10 +317,63 @@ function DirectionMultiSelect({ directions, value, onChange }: DirectionMultiSel
   );
 }
 
+function normalizedCityName(value: string) {
+  return value.trim().replace(/^(?:г\.|город)\s*/i, '').trim().toLocaleLowerCase('ru');
+}
+
 export function EventFilters({ cities, directions, filters, onChange }: EventFiltersProps) {
   const [pending, setPending] = useState<ActiveFilters>(filters);
+  const [statusCities, setStatusCities] = useState<CityOption[]>(cities);
 
   useEffect(() => setPending(filters), [filters]);
+
+  useEffect(() => {
+    if (pending.autoStatus.length === 0) {
+      setStatusCities(cities);
+      return;
+    }
+
+    const controller = new AbortController();
+    const qs = new URLSearchParams();
+    pending.autoStatus.forEach((status) => qs.append('autoStatus', status));
+
+    void fetch(`/api/filters/cities?${qs.toString()}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`Cities request failed: ${response.status}`);
+        return response.json() as Promise<CityOption[]>;
+      })
+      .then((matchingCities) => {
+        const allowedNames = new Set(
+          matchingCities.map((city) => normalizedCityName(city.name)),
+        );
+        const nextCities = cities.filter((city) =>
+          allowedNames.has(normalizedCityName(city.name)),
+        );
+        const allowedValues = new Set(
+          nextCities.flatMap((city) => [city.name, ...(city.filterValues ?? [])]),
+        );
+
+        setStatusCities(nextCities);
+        setPending((current) => {
+          const nextSelectedCities = current.cities.filter((city) => allowedValues.has(city));
+          if (nextSelectedCities.length === current.cities.length) return current;
+          return {
+            ...current,
+            regions: [],
+            cities: nextSelectedCities,
+          };
+        });
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setStatusCities(cities);
+      });
+
+    return () => controller.abort();
+  }, [cities, pending.autoStatus]);
 
   const hasFilters =
     pending.regions.length > 0 ||
@@ -354,7 +407,7 @@ export function EventFilters({ cities, directions, filters, onChange }: EventFil
           <div className="pub-filter-section pub-filter-section--location">
             <label className="pub-filter-label" htmlFor="filter-region">Регион / Город</label>
             <LocationMultiSelect
-              cities={cities}
+              cities={statusCities}
               selectedCities={pending.cities}
               onChange={(selectedCities) => {
                 setPending((current) => ({
