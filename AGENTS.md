@@ -9,9 +9,9 @@
 
 Единственная утверждённая production-версия приложения:
 
-- commit: `09e2702f51908b6468c23aff6044bb5e35c59075`;
-- backend image: `ab-afisha/backend:backend-release-09e2702`;
-- frontend image: `ab-afisha/frontend:frontend-release-09e2702`;
+- commit: `79d85dc230b71699977bfec633db411a49c72f4f`;
+- backend image: `ab-afisha/backend:backend-release-79d85dc`;
+- frontend image: `ab-afisha/frontend:frontend-release-79d85dc`;
 - full deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`;
 - frontend-only deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
