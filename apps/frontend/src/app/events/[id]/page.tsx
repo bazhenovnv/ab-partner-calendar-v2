@@ -67,6 +67,7 @@ export default async function EventPage({ params }: Props) {
   const heroUrl = image?.originalUrl ?? image?.mainEventUrl ?? image?.eventCardUrl;
   const cityLabel = event.city?.name ?? event.cityName;
   const statusCfg = STATUS_CONFIG[event.autoStatus];
+  const hasPhysicalLocation = event.format === 'OFFLINE' || event.format === 'HYBRID';
 
   return (
     <PublicShell>
@@ -84,7 +85,6 @@ export default async function EventPage({ params }: Props) {
           </Link>
         </nav>
 
-        {/* Status badge */}
         {statusCfg.label && (
           <div className="mb-3">
             <span
@@ -98,7 +98,6 @@ export default async function EventPage({ params }: Props) {
           </div>
         )}
 
-        {/* Hero image */}
         {heroUrl && (
           <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-5 shadow-base">
             <Image
@@ -114,7 +113,6 @@ export default async function EventPage({ params }: Props) {
           </div>
         )}
 
-        {/* Direction & tag chips */}
         <div className="flex flex-wrap gap-2 mb-3">
           {event.directions.map((d) => (
             <span
@@ -131,23 +129,18 @@ export default async function EventPage({ params }: Props) {
           ))}
         </div>
 
-        {/* Title */}
         <h1 className="font-montserrat font-bold text-primary text-2xl tablet:text-3xl desktop:text-4xl leading-tight mb-3">
           {event.title}
         </h1>
 
-        {/* Short description (shown before meta card on mobile) */}
         {event.shortDescription && (
           <p className="text-sm text-primary/70 leading-relaxed mb-5">
             {event.shortDescription}
           </p>
         )}
 
-        {/* Info card */}
         <div className="rounded-2xl border border-dropdown-border bg-white shadow-sm mb-5 overflow-hidden">
-          {/* 3-column: date / time / price */}
           <div className="grid grid-cols-3 divide-x divide-dropdown-border">
-            {/* Date */}
             <div className="flex flex-col items-center justify-center gap-1 px-3 py-4 text-center">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-mint shrink-0">
                 <rect x="2" y="4" width="16" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.4" />
@@ -160,7 +153,6 @@ export default async function EventPage({ params }: Props) {
               </span>
             </div>
 
-            {/* Time */}
             <div className="flex flex-col items-center justify-center gap-1 px-3 py-4 text-center">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-mint shrink-0">
                 <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.4" />
@@ -172,7 +164,6 @@ export default async function EventPage({ params }: Props) {
               </span>
             </div>
 
-            {/* Price */}
             <div className="flex flex-col items-center justify-center gap-1 px-3 py-4 text-center">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" className="text-mint shrink-0">
                 <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.4" />
@@ -185,7 +176,6 @@ export default async function EventPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Format row */}
           <div className="flex items-center gap-3 px-4 py-3 border-t border-dropdown-border">
             {event.format === 'ONLINE' ? (
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className="text-mint shrink-0">
@@ -199,13 +189,12 @@ export default async function EventPage({ params }: Props) {
               </svg>
             )}
             <span className="text-sm text-primary font-medium">{formatFormat(event.format)}</span>
-            {cityLabel && event.format === 'OFFLINE' && (
+            {cityLabel && hasPhysicalLocation && (
               <span className="text-sm text-primary/60">{cityLabel}</span>
             )}
           </div>
 
-          {/* Address row (offline only) */}
-          {event.format === 'OFFLINE' && (event.venue || event.address) && (
+          {hasPhysicalLocation && (event.venue || event.address) && (
             <div className="flex items-start gap-3 px-4 py-3 border-t border-dropdown-border">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className="text-primary/40 shrink-0 mt-0.5">
                 <path d="M9 2C6.24 2 4 4.24 4 7c0 4.25 5 9 5 9s5-4.75 5-9c0-2.76-2.24-5-5-5Z" stroke="currentColor" strokeWidth="1.4" />
@@ -219,7 +208,6 @@ export default async function EventPage({ params }: Props) {
             </div>
           )}
 
-          {/* Speaker row */}
           {event.speaker && (
             <div className="flex items-center gap-3 px-4 py-3 border-t border-dropdown-border">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className="text-primary/40 shrink-0">
@@ -231,10 +219,8 @@ export default async function EventPage({ params }: Props) {
           )}
         </div>
 
-        {/* CTA buttons */}
         <EventDetailActions event={event} />
 
-        {/* Full description */}
         {event.fullDescription && (
           <div className="mt-8 pt-8 border-t border-dropdown-border">
             <SanitizedHtml
