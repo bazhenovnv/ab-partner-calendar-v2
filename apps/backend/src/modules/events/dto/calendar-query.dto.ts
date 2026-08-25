@@ -33,8 +33,8 @@ export class CalendarQueryDto {
   directions?: string[];
 
   @IsOptional()
-  @IsEnum(['ONLINE', 'OFFLINE'])
-  format?: 'ONLINE' | 'OFFLINE';
+  @IsEnum(['ONLINE', 'OFFLINE', 'HYBRID'])
+  format?: 'ONLINE' | 'OFFLINE' | 'HYBRID';
 
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))

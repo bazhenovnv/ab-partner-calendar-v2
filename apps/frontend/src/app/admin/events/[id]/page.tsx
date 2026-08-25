@@ -3,7 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { adminApi, ApiError, type AdminEvent, type EventStatus, type EventFormat, type PriceType } from '@/lib/admin-api';
+import {
+  adminApi,
+  ApiError,
+  type AdminEvent,
+  type EventStatus,
+  type EventFormat,
+  type PriceType,
+} from '@/lib/admin-api';
 import DirectionsPicker from '@/components/admin/DirectionsPicker';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
@@ -86,10 +93,14 @@ export default function EventEditPage() {
   const [error, setError] = useState('');
   const [ok, setOk] = useState('');
 
+  async function loadEvent(): Promise<AdminEvent> {
+    return adminApi.get<AdminEvent>(`/events/admin/${id}`);
+  }
+
   useEffect(() => {
     void (async () => {
       try {
-        const ev = await adminApi.get<AdminEvent>(`/events/admin/${id}`);
+        const ev = await loadEvent();
         setEvent(ev);
         setForm(eventToForm(ev));
         setDirectionIds(ev.directions?.map((d) => d.direction.id) ?? []);
@@ -99,6 +110,7 @@ export default function EventEditPage() {
         setLoading(false);
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   function applyEvent(ev: AdminEvent) {
@@ -156,9 +168,10 @@ export default function EventEditPage() {
           : [],
       };
 
-      const updated = await adminApi.put<AdminEvent>(`/events/admin/${id}`, body);
-      applyEvent(updated);
-      setOk('Сохранено');
+      await adminApi.put<AdminEvent>(`/events/admin/${id}`, body);
+      const refreshed = await loadEvent();
+      applyEvent(refreshed);
+      setOk('Сохранено. Проверка готовности к публикации обновлена.');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Ошибка при сохранении');
     } finally {
@@ -170,8 +183,9 @@ export default function EventEditPage() {
     setError('');
     setOk('');
     try {
-      const updated = await adminApi.patch<AdminEvent>(`/events/admin/${id}/publish`, {});
-      setEvent(updated);
+      await adminApi.patch<AdminEvent>(`/events/admin/${id}/publish`, {});
+      const refreshed = await loadEvent();
+      applyEvent(refreshed);
       setOk('Мероприятие опубликовано');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Ошибка при публикации');
@@ -182,8 +196,9 @@ export default function EventEditPage() {
     setError('');
     setOk('');
     try {
-      const updated = await adminApi.patch<AdminEvent>(`/events/admin/${id}/status`, { status });
-      setEvent(updated);
+      await adminApi.patch<AdminEvent>(`/events/admin/${id}/status`, { status });
+      const refreshed = await loadEvent();
+      applyEvent(refreshed);
       setOk(`Статус изменён: ${STATUS_LABELS[status]}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Ошибка');
@@ -211,7 +226,8 @@ export default function EventEditPage() {
     setError('');
     setOk('');
     try {
-      const restored = await adminApi.patch<AdminEvent>(`/events/admin/${id}/restore`, {});
+      await adminApi.patch<AdminEvent>(`/events/admin/${id}/restore`, {});
+      const restored = await loadEvent();
       applyEvent(restored);
       setOk(`Мероприятие восстановлено. Статус: ${STATUS_LABELS[restored.status]}`);
     } catch (err) {
@@ -241,19 +257,30 @@ export default function EventEditPage() {
 
   const isArchivedOrDeleted = event.status === 'ARCHIVE' || event.status === 'DELETED';
   const isDeleted = event.status === 'DELETED';
+  const isNeedsAttention = event.status === 'NEEDS_ATTENTION';
+  const backHref = isArchivedOrDeleted
+    ? '/admin/archive'
+    : isNeedsAttention
+      ? '/admin/needs-attention'
+      : '/admin/events';
+  const backLabel = isArchivedOrDeleted
+    ? 'Архив / удалённые'
+    : isNeedsAttention
+      ? 'Требует внимания'
+      : 'Мероприятия';
 
   return (
     <div className="adm-page">
       <div className="adm-page__header">
         <div>
-          <Link href={isArchivedOrDeleted ? '/admin/archive' : '/admin/events'} className="adm-back">
-            ← {isArchivedOrDeleted ? 'Архив / удалённые' : 'Мероприятия'}
+          <Link href={backHref} className="adm-back">
+            ← {backLabel}
           </Link>
           <h1 className="adm-page__title">{event.title}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className={STATUS_BADGE[event.status]}>{STATUS_LABELS[event.status]}</span>
-          {event.status === 'DRAFT' && (
+          {(event.status === 'DRAFT' || event.status === 'NEEDS_ATTENTION') && (
             <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={handlePublish} type="button">
               Опубликовать
             </button>
@@ -313,6 +340,43 @@ export default function EventEditPage() {
       {ok && <p className="adm-ok">{ok}</p>}
       {isDeleted && (
         <p className="adm-muted">Удалённое мероприятие доступно для просмотра. Для редактирования сначала восстановите его.</p>
+      )}
+
+      {isNeedsAttention && (
+        <div className="adm-card" style={{ marginBottom: '1rem', border: '1px solid #e6a9a9' }}>
+          <h2 style={{ marginTop: 0, marginBottom: '0.8rem', fontSize: '1.05rem' }}>
+            Почему событие требует внимания
+          </h2>
+          {(event.attentionGuidance?.length ?? 0) > 0 ? (
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              {event.attentionGuidance?.map((item, index) => (
+                <div key={`${item.reason}-${index}`}>
+                  <div style={{ fontWeight: 600 }}>{item.reason}</div>
+                  <div className="adm-muted" style={{ marginTop: '0.15rem' }}>{item.action}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="adm-muted">Автоматическая публикация была остановлена. Проверьте данные мероприятия.</p>
+          )}
+
+          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+            <div style={{ fontWeight: 700, marginBottom: '0.45rem' }}>Что мешает публикации сейчас</div>
+            {(event.publicationIssues?.length ?? 0) > 0 ? (
+              <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+                {event.publicationIssues?.map((item, index) => (
+                  <li key={`${item.reason}-${index}`} style={{ marginBottom: '0.4rem' }}>
+                    <strong>{item.reason}.</strong> {item.action}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="adm-ok" style={{ margin: 0 }}>
+                Обязательные данные заполнены. Проверьте карточку и нажмите «Опубликовать».
+              </p>
+            )}
+          </div>
+        </div>
       )}
 
       <form className="adm-form" onSubmit={handleSave}>
@@ -388,6 +452,7 @@ export default function EventEditPage() {
             >
               <option value="ONLINE">Онлайн</option>
               <option value="OFFLINE">Офлайн</option>
+              <option value="HYBRID">Онлайн + офлайн</option>
             </select>
           </label>
           <label className="adm-label adm-label--grow">
@@ -424,7 +489,7 @@ export default function EventEditPage() {
           />
         </label>
 
-        {form.format === 'OFFLINE' && (
+        {(form.format === 'OFFLINE' || form.format === 'HYBRID') && (
           <>
             <label className="adm-label">
               Адрес
@@ -514,7 +579,7 @@ export default function EventEditPage() {
               {saving ? 'Сохранение…' : 'Сохранить'}
             </button>
           )}
-          <Link href={isArchivedOrDeleted ? '/admin/archive' : '/admin/events'} className="adm-btn adm-btn--secondary">
+          <Link href={backHref} className="adm-btn adm-btn--secondary">
             К списку
           </Link>
         </div>

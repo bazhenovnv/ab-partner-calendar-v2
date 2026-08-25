@@ -28,7 +28,7 @@ export class CreateEventDto {
   @IsString()
   startTime?: string;
 
-  @IsEnum(['ONLINE', 'OFFLINE'])
+  @IsEnum(['ONLINE', 'OFFLINE', 'HYBRID'])
   format: EventFormat;
 
   @IsOptional()

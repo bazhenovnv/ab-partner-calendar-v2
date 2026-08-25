@@ -25,6 +25,7 @@ enum EventAutoStatus {
 enum EventFormat {
   ONLINE
   OFFLINE
+  HYBRID
 }
 
 enum PriceType {
@@ -143,6 +144,7 @@ model Event {
   manualStatusBy   User?           @relation("ManualStatusBy", fields: [manualStatusById], references: [id])
   manualStatusById String?
   manualStatusAt   DateTime?
+  attentionReasons String[]        @default([])
 
   format           EventFormat     @default(ONLINE)
   cityId           String?
