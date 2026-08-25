@@ -97,21 +97,18 @@ function repairHybridLocation(text: string, result: ParsedMaxPost) {
   if (!HYBRID_PATTERN.test(formatValue)) return;
 
   // Base parser historically collapsed hybrid events into ONLINE and used the
-  // literal "онлайн + офлайн" as a city. Preserve compatibility in the base
-  // parser while correcting the normalized value here.
+  // literal "онлайн + офлайн" as a city. Keep the manual-review flag, but
+  // normalize the format and physical location before the event reaches admin.
   (result as unknown as { format: string | null }).format = 'HYBRID';
-
-  const remainingReasons = result.attentionReasons.filter(
-    (reason) => reason !== 'Гибридный формат требует ручной проверки',
-  );
+  const reasons = [...result.attentionReasons];
 
   const whereValue = text.match(/Где\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
   if (!whereValue) {
     result.city = null;
     result.address = null;
     result.venue = null;
-    remainingReasons.push('Место очного участия гибридного события не определено');
-    setAttention(result, remainingReasons);
+    reasons.push('Место очного участия гибридного события не определено');
+    setAttention(result, reasons);
     return;
   }
 
@@ -141,7 +138,7 @@ function repairHybridLocation(text: string, result: ParsedMaxPost) {
     }
   }
 
-  setAttention(result, remainingReasons);
+  setAttention(result, reasons);
 }
 
 function repairVenueFirstLocation(result: ParsedMaxPost) {
