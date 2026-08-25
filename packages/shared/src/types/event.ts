@@ -1,6 +1,6 @@
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'HIDDEN' | 'ARCHIVE' | 'NEEDS_ATTENTION' | 'DELETED';
 export type EventAutoStatus = 'PLANNED' | 'LIVE' | 'COMPLETED';
-export type EventFormat = 'ONLINE' | 'OFFLINE';
+export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 export type PriceType = 'FREE' | 'PAID';
 export type ImportSource = 'MAX' | 'API' | 'MANUAL';
 export type BotChannel = 'TELEGRAM' | 'MAX';
