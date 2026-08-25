@@ -35,7 +35,7 @@ test('needs-attention queue explains reason and current publication blockers', (
   assert.match(eventsService, /images\?\.some/);
   assert.match(eventsService, /Для публикации нужно исправить/);
   assert.doesNotMatch(eventsService, /event\.images\?\.eventCardUrl/);
-  assert.match(queuePage, /Почему событие не опубликовано автоматически/);
+  assert.match(queuePage, /почему событие не опубликовано автоматически/);
   assert.match(queuePage, /Что нужно для публикации/);
   assert.match(queuePage, /Гибридный формат требует ручной проверки/);
 });
