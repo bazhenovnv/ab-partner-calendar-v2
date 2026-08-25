@@ -157,8 +157,22 @@ export interface SiteConfigRow {
 
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'HIDDEN' | 'ARCHIVE' | 'NEEDS_ATTENTION' | 'DELETED';
 export type EventAutoStatus = 'PLANNED' | 'LIVE' | 'COMPLETED';
-export type EventFormat = 'ONLINE' | 'OFFLINE';
+export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 export type PriceType = 'FREE' | 'PAID';
+
+export interface AttentionGuidanceItem {
+  reason: string;
+  action: string;
+  blocking: boolean;
+}
+
+export interface AdminEventImage {
+  thumbnailUrl?: string | null;
+  eventCardUrl?: string | null;
+  originalUrl?: string | null;
+  mainEventUrl?: string | null;
+  modalUrl?: string | null;
+}
 
 export interface AdminEvent {
   id: string;
@@ -185,8 +199,12 @@ export interface AdminEvent {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  attentionReasons?: string[];
+  attentionGuidance?: AttentionGuidanceItem[];
+  publicationIssues?: AttentionGuidanceItem[];
+  publicationReady?: boolean;
   city: { name: string; region: string } | null;
-  images: { thumbnailUrl?: string | null } | null;
+  images: AdminEventImage[];
   directions?: Array<{ direction: { id: string; name: string; slug: string } }>;
   tags?: Array<{ tag: string }>;
 }
