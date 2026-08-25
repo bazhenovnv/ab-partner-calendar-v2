@@ -61,8 +61,10 @@ export function formatEventDateParts(startDate: string): { day: number; month: s
   return { day: d.getDate(), month: MONTHS_RU_GEN[d.getMonth()] };
 }
 
-export function formatFormat(format: 'ONLINE' | 'OFFLINE'): string {
-  return format === 'ONLINE' ? 'Онлайн' : 'Офлайн';
+export function formatFormat(format: 'ONLINE' | 'OFFLINE' | 'HYBRID'): string {
+  if (format === 'ONLINE') return 'Онлайн';
+  if (format === 'HYBRID') return 'Онлайн + офлайн';
+  return 'Офлайн';
 }
 
 export function isoToIcsDate(iso: string): string {
