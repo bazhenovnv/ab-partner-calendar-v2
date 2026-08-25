@@ -31,7 +31,7 @@ export interface PublicEvent {
   startDate: string;
   endDate?: string | null;
   startTime?: string | null;
-  format: 'ONLINE' | 'OFFLINE';
+  format: 'ONLINE' | 'OFFLINE' | 'HYBRID';
   city?: EventCity | null;
   cityName?: string | null;
   address?: string | null;
@@ -76,5 +76,5 @@ export interface CityOption {
 }
 
 export type EventAutoStatus = 'PLANNED' | 'LIVE' | 'COMPLETED';
-export type EventFormat = 'ONLINE' | 'OFFLINE';
+export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 export type PriceType = 'FREE' | 'PAID';
