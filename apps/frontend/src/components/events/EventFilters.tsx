@@ -118,8 +118,8 @@ function LocationMultiSelect({
       const normalizedName = name.toLocaleLowerCase('ru');
       if (!name || NON_CITY_VALUES.has(normalizedName)) continue;
       const values = Array.from(new Set([name, ...(city.filterValues ?? [])].map((value) => value.trim()).filter(Boolean)));
-      const existing = uniqueCities.get(normalizedName);
-      if (existing) existing.values = Array.from(new Set([...existing.values, ...values]));
+      const existingCity = uniqueCities.get(normalizedName);
+      if (existingCity) existingCity.values = Array.from(new Set([...existingCity.values, ...values]));
       else uniqueCities.set(normalizedName, { id: city.id, name, values });
     }
     return Array.from(uniqueCities.values()).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
@@ -286,7 +286,17 @@ export function EventFilters({ cities, directions, filters, onChange }: EventFil
         <div className="pub-filter-left-col">
           <div className="pub-filter-section pub-filter-section--location">
             <label className="pub-filter-label" htmlFor="filter-region">Регион / Город</label>
-            <LocationMultiSelect cities={facetCities} selectedCities={pending.cities} onChange={(selectedCities) => setPending((current) => ({ ...current, regions: [], cities: selectedCities }))} />
+            <LocationMultiSelect
+              cities={facetCities}
+              selectedCities={pending.cities}
+              onChange={(selectedCities) => {
+                setPending((current) => ({
+                  ...current,
+                  regions: [],
+                  cities: selectedCities,
+                }));
+              }}
+            />
           </div>
           <div className="pub-filter-section pub-filter-section--direction">
             <label className="pub-filter-label" htmlFor="filter-direction">Направление</label>
