@@ -23,6 +23,7 @@ import { BuilderModule } from './modules/builder/builder.module';
 import { LegalModule } from './modules/legal/legal.module';
 import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
 import { DirectionsModule } from './modules/directions/directions.module';
+import { EmailNotificationsModule } from './modules/email-notifications/email-notifications.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { DirectionsModule } from './modules/directions/directions.module';
     LegalModule,
     BroadcastsModule,
     DirectionsModule,
+    EmailNotificationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
