@@ -115,8 +115,9 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
 
   const handleFilterChange = (nextFilters: ActiveFilters) => {
     setFilters(nextFilters);
+    setSelectedDate(null);
     setPage(1);
-    startTransition(() => void fetchEvents(1, selectedDate, nextFilters));
+    startTransition(() => void fetchEvents(1, null, nextFilters));
   };
 
   const handleDateSelect = (date: string | null) => {
