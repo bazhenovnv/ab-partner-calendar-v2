@@ -5,9 +5,9 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Git commit: `09e2702f51908b6468c23aff6044bb5e35c59075`
-- Backend image: `ab-afisha/backend:backend-release-09e2702`
-- Frontend image: `ab-afisha/frontend:frontend-release-09e2702`
+- Git commit: `79d85dc230b71699977bfec633db411a49c72f4f`
+- Backend image: `ab-afisha/backend:backend-release-79d85dc`
+- Frontend image: `ab-afisha/frontend:frontend-release-79d85dc`
 - Дата утверждения: `2026-08-25`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -18,6 +18,10 @@
 
 ## Что входит в этот релиз
 
+- корректный MAX-парсинг venue-first строк вида `Где: Экспофорум, Санкт-Петербург`: город и площадка больше не меняются местами;
+- полноценный формат `HYBRID` для мероприятий `онлайн + офлайн` с сохранением физического города, площадки и адреса;
+- раздел «Требует внимания» показывает причины, действия администратора и актуальные блокеры публикации, а карточка позволяет опубликовать событие после backend-валидации;
+- email-уведомления о новых `NEEDS_ATTENTION` на `info-event@a-b.ru` через SMTP с причиной, рекомендацией и ссылкой на административный раздел; повторяющиеся одинаковые предупреждения подавляются;
 - полный ролевой ЛК администратора по утверждённому ТЗ;
 - безопасный lifecycle мероприятий: архив, удаление и восстановление без ложных ошибок после HTTP 204;
 - канонический контракт «Главных событий»: только `PUBLISHED + mainEvent=true` с отдельной обложкой `mainEventUrl`;
@@ -55,8 +59,8 @@
 
 - деплоить backend или frontend с тегом `latest`;
 - выбирать backend через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-09e2702`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-09e2702`;
+- деплоить любой `backend-release-*`, кроме `backend-release-79d85dc`;
+- деплоить любой `frontend-release-*`, кроме `frontend-release-79d85dc`;
 - использовать старые `max-ingestion-*`, `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
 - определять production-версию по последнему commit в `main`;
 - менять закреплённую версию без отдельного явного утверждения владельца проекта;
@@ -74,4 +78,4 @@
 - `CLAUDE.md`;
 - теста `apps/frontend/test/production-release-lock.test.mjs`.
 
-До следующего отдельного утверждения действующей остаётся версия `09e2702f51908b6468c23aff6044bb5e35c59075`.
+До следующего отдельного утверждения действующей остаётся версия `79d85dc230b71699977bfec633db411a49c72f4f`.
