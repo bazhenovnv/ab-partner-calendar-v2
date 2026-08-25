@@ -5,9 +5,9 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Git commit: `b676d1a7ce6a1d458e8a7d1e4267c6be4f58ae90`
-- Backend image: `ab-afisha/backend:backend-release-b676d1a`
-- Frontend image: `ab-afisha/frontend:frontend-release-b676d1a`
+- Git commit: `09e2702f51908b6468c23aff6044bb5e35c59075`
+- Backend image: `ab-afisha/backend:backend-release-09e2702`
+- Frontend image: `ab-afisha/frontend:frontend-release-09e2702`
 - Дата утверждения: `2026-08-25`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -26,6 +26,7 @@
 - восстановление справочника городов из опубликованных офлайн-мероприятий и исправление venue-first адресов MAX;
 - публичный фильтр городов использует синхронизированный справочник и больше не обрезает реальные города по локальной выборке событий;
 - применение общих фильтров сбрасывает скрытый фильтр даты, а календарь синхронизирует выбранную дату и отображаемый месяц;
+- faceted filtering: OR внутри одной группы, AND между группами; город и статус не ограничивают сами себя при расчёте доступных вариантов;
 - список «Регион / Город» динамически перестраивается по выбранным статусам `PLANNED/LIVE/COMPLETED`, а несовместимый выбранный город автоматически снимается;
 - публичный фильтр направлений показывает только направления, реально связанные с опубликованными мероприятиями;
 - исправлена доставка напоминаний Telegram/MAX: корректный MAX `user_id`, сетевые retry/timeout и запись ошибок в `ErrorLog`;
@@ -54,8 +55,8 @@
 
 - деплоить backend или frontend с тегом `latest`;
 - выбирать backend через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-b676d1a`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-b676d1a`;
+- деплоить любой `backend-release-*`, кроме `backend-release-09e2702`;
+- деплоить любой `frontend-release-*`, кроме `frontend-release-09e2702`;
 - использовать старые `max-ingestion-*`, `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
 - определять production-версию по последнему commit в `main`;
 - менять закреплённую версию без отдельного явного утверждения владельца проекта;
@@ -73,4 +74,4 @@
 - `CLAUDE.md`;
 - теста `apps/frontend/test/production-release-lock.test.mjs`.
 
-До следующего отдельного утверждения действующей остаётся версия `b676d1a7ce6a1d458e8a7d1e4267c6be4f58ae90`.
+До следующего отдельного утверждения действующей остаётся версия `09e2702f51908b6468c23aff6044bb5e35c59075`.
