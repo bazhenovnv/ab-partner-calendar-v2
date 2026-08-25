@@ -10,6 +10,7 @@ const appModule = read('apps/backend/src/app.module.ts');
 const dispatcher = read('apps/backend/src/modules/email-notifications/email-notifications.service.ts');
 const smtp = read('apps/backend/src/modules/email-notifications/smtp-mail.service.ts');
 const envExample = read('.env.example');
+const productionCompose = read('docker-compose.production.v2.yml');
 
 test('needs-attention notifications are wired to the backend scheduler', () => {
   assert.match(appModule, /EmailNotificationsModule/);
@@ -38,6 +39,16 @@ test('SMTP supports secure and STARTTLS configurations without a new package dep
   assert.match(envExample, /SMTP_SECURE=true/);
   assert.match(envExample, /SMTP_STARTTLS=true/);
   assert.match(envExample, /ATTENTION_EMAIL_TO=info-event@a-b\.ru/);
+});
+
+test('production backend receives SMTP configuration from compose environment', () => {
+  assert.match(productionCompose, /SMTP_HOST: \$\{SMTP_HOST:-\}/);
+  assert.match(productionCompose, /SMTP_PORT: \$\{SMTP_PORT:-465\}/);
+  assert.match(productionCompose, /SMTP_SECURE: \$\{SMTP_SECURE:-true\}/);
+  assert.match(productionCompose, /SMTP_USER: \$\{SMTP_USER:-\}/);
+  assert.match(productionCompose, /SMTP_PASSWORD: \$\{SMTP_PASSWORD:-\}/);
+  assert.match(productionCompose, /SMTP_FROM: \$\{SMTP_FROM:-\}/);
+  assert.match(productionCompose, /ATTENTION_EMAIL_TO: \$\{ATTENTION_EMAIL_TO:-info-event@a-b\.ru\}/);
 });
 
 test('repeated unresolved MAX warnings are suppressed while real mail failures are logged', () => {
