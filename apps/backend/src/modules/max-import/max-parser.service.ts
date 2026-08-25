@@ -78,17 +78,88 @@ const CYRILLIC_DIRECTION_HINTS: Array<{
   },
 ];
 
-const VENUE_PREFIX = /^(?:отель|гостиниц|бизнес[-\s]?центр|бц\b|конференц|центр\b|зал\b|офис\b|ресторан\b|кафе\b)/i;
+const VENUE_PREFIX = /^(?:отель|гостиниц|бизнес[-\s]?центр|бц\b|конференц|центр\b|зал\b|офис\b|ресторан\b|кафе\b|экспофорум\b|экспоцентр\b|экспо\b)/i;
 const STREET_PART = /^(?:ул\.?|улица|проспект|пр-т|пер\.?|переулок|шоссе|наб\.?|набережная|бульвар|бул\.?|пл\.?|площадь|д\.?\s*\d|дом\b)/i;
 const REGION_PART = /(?:обл\.?|область|край|респ\.?|республика|автономн|округ|ао)$/i;
+const HYBRID_PATTERN = /(?:онлайн\s*(?:\+|\/)|(?:\+|\/)\s*офлайн|online\s*(?:\+|\/)|(?:\+|\/)\s*offline|очно\s*(?:\+|\/))/i;
 
 function cleanLocationPart(value: string) {
   return value.trim().replace(/^(?:г\.|город)\s*/i, '').trim();
 }
 
+function setAttention(result: ParsedMaxPost, reasons: string[]) {
+  result.attentionReasons = [...new Set(reasons.filter(Boolean))];
+  result.needsAttention = result.attentionReasons.length > 0;
+}
+
+function repairHybridLocation(text: string, result: ParsedMaxPost) {
+  const formatValue = text.match(/Формат\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
+  if (!HYBRID_PATTERN.test(formatValue)) return;
+
+  // Base parser historically collapsed hybrid events into ONLINE and used the
+  // literal "онлайн + офлайн" as a city. Preserve compatibility in the base
+  // parser while correcting the normalized value here.
+  (result as unknown as { format: string | null }).format = 'HYBRID';
+
+  const remainingReasons = result.attentionReasons.filter(
+    (reason) => reason !== 'Гибридный формат требует ручной проверки',
+  );
+
+  const whereValue = text.match(/Где\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
+  if (!whereValue) {
+    result.city = null;
+    result.address = null;
+    result.venue = null;
+    remainingReasons.push('Место очного участия гибридного события не определено');
+    setAttention(result, remainingReasons);
+    return;
+  }
+
+  const normalized = whereValue.replace(/^Россия\s*,\s*/i, '').trim();
+  const cityAndDetails = normalized.match(/^\s*(?:г\.\s*)?([^,]+)(?:,\s*(.+))?$/i);
+  result.city = cleanLocationPart(cityAndDetails?.[1] ?? normalized);
+  result.address = null;
+  result.venue = null;
+
+  const details = cityAndDetails?.[2]?.trim() ?? '';
+  if (details) {
+    const parentheticalAddress = details.match(/^(.+?)\s*\(([^()]+)\)\s*$/);
+    if (parentheticalAddress) {
+      result.venue = parentheticalAddress[1].trim();
+      result.address = parentheticalAddress[2].trim();
+    } else if (STREET_PART.test(details)) {
+      result.address = details;
+    } else {
+      const commaParts = details.split(',').map((part) => part.trim()).filter(Boolean);
+      const addressTail = commaParts.length > 1 ? commaParts.slice(1).join(', ') : '';
+      if (addressTail && STREET_PART.test(addressTail)) {
+        result.venue = commaParts[0];
+        result.address = addressTail;
+      } else {
+        result.venue = details;
+      }
+    }
+  }
+
+  setAttention(result, remainingReasons);
+}
+
 function repairVenueFirstLocation(result: ParsedMaxPost) {
-  if (result.format !== 'OFFLINE' || !result.city || !result.address) return;
-  if (!VENUE_PREFIX.test(result.city)) return;
+  const format = (result as unknown as { format: string | null }).format;
+  if (format !== 'OFFLINE' && format !== 'HYBRID') return;
+  if (!result.city || !VENUE_PREFIX.test(result.city)) return;
+
+  // Common MAX wording: "Где: Экспофорум, Санкт-Петербург". The base parser
+  // reads the first token as a city; swap it when the first token is clearly a
+  // venue and the second token is a plausible city.
+  if (result.venue && !result.address && !VENUE_PREFIX.test(result.venue)) {
+    const venue = result.city;
+    result.city = cleanLocationPart(result.venue);
+    result.venue = venue;
+    return;
+  }
+
+  if (!result.address) return;
 
   const parts = result.address
     .split(',')
@@ -119,6 +190,7 @@ export class MaxParserService extends BaseMaxParserService {
     supplementalUrls: string[] = [],
   ): ParsedMaxPost {
     const result = super.parse(text, postDate, supplementalUrls);
+    repairHybridLocation(text, result);
     repairVenueFirstLocation(result);
 
     const usedFallback =
