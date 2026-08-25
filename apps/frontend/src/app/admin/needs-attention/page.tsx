@@ -2,16 +2,23 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { adminApi, type AttentionGuidanceItem } from '@/lib/admin-api';
+import { adminApi, type AttentionGuidanceItem, type EventFormat } from '@/lib/admin-api';
 
 type Item = {
   id: string;
   title: string;
+  format: EventFormat;
   cityName: string | null;
   updatedAt: string;
   attentionGuidance?: AttentionGuidanceItem[];
   publicationIssues?: AttentionGuidanceItem[];
   publicationReady?: boolean;
+};
+
+const HYBRID_REVIEW_GUIDANCE: AttentionGuidanceItem = {
+  reason: 'Гибридный формат требует ручной проверки',
+  action: 'Проверьте формат «Онлайн + офлайн», город, площадку и адрес очной части. После проверки событие можно опубликовать.',
+  blocking: true,
 };
 
 function GuidanceList({ items }: { items: AttentionGuidanceItem[] }) {
@@ -67,7 +74,12 @@ export default function NeedsAttentionPage() {
               </thead>
               <tbody>
                 {items.map((item) => {
-                  const guidance = item.attentionGuidance ?? [];
+                  const backendGuidance = item.attentionGuidance ?? [];
+                  const guidance = backendGuidance.length > 0
+                    ? backendGuidance
+                    : item.format === 'HYBRID'
+                      ? [HYBRID_REVIEW_GUIDANCE]
+                      : [];
                   const issues = item.publicationIssues ?? [];
                   return (
                     <tr key={item.id}>
