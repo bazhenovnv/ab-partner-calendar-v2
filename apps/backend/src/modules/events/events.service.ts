@@ -7,6 +7,12 @@ import { EventsQueryDto } from './dto/events-query.dto';
 import { CalendarQueryDto } from './dto/calendar-query.dto';
 import { EventStatus, EventAutoStatus, Prisma } from '@prisma/client';
 
+type AttentionGuidanceItem = {
+  reason: string;
+  action: string;
+  blocking: boolean;
+};
+
 @Injectable()
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -348,11 +354,18 @@ export class EventsService {
   }
 
   async getNeedsAttention() {
-    return this.prisma.event.findMany({
+    const events = await this.prisma.event.findMany({
       where: { status: 'NEEDS_ATTENTION' },
       orderBy: { updatedAt: 'desc' },
-      include: { images: true },
+      include: {
+        images: true,
+        directions: { include: { direction: true } },
+        city: true,
+        tags: true,
+      },
     });
+
+    return events.map((event) => this.decorateAttention(event));
   }
 
   async getAdminEventById(id: string) {
@@ -367,7 +380,7 @@ export class EventsService {
       },
     });
     if (!event) throw new NotFoundException('Event not found');
-    return event;
+    return this.decorateAttention(event);
   }
 
   async createEvent(dto: CreateEventDto, userId: string) {
@@ -384,6 +397,7 @@ export class EventsService {
         cityName: dto.cityName,
         address: dto.address,
         venue: dto.venue,
+        isOnline: dto.format === 'ONLINE' || dto.format === 'HYBRID',
         eventUrl: dto.eventUrl,
         ticketUrl: dto.ticketUrl,
         ticketSalesEnabled: dto.ticketSalesEnabled ?? false,
@@ -419,7 +433,10 @@ export class EventsService {
         ...(dto.startDate !== undefined && { startDate: new Date(dto.startDate) }),
         ...(dto.endDate !== undefined && { endDate: dto.endDate ? new Date(dto.endDate) : null }),
         ...(dto.startTime !== undefined && { startTime: dto.startTime }),
-        ...(dto.format !== undefined && { format: dto.format }),
+        ...(dto.format !== undefined && {
+          format: dto.format,
+          isOnline: dto.format === 'ONLINE' || dto.format === 'HYBRID',
+        }),
         ...(dto.cityId !== undefined && { cityId: dto.cityId }),
         ...(dto.cityName !== undefined && { cityName: dto.cityName }),
         ...(dto.address !== undefined && { address: dto.address }),
@@ -467,7 +484,11 @@ export class EventsService {
   async publishEvent(id: string, userId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id },
-      include: { images: true },
+      include: {
+        images: true,
+        city: true,
+        directions: { include: { direction: true } },
+      },
     });
     if (!event) throw new NotFoundException('Event not found');
 
@@ -475,7 +496,11 @@ export class EventsService {
 
     const updated = await this.prisma.event.update({
       where: { id },
-      data: { status: 'PUBLISHED', publishedAt: event.publishedAt ?? new Date() },
+      data: {
+        status: 'PUBLISHED',
+        publishedAt: event.publishedAt ?? new Date(),
+        attentionReasons: [],
+      },
     });
     await this.logAction(userId, 'publish', 'event', id, null, null);
     return updated;
@@ -510,16 +535,127 @@ export class EventsService {
 
   // ── Private helpers ────────────────────────────────────────────────────────
 
-  private validateForPublication(event: any) {
-    const criticalMissing: string[] = [];
-    if (!event.title) criticalMissing.push('title');
-    if (!event.startDate) criticalMissing.push('date');
-    if (!event.startTime) criticalMissing.push('time');
-    if (!event.eventUrl) criticalMissing.push('eventUrl');
-    if (!event.images?.eventCardUrl && !event.images?.originalUrl) criticalMissing.push('image');
+  private hasEventImage(images: any[] | null | undefined): boolean {
+    return Boolean(
+      images?.some((image) =>
+        Boolean(
+          image?.eventCardUrl ||
+          image?.originalUrl ||
+          image?.thumbnailUrl ||
+          image?.mainEventUrl ||
+          image?.modalUrl,
+        ),
+      ),
+    );
+  }
 
-    if (criticalMissing.length > 0) {
-      throw new BadRequestException(`Missing required fields: ${criticalMissing.join(', ')}`);
+  private publicationIssues(event: any): AttentionGuidanceItem[] {
+    const issues: AttentionGuidanceItem[] = [];
+    const add = (reason: string, action: string) => {
+      issues.push({ reason, action, blocking: true });
+    };
+
+    if (!event.title?.trim() || event.title.trim().length < 2 || event.title.trim() === 'Без названия') {
+      add('Не указан корректный заголовок', 'Укажите понятное название мероприятия.');
+    }
+    if (!event.startDate) {
+      add('Не указана дата мероприятия', 'Укажите дату начала мероприятия.');
+    }
+    if (!event.format) {
+      add('Не определён формат мероприятия', 'Выберите формат: онлайн, офлайн или онлайн + офлайн.');
+    }
+    if (
+      (event.format === 'OFFLINE' || event.format === 'HYBRID') &&
+      !event.cityName?.trim() &&
+      !event.city?.name?.trim()
+    ) {
+      add('Не определён город очного участия', 'Укажите город, где проходит очная часть мероприятия.');
+    }
+    if (!this.hasEventImage(event.images)) {
+      add('Изображение события отсутствует', 'Загрузите изображение мероприятия. Без изображения событие не публикуется автоматически.');
+    }
+
+    return issues;
+  }
+
+  private attentionAction(reason: string): string {
+    const normalized = reason.toLocaleLowerCase('ru-RU');
+    if (normalized.includes('изображ')) {
+      return 'Проверьте изображение мероприятия и при необходимости загрузите его вручную.';
+    }
+    if (normalized.includes('гибрид') || normalized.includes('очно')) {
+      return 'Проверьте формат «Онлайн + офлайн», город, площадку и адрес очной части.';
+    }
+    if (normalized.includes('заголов')) {
+      return 'Проверьте и заполните название мероприятия.';
+    }
+    if (normalized.includes('дат')) {
+      return 'Проверьте дату начала и окончания мероприятия.';
+    }
+    if (normalized.includes('формат')) {
+      return 'Выберите корректный формат мероприятия.';
+    }
+    if (normalized.includes('город') || normalized.includes('мест')) {
+      return 'Укажите корректный город, площадку и адрес очного мероприятия.';
+    }
+    if (normalized.includes('направлен')) {
+      return 'Выберите хотя бы одно подходящее направление мероприятия.';
+    }
+    if (normalized.includes('подборк')) {
+      return 'Это пост с несколькими мероприятиями. Проверьте, нужно ли разделить его на отдельные события.';
+    }
+    return 'Проверьте данные события в карточке и исправьте указанную причину перед публикацией.';
+  }
+
+  private sourceAttentionReasons(event: any): string[] {
+    const reasons = new Set<string>(event.attentionReasons ?? []);
+    const sourceText = String(event.fullDescription ?? '');
+
+    if (
+      /ПОДБОРКА\s+(НЕДЕЛИ|МЕСЯЦА|ДНЯ)/i.test(sourceText) ||
+      /АБ\s+АФИША\s+БУХГАЛТЕРА[:：]\s*ЧТО\s+ПОСМОТРЕТЬ/i.test(sourceText) ||
+      /\b(?:мероприятия|вебинары|семинары)\s+на\s+(?:неделю|месяц)\b/i.test(sourceText)
+    ) {
+      reasons.add('Пост-подборка: требуется ручная обработка без автоматического разделения');
+    }
+
+    if (!event.directions?.length) {
+      reasons.add('Направление отсутствует или не найдено в справочнике');
+    }
+
+    return [...reasons];
+  }
+
+  private decorateAttention(event: any) {
+    const publicationIssues = this.publicationIssues(event);
+    const reasonGuidance = this.sourceAttentionReasons(event).map((reason) => ({
+      reason,
+      action: this.attentionAction(reason),
+      blocking: true,
+    }));
+
+    const seen = new Set(reasonGuidance.map((item) => item.reason));
+    for (const issue of publicationIssues) {
+      if (!seen.has(issue.reason)) {
+        reasonGuidance.push(issue);
+        seen.add(issue.reason);
+      }
+    }
+
+    return {
+      ...event,
+      attentionGuidance: reasonGuidance,
+      publicationIssues,
+      publicationReady: publicationIssues.length === 0,
+    };
+  }
+
+  private validateForPublication(event: any) {
+    const issues = this.publicationIssues(event);
+    if (issues.length > 0) {
+      throw new BadRequestException(
+        `Для публикации нужно исправить: ${issues.map((issue) => issue.reason).join('; ')}`,
+      );
     }
   }
 
