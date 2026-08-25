@@ -10,21 +10,27 @@ const FILTERS_UI = read('apps/frontend/src/components/events/EventFilters.tsx');
 const FILTERS_CONTROLLER = read('apps/backend/src/modules/filters/filters.controller.ts');
 const FILTERS_SERVICE = read('apps/backend/src/modules/filters/filters.service.ts');
 
-describe('Dynamic city/status filter', () => {
-  test('requests city options for the pending auto statuses before Apply', () => {
-    assert.match(FILTERS_UI, /pending\.autoStatus\.forEach\(\(status\) => qs\.append\('autoStatus', status\)\)/);
-    assert.match(FILTERS_UI, /fetch\(`\/api\/filters\/cities\?\$\{qs\.toString\(\)\}`/);
-    assert.match(FILTERS_UI, /cities=\{statusCities\}/);
+describe('Faceted city/status filter', () => {
+  test('requests both city and status facets from the pending filter state', () => {
+    assert.match(FILTERS_UI, /fetch\(`\/api\/filters\/facets\?\$\{qs\.toString\(\)\}`/);
+    assert.match(FILTERS_UI, /pending\.cities\.forEach/);
+    assert.match(FILTERS_UI, /pending\.autoStatus\.forEach/);
+    assert.match(FILTERS_UI, /pending\.directions\.forEach/);
   });
 
-  test('drops an already selected city when it is unavailable for the new status', () => {
-    assert.match(FILTERS_UI, /nextSelectedCities = current\.cities\.filter/);
-    assert.match(FILTERS_UI, /cities: nextSelectedCities/);
+  test('drops incompatible city and status selections without self-filtering', () => {
+    assert.match(FILTERS_UI, /selectedCities = current\.cities\.filter/);
+    assert.match(FILTERS_UI, /selectedStatuses = current\.autoStatus\.filter/);
+    assert.match(FILTERS_UI, /setAvailableStatuses/);
+    assert.match(FILTERS_UI, /По выбранным фильтрам городов нет/);
   });
 
-  test('backend accepts repeated autoStatus values and filters published events', () => {
-    assert.match(FILTERS_CONTROLLER, /@Query\('autoStatus'\)/);
-    assert.match(FILTERS_SERVICE, /autoStatus: \{ in: autoStatus \}/);
+  test('backend calculates city and status facets independently', () => {
+    assert.match(FILTERS_CONTROLLER, /@Get\('facets'\)/);
+    assert.match(FILTERS_SERVICE, /const cityWhere/);
+    assert.match(FILTERS_SERVICE, /const statusWhere/);
+    assert.match(FILTERS_SERVICE, /autoStatus: \{ in: query\.autoStatus \}/);
+    assert.match(FILTERS_SERVICE, /this\.cityConstraint\(query\.cities\)/);
     assert.match(FILTERS_SERVICE, /status: 'PUBLISHED'/);
   });
 });
