@@ -9,6 +9,11 @@ import { resolve, join } from 'node:path';
 
 const BOTS = resolve(import.meta.dirname, '..');
 const SRC = join(BOTS, 'src');
+const REPO = resolve(BOTS, '../..');
+const MAX_INTERACTION = join(
+  REPO,
+  'apps/backend/src/modules/max-import/max-bot-interaction.service.ts',
+);
 
 describe('Bot files exist', () => {
   const files = [
@@ -25,18 +30,45 @@ describe('Bot files exist', () => {
 });
 
 describe('Reminder calendar and time selection', () => {
-  test('Telegram uses compact calendar, time controls and Apply', () => {
+  test('Telegram uses date -> hour -> minute multi-select flow', () => {
     const source = readFileSync(join(SRC, 'telegram/bot.ts'), 'utf8');
     assert.ok(source.includes('buildReminderCalendar'));
     assert.ok(source.includes('buildReminderDateTime'));
+    assert.ok(source.includes('getAvailableReminderHours'));
+    assert.ok(source.includes('getAvailableReminderMinutes'));
     assert.ok(source.includes('reminder_month:'));
     assert.ok(source.includes('reminder_date:'));
-    assert.ok(source.includes('reminder_time:'));
-    assert.ok(source.includes("bot.callbackQuery('reminder_add'"));
+    assert.ok(source.includes('reminder_hour:'));
+    assert.ok(source.includes('reminder_minute:'));
+    assert.ok(source.includes('reminder_selected'));
+    assert.ok(source.includes('reminder_remove:'));
+    assert.ok(source.includes('reminder_cancel'));
     assert.ok(source.includes("bot.callbackQuery('reminder_apply'"));
     assert.ok(source.includes('Применить'));
-    assert.ok(!source.includes('awaitingReminderTime'));
+    assert.ok(source.includes('Очистить'));
+    assert.ok(source.includes('Отмена'));
+    assert.ok(!source.includes('pendingTime:'));
+    assert.ok(!source.includes('reminder_time:'));
+    assert.ok(!source.includes("bot.callbackQuery('reminder_add'"));
     assert.ok(!source.includes('reminder_toggle:'));
+  });
+
+  test('MAX webhook uses the same multi-select flow and Accept button', () => {
+    const source = readFileSync(MAX_INTERACTION, 'utf8');
+    assert.ok(source.includes('getAvailableReminderHours'));
+    assert.ok(source.includes('getAvailableReminderMinutes'));
+    assert.ok(source.includes('reminder_hour:'));
+    assert.ok(source.includes('reminder_minute:'));
+    assert.ok(source.includes('reminder_selected'));
+    assert.ok(source.includes('reminder_remove:'));
+    assert.ok(source.includes('reminder_cancel'));
+    assert.ok(source.includes("this.button('Принять', 'accept_legal')"));
+    assert.ok(source.includes('Применить'));
+    assert.ok(source.includes('Очистить'));
+    assert.ok(source.includes('Отмена'));
+    assert.ok(!source.includes('pendingTime:'));
+    assert.ok(!source.includes('reminder_time:'));
+    assert.ok(!source.includes("payload === 'reminder_add'"));
   });
 
   test('MAX standalone process is disabled in webhook mode', () => {
