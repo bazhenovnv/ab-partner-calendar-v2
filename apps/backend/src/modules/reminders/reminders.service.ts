@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { getReminderEventDeadline } from '@ab-afisha/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReminderDto } from './create-reminder.dto';
 
@@ -48,10 +49,15 @@ export class RemindersService {
 
     const event = await this.prisma.event.findFirst({
       where: { id: dto.eventId },
-      select: { id: true, startDate: true },
+      select: { id: true, startDate: true, startTime: true },
     });
     if (!event) throw new NotFoundException('Event not found');
-    if (remindAt.getTime() >= event.startDate.getTime()) {
+
+    const eventDeadline = getReminderEventDeadline(event.startDate, event.startTime);
+    if (!eventDeadline) {
+      throw new BadRequestException('Event start time is invalid');
+    }
+    if (remindAt.getTime() >= eventDeadline.getTime()) {
       throw new BadRequestException('remindAt must be before event start time');
     }
 
@@ -215,7 +221,8 @@ export class RemindersService {
       try {
         const { event, botUser } = reminder;
         const eventUrl = `${this.siteUrl}/events/${event.id}`;
-        const eventDateMsk = formatMsk(event.startDate);
+        const eventMoment = getReminderEventDeadline(event.startDate, event.startTime) ?? event.startDate;
+        const eventDateMsk = formatMsk(eventMoment);
 
         let text: string;
         if (botUser.channel === 'TELEGRAM') {
