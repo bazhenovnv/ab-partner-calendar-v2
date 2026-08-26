@@ -23,11 +23,11 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = 'a0727468eb1966cdc7fd4ca3f469eeacf51b09a5';
+const RELEASE_ANCHOR = 'ebfb4f9db38c34e58743463a9c5200c46988dd66';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-a072746';
+const BACKEND_TAG = 'backend-release-ebfb4f9';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
-const BOTS_COMMIT = RELEASE_ANCHOR;
+const BOTS_COMMIT = 'a0727468eb1966cdc7fd4ca3f469eeacf51b09a5';
 const BOTS_TAG = 'bots-release-a072746';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
 const FRONTEND_COMMIT = '79d85dc230b71699977bfec633db411a49c72f4f';
@@ -52,6 +52,7 @@ describe('Pinned production component release', () => {
     for (const content of [RELEASE, AGENTS, CLAUDE]) {
       assert.match(content, new RegExp(RELEASE_ANCHOR));
       assert.match(content, new RegExp(BACKEND_IMAGE));
+      assert.match(content, new RegExp(BOTS_COMMIT));
       assert.match(content, new RegExp(BOTS_IMAGE));
       assert.match(content, new RegExp(FRONTEND_COMMIT));
       assert.match(content, new RegExp(FRONTEND_IMAGE));
@@ -62,7 +63,7 @@ describe('Pinned production component release', () => {
   });
 
   test('compose pins backend, bots and frontend without APP_VERSION', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-a072746\}/);
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-ebfb4f9\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-a072746\}/);
     assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-79d85dc\}/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
