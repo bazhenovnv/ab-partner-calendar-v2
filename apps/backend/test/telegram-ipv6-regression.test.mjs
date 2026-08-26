@@ -10,6 +10,8 @@ const read = (path) => readFileSync(resolve(ROOT, path), 'utf8');
 const compose = read('docker-compose.production.v2.yml');
 const botsIndex = read('apps/bots/src/index.ts');
 const transport = read('apps/backend/src/common/telegram/telegram-api.ts');
+const reminders = read('apps/backend/src/modules/reminders/reminders.service.ts');
+const broadcasts = read('apps/backend/src/modules/broadcasts/broadcasts.service.ts');
 const hostScript = resolve(ROOT, 'infra/scripts/configure-telegram-ipv6-host.sh');
 
 test('production isolates IPv6 egress to backend and bots', () => {
@@ -28,6 +30,13 @@ test('backend Telegram transport selects IPv6 without changing MAX or SMTP', () 
   assert.match(transport, /hostname: 'api\.telegram\.org'/);
   assert.match(transport, /family: telegramIpFamily\(\)/);
   assert.match(transport, /TELEGRAM_IP_FAMILY/);
+});
+
+test('all backend Telegram delivery paths use the dedicated transport', () => {
+  assert.match(reminders, /telegramPostJson/);
+  assert.match(broadcasts, /telegramPostJson/);
+  assert.doesNotMatch(reminders, /fetch\(`https:\/\/api\.telegram\.org/);
+  assert.doesNotMatch(broadcasts, /fetch\(`https:\/\/api\.telegram\.org/);
 });
 
 test('host IPv6 persistence script is valid Bash', () => {
