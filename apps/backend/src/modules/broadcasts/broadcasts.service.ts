@@ -8,6 +8,7 @@ import {
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { telegramPostJson } from '../../common/telegram/telegram-api';
 
 export interface CreateBroadcastDto {
   title: string;
@@ -167,18 +168,17 @@ export class BroadcastsService {
     const text = this.buildTelegramMessage(broadcast as any);
     let apiErrorDescription: string | undefined;
     try {
-      const res = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = await telegramPostJson<{ description?: string }>(
+        tgToken,
+        'sendMessage',
+        {
           chat_id: adminChatId,
           text: `[ТЕСТ РАССЫЛКИ]\n\n${text}`,
           parse_mode: 'HTML',
-        }),
-      });
+        },
+      );
       if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as { description?: string };
-        apiErrorDescription = body.description ?? `Telegram API HTTP ${res.status}`;
+        apiErrorDescription = res.json?.description ?? `Telegram API HTTP ${res.status}`;
       }
     } catch (err: unknown) {
       throw new BadGatewayException(`Telegram API unreachable: ${String(err)}`);
@@ -267,7 +267,7 @@ export class BroadcastsService {
 
     // Mark PENDING recipients as SKIPPED
     await this.prisma.broadcastRecipient.updateMany({
-      where: { broadcastId: id, status: 'PENDING' as any },
+      where: { broadcastId, status: 'PENDING' as any },
       data: { status: 'SKIPPED' as any, skippedReason: 'Broadcast cancelled' },
     });
 
@@ -455,14 +455,16 @@ export class BroadcastsService {
       const token = process.env.TELEGRAM_BOT_TOKEN;
       if (!token) return { success: false, reason: 'TELEGRAM_BOT_TOKEN not configured' };
       try {
-        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: user.externalId, text, parse_mode: 'HTML' }),
-        });
+        const res = await telegramPostJson<{ description?: string }>(
+          token,
+          'sendMessage',
+          { chat_id: user.externalId, text, parse_mode: 'HTML' },
+        );
         if (res.ok) return { success: true };
-        const body = await res.json() as { description?: string };
-        return { success: false, reason: body.description ?? `HTTP ${res.status}` };
+        return {
+          success: false,
+          reason: res.json?.description ?? res.body || `HTTP ${res.status}`,
+        };
       } catch (err: unknown) {
         return { success: false, reason: String(err) };
       }
