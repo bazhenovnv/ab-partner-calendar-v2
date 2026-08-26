@@ -91,6 +91,18 @@ jobs:
       - name: Typecheck (shared + bots + frontend + backend)
         run: pnpm typecheck
 
+      - name: Shared reminder regression tests
+        run: node --test packages/shared/test/*.test.mjs
+
+      - name: Bots regression tests
+        run: node --test apps/bots/test/*.test.mjs
+
+      - name: Backend reminder and Telegram network regression tests
+        run: >-
+          node --test
+          apps/backend/test/reminder-time-regression.test.mjs
+          apps/backend/test/telegram-ipv6-regression.test.mjs
+
       - name: Frontend regression tests
         run: node --test apps/frontend/test/*.test.mjs
 

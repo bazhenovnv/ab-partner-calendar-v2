@@ -6,10 +6,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import {
   SITE_URL,
-  adjustReminderTime,
   buildReminderCalendar,
   buildReminderDateTime,
+  formatReminderDateLabel,
+  getAvailableReminderHours,
+  getAvailableReminderMinutes,
   getInitialReminderMonth,
+  getReminderEventDeadline,
   shiftReminderMonth,
   type ReminderDateTimeOption,
 } from '@ab-afisha/shared';
@@ -46,9 +49,9 @@ type MaxReminderState = {
   eventStartDate: string;
   eventStartTime?: string | null;
   monthId: string;
-  view: 'calendar' | 'time';
+  view: 'calendar' | 'hour' | 'minute' | 'selected';
   pendingDate?: string;
-  pendingTime: string;
+  pendingHour?: string;
   selected: Map<string, ReminderDateTimeOption>;
 };
 
@@ -193,7 +196,7 @@ export class MaxBotInteractionService {
       return true;
     }
 
-    await this.sendMessage(sender.userId, 'Используйте календарь и кнопки настройки времени.');
+    await this.sendMessage(sender.userId, 'Используйте календарь и кнопки выбора часа и минут.');
     return true;
   }
 
@@ -237,6 +240,8 @@ export class MaxBotInteractionService {
       );
       if (monthId) state.monthId = monthId;
       state.view = 'calendar';
+      state.pendingDate = undefined;
+      state.pendingHour = undefined;
       await this.answerCallback(
         update.callback.callbackId,
         this.selectorText(state),
@@ -247,9 +252,19 @@ export class MaxBotInteractionService {
 
     const dateMatch = /^reminder_date:(\d{4}-\d{2}-\d{2})$/.exec(payload);
     if (dateMatch) {
-      state.pendingDate = dateMatch[1];
-      state.pendingTime = '09:00';
-      state.view = 'time';
+      const dateId = dateMatch[1];
+      const hours = getAvailableReminderHours(
+        dateId,
+        state.eventStartDate,
+        state.eventStartTime,
+      );
+      if (!hours.length) {
+        await this.answerCallback(update.callback.callbackId, undefined, undefined, 'На эту дату уже нет доступного времени.');
+        return;
+      }
+      state.pendingDate = dateId;
+      state.pendingHour = undefined;
+      state.view = 'hour';
       await this.answerCallback(
         update.callback.callbackId,
         this.selectorText(state),
@@ -258,9 +273,65 @@ export class MaxBotInteractionService {
       return;
     }
 
-    const timeMatch = /^reminder_time:(-?\d+)$/.exec(payload);
-    if (timeMatch) {
-      state.pendingTime = adjustReminderTime(state.pendingTime, Number(timeMatch[1]));
+    const hourMatch = /^reminder_hour:(\d{2})$/.exec(payload);
+    if (hourMatch) {
+      if (!state.pendingDate) {
+        await this.answerCallback(update.callback.callbackId, undefined, undefined, 'Сначала выберите дату.');
+        return;
+      }
+      const hour = hourMatch[1];
+      const minutes = getAvailableReminderMinutes(
+        state.pendingDate,
+        hour,
+        state.eventStartDate,
+        state.eventStartTime,
+      );
+      if (!minutes.length) {
+        await this.answerCallback(update.callback.callbackId, undefined, undefined, 'В этом часу уже нет доступного времени.');
+        return;
+      }
+      state.pendingHour = hour;
+      state.view = 'minute';
+      await this.answerCallback(
+        update.callback.callbackId,
+        this.selectorText(state),
+        this.selectorKeyboard(state),
+      );
+      return;
+    }
+
+    const minuteMatch = /^reminder_minute:(\d{2})$/.exec(payload);
+    if (minuteMatch) {
+      if (!state.pendingDate || !state.pendingHour) {
+        await this.answerCallback(update.callback.callbackId, undefined, undefined, 'Сначала выберите дату и час.');
+        return;
+      }
+      const option = buildReminderDateTime(
+        state.pendingDate,
+        `${state.pendingHour}:${minuteMatch[1]}`,
+        state.eventStartDate,
+        state.eventStartTime,
+      );
+      if (!option) {
+        await this.answerCallback(update.callback.callbackId, undefined, undefined, 'Это время уже недоступно. Выберите другое.');
+        return;
+      }
+      const duplicate = state.selected.has(option.id);
+      state.selected.set(option.id, option);
+      state.pendingHour = undefined;
+      state.view = 'hour';
+      await this.answerCallback(
+        update.callback.callbackId,
+        this.selectorText(state),
+        this.selectorKeyboard(state),
+        duplicate ? 'Это время уже выбрано.' : 'Напоминание добавлено.',
+      );
+      return;
+    }
+
+    if (payload === 'reminder_hours_back') {
+      state.pendingHour = undefined;
+      state.view = state.pendingDate ? 'hour' : 'calendar';
       await this.answerCallback(
         update.callback.callbackId,
         this.selectorText(state),
@@ -272,6 +343,7 @@ export class MaxBotInteractionService {
     if (payload === 'reminder_back') {
       state.view = 'calendar';
       state.pendingDate = undefined;
+      state.pendingHour = undefined;
       await this.answerCallback(
         update.callback.callbackId,
         this.selectorText(state),
@@ -280,42 +352,33 @@ export class MaxBotInteractionService {
       return;
     }
 
-    if (payload === 'reminder_add') {
-      if (!state.pendingDate) {
-        await this.answerCallback(update.callback.callbackId, undefined, undefined, 'Сначала выберите дату.');
-        return;
-      }
-
-      const option = buildReminderDateTime(
-        state.pendingDate,
-        state.pendingTime,
-        state.eventStartDate,
-        state.eventStartTime,
-      );
-      if (!option) {
-        await this.answerCallback(
-          update.callback.callbackId,
-          undefined,
-          undefined,
-          'Выберите будущее время до начала мероприятия.',
-        );
-        return;
-      }
-
-      state.selected.set(option.id, option);
-      state.view = 'calendar';
-      state.pendingDate = undefined;
+    if (payload === 'reminder_selected') {
+      state.view = 'selected';
       await this.answerCallback(
         update.callback.callbackId,
         this.selectorText(state),
         this.selectorKeyboard(state),
-        'Напоминание добавлено.',
+      );
+      return;
+    }
+
+    const removeMatch = /^reminder_remove:(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})$/.exec(payload);
+    if (removeMatch) {
+      const removed = state.selected.delete(removeMatch[1]);
+      state.view = state.selected.size ? 'selected' : 'calendar';
+      await this.answerCallback(
+        update.callback.callbackId,
+        this.selectorText(state),
+        this.selectorKeyboard(state),
+        removed ? 'Напоминание удалено.' : 'Уже удалено.',
       );
       return;
     }
 
     if (payload === 'reminder_clear') {
       state.selected.clear();
+      state.pendingDate = undefined;
+      state.pendingHour = undefined;
       state.view = 'calendar';
       await this.answerCallback(
         update.callback.callbackId,
@@ -326,10 +389,18 @@ export class MaxBotInteractionService {
       return;
     }
 
+    if (payload === 'reminder_cancel') {
+      this.states.delete(user.userId);
+      await this.answerCallback(
+        update.callback.callbackId,
+        'Выбор напоминаний отменён. Вернуться к нему можно через кнопку «Напомнить» на сайте.',
+      );
+      return;
+    }
+
     if (payload !== 'reminder_apply') return;
 
-    const selected = [...state.selected.values()]
-      .sort((left, right) => left.remindAt.localeCompare(right.remindAt));
+    const selected = this.sortedSelected(state);
     if (!selected.length) {
       await this.answerCallback(update.callback.callbackId, undefined, undefined, 'Сначала добавьте напоминание.');
       return;
@@ -350,7 +421,7 @@ export class MaxBotInteractionService {
     }
 
     if (failed) {
-      await this.answerCallback(update.callback.callbackId, undefined, undefined, `Не удалось сохранить ${failed} напоминание(я).`);
+      await this.answerCallback(update.callback.callbackId, undefined, undefined, `Не удалось сохранить ${failed} напоминание(я). Проверьте время и попробуйте ещё раз.`);
       return;
     }
 
@@ -412,8 +483,9 @@ export class MaxBotInteractionService {
       return;
     }
 
+    const deadline = getReminderEventDeadline(event.startDate, event.startTime);
     const monthId = getInitialReminderMonth(event.startDate);
-    if (!monthId) {
+    if (!deadline || deadline.getTime() <= Date.now() || !monthId) {
       this.states.delete(userId);
       await this.sendMessage(userId, 'Для этого мероприятия уже нет доступного времени для напоминания.');
       return;
@@ -428,28 +500,68 @@ export class MaxBotInteractionService {
       eventStartTime: event.startTime,
       monthId,
       view: 'calendar',
-      pendingTime: '09:00',
       selected: new Map<string, ReminderDateTimeOption>(),
     };
     this.states.set(userId, state);
     await this.sendMessage(userId, this.selectorText(state), this.selectorKeyboard(state));
   }
 
+  private sortedSelected(state: MaxReminderState): ReminderDateTimeOption[] {
+    return [...state.selected.values()]
+      .sort((left, right) => left.remindAt.localeCompare(right.remindAt));
+  }
+
+  private compactOptionLabel(option: ReminderDateTimeOption): string {
+    const [, month, day] = option.dateId.split('-');
+    return `${day}.${month} ${option.time}`;
+  }
+
   private selectedSummary(state: MaxReminderState): string {
-    if (!state.selected.size) return 'Выбранных напоминаний пока нет.';
-    return `Выбрано:\n${[...state.selected.values()]
-      .sort((left, right) => left.remindAt.localeCompare(right.remindAt))
+    const selected = this.sortedSelected(state);
+    if (!selected.length) return 'Выбранных напоминаний пока нет.';
+    return `Выбрано (${selected.length}):\n${selected
       .map((option) => `• ${option.label} МСК`)
       .join('\n')}`;
   }
 
+  private selectedTimesForDate(state: MaxReminderState, dateId: string): string {
+    const times = this.sortedSelected(state)
+      .filter((option) => option.dateId === dateId)
+      .map((option) => option.time);
+    return times.length ? times.join(', ') : 'нет';
+  }
+
   private selectorText(state: MaxReminderState): string {
-    if (state.view === 'time') {
+    if (state.view === 'hour') {
+      const dateLabel = state.pendingDate
+        ? formatReminderDateLabel(state.pendingDate) ?? state.pendingDate
+        : 'не выбрана';
       return (
-        `Настройка времени напоминания\n\n` +
-        `Дата: ${state.pendingDate ?? 'не выбрана'}\n` +
-        `Время: ${state.pendingTime} МСК\n\n` +
-        'Измените время кнопками и нажмите «Добавить».'
+        `Выбор часа\n\n` +
+        `Дата: ${dateLabel}\n` +
+        `Уже выбрано на эту дату: ${state.pendingDate ? this.selectedTimesForDate(state, state.pendingDate) : 'нет'}\n\n` +
+        'Выберите час напоминания (МСК).'
+      );
+    }
+
+    if (state.view === 'minute') {
+      const dateLabel = state.pendingDate
+        ? formatReminderDateLabel(state.pendingDate) ?? state.pendingDate
+        : 'не выбрана';
+      return (
+        `Выбор минут\n\n` +
+        `Дата: ${dateLabel}\n` +
+        `Час: ${state.pendingHour ?? '--'}\n\n` +
+        'Выберите минуты. Время сразу добавится в список.'
+      );
+    }
+
+    if (state.view === 'selected') {
+      return (
+        `Выбранные напоминания\n\n` +
+        `Мероприятие: «${state.eventTitle}»\n\n` +
+        `${this.selectedSummary(state)}\n\n` +
+        'Нажмите на время с ✕, чтобы удалить только его.'
       );
     }
 
@@ -457,14 +569,15 @@ export class MaxBotInteractionService {
       `Календарь напоминаний\n\n` +
       `Мероприятие: «${state.eventTitle}»\n\n` +
       `${this.selectedSummary(state)}\n\n` +
-      'Выберите дату в календаре. Затем настройте время.'
+      'Выберите дату. После этого выберите час и минуты.'
     );
   }
 
   private selectorKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
-    return state.view === 'time'
-      ? this.timeKeyboard(state)
-      : this.calendarKeyboard(state);
+    if (state.view === 'hour') return this.hourKeyboard(state);
+    if (state.view === 'minute') return this.minuteKeyboard(state);
+    if (state.view === 'selected') return this.selectedKeyboard(state);
+    return this.calendarKeyboard(state);
   }
 
   private calendarKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
@@ -472,7 +585,12 @@ export class MaxBotInteractionService {
     if (!calendar) {
       return {
         type: 'inline_keyboard',
-        payload: { buttons: [[this.button('Нет доступных дат', 'reminder_noop')]] },
+        payload: {
+          buttons: [
+            [this.button('Нет доступных дат', 'reminder_noop')],
+            [this.button('Отмена', 'reminder_cancel')],
+          ],
+        },
       };
     }
 
@@ -484,7 +602,7 @@ export class MaxBotInteractionService {
 
     buttons.push(WEEKDAYS.map((weekday) => this.button(weekday, 'reminder_noop')));
 
-    const selectedDates = new Set([...state.selected.values()].map((option) => option.dateId));
+    const selectedDates = new Set(this.sortedSelected(state).map((option) => option.dateId));
     calendar.weeks.forEach((week) => {
       buttons.push(week.map((cell) => {
         if (!cell.dateId || !cell.enabled || cell.day === null) {
@@ -498,36 +616,90 @@ export class MaxBotInteractionService {
     if (state.selected.size) {
       buttons.push([
         this.button(`Применить (${state.selected.size})`, 'reminder_apply'),
+        this.button(`Выбранные (${state.selected.size})`, 'reminder_selected'),
+      ]);
+      buttons.push([
         this.button('Очистить', 'reminder_clear'),
+        this.button('Отмена', 'reminder_cancel'),
       ]);
     } else {
-      buttons.push([this.button('Выберите дату', 'reminder_noop')]);
+      buttons.push([this.button('Отмена', 'reminder_cancel')]);
     }
 
     return { type: 'inline_keyboard', payload: { buttons } };
   }
 
-  private timeKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
-    return {
-      type: 'inline_keyboard',
-      payload: {
-        buttons: [
-          [
-            this.button('−1 ч', 'reminder_time:-60'),
-            this.button(state.pendingTime, 'reminder_noop'),
-            this.button('+1 ч', 'reminder_time:60'),
-          ],
-          [
-            this.button('−15 мин', 'reminder_time:-15'),
-            this.button('+15 мин', 'reminder_time:15'),
-          ],
-          [
-            this.button('← Календарь', 'reminder_back'),
-            this.button('Добавить', 'reminder_add'),
-          ],
-        ],
-      },
-    };
+  private hourKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
+    const buttons: MaxButton[][] = [];
+    if (state.pendingDate) {
+      const hours = getAvailableReminderHours(
+        state.pendingDate,
+        state.eventStartDate,
+        state.eventStartTime,
+      );
+      this.pushGrid(buttons, hours, 4, (hour) => this.button(hour, `reminder_hour:${hour}`));
+    }
+
+    const navigation = [this.button('← Календарь', 'reminder_back')];
+    if (state.selected.size) {
+      navigation.push(this.button(`Выбранные (${state.selected.size})`, 'reminder_selected'));
+    }
+    buttons.push(navigation);
+    buttons.push([this.button('Отмена', 'reminder_cancel')]);
+    return { type: 'inline_keyboard', payload: { buttons } };
+  }
+
+  private minuteKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
+    const buttons: MaxButton[][] = [];
+    if (state.pendingDate && state.pendingHour) {
+      const minutes = getAvailableReminderMinutes(
+        state.pendingDate,
+        state.pendingHour,
+        state.eventStartDate,
+        state.eventStartTime,
+      );
+      this.pushGrid(buttons, minutes, 4, (minute) => this.button(minute, `reminder_minute:${minute}`));
+    }
+
+    buttons.push([
+      this.button('← Часы', 'reminder_hours_back'),
+      this.button('← Календарь', 'reminder_back'),
+    ]);
+    if (state.selected.size) {
+      buttons.push([this.button(`Выбранные (${state.selected.size})`, 'reminder_selected')]);
+    }
+    buttons.push([this.button('Отмена', 'reminder_cancel')]);
+    return { type: 'inline_keyboard', payload: { buttons } };
+  }
+
+  private selectedKeyboard(state: MaxReminderState): MaxKeyboardAttachment {
+    const buttons: MaxButton[][] = this.sortedSelected(state).map((option) => [
+      this.button(`✕ ${this.compactOptionLabel(option)}`, `reminder_remove:${option.id}`),
+    ]);
+
+    const navigation = [this.button('← Календарь', 'reminder_back')];
+    if (state.selected.size) {
+      navigation.push(this.button(`Применить (${state.selected.size})`, 'reminder_apply'));
+    }
+    buttons.push(navigation);
+
+    const finalRow: MaxButton[] = [];
+    if (state.selected.size) finalRow.push(this.button('Очистить', 'reminder_clear'));
+    finalRow.push(this.button('Отмена', 'reminder_cancel'));
+    buttons.push(finalRow);
+
+    return { type: 'inline_keyboard', payload: { buttons } };
+  }
+
+  private pushGrid(
+    rows: MaxButton[][],
+    values: readonly string[],
+    columns: number,
+    makeButton: (value: string) => MaxButton,
+  ): void {
+    for (let index = 0; index < values.length; index += columns) {
+      rows.push(values.slice(index, index + columns).map(makeButton));
+    }
   }
 
   private button(text: string, payload: string): MaxButton {

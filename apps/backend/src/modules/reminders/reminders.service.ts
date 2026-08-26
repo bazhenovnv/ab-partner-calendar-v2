@@ -1,9 +1,10 @@
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { getReminderEventDeadline } from '@ab-afisha/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { telegramPostJson } from '../../common/telegram/telegram-api';
 import { CreateReminderDto } from './create-reminder.dto';
 
-const TG_API = 'https://api.telegram.org';
 const MAX_API = 'https://platform-api2.max.ru';
 const DELIVERY_ATTEMPTS = 3;
 const DELIVERY_TIMEOUT_MS = 15_000;
@@ -48,10 +49,15 @@ export class RemindersService {
 
     const event = await this.prisma.event.findFirst({
       where: { id: dto.eventId },
-      select: { id: true, startDate: true },
+      select: { id: true, startDate: true, startTime: true },
     });
     if (!event) throw new NotFoundException('Event not found');
-    if (remindAt.getTime() >= event.startDate.getTime()) {
+
+    const eventDeadline = getReminderEventDeadline(event.startDate, event.startTime);
+    if (!eventDeadline) {
+      throw new BadRequestException('Event start time is invalid');
+    }
+    if (remindAt.getTime() >= eventDeadline.getTime()) {
       throw new BadRequestException('remindAt must be before event start time');
     }
 
@@ -146,20 +152,18 @@ export class RemindersService {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     if (!token) throw new Error('TELEGRAM_BOT_TOKEN not configured');
 
-    const res = await this.fetchWithRetry(`${TG_API}/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: externalId,
-        text,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
-      }),
-    }, 'Telegram API');
+    const result = await telegramPostJson(token, 'sendMessage', {
+      chat_id: externalId,
+      text,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+    }, {
+      attempts: DELIVERY_ATTEMPTS,
+      timeoutMs: DELIVERY_TIMEOUT_MS,
+    });
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error(`Telegram API error ${res.status}: ${body || res.statusText}`);
+    if (!result.ok) {
+      throw new Error(`Telegram API error ${result.status}: ${result.body || 'empty response'}`);
     }
   }
 
@@ -215,7 +219,8 @@ export class RemindersService {
       try {
         const { event, botUser } = reminder;
         const eventUrl = `${this.siteUrl}/events/${event.id}`;
-        const eventDateMsk = formatMsk(event.startDate);
+        const eventMoment = getReminderEventDeadline(event.startDate, event.startTime) ?? event.startDate;
+        const eventDateMsk = formatMsk(eventMoment);
 
         let text: string;
         if (botUser.channel === 'TELEGRAM') {

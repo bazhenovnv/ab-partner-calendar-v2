@@ -4,7 +4,11 @@ import {
   adjustReminderTime,
   buildReminderCalendar,
   buildReminderDateTime,
+  formatReminderDateLabel,
+  getAvailableReminderHours,
+  getAvailableReminderMinutes,
   getInitialReminderMonth,
+  getReminderEventDeadline,
   shiftReminderMonth,
 } from '../dist/index.js';
 
@@ -58,6 +62,40 @@ test('creates a Moscow date-time reminder with user-selected time', () => {
   assert.match(option.label, /14:15/);
 });
 
+test('uses the separate event startTime as the reminder deadline', () => {
+  const deadline = getReminderEventDeadline(
+    '2026-08-20T00:00:00.000Z',
+    '18:30',
+  );
+
+  assert.ok(deadline);
+  assert.equal(deadline.toISOString(), '2026-08-20T15:30:00.000Z');
+});
+
+test('offers only five-minute slots that are still valid before event start', () => {
+  const now = '2026-08-03T06:32:00.000Z'; // 09:32 MSK
+  const eventDate = '2026-08-03T00:00:00.000Z';
+  const eventTime = '12:12';
+
+  assert.deepEqual(
+    getAvailableReminderHours('2026-08-03', eventDate, eventTime, now),
+    ['09', '10', '11', '12'],
+  );
+  assert.deepEqual(
+    getAvailableReminderMinutes('2026-08-03', '09', eventDate, eventTime, now),
+    ['35', '40', '45', '50', '55'],
+  );
+  assert.deepEqual(
+    getAvailableReminderMinutes('2026-08-03', '12', eventDate, eventTime, now),
+    ['00', '05', '10'],
+  );
+});
+
+test('formats the selected calendar date for bot screens', () => {
+  assert.match(formatReminderDateLabel('2026-08-27') ?? '', /27 августа 2026/);
+  assert.equal(formatReminderDateLabel('bad-date'), null);
+});
+
 test('rejects past reminders and reminders at or after event start', () => {
   assert.equal(
     buildReminderDateTime(
@@ -81,7 +119,7 @@ test('rejects past reminders and reminders at or after event start', () => {
   );
 });
 
-test('adjusts reminder time in 15-minute and hourly steps', () => {
+test('keeps legacy time adjustment helper backward compatible', () => {
   assert.equal(adjustReminderTime('09:00', 15), '09:15');
   assert.equal(adjustReminderTime('09:00', -60), '08:00');
   assert.equal(adjustReminderTime('00:00', -15), '23:45');
