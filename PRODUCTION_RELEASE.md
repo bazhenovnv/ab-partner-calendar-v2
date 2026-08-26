@@ -5,42 +5,41 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Git commit: `79d85dc230b71699977bfec633db411a49c72f4f`
-- Backend image: `ab-afisha/backend:backend-release-79d85dc`
+- Release anchor commit: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5`
+- Backend commit: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5`
+- Backend image: `ab-afisha/backend:backend-release-a072746`
+- Bots commit: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5`
+- Bots image: `ab-afisha/bots:bots-release-a072746`
+- Frontend commit: `79d85dc230b71699977bfec633db411a49c72f4f`
 - Frontend image: `ab-afisha/frontend:frontend-release-79d85dc`
-- Дата утверждения: `2026-08-25`
+- Дата утверждения: `2026-08-26`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
-- Полный backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`
+- Backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Историческое имя lock-файла сохранено для совместимости; он закрепляет и backend, и frontend.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Историческое имя lock-файла сохранено для совместимости. Компоненты production закрепляются **независимо**: backend, bots и frontend могут быть собраны из разных утверждённых commit.
 
 ## Что входит в этот релиз
 
-- корректный MAX-парсинг venue-first строк вида `Где: Экспофорум, Санкт-Петербург`: город и площадка больше не меняются местами;
-- полноценный формат `HYBRID` для мероприятий `онлайн + офлайн` с сохранением физического города, площадки и адреса;
-- раздел «Требует внимания» показывает причины, действия администратора и актуальные блокеры публикации, а карточка позволяет опубликовать событие после backend-валидации;
-- email-уведомления о новых `NEEDS_ATTENTION` на `info-event@a-b.ru` через SMTP с причиной, рекомендацией и ссылкой на административный раздел; повторяющиеся одинаковые предупреждения подавляются;
-- полный ролевой ЛК администратора по утверждённому ТЗ;
-- безопасный lifecycle мероприятий: архив, удаление и восстановление без ложных ошибок после HTTP 204;
-- канонический контракт «Главных событий»: только `PUBLISHED + mainEvent=true` с отдельной обложкой `mainEventUrl`;
-- синхронизация раздела «Требует внимания» с маршрутом и левым меню;
-- визуальный редактор юридических документов без показа сырого HTML;
-- восстановление справочника городов из опубликованных офлайн-мероприятий и исправление venue-first адресов MAX;
-- публичный фильтр городов использует синхронизированный справочник и больше не обрезает реальные города по локальной выборке событий;
-- применение общих фильтров сбрасывает скрытый фильтр даты, а календарь синхронизирует выбранную дату и отображаемый месяц;
-- faceted filtering: OR внутри одной группы, AND между группами; город и статус не ограничивают сами себя при расчёте доступных вариантов;
-- список «Регион / Город» динамически перестраивается по выбранным статусам `PLANNED/LIVE/COMPLETED`, а несовместимый выбранный город автоматически снимается;
-- публичный фильтр направлений показывает только направления, реально связанные с опубликованными мероприятиями;
-- исправлена доставка напоминаний Telegram/MAX: корректный MAX `user_id`, сетевые retry/timeout и запись ошибок в `ErrorLog`;
-- внутренняя аналитика: визиты, просмотры событий и регистрационные действия;
-- роль `EDITOR` может читать справочники для редактирования мероприятий, но менять города и направления может только `ADMIN`;
-- MAX-рассылки личным пользователям отправляются через `user_id`, а не ошибочный `chat_id`;
-- подсказки мероприятий в календаре не обрезаются у левого края карточки календаря;
-- контакты и согласия сохраняют существующую модель: в контактах только пользователи с принятыми юридическими документами, маркетинговые рассылки требуют отдельного согласия;
-- сохранены предыдущие исправления публичного календаря, карточек, модальных окон и живая MAX-синхронизация;
-- безопасный seed первого администратора без известного fallback-пароля.
+Новый backend + bots pin `a072746` добавляет:
+
+- Telegram снова получает доступ к `api.telegram.org` через отдельный Docker IPv6 egress;
+- host IPv6 фиксируется через `forwarding=1` и `accept_ra=2` после reboot;
+- Telegram long polling предпочитает IPv6;
+- backend отправляет Telegram-напоминания через точечный IPv6 transport, не меняя сетевое поведение MAX и SMTP;
+- Telegram reminder flow: календарь → час → минуты с шагом 5 минут;
+- можно выбрать несколько времён на одной дате и несколько разных дат;
+- можно удалить отдельный вариант, очистить выбор, отменить или применить весь набор;
+- MAX webhook использует тот же сценарий выбора даты/часа/минут и мультивыбор;
+- в MAX юридическое согласие остаётся кнопкой «Принять»;
+- backend валидирует напоминание по фактическому `startTime`, а не по полуночи `startDate`;
+- отправленное напоминание показывает фактическое время начала мероприятия;
+- CI проверяет shared reminder logic, Telegram/MAX bot flow, backend reminder/network regression и полный build.
+
+Frontend остаётся на ранее утверждённом `frontend-release-79d85dc`; UI сайта в этом релизе не меняется.
+
+Сохраняются все исправления предыдущего production-релиза `79d85dc`, включая MAX `HYBRID`, «Требует внимания», email-уведомления, faceted filters, legal/admin lifecycle и MAX import recovery.
 
 ## Обязательное правило для новых чатов и AI-агентов
 
@@ -51,20 +50,21 @@
 3. `AGENTS.md`;
 4. `CLAUDE.md`.
 
-Нельзя считать `main`, `latest`, старый Docker-тег, старый release-скрипт или ранее собранный образ утверждённой production-версией.
+Нельзя считать `main`, `latest`, `APP_VERSION`, старый Docker-тег, rollback-образ или ранее собранный image утверждённой production-версией.
 
-Разрешено использовать только commit и Docker images, указанные в `infra/deploy/production-frontend.env`.
+Разрешено использовать только component commits и Docker images, указанные в `infra/deploy/production-frontend.env`.
 
 ## Запрещено
 
-- деплоить backend или frontend с тегом `latest`;
-- выбирать backend через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-79d85dc`;
+- деплоить backend, bots или frontend с тегом `latest`;
+- выбирать backend или bots через общий `APP_VERSION`;
+- деплоить любой `backend-release-*`, кроме `backend-release-a072746`;
+- деплоить любой `bots-release-*`, кроме `bots-release-a072746`;
 - деплоить любой `frontend-release-*`, кроме `frontend-release-79d85dc`;
-- использовать старые `max-ingestion-*`, `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
+- использовать `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
 - определять production-версию по последнему commit в `main`;
-- менять закреплённую версию без отдельного явного утверждения владельца проекта;
-- перезапускать bots или nginx при deployment backend/frontend;
+- менять закреплённые component pins без отдельного явного утверждения владельца проекта;
+- перезапускать frontend или nginx при deployment backend+bots;
 - изменять локальный production-конфиг `infra/nginx/conf.d/production.v2.conf`.
 
 ## Как утвердить новую версию в будущем
@@ -78,4 +78,4 @@
 - `CLAUDE.md`;
 - теста `apps/frontend/test/production-release-lock.test.mjs`.
 
-До следующего отдельного утверждения действующей остаётся версия `79d85dc230b71699977bfec633db411a49c72f4f`.
+Для backend+bots используется `infra/scripts/deploy-pinned-backend-bots.sh`. Frontend обновляется отдельно через `infra/scripts/deploy-pinned-frontend.sh`, если его pin изменился.

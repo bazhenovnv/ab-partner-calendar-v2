@@ -7,16 +7,17 @@
 - `PRODUCTION_RELEASE.md`;
 - `infra/deploy/production-frontend.env`.
 
-Единственная утверждённая production-версия приложения:
+Единственная утверждённая production-конфигурация:
 
-- commit: `79d85dc230b71699977bfec633db411a49c72f4f`;
-- backend image: `ab-afisha/backend:backend-release-79d85dc`;
-- frontend image: `ab-afisha/frontend:frontend-release-79d85dc`;
+- release anchor: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5`;
+- backend commit/image: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5` / `ab-afisha/backend:backend-release-a072746`;
+- bots commit/image: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5` / `ab-afisha/bots:bots-release-a072746`;
+- frontend commit/image: `79d85dc230b71699977bfec633db411a49c72f4f` / `ab-afisha/frontend:frontend-release-79d85dc`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
-- полный backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`;
+- backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Запрещено считать `main`, `latest`, старый release-тег, rollback-образ или ранее использованный скрипт текущей production-версией. Запрещено выбирать backend через общий `APP_VERSION`, потому что он также используется bots. Новая версия становится production только после отдельного явного утверждения владельцем проекта и обновления production lock-файлов.
+Production components закрепляются независимо. Запрещено считать `main`, `latest`, `APP_VERSION`, старый release-тег или rollback-образ текущей production-версией. Запрещено выбирать backend или bots через общий `APP_VERSION`. Новая версия становится production только после отдельного явного утверждения владельцем проекта и обновления production lock-файлов.
 
 ## Роль Claude Code
 

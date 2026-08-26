@@ -7,15 +7,16 @@
 - `PRODUCTION_RELEASE.md`;
 - `infra/deploy/production-frontend.env`.
 
-Единственная утверждённая production-версия приложения:
+Единственная утверждённая production-конфигурация:
 
-- commit: `79d85dc230b71699977bfec633db411a49c72f4f`;
-- backend image: `ab-afisha/backend:backend-release-79d85dc`;
-- frontend image: `ab-afisha/frontend:frontend-release-79d85dc`;
-- full deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-app.sh`;
-- frontend-only deploy script: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
+- release anchor: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5`;
+- backend commit/image: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5` / `ab-afisha/backend:backend-release-a072746`;
+- bots commit/image: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5` / `ab-afisha/bots:bots-release-a072746`;
+- frontend commit/image: `79d85dc230b71699977bfec633db411a49c72f4f` / `ab-afisha/frontend:frontend-release-79d85dc`;
+- backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
+- frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Нельзя определять production по `main`, `latest`, старому Docker-тегу или старому deploy-скрипту. Нельзя выбирать backend через общий `APP_VERSION`, потому что он также используется bots. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
+Production компоненты закрепляются независимо. Нельзя определять production по `main`, `latest`, `APP_VERSION`, старому Docker-тегу или rollback-образу. Нельзя выбирать backend или bots через общий `APP_VERSION`. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
 
 ## Project
 
