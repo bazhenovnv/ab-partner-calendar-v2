@@ -4,6 +4,16 @@ const MOSCOW_OFFSET_HOURS = 3;
 const DEFAULT_REMINDER_TIME = '09:00';
 const DAYS_BEFORE_EVENT = [30, 14, 7, 3, 1, 0] as const;
 
+export const REMINDER_MINUTE_STEP = 5;
+export const REMINDER_HOURS = Array.from(
+  { length: 24 },
+  (_, hour) => String(hour).padStart(2, '0'),
+) as readonly string[];
+export const REMINDER_MINUTES = Array.from(
+  { length: 60 / REMINDER_MINUTE_STEP },
+  (_, index) => String(index * REMINDER_MINUTE_STEP).padStart(2, '0'),
+) as readonly string[];
+
 export interface ReminderDateOption {
   id: string;
   label: string;
@@ -143,6 +153,31 @@ export function getReminderEventDateId(eventStartInput: Date | string): string |
   return getMoscowDateId(eventStartInput);
 }
 
+export function getReminderEventDeadline(
+  eventStartInput: Date | string,
+  eventStartTime?: string | null,
+): Date | null {
+  const eventDateId = getReminderEventDateId(eventStartInput);
+  if (!eventDateId) return null;
+
+  return moscowDateTime(
+    eventDateId,
+    parseTime(eventStartTime ?? '') ? eventStartTime! : '23:59',
+  );
+}
+
+export function formatReminderDateLabel(dateId: string): string | null {
+  const date = parseDateId(dateId);
+  if (!date) return null;
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(Date.UTC(date.year, date.month - 1, date.day)));
+}
+
 export function getInitialReminderMonth(
   eventStartInput: Date | string,
   nowInput: Date | string = new Date(),
@@ -241,14 +276,9 @@ export function buildReminderDateTime(
 ): ReminderDateTimeOption | null {
   const remindAt = moscowDateTime(dateId, time);
   const now = new Date(nowInput);
-  const eventDateId = getReminderEventDateId(eventStartInput);
-  if (!remindAt || Number.isNaN(now.getTime()) || !eventDateId) return null;
+  const eventDeadline = getReminderEventDeadline(eventStartInput, eventStartTime);
+  if (!remindAt || Number.isNaN(now.getTime()) || !eventDeadline) return null;
 
-  const eventDeadline = moscowDateTime(
-    eventDateId,
-    parseTime(eventStartTime ?? '') ? eventStartTime! : '23:59',
-  );
-  if (!eventDeadline) return null;
   if (remindAt.getTime() <= now.getTime() || remindAt.getTime() >= eventDeadline.getTime()) return null;
 
   const label = new Intl.DateTimeFormat('ru-RU', {
@@ -267,6 +297,45 @@ export function buildReminderDateTime(
     label,
     remindAt: remindAt.toISOString(),
   };
+}
+
+export function getAvailableReminderHours(
+  dateId: string,
+  eventStartInput: Date | string,
+  eventStartTime?: string | null,
+  nowInput: Date | string = new Date(),
+): string[] {
+  return REMINDER_HOURS.filter((hour) =>
+    REMINDER_MINUTES.some((minute) =>
+      buildReminderDateTime(
+        dateId,
+        `${hour}:${minute}`,
+        eventStartInput,
+        eventStartTime,
+        nowInput,
+      ) !== null,
+    ),
+  );
+}
+
+export function getAvailableReminderMinutes(
+  dateId: string,
+  hour: string,
+  eventStartInput: Date | string,
+  eventStartTime?: string | null,
+  nowInput: Date | string = new Date(),
+): string[] {
+  if (!/^([01]\d|2[0-3])$/.test(hour)) return [];
+
+  return REMINDER_MINUTES.filter((minute) =>
+    buildReminderDateTime(
+      dateId,
+      `${hour}:${minute}`,
+      eventStartInput,
+      eventStartTime,
+      nowInput,
+    ) !== null,
+  );
 }
 
 /**
