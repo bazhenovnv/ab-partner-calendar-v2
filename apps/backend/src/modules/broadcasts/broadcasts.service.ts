@@ -267,7 +267,7 @@ export class BroadcastsService {
 
     // Mark PENDING recipients as SKIPPED
     await this.prisma.broadcastRecipient.updateMany({
-      where: { broadcastId, status: 'PENDING' as any },
+      where: { broadcastId: id, status: 'PENDING' as any },
       data: { status: 'SKIPPED' as any, skippedReason: 'Broadcast cancelled' },
     });
 
@@ -463,7 +463,7 @@ export class BroadcastsService {
         if (res.ok) return { success: true };
         return {
           success: false,
-          reason: res.json?.description ?? res.body || `HTTP ${res.status}`,
+          reason: res.json?.description ?? (res.body || `HTTP ${res.status}`),
         };
       } catch (err: unknown) {
         return { success: false, reason: String(err) };
