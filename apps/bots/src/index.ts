@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { setDefaultResultOrder } from 'node:dns';
 import { startTelegramBot } from './telegram/bot';
 import { startMaxBot } from './max/bot';
 
@@ -8,6 +9,9 @@ interface TelegramApiResponse {
 }
 
 async function prepareTelegramLongPolling(token: string): Promise<void> {
+  setDefaultResultOrder('ipv6first');
+  console.log('[bots] DNS result order set to ipv6first for Telegram connectivity');
+
   const response = await fetch(`https://api.telegram.org/bot${token}/deleteWebhook`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
