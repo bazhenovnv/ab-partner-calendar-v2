@@ -2,9 +2,9 @@ import { BadRequestException, ConflictException, Injectable, Logger, NotFoundExc
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { getReminderEventDeadline } from '@ab-afisha/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { telegramPostJson } from '../../common/telegram/telegram-api';
 import { CreateReminderDto } from './create-reminder.dto';
 
-const TG_API = 'https://api.telegram.org';
 const MAX_API = 'https://platform-api2.max.ru';
 const DELIVERY_ATTEMPTS = 3;
 const DELIVERY_TIMEOUT_MS = 15_000;
@@ -152,20 +152,18 @@ export class RemindersService {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     if (!token) throw new Error('TELEGRAM_BOT_TOKEN not configured');
 
-    const res = await this.fetchWithRetry(`${TG_API}/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: externalId,
-        text,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
-      }),
-    }, 'Telegram API');
+    const result = await telegramPostJson(token, 'sendMessage', {
+      chat_id: externalId,
+      text,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+    }, {
+      attempts: DELIVERY_ATTEMPTS,
+      timeoutMs: DELIVERY_TIMEOUT_MS,
+    });
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error(`Telegram API error ${res.status}: ${body || res.statusText}`);
+    if (!result.ok) {
+      throw new Error(`Telegram API error ${result.status}: ${result.body || 'empty response'}`);
     }
   }
 
