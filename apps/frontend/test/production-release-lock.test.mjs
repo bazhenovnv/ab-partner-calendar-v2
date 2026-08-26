@@ -12,67 +12,85 @@ const RELEASE = read('PRODUCTION_RELEASE.md');
 const COMPOSE = read('docker-compose.production.v2.yml');
 const AGENTS = read('AGENTS.md');
 const CLAUDE = read('CLAUDE.md');
+
+const BACKEND_BOTS_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-bots.sh');
 const APP_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-app.sh');
 const FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP_PATH = resolve(ROOT, 'infra/scripts/cleanup-old-frontend-releases.sh');
-const APP_DEPLOY = read('infra/scripts/deploy-pinned-app.sh');
+const IPV6_HOST_PATH = resolve(ROOT, 'infra/scripts/configure-telegram-ipv6-host.sh');
+
+const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const COMMIT = '79d85dc230b71699977bfec633db411a49c72f4f';
-const BACKEND_TAG = 'backend-release-79d85dc';
+const RELEASE_ANCHOR = 'a0727468eb1966cdc7fd4ca3f469eeacf51b09a5';
+const BACKEND_COMMIT = RELEASE_ANCHOR;
+const BACKEND_TAG = 'backend-release-a072746';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
+const BOTS_COMMIT = RELEASE_ANCHOR;
+const BOTS_TAG = 'bots-release-a072746';
+const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
+const FRONTEND_COMMIT = '79d85dc230b71699977bfec633db411a49c72f4f';
 const FRONTEND_TAG = 'frontend-release-79d85dc';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 
-describe('Pinned production application release', () => {
-  test('defines one machine-readable commit for backend and frontend', () => {
-    assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${COMMIT}`));
-    assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${COMMIT}`));
+describe('Pinned production component release', () => {
+  test('defines independent machine-readable pins for backend, bots and frontend', () => {
+    assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
+    assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_IMAGE=${BACKEND_IMAGE}`));
-    assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_COMMIT=${COMMIT}`));
+    assert.match(LOCK, new RegExp(`PRODUCTION_BOTS_COMMIT=${BOTS_COMMIT}`));
+    assert.match(LOCK, new RegExp(`PRODUCTION_BOTS_TAG=${BOTS_TAG}`));
+    assert.match(LOCK, new RegExp(`PRODUCTION_BOTS_IMAGE=${BOTS_IMAGE}`));
+    assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_COMMIT=${FRONTEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_TAG=${FRONTEND_TAG}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_IMAGE=${FRONTEND_IMAGE}`));
   });
 
-  test('documents the exact app release for future agents', () => {
+  test('documents exact component pins and the current deploy path', () => {
     for (const content of [RELEASE, AGENTS, CLAUDE]) {
-      assert.match(content, new RegExp(COMMIT));
+      assert.match(content, new RegExp(RELEASE_ANCHOR));
       assert.match(content, new RegExp(BACKEND_IMAGE));
+      assert.match(content, new RegExp(BOTS_IMAGE));
+      assert.match(content, new RegExp(FRONTEND_COMMIT));
       assert.match(content, new RegExp(FRONTEND_IMAGE));
-      assert.match(content, /deploy-pinned-app\.sh/);
+      assert.match(content, /deploy-pinned-backend-bots\.sh/);
+      assert.match(content, /deploy-pinned-frontend\.sh/);
     }
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
   });
 
-  test('pins backend and frontend independently from the bots APP_VERSION', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-79d85dc\}/);
+  test('compose pins backend, bots and frontend without APP_VERSION', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-a072746\}/);
+    assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-a072746\}/);
     assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-79d85dc\}/);
-    assert.match(COMPOSE, /bots:[\s\S]*?image: ab-afisha\/bots:\$\{APP_VERSION:-latest\}/);
-    assert.doesNotMatch(COMPOSE, /backend:[\s\S]*?image: ab-afisha\/backend:\$\{APP_VERSION/);
-    assert.doesNotMatch(COMPOSE, /frontend:[\s\S]*?image: ab-afisha\/frontend:\$\{APP_VERSION/);
+    assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('full deploy validates revisions and switches only backend and frontend', () => {
-    assert.match(APP_DEPLOY, /source "\$LOCK_FILE"/);
-    assert.match(APP_DEPLOY, /PRODUCTION_BACKEND_IMAGE/);
-    assert.match(APP_DEPLOY, /PRODUCTION_FRONTEND_IMAGE/);
-    assert.match(APP_DEPLOY, /org\.opencontainers\.image\.revision/);
-    assert.match(APP_DEPLOY, /compose_with_images/);
-    assert.match(APP_DEPLOY, /force-recreate backend/);
-    assert.match(APP_DEPLOY, /force-recreate frontend/);
-    assert.doesNotMatch(APP_DEPLOY, /force-recreate bots/);
-    assert.doesNotMatch(APP_DEPLOY, /force-recreate nginx/);
-    assert.match(APP_DEPLOY, /RECENT_BACKFILL_MARKER_REMOVED/);
-    assert.match(APP_DEPLOY, /wait_reconciliation/);
-    assert.match(APP_DEPLOY, /LATEST_MAX_EVENTS=/);
-    assert.match(APP_DEPLOY, /PRODUCTION_APP_PIN_OK/);
-    assert.match(APP_DEPLOY, /BOTS_UNCHANGED=true/);
-    assert.match(APP_DEPLOY, /NGINX_PRESERVED=true/);
+  test('compose provides isolated IPv6 Telegram egress only to backend and bots', () => {
+    assert.match(COMPOSE, /telegram-egress:[\s\S]*?enable_ipv6: true/);
+    assert.match(COMPOSE, /backend:[\s\S]*?networks:\s*\n\s*- default\s*\n\s*- telegram-egress/);
+    assert.match(COMPOSE, /bots:[\s\S]*?networks:\s*\n\s*- default\s*\n\s*- telegram-egress/);
+    assert.match(COMPOSE, /TELEGRAM_IP_FAMILY: \$\{TELEGRAM_IP_FAMILY:-6\}/);
   });
 
-  test('frontend-only deploy remains compatible with the shared lock', () => {
+  test('backend+bots deploy validates revisions, Telegram IPv6 and preserves frontend/nginx', () => {
+    assert.match(BACKEND_BOTS_DEPLOY, /PRODUCTION_BACKEND_IMAGE/);
+    assert.match(BACKEND_BOTS_DEPLOY, /PRODUCTION_BOTS_IMAGE/);
+    assert.match(BACKEND_BOTS_DEPLOY, /org\.opencontainers\.image\.revision/);
+    assert.match(BACKEND_BOTS_DEPLOY, /force-recreate backend/);
+    assert.match(BACKEND_BOTS_DEPLOY, /force-recreate bots/);
+    assert.doesNotMatch(BACKEND_BOTS_DEPLOY, /force-recreate frontend/);
+    assert.doesNotMatch(BACKEND_BOTS_DEPLOY, /force-recreate nginx/);
+    assert.match(BACKEND_BOTS_DEPLOY, /family: 6/);
+    assert.match(BACKEND_BOTS_DEPLOY, /TELEGRAM_GET_ME_OK/);
+    assert.match(BACKEND_BOTS_DEPLOY, /PRODUCTION_BACKEND_BOTS_PIN_OK=true/);
+    assert.match(BACKEND_BOTS_DEPLOY, /FRONTEND_UNCHANGED=true/);
+    assert.match(BACKEND_BOTS_DEPLOY, /NGINX_UNCHANGED=true/);
+  });
+
+  test('frontend-only deploy remains pinned to the existing frontend release', () => {
     assert.match(FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_COMMIT/);
     assert.match(FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_IMAGE/);
     assert.match(FRONTEND_DEPLOY, /up -d --no-deps --force-recreate frontend/);
@@ -86,8 +104,14 @@ describe('Pinned production application release', () => {
   });
 
   test('keeps all production scripts valid Bash', () => {
-    execFileSync('bash', ['-n', APP_DEPLOY_PATH], { stdio: 'pipe' });
-    execFileSync('bash', ['-n', FRONTEND_DEPLOY_PATH], { stdio: 'pipe' });
-    execFileSync('bash', ['-n', CLEANUP_PATH], { stdio: 'pipe' });
+    for (const path of [
+      BACKEND_BOTS_DEPLOY_PATH,
+      APP_DEPLOY_PATH,
+      FRONTEND_DEPLOY_PATH,
+      CLEANUP_PATH,
+      IPV6_HOST_PATH,
+    ]) {
+      execFileSync('bash', ['-n', path], { stdio: 'pipe' });
+    }
   });
 });
