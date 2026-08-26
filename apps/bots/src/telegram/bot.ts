@@ -1,10 +1,13 @@
 import { Bot, InlineKeyboard, Keyboard } from 'grammy';
 import {
   SITE_URL,
-  adjustReminderTime,
   buildReminderCalendar,
   buildReminderDateTime,
+  formatReminderDateLabel,
+  getAvailableReminderHours,
+  getAvailableReminderMinutes,
   getInitialReminderMonth,
+  getReminderEventDeadline,
   shiftReminderMonth,
   type ReminderDateTimeOption,
 } from '@ab-afisha/shared';
@@ -14,8 +17,6 @@ const API_BASE = `${BACKEND_URL}/api`;
 const BOT_TOKEN = process.env.BOT_INTERNAL_TOKEN ?? '';
 const BOT_HEADERS = { 'Content-Type': 'application/json', 'X-Bot-Internal-Token': BOT_TOKEN };
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const;
-
-// ── backend API calls ───────────────────────────────────────────────────────
 
 interface BotUserSnapshot {
   id: string;
@@ -117,8 +118,6 @@ async function saveReminder(botUserId: string, eventId: string, remindAt: string
   }
 }
 
-// ── per-user state machine ──────────────────────────────────────────────────
-
 type ReminderSelectionState = {
   step: 'selectingReminder';
   botUserId: string;
@@ -127,9 +126,9 @@ type ReminderSelectionState = {
   eventStartDate: string;
   eventStartTime?: string | null;
   monthId: string;
-  view: 'calendar' | 'time';
+  view: 'calendar' | 'hour' | 'minute' | 'selected';
   pendingDate?: string;
-  pendingTime: string;
+  pendingHour?: string;
   selected: Map<string, ReminderDateTimeOption>;
 };
 
@@ -140,12 +139,29 @@ type UserState =
 
 const userState = new Map<number, UserState>();
 
+function sortedSelected(state: ReminderSelectionState): ReminderDateTimeOption[] {
+  return [...state.selected.values()]
+    .sort((left, right) => left.remindAt.localeCompare(right.remindAt));
+}
+
+function compactOptionLabel(option: ReminderDateTimeOption): string {
+  const [, month, day] = option.dateId.split('-');
+  return `${day}.${month} ${option.time}`;
+}
+
 function selectedSummary(state: ReminderSelectionState): string {
-  if (!state.selected.size) return 'Выбранных напоминаний пока нет.';
-  return `Выбрано:\n${[...state.selected.values()]
-    .sort((left, right) => left.remindAt.localeCompare(right.remindAt))
+  const selected = sortedSelected(state);
+  if (!selected.length) return 'Выбранных напоминаний пока нет.';
+  return `Выбрано (${selected.length}):\n${selected
     .map((option) => `• ${option.label} МСК`)
     .join('\n')}`;
+}
+
+function selectedTimesForDate(state: ReminderSelectionState, dateId: string): string {
+  const times = sortedSelected(state)
+    .filter((option) => option.dateId === dateId)
+    .map((option) => option.time);
+  return times.length ? times.join(', ') : 'нет';
 }
 
 function calendarText(state: ReminderSelectionState): string {
@@ -153,23 +169,65 @@ function calendarText(state: ReminderSelectionState): string {
     `Календарь напоминаний\n\n` +
     `Мероприятие: «${state.eventTitle}»\n\n` +
     `${selectedSummary(state)}\n\n` +
-    'Выберите дату в календаре. Затем настройте время.'
+    'Выберите дату. После этого выберите час и минуты.'
   );
 }
 
-function timeText(state: ReminderSelectionState): string {
+function hourText(state: ReminderSelectionState): string {
+  const dateLabel = state.pendingDate
+    ? formatReminderDateLabel(state.pendingDate) ?? state.pendingDate
+    : 'не выбрана';
   return (
-    `Настройка времени напоминания\n\n` +
-    `Дата: ${state.pendingDate ?? 'не выбрана'}\n` +
-    `Время: ${state.pendingTime} МСК\n\n` +
-    'Измените время кнопками и нажмите «Добавить».'
+    `Выбор часа\n\n` +
+    `Дата: ${dateLabel}\n` +
+    `Уже выбрано на эту дату: ${state.pendingDate ? selectedTimesForDate(state, state.pendingDate) : 'нет'}\n\n` +
+    'Выберите час напоминания (МСК).'
   );
+}
+
+function minuteText(state: ReminderSelectionState): string {
+  const dateLabel = state.pendingDate
+    ? formatReminderDateLabel(state.pendingDate) ?? state.pendingDate
+    : 'не выбрана';
+  return (
+    `Выбор минут\n\n` +
+    `Дата: ${dateLabel}\n` +
+    `Час: ${state.pendingHour ?? '--'}\n\n` +
+    'Выберите минуты. Время сразу добавится в список.'
+  );
+}
+
+function selectedText(state: ReminderSelectionState): string {
+  return (
+    `Выбранные напоминания\n\n` +
+    `Мероприятие: «${state.eventTitle}»\n\n` +
+    `${selectedSummary(state)}\n\n` +
+    'Нажмите на время с ✕, чтобы удалить только его.'
+  );
+}
+
+function addGrid(
+  keyboard: InlineKeyboard,
+  values: readonly string[],
+  columns: number,
+  callback: (value: string) => string,
+): void {
+  values.forEach((value, index) => {
+    keyboard.text(value, callback(value));
+    if ((index + 1) % columns === 0) keyboard.row();
+  });
+  if (values.length % columns !== 0) keyboard.row();
 }
 
 function calendarKeyboard(state: ReminderSelectionState): InlineKeyboard {
   const keyboard = new InlineKeyboard();
   const calendar = buildReminderCalendar(state.eventStartDate, state.monthId);
-  if (!calendar) return keyboard.text('Нет доступных дат', 'reminder_noop');
+  if (!calendar) {
+    return keyboard
+      .text('Нет доступных дат', 'reminder_noop')
+      .row()
+      .text('Отмена', 'reminder_cancel');
+  }
 
   keyboard
     .text(calendar.canGoPrevious ? '‹' : '·', calendar.canGoPrevious ? 'reminder_month:-1' : 'reminder_noop')
@@ -180,7 +238,7 @@ function calendarKeyboard(state: ReminderSelectionState): InlineKeyboard {
   WEEKDAYS.forEach((weekday) => keyboard.text(weekday, 'reminder_noop'));
   keyboard.row();
 
-  const selectedDates = new Set([...state.selected.values()].map((option) => option.dateId));
+  const selectedDates = new Set(sortedSelected(state).map((option) => option.dateId));
   calendar.weeks.forEach((week) => {
     week.forEach((cell) => {
       if (!cell.dateId || !cell.enabled || cell.day === null) {
@@ -196,35 +254,87 @@ function calendarKeyboard(state: ReminderSelectionState): InlineKeyboard {
   if (state.selected.size) {
     keyboard
       .text(`Применить (${state.selected.size})`, 'reminder_apply')
+      .text(`Выбранные (${state.selected.size})`, 'reminder_selected')
+      .row()
       .text('Очистить', 'reminder_clear')
+      .text('Отмена', 'reminder_cancel')
       .row();
   } else {
-    keyboard.text('Выберите дату', 'reminder_noop').row();
+    keyboard.text('Отмена', 'reminder_cancel').row();
   }
 
   return keyboard;
 }
 
-function timeKeyboard(state: ReminderSelectionState): InlineKeyboard {
-  return new InlineKeyboard()
-    .text('−1 ч', 'reminder_time:-60')
-    .text(state.pendingTime, 'reminder_noop')
-    .text('+1 ч', 'reminder_time:60')
-    .row()
-    .text('−15 мин', 'reminder_time:-15')
-    .text('+15 мин', 'reminder_time:15')
-    .row()
+function hourKeyboard(state: ReminderSelectionState): InlineKeyboard {
+  const keyboard = new InlineKeyboard();
+  if (!state.pendingDate) {
+    return keyboard.text('← Календарь', 'reminder_back');
+  }
+
+  const hours = getAvailableReminderHours(
+    state.pendingDate,
+    state.eventStartDate,
+    state.eventStartTime,
+  );
+  addGrid(keyboard, hours, 4, (hour) => `reminder_hour:${hour}`);
+
+  keyboard.text('← Календарь', 'reminder_back');
+  if (state.selected.size) keyboard.text(`Выбранные (${state.selected.size})`, 'reminder_selected');
+  keyboard.row().text('Отмена', 'reminder_cancel').row();
+  return keyboard;
+}
+
+function minuteKeyboard(state: ReminderSelectionState): InlineKeyboard {
+  const keyboard = new InlineKeyboard();
+  if (!state.pendingDate || !state.pendingHour) {
+    return keyboard.text('← Календарь', 'reminder_back');
+  }
+
+  const minutes = getAvailableReminderMinutes(
+    state.pendingDate,
+    state.pendingHour,
+    state.eventStartDate,
+    state.eventStartTime,
+  );
+  addGrid(keyboard, minutes, 4, (minute) => `reminder_minute:${minute}`);
+
+  keyboard
+    .text('← Часы', 'reminder_hours_back')
     .text('← Календарь', 'reminder_back')
-    .text('Добавить', 'reminder_add')
     .row();
+  if (state.selected.size) {
+    keyboard.text(`Выбранные (${state.selected.size})`, 'reminder_selected').row();
+  }
+  keyboard.text('Отмена', 'reminder_cancel').row();
+  return keyboard;
+}
+
+function selectedKeyboard(state: ReminderSelectionState): InlineKeyboard {
+  const keyboard = new InlineKeyboard();
+  for (const option of sortedSelected(state)) {
+    keyboard.text(`✕ ${compactOptionLabel(option)}`, `reminder_remove:${option.id}`).row();
+  }
+  keyboard.text('← Календарь', 'reminder_back');
+  if (state.selected.size) keyboard.text(`Применить (${state.selected.size})`, 'reminder_apply');
+  keyboard.row();
+  if (state.selected.size) keyboard.text('Очистить', 'reminder_clear');
+  keyboard.text('Отмена', 'reminder_cancel').row();
+  return keyboard;
 }
 
 function selectorText(state: ReminderSelectionState): string {
-  return state.view === 'time' ? timeText(state) : calendarText(state);
+  if (state.view === 'hour') return hourText(state);
+  if (state.view === 'minute') return minuteText(state);
+  if (state.view === 'selected') return selectedText(state);
+  return calendarText(state);
 }
 
 function selectorKeyboard(state: ReminderSelectionState): InlineKeyboard {
-  return state.view === 'time' ? timeKeyboard(state) : calendarKeyboard(state);
+  if (state.view === 'hour') return hourKeyboard(state);
+  if (state.view === 'minute') return minuteKeyboard(state);
+  if (state.view === 'selected') return selectedKeyboard(state);
+  return calendarKeyboard(state);
 }
 
 async function showReminderSelector(
@@ -240,8 +350,9 @@ async function showReminderSelector(
     return;
   }
 
+  const deadline = getReminderEventDeadline(event.startDate, event.startTime);
   const monthId = getInitialReminderMonth(event.startDate);
-  if (!monthId) {
+  if (!deadline || deadline.getTime() <= Date.now() || !monthId) {
     userState.delete(tgUserId);
     await reply('Для этого мероприятия уже нет доступного времени для напоминания.');
     return;
@@ -256,14 +367,11 @@ async function showReminderSelector(
     eventStartTime: event.startTime,
     monthId,
     view: 'calendar',
-    pendingTime: '09:00',
     selected: new Map<string, ReminderDateTimeOption>(),
   };
   userState.set(tgUserId, state);
   await reply(selectorText(state), { reply_markup: selectorKeyboard(state) });
 }
-
-// ── legal notice text ───────────────────────────────────────────────────────
 
 function legalNoticeText(includeMarketing: boolean): string {
   const links = [
@@ -329,12 +437,10 @@ async function handleStart(
     await showReminderSelector(tgUserId, user.id, pendingEventId, reply);
   } else {
     await reply(
-      `Привет! Я бот АБ Афиши Бухгалтера.\n\nЯ помогу напомнить о предстоящих мероприятиях для бухгалтеров.\n\nИспользуй меня через кнопку «Напомнить» на сайте ${SITE_URL}`,
+      `Привет! Я бот АБ Афиши Бухгалтера.\n\nЯ помогу напомнить о предстоящих мероприятиях для бухгалтеров.\n\nИспользуйте меня через кнопку «Напомнить» на сайте ${SITE_URL}`,
     );
   }
 }
-
-// ── bot entry point ─────────────────────────────────────────────────────────
 
 export function startTelegramBot(token: string) {
   const bot = new Bot(token);
@@ -353,7 +459,7 @@ export function startTelegramBot(token: string) {
 
   bot.command('help', async (ctx) => {
     await ctx.reply(
-      `Чтобы получить напоминание о мероприятии:\n1. Перейдите на сайт ${SITE_URL}\n2. Найдите мероприятие\n3. Нажмите «Напомнить»\n4. Выберите Telegram\n5. Выберите дату в календаре\n6. Настройте время\n7. Добавьте одно или несколько напоминаний и нажмите «Применить»`,
+      `Чтобы получить напоминание о мероприятии:\n1. Перейдите на сайт ${SITE_URL}\n2. Найдите мероприятие\n3. Нажмите «Напомнить»\n4. Выберите Telegram\n5. Выберите дату в календаре\n6. Выберите час и минуты\n7. Добавьте одно или несколько времён и дат\n8. Нажмите «Применить»`,
     );
   });
 
@@ -418,6 +524,8 @@ export function startTelegramBot(token: string) {
     const monthId = shiftReminderMonth(state.monthId, Number(ctx.match[1]), state.eventStartDate);
     if (monthId) state.monthId = monthId;
     state.view = 'calendar';
+    state.pendingDate = undefined;
+    state.pendingHour = undefined;
     await ctx.answerCallbackQuery();
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
@@ -429,21 +537,84 @@ export function startTelegramBot(token: string) {
       return;
     }
 
-    state.pendingDate = ctx.match[1];
-    state.pendingTime = '09:00';
-    state.view = 'time';
+    const dateId = ctx.match[1];
+    const hours = getAvailableReminderHours(dateId, state.eventStartDate, state.eventStartTime);
+    if (!hours.length) {
+      await ctx.answerCallbackQuery({ text: 'На эту дату уже нет доступного времени.' });
+      return;
+    }
+
+    state.pendingDate = dateId;
+    state.pendingHour = undefined;
+    state.view = 'hour';
     await ctx.answerCallbackQuery();
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
 
-  bot.callbackQuery(/^reminder_time:(-?\d+)$/, async (ctx) => {
+  bot.callbackQuery(/^reminder_hour:(\d{2})$/, async (ctx) => {
     const state = userState.get(ctx.from.id);
-    if (!state || state.step !== 'selectingReminder' || state.view !== 'time') {
+    if (!state || state.step !== 'selectingReminder' || !state.pendingDate) {
       await ctx.answerCallbackQuery({ text: 'Сначала выберите дату.' });
       return;
     }
 
-    state.pendingTime = adjustReminderTime(state.pendingTime, Number(ctx.match[1]));
+    const hour = ctx.match[1];
+    const minutes = getAvailableReminderMinutes(
+      state.pendingDate,
+      hour,
+      state.eventStartDate,
+      state.eventStartTime,
+    );
+    if (!minutes.length) {
+      await ctx.answerCallbackQuery({ text: 'В этом часу уже нет доступного времени.' });
+      return;
+    }
+
+    state.pendingHour = hour;
+    state.view = 'minute';
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
+  });
+
+  bot.callbackQuery(/^reminder_minute:(\d{2})$/, async (ctx) => {
+    const state = userState.get(ctx.from.id);
+    if (
+      !state ||
+      state.step !== 'selectingReminder' ||
+      !state.pendingDate ||
+      !state.pendingHour
+    ) {
+      await ctx.answerCallbackQuery({ text: 'Сначала выберите дату и час.' });
+      return;
+    }
+
+    const option = buildReminderDateTime(
+      state.pendingDate,
+      `${state.pendingHour}:${ctx.match[1]}`,
+      state.eventStartDate,
+      state.eventStartTime,
+    );
+    if (!option) {
+      await ctx.answerCallbackQuery({ text: 'Это время уже недоступно. Выберите другое.' });
+      return;
+    }
+
+    const duplicate = state.selected.has(option.id);
+    state.selected.set(option.id, option);
+    state.pendingHour = undefined;
+    state.view = 'hour';
+    await ctx.answerCallbackQuery({ text: duplicate ? 'Это время уже выбрано.' : 'Напоминание добавлено.' });
+    await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
+  });
+
+  bot.callbackQuery('reminder_hours_back', async (ctx) => {
+    const state = userState.get(ctx.from.id);
+    if (!state || state.step !== 'selectingReminder') {
+      await ctx.answerCallbackQuery();
+      return;
+    }
+    state.pendingHour = undefined;
+    state.view = state.pendingDate ? 'hour' : 'calendar';
     await ctx.answerCallbackQuery();
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
@@ -456,32 +627,31 @@ export function startTelegramBot(token: string) {
     }
     state.view = 'calendar';
     state.pendingDate = undefined;
+    state.pendingHour = undefined;
     await ctx.answerCallbackQuery();
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
 
-  bot.callbackQuery('reminder_add', async (ctx) => {
+  bot.callbackQuery('reminder_selected', async (ctx) => {
     const state = userState.get(ctx.from.id);
-    if (!state || state.step !== 'selectingReminder' || !state.pendingDate) {
-      await ctx.answerCallbackQuery({ text: 'Сначала выберите дату.' });
+    if (!state || state.step !== 'selectingReminder') {
+      await ctx.answerCallbackQuery();
       return;
     }
+    state.view = 'selected';
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
+  });
 
-    const option = buildReminderDateTime(
-      state.pendingDate,
-      state.pendingTime,
-      state.eventStartDate,
-      state.eventStartTime,
-    );
-    if (!option) {
-      await ctx.answerCallbackQuery({ text: 'Выберите будущее время до начала мероприятия.' });
+  bot.callbackQuery(/^reminder_remove:(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})$/, async (ctx) => {
+    const state = userState.get(ctx.from.id);
+    if (!state || state.step !== 'selectingReminder') {
+      await ctx.answerCallbackQuery();
       return;
     }
-
-    state.selected.set(option.id, option);
-    state.view = 'calendar';
-    state.pendingDate = undefined;
-    await ctx.answerCallbackQuery({ text: 'Напоминание добавлено.' });
+    const removed = state.selected.delete(ctx.match[1]);
+    state.view = state.selected.size ? 'selected' : 'calendar';
+    await ctx.answerCallbackQuery({ text: removed ? 'Напоминание удалено.' : 'Уже удалено.' });
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
 
@@ -492,9 +662,22 @@ export function startTelegramBot(token: string) {
       return;
     }
     state.selected.clear();
+    state.pendingDate = undefined;
+    state.pendingHour = undefined;
     state.view = 'calendar';
     await ctx.answerCallbackQuery({ text: 'Выбор очищен.' });
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
+  });
+
+  bot.callbackQuery('reminder_cancel', async (ctx) => {
+    const state = userState.get(ctx.from.id);
+    if (!state || state.step !== 'selectingReminder') {
+      await ctx.answerCallbackQuery();
+      return;
+    }
+    userState.delete(ctx.from.id);
+    await ctx.answerCallbackQuery({ text: 'Выбор отменён.' });
+    await ctx.editMessageText('Выбор напоминаний отменён. Вернуться к нему можно через кнопку «Напомнить» на сайте.');
   });
 
   bot.callbackQuery('reminder_apply', async (ctx) => {
@@ -504,8 +687,7 @@ export function startTelegramBot(token: string) {
       return;
     }
 
-    const selected = [...state.selected.values()]
-      .sort((left, right) => left.remindAt.localeCompare(right.remindAt));
+    const selected = sortedSelected(state);
     if (!selected.length) {
       await ctx.answerCallbackQuery({ text: 'Сначала добавьте хотя бы одно напоминание.' });
       return;
@@ -517,7 +699,7 @@ export function startTelegramBot(token: string) {
     );
     const failed = results.filter((result) => !result.ok && !result.duplicate);
     if (failed.length) {
-      await ctx.reply(`Не удалось сохранить ${failed.length} напоминание(я). Попробуйте ещё раз позже.`);
+      await ctx.reply(`Не удалось сохранить ${failed.length} напоминание(я). Проверьте время и попробуйте ещё раз.`);
       return;
     }
 
@@ -596,7 +778,7 @@ export function startTelegramBot(token: string) {
     }
 
     if (state.step === 'selectingReminder') {
-      await ctx.reply('Используйте календарь и кнопки настройки времени выше.');
+      await ctx.reply('Используйте календарь и кнопки выбора часа и минут выше.');
     }
   });
 
