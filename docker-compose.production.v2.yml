@@ -36,9 +36,7 @@ services:
       retries: 5
 
   backend:
-    # Production backend is pinned independently from APP_VERSION so updating
-    # the API never recreates the bots service by accident.
-    image: ${BACKEND_IMAGE:-ab-afisha/backend:backend-release-79d85dc}
+    image: ${BACKEND_IMAGE:-ab-afisha/backend:backend-release-a072746}
     restart: always
     environment:
       NODE_ENV: production
@@ -94,8 +92,6 @@ services:
       start_period: 30s
 
   frontend:
-    # Production frontend is pinned by PRODUCTION_RELEASE.md and
-    # infra/deploy/production-frontend.env. APP_VERSION must not select it.
     image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-79d85dc}
     restart: always
     environment:
@@ -114,7 +110,7 @@ services:
         condition: service_healthy
 
   bots:
-    image: ab-afisha/bots:${APP_VERSION:-latest}
+    image: ${BOTS_IMAGE:-ab-afisha/bots:bots-release-a072746}
     restart: always
     environment:
       NODE_ENV: production
