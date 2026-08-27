@@ -81,8 +81,9 @@ describe('City-only public location filter', () => {
     assert.match(apiSource, /NON_CITY_MARKERS\.some\(\(marker\) => normalized\.includes\(marker\)\)/);
   });
 
-  test('uses the canonical city name as the backend filter value', () => {
-    assert.match(apiSource, /filterValues:\s*\[name\]/);
+  test('keeps canonical city name plus backend aliases as filter values', () => {
+    assert.match(apiSource, /const filterValues = Array\.from/);
+    assert.match(apiSource, /\[name, \.\.\.\(city\.filterValues \?\? \[\]\)\]/);
     assert.match(apiSource, /new Map<string, CityOption>\(\)/);
     assert.match(apiSource, /normalizeLocationValue\(name\)/);
   });
