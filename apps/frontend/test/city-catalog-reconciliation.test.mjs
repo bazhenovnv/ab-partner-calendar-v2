@@ -45,6 +45,23 @@ describe('City catalogue reconciliation', () => {
     assert.match(FRONTEND_API, /\.\.\.\(city\.filterValues \?\? \[\]\)/);
   });
 
+  test('public city options exclude disabled cities and address-only orphan locations', () => {
+    assert.match(FILTERS_SERVICE, /select: \{ id: true, name: true, region: true, isActive: true \}/);
+    assert.match(FILTERS_SERVICE, /if \(linkedCity && !linkedCity\.isActive\) continue/);
+    assert.match(FILTERS_SERVICE, /inactiveCityNames\.has\(normalizedName\)/);
+    assert.match(
+      FILTERS_SERVICE,
+      /OR: \[\s*\{ cityId: \{ not: null \} \},\s*\{ cityName: \{ not: null \} \},\s*\]/,
+    );
+  });
+
+  test('city facets use exact aliases instead of arbitrary address or venue substrings', () => {
+    assert.match(FILTERS_SERVICE, /cityName: \{ equals: city, mode: 'insensitive' \}/);
+    assert.match(FILTERS_SERVICE, /city: \{ name: \{ equals: city, mode: 'insensitive' \} \}/);
+    assert.doesNotMatch(FILTERS_SERVICE, /address: \{ contains: city/);
+    assert.doesNotMatch(FILTERS_SERVICE, /venue: \{ contains: city/);
+  });
+
   test('empty catalogue triggers a one-time reconciliation', () => {
     assert.match(CITIES_PAGE, /res\.total === 0/);
     assert.match(CITIES_PAGE, /didAutoReconcile\.current/);
