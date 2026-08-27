@@ -36,15 +36,20 @@ describe('Canonical physical city publication', () => {
     );
   });
 
-  test('MAX parser prefers a separate Где line over a physical format token', () => {
+  test('MAX parser deterministically prefers a separate Где line over a physical format token', () => {
     assert.match(MAX_PARSER, /PHYSICAL_FORMAT_PATTERN/);
     assert.match(MAX_PARSER, /Формат\\s\*:\\s\*\(\[\^\\n\]\+\)/);
     assert.match(MAX_PARSER, /Где\\s\*:\\s\*\(\[\^\\n\]\+\)/);
-    assert.match(MAX_PARSER, /whereParsed = super\.parse\(`Где: \$\{whereValue\}`/);
+    assert.match(MAX_PARSER, /function applyPhysicalWhereValue\(whereValue: string, result: ParsedMaxPost\)/);
     assert.match(MAX_PARSER, /format: string \| null \}\)\.format = 'OFFLINE'/);
-    assert.match(MAX_PARSER, /result\.city = whereParsed\.city/);
-    assert.match(MAX_PARSER, /result\.address = whereParsed\.address/);
-    assert.match(MAX_PARSER, /result\.venue = whereParsed\.venue/);
+    assert.match(MAX_PARSER, /applyPhysicalWhereValue\(whereValue, result\)/);
+    assert.doesNotMatch(MAX_PARSER, /whereParsed = super\.parse\(`Где: \$\{whereValue\}`/);
+  });
+
+  test('MAX parser preserves venue-first place and city as separate fields', () => {
+    assert.match(MAX_PARSER, /VENUE_PREFIX\.test\(first\)/);
+    assert.match(MAX_PARSER, /isPlausibleCityName\(second\)/);
+    assert.match(MAX_PARSER, /result\.venue = first;\s*result\.city = second;/);
   });
 
   test('MAX parser recognizes hybrid format in both online/offline orders', () => {
