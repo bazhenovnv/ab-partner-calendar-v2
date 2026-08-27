@@ -5,46 +5,46 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `ebfb4f9db38c34e58743463a9c5200c46988dd66`
-- Backend commit: `ebfb4f9db38c34e58743463a9c5200c46988dd66`
-- Backend image: `ab-afisha/backend:backend-release-ebfb4f9`
-- Bots commit: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5`
-- Bots image: `ab-afisha/bots:bots-release-a072746`
+- Release anchor commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
+- Backend commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
+- Backend image: `ab-afisha/backend:backend-release-3a64511`
+- Bots commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
+- Bots image: `ab-afisha/bots:bots-release-3a64511`
 - Frontend commit: `79d85dc230b71699977bfec633db411a49c72f4f`
 - Frontend image: `ab-afisha/frontend:frontend-release-79d85dc`
-- Дата утверждения: `2026-08-26`
+- Дата утверждения: `2026-08-27`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Историческое имя lock-файла сохранено для совместимости. Компоненты production закрепляются **независимо**: backend, bots и frontend могут быть собраны из разных утверждённых commit.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Историческое имя lock-файла сохранено для совместимости. Компоненты production закрепляются **независимо**.
 
 ## Что входит в этот релиз
 
-Bots pin `a072746` добавляет:
+Backend и bots pin `3a64511` включают предыдущие исправления Telegram IPv6/reminders и дополнительно:
 
-- Telegram снова получает доступ к `api.telegram.org` через отдельный Docker IPv6 egress;
-- host IPv6 фиксируется через `forwarding=1` и `accept_ra=2` после reboot;
-- Telegram long polling предпочитает IPv6;
-- Telegram reminder flow: календарь → час → минуты с шагом 5 минут;
-- можно выбрать несколько времён на одной дате и несколько разных дат;
-- можно удалить отдельный вариант, очистить выбор, отменить или применить весь набор;
-- MAX webhook использует тот же сценарий выбора даты/часа/минут и мультивыбор;
-- в MAX юридическое согласие остаётся кнопкой «Принять».
+- перед каждым новым запуском bot-flow требуется явное подтверждение основных юридических документов;
+- `legalAcceptedAt` обновляется при подтверждении;
+- обязательный сервисный legal gate не включает автоматически согласие на рекламные/информационные рассылки;
+- Telegram показывает документы и кнопку «Принимаю» до перехода к календарю;
+- MAX показывает документы и кнопку «Принять» до перехода к календарю;
+- после выбора минуты пользователь остаётся в минутной сетке того же часа;
+- на минутном экране показываются уже выбранные времена текущего часа;
+- несколько минут одного часа добавляются последовательно без повторного выбора часа;
+- повторный клик по уже выбранной минуте Telegram не делает идентичный `editMessageText` и не вызывает `message is not modified`;
+- сохраняются мультидаты, удаление отдельных времён, очистка, отмена и `Применить (N)`;
+- backend Telegram reminders/test-send/broadcasts продолжают использовать IPv6 transport;
+- MAX webhook сохраняет тот же reminder UX.
 
-Backend pin `ebfb4f9` включает всё из `a072746` и дополнительно:
+Deployment hardening:
 
-- валидирует напоминание по фактическому `startTime`, а не по полуночи `startDate`;
-- показывает фактическое время начала в отправленном напоминании;
-- отправляет Telegram-напоминания через точечный IPv6 transport;
-- отправляет Telegram test-send и массовые рассылки через тот же IPv6 transport;
-- не меняет сетевое поведение MAX и SMTP;
-- regression-test запрещает возвращение прямого backend `fetch(api.telegram.org)` в reminders и broadcasts.
+- `deploy-pinned-backend-bots.sh` проверяет Telegram `getMe` по IPv6 отдельно из bots и backend;
+- `getMe` имеет до 6 попыток с возрастающей паузой, чтобы единичный transient IPv6 timeout не вызывал ложный rollback;
+- при устойчивой ошибке автоматический rollback backend+bots сохраняется;
+- frontend и nginx не пересоздаются backend+bots deployment.
 
-Frontend остаётся на ранее утверждённом `frontend-release-79d85dc`; UI сайта в этом релизе не меняется.
-
-Сохраняются все исправления предыдущего production-релиза `79d85dc`, включая MAX `HYBRID`, «Требует внимания», email-уведомления, faceted filters, legal/admin lifecycle и MAX import recovery.
+Frontend остаётся на `frontend-release-79d85dc`; UI сайта в этом релизе не меняется.
 
 ## Обязательное правило для новых чатов и AI-агентов
 
@@ -63,8 +63,8 @@ Frontend остаётся на ранее утверждённом `frontend-rel
 
 - деплоить backend, bots или frontend с тегом `latest`;
 - выбирать backend или bots через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-ebfb4f9`;
-- деплоить любой `bots-release-*`, кроме `bots-release-a072746`;
+- деплоить любой `backend-release-*`, кроме `backend-release-3a64511`;
+- деплоить любой `bots-release-*`, кроме `bots-release-3a64511`;
 - деплоить любой `frontend-release-*`, кроме `frontend-release-79d85dc`;
 - использовать `rollback-before-*`, `temporary-rollback-*`, preflight-образы или старые release-образы как production;
 - определять production-версию по последнему commit в `main`;
