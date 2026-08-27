@@ -5,9 +5,9 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `ad481442ed706986b62d1388f0e10fb5c5263c4c`
-- Backend commit: `ad481442ed706986b62d1388f0e10fb5c5263c4c`
-- Backend image: `ab-afisha/backend:backend-release-ad48144`
+- Release anchor commit: `4121d008c08f11732f2a45293ef4fa1c8749713e`
+- Backend commit: `4121d008c08f11732f2a45293ef4fa1c8749713e`
+- Backend image: `ab-afisha/backend:backend-release-4121d00`
 - Bots commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
 - Bots image: `ab-afisha/bots:bots-release-3a64511`
 - Frontend commit: `3b70ea58e9284e8e590eb7bf08a0c394000ebcd2`
@@ -24,21 +24,30 @@
 
 ## Что входит в этот релиз
 
-Backend pin `ad48144` закрывает системную причину загрязнения городов после предыдущего исправления публичного фильтра:
+Backend pin `4121d00` включает предыдущую canonical-city защиту и закрывает найденный production-QA edge case структурированных MAX-постов.
+
+Сохраняются предыдущие гарантии:
 
 - MAX parser использует общий shared location parser перед автопубликацией `OFFLINE/HYBRID` событий;
 - значения формата, улицы, дома и площадки не считаются физическим городом только потому, что поле непустое;
 - `Очно`, `офлайн + онлайн`, `ст1`, адресные фрагменты и venue-only значения без распознаваемого города дают `city=null` и причину `Город очного участия не определён или требует проверки`;
 - такие MAX-события переходят в `NEEDS_ATTENTION` вместо автоматического `PUBLISHED`;
-- валидный город может быть восстановлен из структурированных city/address/venue данных, например для сочетаний `Очно` + `venue=Москва` или `Экспофорум` + `venue=Санкт-Петербург`;
 - ручная публикация `OFFLINE/HYBRID` через `/publish` требует активную каноническую связь `cityId -> City`;
-- ручной перевод статуса через `/status` в `PUBLISHED` проходит ту же canonical-city проверку и больше не является обходом;
+- ручной перевод статуса через `/status` в `PUBLISHED` проходит ту же canonical-city проверку;
 - при ручной публикации `cityName` выравнивается по имени связанного активного `City`;
 - создание и переименование записей справочника `City` отвергает очевидные значения формата, адреса и площадки.
 
+Дополнительно исправлен false-negative структурированного MAX-поста:
+
+- для обычной схемы `Формат: Очно` + отдельная строка `Где: Москва` parser больше не теряет реальный город из-за первого совпадения `Формат|Где`;
+- при физическом не-гибридном формате отдельная строка `Где:` повторно разбирается именно как physical location до canonical-city validation;
+- схема `Формат: Очно` + `Где: Экспофорум, Санкт-Петербург` сохраняет venue-first repair и даёт город `Санкт-Петербург`, площадку `Экспофорум`;
+- hybrid syntax распознаётся в обоих порядках: `онлайн + офлайн` и `офлайн + онлайн`;
+- отсутствие реального места у hybrid/offline по-прежнему не приводит к угадыванию города и остаётся `NEEDS_ATTENTION`.
+
 Frontend остаётся на `3b70ea5`: публичный city filter уже использует канонические города и общий location parser. Bots остаются на `3a64511`: reminder/legal-gate поведение не меняется.
 
-Перед этим backend-релизом исторические production-данные были отдельно нормализованы операционной транзакцией с резервной копией и проверкой `COMMIT`:
+Исторические production-данные были ранее отдельно нормализованы операционной транзакцией с резервной копией и проверкой `COMMIT`:
 
 - `Москва` — активный канонический `City`, 6 связанных событий;
 - `Санкт-Петербург` — активный канонический `City`, 2 связанных события;
@@ -57,7 +66,7 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 
 - читает component pins из release lock;
 - не двигает root Git HEAD;
-- строит только backend из detached worktree точного commit `ad48144`;
+- строит только backend из detached worktree точного commit `4121d00`;
 - проверяет OCI revision label и наличие compiled canonical-city guards в image;
 - фиксирует текущие backend/frontend/bots/nginx container IDs и images, nginx config SHA и полный local Git status;
 - переключает только backend через `--no-deps --force-recreate backend`;
@@ -69,7 +78,9 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 - проверяет публичный city filter и активные City rows через общий classifier;
 - выводит число исторических опубликованных `OFFLINE/HYBRID` с `cityId=null` только как диагностический legacy-counter;
 - проверяет, что frontend, bots, nginx-container, nginx image/config и local Git status остались неизменными;
-- при ошибке автоматически откатывает только backend на ранее запущенный image и после восстановления backend повторно выполняет `nginx -t` + `nginx -s reload`, чтобы nginx не оставался привязан к IP неудачного контейнера.
+- при ошибке автоматически откатывает только backend на ранее запущенный image и после восстановления backend повторно выполняет `nginx -t` + `nginx -s reload`.
+
+После deployment обязателен отдельный read-only runtime QA parser/publication guard без создания и изменения событий.
 
 Ожидаемый финальный marker:
 
@@ -92,7 +103,7 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 
 - деплоить backend, bots или frontend с тегом `latest`;
 - выбирать backend или bots через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-ad48144`;
+- деплоить любой `backend-release-*`, кроме `backend-release-4121d00`;
 - деплоить любой `bots-release-*`, кроме `bots-release-3a64511`;
 - деплоить любой `frontend-release-*`, кроме `frontend-release-3b70ea5`;
 - использовать rollback/preflight/temporary images как production;
