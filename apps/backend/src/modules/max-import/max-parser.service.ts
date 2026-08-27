@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import {
+  extractCityFromEventLocation,
+  isPlausibleCityName,
+  looksLikeVenueLocation,
+} from '@ab-afisha/shared';
+import {
   MaxParserService as BaseMaxParserService,
   type ParsedMaxPost,
 } from './max-parser-v2.service';
@@ -179,6 +184,32 @@ function repairVenueFirstLocation(result: ParsedMaxPost) {
   }
 }
 
+function validatePhysicalLocation(result: ParsedMaxPost) {
+  const format = (result as unknown as { format: string | null }).format;
+  if (format !== 'OFFLINE' && format !== 'HYBRID') return;
+
+  const rawCity = result.city?.trim() ?? '';
+  const inferredCity = extractCityFromEventLocation({
+    cityName: result.city,
+    address: result.address,
+    venue: result.venue,
+  });
+
+  if (!inferredCity || !isPlausibleCityName(inferredCity)) {
+    if (rawCity && looksLikeVenueLocation(rawCity) && !result.venue?.trim()) {
+      result.venue = rawCity;
+    }
+    result.city = null;
+    setAttention(result, [
+      ...result.attentionReasons,
+      'Город очного участия не определён или требует проверки',
+    ]);
+    return;
+  }
+
+  result.city = inferredCity;
+}
+
 @Injectable()
 export class MaxParserService extends BaseMaxParserService {
   override parse(
@@ -189,6 +220,7 @@ export class MaxParserService extends BaseMaxParserService {
     const result = super.parse(text, postDate, supplementalUrls);
     repairHybridLocation(text, result);
     repairVenueFirstLocation(result);
+    validatePhysicalLocation(result);
 
     const usedFallback =
       result.directionSlugs.length === 1 &&

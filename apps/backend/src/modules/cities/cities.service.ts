@@ -205,6 +205,9 @@ export class CitiesService {
   async create(dto: CreateCityDto) {
     if (!dto.name?.trim()) throw new BadRequestException('Название обязательно');
     if (!dto.region?.trim()) throw new BadRequestException('Регион обязателен');
+    if (!isPlausibleCityName(dto.name)) {
+      throw new BadRequestException('Укажите корректное название города, а не формат, адрес или площадку');
+    }
 
     const existing = await this.prisma.city.findUnique({ where: { name: dto.name.trim() } });
     if (existing) throw new ConflictException(`Город «${dto.name}» уже существует`);
@@ -223,6 +226,9 @@ export class CitiesService {
     await this.findById(id);
 
     if (dto.name !== undefined) {
+      if (!isPlausibleCityName(dto.name)) {
+        throw new BadRequestException('Укажите корректное название города, а не формат, адрес или площадку');
+      }
       const dup = await this.prisma.city.findFirst({
         where: { name: dto.name.trim(), id: { not: id } },
       });
