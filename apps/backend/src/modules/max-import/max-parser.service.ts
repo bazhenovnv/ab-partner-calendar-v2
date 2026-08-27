@@ -86,7 +86,8 @@ const CYRILLIC_DIRECTION_HINTS: Array<{
 const VENUE_PREFIX = /^(?:отель|гостиниц|бизнес[-\s]?центр|бц\b|конференц|центр\b|зал\b|офис\b|ресторан\b|кафе\b|экспофорум\b|экспоцентр\b|экспо\b)/i;
 const STREET_PART = /^(?:ул\.?|улица|проспект|пр-т|пер\.?|переулок|шоссе|наб\.?|набережная|бульвар|бул\.?|пл\.?|площадь|д\.?\s*\d|дом\b)/i;
 const REGION_PART = /(?:обл\.?|область|край|респ\.?|республика|автономн|округ|ао)$/i;
-const HYBRID_PATTERN = /(?:онлайн\s*(?:\+|\/)|(?:\+|\/)\s*офлайн|online\s*(?:\+|\/)|(?:\+|\/)\s*offline|очно\s*(?:\+|\/))/i;
+const HYBRID_PATTERN = /(?:(?:онлайн|online)\s*(?:\+|\/)\s*(?:офлайн|offline|очно)|(?:офлайн|offline|очно)\s*(?:\+|\/)\s*(?:онлайн|online))/i;
+const PHYSICAL_FORMAT_PATTERN = /^(?:очно|офлайн|offline)(?:\b|\s|$)/i;
 
 function cleanLocationPart(value: string) {
   return value.trim().replace(/^(?:г\.|город)\s*/i, '').trim();
@@ -218,6 +219,25 @@ export class MaxParserService extends BaseMaxParserService {
     supplementalUrls: string[] = [],
   ): ParsedMaxPost {
     const result = super.parse(text, postDate, supplementalUrls);
+
+    // Structured MAX posts commonly put the delivery mode and physical place
+    // on separate lines: "Формат: Очно" followed by "Где: Москва". The base
+    // parser takes the first Формат|Где match and therefore sees only "Очно".
+    // Re-parse the Где value in isolation before the canonical city validator.
+    const formatValue = text.match(/Формат\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
+    const whereValue = text.match(/Где\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
+    if (
+      whereValue &&
+      PHYSICAL_FORMAT_PATTERN.test(formatValue) &&
+      !HYBRID_PATTERN.test(formatValue)
+    ) {
+      const whereParsed = super.parse(`Где: ${whereValue}`, postDate, supplementalUrls);
+      (result as unknown as { format: string | null }).format = 'OFFLINE';
+      result.city = whereParsed.city;
+      result.address = whereParsed.address;
+      result.venue = whereParsed.venue;
+    }
+
     repairHybridLocation(text, result);
     repairVenueFirstLocation(result);
     validatePhysicalLocation(result);
