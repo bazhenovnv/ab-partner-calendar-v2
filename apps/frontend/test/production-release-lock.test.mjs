@@ -88,6 +88,19 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(BACKEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ BACKEND \+ BOTS/);
   });
 
+  test('backend-only deploy refreshes nginx DNS after switch and rollback without recreating nginx', () => {
+    assert.match(BACKEND_DEPLOY, /reload_nginx\(\)/);
+    assert.match(BACKEND_DEPLOY, /docker exec "\$container" nginx -t/);
+    assert.match(BACKEND_DEPLOY, /docker exec "\$container" nginx -s reload/);
+    assert.equal(
+      (BACKEND_DEPLOY.match(/reload_nginx "\$NGINX_BEFORE"/g) ?? []).length,
+      2,
+    );
+    assert.match(BACKEND_DEPLOY, /NGINX_RELOAD_OK=true/);
+    assert.match(BACKEND_DEPLOY, /NGINX_CONTAINER_UNCHANGED=true/);
+    assert.doesNotMatch(BACKEND_DEPLOY, /force-recreate nginx/);
+  });
+
   test('backend-only deploy checks canonical city runtime and Telegram IPv6 with retry', () => {
     assert.match(BACKEND_DEPLOY, /family: 6/);
     assert.match(BACKEND_DEPLOY, /for attempt in 1 2 3 4 5 6/);
@@ -100,10 +113,11 @@ describe('Pinned production component release', () => {
     assert.match(BACKEND_DEPLOY, /Город очного участия не определён или требует проверки/);
   });
 
-  test('backend-only deploy preserves frontend bots nginx and local files', () => {
+  test('backend-only deploy preserves frontend bots nginx container/config and local files', () => {
     assert.match(BACKEND_DEPLOY, /FRONTEND_UNCHANGED=true/);
     assert.match(BACKEND_DEPLOY, /BOTS_UNCHANGED=true/);
     assert.match(BACKEND_DEPLOY, /NGINX_UNCHANGED=true/);
+    assert.match(BACKEND_DEPLOY, /NGINX_CONTAINER_UNCHANGED=true/);
     assert.match(BACKEND_DEPLOY, /LOCAL_CHANGES_PRESERVED=true/);
     assert.match(BACKEND_DEPLOY, /PRODUCTION_BACKEND_PIN_OK=true/);
     assert.match(BACKEND_DEPLOY, /NGINX_CONFIG_SHA_BEFORE/);
