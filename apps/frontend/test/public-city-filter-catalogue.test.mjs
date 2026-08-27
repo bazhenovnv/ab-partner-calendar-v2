@@ -23,7 +23,8 @@ describe('Public city filter catalogue', () => {
     assert.match(API, /if \(\/\\d\/\.test\(name\)\) return false/);
   });
 
-  test('filters by canonical city name after cityId synchronization', () => {
-    assert.match(API, /filterValues:\s*\[name\]/);
+  test('keeps canonical city plus legacy aliases after backend normalization', () => {
+    assert.match(API, /const filterValues = Array\.from/);
+    assert.match(API, /\[name, \.\.\.\(city\.filterValues \?\? \[\]\)\]/);
   });
 });

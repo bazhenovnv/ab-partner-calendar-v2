@@ -153,11 +153,19 @@ export async function fetchCities(): Promise<CityOption[]> {
     const existing = uniqueCities.get(normalizedName);
     if (existing) continue;
 
+    const filterValues = Array.from(
+      new Set(
+        [name, ...(city.filterValues ?? [])]
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    );
+
     uniqueCities.set(normalizedName, {
       ...city,
       name,
       region: city.region?.trim() || 'Другие регионы',
-      filterValues: [name],
+      filterValues,
     });
   }
 
