@@ -20,6 +20,7 @@ interface PublicCityOption {
   id: string;
   name: string;
   region: string;
+  filterValues: Set<string>;
 }
 
 @Injectable()
@@ -147,19 +148,37 @@ export class FiltersService {
           venue: eventLocation.venue,
         }) ||
         'Другие регионы';
+      const canonicalName = catalogueCity?.name ?? matchingLinkedCity?.name ?? extractedName;
+      const aliases = [canonicalName, eventLocation.cityName]
+        .filter((value): value is string => Boolean(value?.trim()))
+        .map((value) => value.trim());
+      const existing = citiesByName.get(normalizedName);
 
-      if (!citiesByName.has(normalizedName)) {
-        citiesByName.set(normalizedName, {
-          id: matchingLinkedCity?.id ?? catalogueCity?.id ?? `event-city:${normalizedName}`,
-          name: catalogueCity?.name ?? matchingLinkedCity?.name ?? extractedName,
-          region,
-        });
+      if (existing) {
+        aliases.forEach((value) => existing.filterValues.add(value));
+        continue;
       }
+
+      citiesByName.set(normalizedName, {
+        id: matchingLinkedCity?.id ?? catalogueCity?.id ?? `event-city:${normalizedName}`,
+        name: canonicalName,
+        region,
+        filterValues: new Set(aliases),
+      });
     }
 
-    return Array.from(citiesByName.values()).sort((a, b) =>
-      a.name.localeCompare(b.name, 'ru'),
-    );
+    return Array.from(citiesByName.values())
+      .map((city) => ({
+        id: city.id,
+        name: city.name,
+        region: city.region,
+        filterValues: Array.from(city.filterValues).sort((a, b) => {
+          if (a === city.name) return -1;
+          if (b === city.name) return 1;
+          return a.localeCompare(b, 'ru');
+        }),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
   }
 
   async getCities(autoStatus: EventAutoStatus[] = []) {
