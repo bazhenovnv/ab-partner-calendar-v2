@@ -60,9 +60,6 @@ export class FiltersService {
       locationFilters.push(
         { city: { name: { equals: city, mode: 'insensitive' } } },
         { cityName: { equals: city, mode: 'insensitive' } },
-        { cityName: { startsWith: `${city},`, mode: 'insensitive' } },
-        { address: { contains: city, mode: 'insensitive' } },
-        { venue: { contains: city, mode: 'insensitive' } },
       );
     }
     return locationFilters.length > 0 ? { OR: locationFilters } : {};
@@ -71,8 +68,7 @@ export class FiltersService {
   private async citiesForWhere(where: Prisma.EventWhereInput) {
     const [catalogueCities, eventLocations] = await Promise.all([
       this.prisma.city.findMany({
-        where: { isActive: true },
-        select: { id: true, name: true, region: true },
+        select: { id: true, name: true, region: true, isActive: true },
         orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       }),
       this.prisma.event.findMany({
@@ -81,8 +77,6 @@ export class FiltersService {
           OR: [
             { cityId: { not: null } },
             { cityName: { not: null } },
-            { address: { not: null } },
-            { venue: { not: null } },
           ],
         },
         select: {
@@ -90,20 +84,29 @@ export class FiltersService {
           address: true,
           venue: true,
           city: {
-            select: { id: true, name: true, region: true },
+            select: { id: true, name: true, region: true, isActive: true },
           },
         },
       }),
     ]);
 
     const cleanCatalogue = catalogueCities.filter((city) =>
-      isPlausibleCityName(city.name),
+      city.isActive && isPlausibleCityName(city.name),
+    );
+    const inactiveCityNames = new Set(
+      catalogueCities
+        .filter((city) => !city.isActive && isPlausibleCityName(city.name))
+        .map((city) => normalizeLocationValue(city.name)),
     );
     const directEventCityNames = eventLocations
-      .flatMap((location) => [location.city?.name, location.cityName])
+      .flatMap((location) => [
+        location.city?.isActive ? location.city.name : null,
+        location.city && !location.city.isActive ? null : location.cityName,
+      ])
       .filter((value): value is string => Boolean(value?.trim()))
       .map((value) => value.trim().replace(/^(?:г\.|город)\s*/i, '').trim())
-      .filter(isPlausibleCityName);
+      .filter(isPlausibleCityName)
+      .filter((name) => !inactiveCityNames.has(normalizeLocationValue(name)));
     const candidateNames = Array.from(
       new Map(
         [...cleanCatalogue.map((city) => city.name), ...directEventCityNames]
@@ -117,8 +120,10 @@ export class FiltersService {
 
     for (const eventLocation of eventLocations) {
       const linkedCity = eventLocation.city;
+      if (linkedCity && !linkedCity.isActive) continue;
+
       const linkedCityIsValid = Boolean(
-        linkedCity?.name && isPlausibleCityName(linkedCity.name),
+        linkedCity?.isActive && linkedCity.name && isPlausibleCityName(linkedCity.name),
       );
       const extractedName = linkedCityIsValid
         ? linkedCity!.name
@@ -134,6 +139,8 @@ export class FiltersService {
       if (!extractedName || !isPlausibleCityName(extractedName)) continue;
 
       const normalizedName = normalizeLocationValue(extractedName);
+      if (inactiveCityNames.has(normalizedName)) continue;
+
       const catalogueCity = catalogueByName.get(normalizedName);
       const matchingLinkedCity = linkedCityIsValid &&
         normalizeLocationValue(linkedCity!.name) === normalizedName
@@ -201,7 +208,7 @@ export class FiltersService {
     };
 
     // Status facet deliberately ignores the current status selection, but
-    // respects city and all other groups. This prevents self-filtering loops.
+    // respects the exact city aliases sent by the frontend and all other groups.
     const statusWhere: Prisma.EventWhereInput = {
       ...commonWhere,
       ...(query.cities?.length ? this.cityConstraint(query.cities) : {}),
