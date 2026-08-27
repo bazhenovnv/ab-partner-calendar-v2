@@ -36,6 +36,28 @@ describe('Canonical physical city publication', () => {
     );
   });
 
+  test('MAX parser prefers a separate Где line over a physical format token', () => {
+    assert.match(MAX_PARSER, /PHYSICAL_FORMAT_PATTERN/);
+    assert.match(MAX_PARSER, /Формат\\s\*:\\s\*\(\[\^\\n\]\+\)/);
+    assert.match(MAX_PARSER, /Где\\s\*:\\s\*\(\[\^\\n\]\+\)/);
+    assert.match(MAX_PARSER, /whereParsed = super\.parse\(`Где: \$\{whereValue\}`/);
+    assert.match(MAX_PARSER, /format: string \| null \}\)\.format = 'OFFLINE'/);
+    assert.match(MAX_PARSER, /result\.city = whereParsed\.city/);
+    assert.match(MAX_PARSER, /result\.address = whereParsed\.address/);
+    assert.match(MAX_PARSER, /result\.venue = whereParsed\.venue/);
+  });
+
+  test('MAX parser recognizes hybrid format in both online/offline orders', () => {
+    assert.match(
+      MAX_PARSER,
+      /\(\?:офлайн\|offline\|очно\)\\s\*\(\?:\\\+\|\\\/\)\\s\*\(\?:онлайн\|online\)/,
+    );
+    assert.match(
+      MAX_PARSER,
+      /\(\?:онлайн\|online\)\\s\*\(\?:\\\+\|\\\/\)\\s\*\(\?:офлайн\|offline\|очно\)/,
+    );
+  });
+
   test('manual publication requires an active canonical City relation', () => {
     assert.match(PUBLICATION_LOCATION, /event\.format !== 'OFFLINE'/);
     assert.match(PUBLICATION_LOCATION, /event\.format !== 'HYBRID'/);
