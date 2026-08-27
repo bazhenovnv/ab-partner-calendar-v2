@@ -4,6 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import {
+  extractCityFromEventLocation,
+  extractRegionFromEventLocation,
+  isPlausibleCityName,
+  normalizeLocationValue,
+} from '@ab-afisha/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 export interface CreateCityDto {
@@ -27,61 +33,6 @@ export interface ListCitiesQuery {
   limit?: number;
   sortBy?: 'name' | 'sortOrder' | 'createdAt';
   sortDir?: 'asc' | 'desc';
-}
-
-const NON_CITY = /^(?:онлайн|online|очно|офлайн|offline|дистанционно)$/i;
-const VENUE_PREFIX = /^(?:отель|гостиниц|бизнес[-\s]?центр|бц\b|конференц|центр\b|зал\b|офис\b|ресторан\b|кафе\b)/i;
-const STREET_PART = /^(?:ул\.?|улица|проспект|пр-т|пер\.?|переулок|шоссе|наб\.?|набережная|бульвар|бул\.?|пл\.?|площадь|д\.?\s*\d|дом\b)/i;
-const REGION_PART = /(?:обл\.?|область|край|респ\.?|республика|автономн|округ|ао)$/i;
-
-function cleanLocationPart(value: string) {
-  return value
-    .trim()
-    .replace(/^(?:г\.|город)\s*/i, '')
-    .replace(/^['«"]|['»"]$/g, '')
-    .trim();
-}
-
-function inferCityAndRegion(input: {
-  cityName: string | null;
-  address: string | null;
-}) {
-  const addressParts = (input.address ?? '')
-    .split(',')
-    .map(cleanLocationPart)
-    .filter(Boolean);
-
-  let region = 'Не указан';
-  let regionIndex = -1;
-  for (let index = addressParts.length - 1; index >= 0; index -= 1) {
-    if (REGION_PART.test(addressParts[index])) {
-      region = addressParts[index];
-      regionIndex = index;
-      break;
-    }
-  }
-
-  const endIndex = regionIndex >= 0 ? regionIndex - 1 : addressParts.length - 1;
-  for (let index = endIndex; index >= 0; index -= 1) {
-    const candidate = addressParts[index];
-    if (!candidate || /^\d+[а-яa-z/-]*$/i.test(candidate)) continue;
-    if (STREET_PART.test(candidate) || REGION_PART.test(candidate)) continue;
-    if (VENUE_PREFIX.test(candidate) || NON_CITY.test(candidate)) continue;
-    if (!/[а-яёa-z]/i.test(candidate)) continue;
-    return { name: candidate, region };
-  }
-
-  const fallback = cleanLocationPart(input.cityName ?? '');
-  if (
-    fallback &&
-    !NON_CITY.test(fallback) &&
-    !VENUE_PREFIX.test(fallback) &&
-    !STREET_PART.test(fallback)
-  ) {
-    return { name: fallback, region };
-  }
-
-  return null;
 }
 
 @Injectable()
@@ -118,52 +69,114 @@ export class CitiesService {
   }
 
   async reconcileFromEvents() {
-    const events = await this.prisma.event.findMany({
-      where: {
-        format: 'OFFLINE',
-        status: { not: 'DELETED' },
-      },
-      select: {
-        id: true,
-        cityId: true,
-        cityName: true,
-        address: true,
-      },
-    });
+    const [catalogueCities, events] = await Promise.all([
+      this.prisma.city.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true, region: true },
+      }),
+      this.prisma.event.findMany({
+        where: {
+          format: { in: ['OFFLINE', 'HYBRID'] },
+          status: { not: 'DELETED' },
+        },
+        select: {
+          id: true,
+          cityId: true,
+          cityName: true,
+          address: true,
+          venue: true,
+          city: {
+            select: { id: true, name: true, region: true },
+          },
+        },
+      }),
+    ]);
+
+    const cleanCatalogueNames = catalogueCities
+      .map((city) => city.name)
+      .filter(isPlausibleCityName);
+    const directEventNames = events
+      .flatMap((event) => [event.city?.name, event.cityName])
+      .filter((value): value is string => Boolean(value?.trim()))
+      .map((value) => value.trim().replace(/^(?:г\.|город)\s*/i, '').trim())
+      .filter(isPlausibleCityName);
+    const candidateNames = Array.from(
+      new Map(
+        [...cleanCatalogueNames, ...directEventNames].map((name) => [
+          normalizeLocationValue(name),
+          name,
+        ]),
+      ).values(),
+    );
 
     let created = 0;
     let linked = 0;
     let corrected = 0;
+    let skipped = 0;
     const cityNames = new Set<string>();
 
     for (const event of events) {
-      const inferred = inferCityAndRegion(event);
-      if (!inferred) continue;
-      cityNames.add(inferred.name);
+      const inferredName = extractCityFromEventLocation(
+        {
+          cityName: event.cityName,
+          address: event.address,
+          venue: event.venue,
+        },
+        candidateNames,
+      );
+      if (!inferredName || !isPlausibleCityName(inferredName)) {
+        skipped += 1;
+        continue;
+      }
 
-      let city = await this.prisma.city.findUnique({ where: { name: inferred.name } });
+      const normalizedName = normalizeLocationValue(inferredName);
+      const canonicalCandidate = candidateNames.find(
+        (name) => normalizeLocationValue(name) === normalizedName,
+      ) ?? inferredName;
+      cityNames.add(canonicalCandidate);
+
+      let city = await this.prisma.city.findFirst({
+        where: {
+          name: { equals: canonicalCandidate, mode: 'insensitive' },
+        },
+      });
+
+      const inferredRegion =
+        extractRegionFromEventLocation({
+          cityName: event.cityName,
+          address: event.address,
+          venue: event.venue,
+        }) ?? 'Не указан';
+
       if (!city) {
         city = await this.prisma.city.create({
           data: {
-            name: inferred.name,
-            region: inferred.region,
+            name: canonicalCandidate,
+            region: inferredRegion,
             isActive: true,
           },
         });
         created += 1;
-      } else if (city.region === 'Не указан' && inferred.region !== 'Не указан') {
+        candidateNames.push(city.name);
+      } else if (city.region === 'Не указан' && inferredRegion !== 'Не указан') {
         city = await this.prisma.city.update({
           where: { id: city.id },
-          data: { region: inferred.region },
+          data: { region: inferredRegion },
         });
       }
 
-      const cityNameChanged = event.cityName !== city.name;
       const cityLinkChanged = event.cityId !== city.id;
-      if (cityNameChanged || cityLinkChanged) {
+      const rawCityName = event.cityName?.trim() ?? '';
+      const cityNameIsSimple = isPlausibleCityName(rawCityName);
+      const cityNameChanged = cityNameIsSimple && rawCityName !== city.name;
+
+      if (cityLinkChanged || cityNameChanged) {
         await this.prisma.event.update({
           where: { id: event.id },
-          data: { cityId: city.id, cityName: city.name },
+          data: {
+            ...(cityLinkChanged ? { cityId: city.id } : {}),
+            ...(cityNameChanged ? { cityName: city.name } : {}),
+          },
         });
         if (cityLinkChanged) linked += 1;
         if (cityNameChanged) corrected += 1;
@@ -176,6 +189,7 @@ export class CitiesService {
       created,
       linked,
       corrected,
+      skipped,
     };
   }
 
