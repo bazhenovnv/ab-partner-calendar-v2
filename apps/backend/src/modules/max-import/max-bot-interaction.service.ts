@@ -318,8 +318,7 @@ export class MaxBotInteractionService {
       }
       const duplicate = state.selected.has(option.id);
       state.selected.set(option.id, option);
-      state.pendingHour = undefined;
-      state.view = 'hour';
+      state.view = 'minute';
       await this.answerCallback(
         update.callback.callbackId,
         this.selectorText(state),
@@ -531,6 +530,13 @@ export class MaxBotInteractionService {
     return times.length ? times.join(', ') : 'нет';
   }
 
+  private selectedTimesForHour(state: MaxReminderState, dateId: string, hour: string): string {
+    const times = this.sortedSelected(state)
+      .filter((option) => option.dateId === dateId && option.time.startsWith(`${hour}:`))
+      .map((option) => `✓ ${option.time}`);
+    return times.length ? times.join(', ') : 'нет';
+  }
+
   private selectorText(state: MaxReminderState): string {
     if (state.view === 'hour') {
       const dateLabel = state.pendingDate
@@ -548,11 +554,15 @@ export class MaxBotInteractionService {
       const dateLabel = state.pendingDate
         ? formatReminderDateLabel(state.pendingDate) ?? state.pendingDate
         : 'не выбрана';
+      const selectedInHour = state.pendingDate && state.pendingHour
+        ? this.selectedTimesForHour(state, state.pendingDate, state.pendingHour)
+        : 'нет';
       return (
         `Выбор минут\n\n` +
         `Дата: ${dateLabel}\n` +
-        `Час: ${state.pendingHour ?? '--'}\n\n` +
-        'Выберите минуты. Время сразу добавится в список.'
+        `Час: ${state.pendingHour ?? '--'}\n` +
+        `Уже выбрано в этом часу: ${selectedInHour}\n\n` +
+        'Выберите минуты. Время сразу добавится в список, и можно выбрать следующую минуту этого же часа.'
       );
     }
 

@@ -164,6 +164,17 @@ function selectedTimesForDate(state: ReminderSelectionState, dateId: string): st
   return times.length ? times.join(', ') : 'нет';
 }
 
+function selectedTimesForHour(
+  state: ReminderSelectionState,
+  dateId: string,
+  hour: string,
+): string {
+  const times = sortedSelected(state)
+    .filter((option) => option.dateId === dateId && option.time.startsWith(`${hour}:`))
+    .map((option) => `✓ ${option.time}`);
+  return times.length ? times.join(', ') : 'нет';
+}
+
 function calendarText(state: ReminderSelectionState): string {
   return (
     `Календарь напоминаний\n\n` +
@@ -189,11 +200,15 @@ function minuteText(state: ReminderSelectionState): string {
   const dateLabel = state.pendingDate
     ? formatReminderDateLabel(state.pendingDate) ?? state.pendingDate
     : 'не выбрана';
+  const selectedInHour = state.pendingDate && state.pendingHour
+    ? selectedTimesForHour(state, state.pendingDate, state.pendingHour)
+    : 'нет';
   return (
     `Выбор минут\n\n` +
     `Дата: ${dateLabel}\n` +
-    `Час: ${state.pendingHour ?? '--'}\n\n` +
-    'Выберите минуты. Время сразу добавится в список.'
+    `Час: ${state.pendingHour ?? '--'}\n` +
+    `Уже выбрано в этом часу: ${selectedInHour}\n\n` +
+    'Выберите минуты. Время сразу добавится в список, и можно выбрать следующую минуту этого же часа.'
   );
 }
 
@@ -600,10 +615,14 @@ export function startTelegramBot(token: string) {
     }
 
     const duplicate = state.selected.has(option.id);
+    if (duplicate) {
+      await ctx.answerCallbackQuery({ text: 'Это время уже выбрано.' });
+      return;
+    }
+
     state.selected.set(option.id, option);
-    state.pendingHour = undefined;
-    state.view = 'hour';
-    await ctx.answerCallbackQuery({ text: duplicate ? 'Это время уже выбрано.' : 'Напоминание добавлено.' });
+    state.view = 'minute';
+    await ctx.answerCallbackQuery({ text: 'Напоминание добавлено.' });
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
 

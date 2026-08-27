@@ -29,7 +29,7 @@ export class BotsService {
     username?: string | null;
     firstName?: string | null;
   }): Promise<BotUserSnapshot> {
-    return this.prisma.botUser.upsert({
+    const snapshot = await this.prisma.botUser.upsert({
       where: { channel_externalId: { channel: data.channel, externalId: data.externalId } },
       create: {
         channel: data.channel,
@@ -49,7 +49,17 @@ export class BotsService {
         phone: true,
         allowMarketingMessages: true,
       },
-    }) as Promise<BotUserSnapshot>;
+    }) as BotUserSnapshot;
+
+    // Every new bot start is an explicit legal gate. The stored legalAcceptedAt
+    // remains available for audit/export, but the interaction snapshot requires
+    // a fresh confirmation before the user can proceed to reminder selection.
+    // Marketing consent is deliberately excluded from this mandatory service flow.
+    return {
+      ...snapshot,
+      legalAcceptedAt: null,
+      allowMarketingMessages: false,
+    };
   }
 
   async acceptLegal(id: string, acceptBroadcastConsent: boolean): Promise<void> {
