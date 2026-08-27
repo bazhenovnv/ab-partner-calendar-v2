@@ -62,12 +62,14 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 - фиксирует текущие backend/frontend/bots/nginx container IDs и images, nginx config SHA и полный local Git status;
 - переключает только backend через `--no-deps --force-recreate backend`;
 - не пересоздаёт frontend, bots или nginx;
+- после замены backend выполняет `nginx -t` и `nginx -s reload` **в том же nginx-container**, чтобы nginx заново разрешил Docker DNS-имя `backend` и не сохранил IP старого контейнера;
+- reload nginx не меняет его container ID, image или конфигурационный файл;
 - проверяет health и public HTTP;
 - проверяет Telegram `getMe` из нового backend по IPv6 до 6 попыток с backoff;
 - проверяет публичный city filter и активные City rows через общий classifier;
 - выводит число исторических опубликованных `OFFLINE/HYBRID` с `cityId=null` только как диагностический legacy-counter;
-- проверяет, что frontend, bots, nginx, nginx config и local Git status остались неизменными;
-- при ошибке автоматически откатывает только backend на ранее запущенный image.
+- проверяет, что frontend, bots, nginx-container, nginx image/config и local Git status остались неизменными;
+- при ошибке автоматически откатывает только backend на ранее запущенный image и после восстановления backend повторно выполняет `nginx -t` + `nginx -s reload`, чтобы nginx не оставался привязан к IP неудачного контейнера.
 
 Ожидаемый финальный marker:
 
@@ -96,7 +98,7 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 - использовать rollback/preflight/temporary images как production;
 - определять production-версию по последнему commit в `main`;
 - менять component pins без отдельного утверждения владельцем проекта;
-- перезапускать frontend, bots или nginx при deployment этого backend-only release;
+- пересоздавать или останавливать frontend, bots или nginx при deployment этого backend-only release; разрешён только контролируемый `nginx -s reload` внутри существующего nginx-container после проверки `nginx -t`;
 - изменять локальный production-конфиг `infra/nginx/conf.d/production.v2.conf`;
 - использовать для этого релиза старый `deploy-pinned-app.sh`;
 - использовать для этого backend-only релиза `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh`, потому что они пересоздают компоненты, которые в этом release не меняются.
