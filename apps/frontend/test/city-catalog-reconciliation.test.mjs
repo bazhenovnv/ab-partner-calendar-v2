@@ -13,17 +13,36 @@ const CITIES_SERVICE = readFileSync(
   resolve(ROOT, 'apps/backend/src/modules/cities/cities.service.ts'),
   'utf8',
 );
+const FILTERS_SERVICE = readFileSync(
+  resolve(ROOT, 'apps/backend/src/modules/filters/filters.service.ts'),
+  'utf8',
+);
+const FRONTEND_API = readFileSync(
+  resolve(FRONTEND, 'src/lib/api.ts'),
+  'utf8',
+);
 const MAX_PARSER = readFileSync(
   resolve(ROOT, 'apps/backend/src/modules/max-import/max-parser.service.ts'),
   'utf8',
 );
 
 describe('City catalogue reconciliation', () => {
-  test('admin can reconcile the city catalogue from event data', () => {
+  test('admin can reconcile canonical cities from offline and hybrid event data', () => {
     assert.match(CITIES_PAGE, /\/admin\/cities\/reconcile/);
     assert.match(CITIES_PAGE, /Синхронизировать из мероприятий/);
     assert.match(CITIES_SERVICE, /async reconcileFromEvents\(\)/);
-    assert.match(CITIES_SERVICE, /cityId: city\.id, cityName: city\.name/);
+    assert.match(CITIES_SERVICE, /format: \{ in: \['OFFLINE', 'HYBRID'\] \}/);
+    assert.match(CITIES_SERVICE, /extractCityFromEventLocation/);
+    assert.match(CITIES_SERVICE, /cityId: city\.id/);
+    assert.match(CITIES_SERVICE, /cityNameIsSimple/);
+  });
+
+  test('public city filter is derived from published event locations and keeps aliases', () => {
+    assert.match(FILTERS_SERVICE, /this\.citiesForWhere/);
+    assert.match(FILTERS_SERVICE, /status: 'PUBLISHED'/);
+    assert.match(FILTERS_SERVICE, /extractCityFromEventLocation/);
+    assert.match(FILTERS_SERVICE, /filterValues: new Set/);
+    assert.match(FRONTEND_API, /\.\.\.\(city\.filterValues \?\? \[\]\)/);
   });
 
   test('empty catalogue triggers a one-time reconciliation', () => {
