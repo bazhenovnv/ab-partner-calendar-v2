@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EventAutoStatus, Prisma } from '@prisma/client';
+import {
+  extractCityFromEventLocation,
+  extractRegionFromEventLocation,
+  isPlausibleCityName,
+  normalizeLocationValue,
+} from '@ab-afisha/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 export interface FacetQuery {
@@ -8,6 +14,12 @@ export interface FacetQuery {
   format?: 'ONLINE' | 'OFFLINE';
   priceType?: 'FREE' | 'PAID';
   autoStatus?: EventAutoStatus[];
+}
+
+interface PublicCityOption {
+  id: string;
+  name: string;
+  region: string;
 }
 
 @Injectable()
@@ -45,75 +57,115 @@ export class FiltersService {
     const locationFilters: Prisma.EventWhereInput[] = [];
     for (const city of cities) {
       locationFilters.push(
-        { cityName: { equals: city, mode: 'insensitive' } },
         { city: { name: { equals: city, mode: 'insensitive' } } },
+        { cityName: { equals: city, mode: 'insensitive' } },
+        { cityName: { startsWith: `${city},`, mode: 'insensitive' } },
+        { address: { contains: city, mode: 'insensitive' } },
+        { venue: { contains: city, mode: 'insensitive' } },
       );
     }
     return locationFilters.length > 0 ? { OR: locationFilters } : {};
   }
 
   private async citiesForWhere(where: Prisma.EventWhereInput) {
-    const eventLocations = await this.prisma.event.findMany({
-      where: {
-        ...where,
-        OR: [
-          { cityId: { not: null } },
-          { cityName: { not: null } },
-        ],
-      },
-      select: {
-        cityName: true,
-        city: {
-          select: { id: true, name: true, region: true },
+    const [catalogueCities, eventLocations] = await Promise.all([
+      this.prisma.city.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true, region: true },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      }),
+      this.prisma.event.findMany({
+        where: {
+          ...where,
+          OR: [
+            { cityId: { not: null } },
+            { cityName: { not: null } },
+            { address: { not: null } },
+            { venue: { not: null } },
+          ],
         },
-      },
-    });
+        select: {
+          cityName: true,
+          address: true,
+          venue: true,
+          city: {
+            select: { id: true, name: true, region: true },
+          },
+        },
+      }),
+    ]);
 
-    const locationKey = (name: string, region: string) =>
-      `${region.trim().toLocaleLowerCase('ru')}::${name.trim().toLocaleLowerCase('ru')}`;
-    const citiesByLocation = new Map<string, { id: string; name: string; region: string }>();
+    const cleanCatalogue = catalogueCities.filter((city) =>
+      isPlausibleCityName(city.name),
+    );
+    const directEventCityNames = eventLocations
+      .flatMap((location) => [location.city?.name, location.cityName])
+      .filter((value): value is string => Boolean(value?.trim()))
+      .map((value) => value.trim().replace(/^(?:г\.|город)\s*/i, '').trim())
+      .filter(isPlausibleCityName);
+    const candidateNames = Array.from(
+      new Map(
+        [...cleanCatalogue.map((city) => city.name), ...directEventCityNames]
+          .map((name) => [normalizeLocationValue(name), name]),
+      ).values(),
+    );
+    const catalogueByName = new Map(
+      cleanCatalogue.map((city) => [normalizeLocationValue(city.name), city]),
+    );
+    const citiesByName = new Map<string, PublicCityOption>();
 
     for (const eventLocation of eventLocations) {
-      if (eventLocation.city) {
-        const relatedCity = eventLocation.city;
-        const key = locationKey(relatedCity.name, relatedCity.region);
-        if (!citiesByLocation.has(key)) citiesByLocation.set(key, relatedCity);
-      }
-
-      const name = eventLocation.cityName?.trim();
-      const normalizedName = name?.toLocaleLowerCase('ru');
-      if (!name || !normalizedName || normalizedName === 'онлайн') continue;
-
-      const alreadyRepresented = Array.from(citiesByLocation.values()).some(
-        (city) => city.name.toLocaleLowerCase('ru') === normalizedName,
+      const linkedCity = eventLocation.city;
+      const linkedCityIsValid = Boolean(
+        linkedCity?.name && isPlausibleCityName(linkedCity.name),
       );
-      if (alreadyRepresented) continue;
+      const extractedName = linkedCityIsValid
+        ? linkedCity!.name
+        : extractCityFromEventLocation(
+            {
+              cityName: eventLocation.cityName,
+              address: eventLocation.address,
+              venue: eventLocation.venue,
+            },
+            candidateNames,
+          );
 
-      const inferredRegion = name.split(',')[0]?.trim() || 'Другие регионы';
-      citiesByLocation.set(locationKey(name, inferredRegion), {
-        id: `event-city:${normalizedName}`,
-        name,
-        region: inferredRegion,
-      });
+      if (!extractedName || !isPlausibleCityName(extractedName)) continue;
+
+      const normalizedName = normalizeLocationValue(extractedName);
+      const catalogueCity = catalogueByName.get(normalizedName);
+      const matchingLinkedCity = linkedCityIsValid &&
+        normalizeLocationValue(linkedCity!.name) === normalizedName
+        ? linkedCity
+        : null;
+      const region =
+        matchingLinkedCity?.region?.trim() ||
+        catalogueCity?.region?.trim() ||
+        extractRegionFromEventLocation({
+          cityName: eventLocation.cityName,
+          address: eventLocation.address,
+          venue: eventLocation.venue,
+        }) ||
+        'Другие регионы';
+
+      if (!citiesByName.has(normalizedName)) {
+        citiesByName.set(normalizedName, {
+          id: matchingLinkedCity?.id ?? catalogueCity?.id ?? `event-city:${normalizedName}`,
+          name: catalogueCity?.name ?? matchingLinkedCity?.name ?? extractedName,
+          region,
+        });
+      }
     }
 
-    return Array.from(citiesByLocation.values()).sort((a, b) =>
-      a.region.localeCompare(b.region, 'ru') || a.name.localeCompare(b.name, 'ru'),
+    return Array.from(citiesByName.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, 'ru'),
     );
   }
 
   async getCities(autoStatus: EventAutoStatus[] = []) {
-    if (autoStatus.length > 0) {
-      return this.citiesForWhere({
-        status: 'PUBLISHED',
-        autoStatus: { in: autoStatus },
-      });
-    }
-
-    return this.prisma.city.findMany({
-      where: { isActive: true },
-      select: { id: true, name: true, region: true },
-      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    return this.citiesForWhere({
+      status: 'PUBLISHED',
+      ...(autoStatus.length > 0 ? { autoStatus: { in: autoStatus } } : {}),
     });
   }
 
