@@ -92,7 +92,7 @@ wait_bots() {
   return 1
 }
 
-telegram_get_me() {
+telegram_get_me_once() {
   local container="$1"
   docker exec -i "$container" node <<'NODE'
 const https = require('node:https');
@@ -104,7 +104,7 @@ const request = https.get({
   port: 443,
   path: `/bot${token}/getMe`,
   family: 6,
-  timeout: 15000,
+  timeout: 10000,
 }, (response) => {
   let body = '';
   response.setEncoding('utf8');
@@ -124,6 +124,26 @@ request.on('error', (error) => {
   process.exit(1);
 });
 NODE
+}
+
+telegram_get_me() {
+  local container="$1"
+  local label="$2"
+
+  for attempt in 1 2 3 4 5 6; do
+    echo "${label}_TELEGRAM_ATTEMPT=$attempt"
+    if telegram_get_me_once "$container"; then
+      echo "${label}_TELEGRAM_GET_ME_OK=true"
+      return 0
+    fi
+
+    if [ "$attempt" -lt 6 ]; then
+      sleep $((attempt * 2))
+    fi
+  done
+
+  echo "${label}_TELEGRAM_GET_ME_OK=false"
+  return 1
 }
 
 build_image() {
@@ -262,11 +282,11 @@ dc up -d --no-deps --force-recreate bots
 new_bots="$(dc ps -q bots)"
 test -n "$new_bots"
 wait_bots "$new_bots" "$PRODUCTION_BOTS_IMAGE"
-telegram_get_me "$new_bots"
+telegram_get_me "$new_bots" BOTS
 echo "PRODUCTION_BOTS_OK=true"
 
 section "6. ПРОВЕРКА BACKEND TELEGRAM IPv6"
-telegram_get_me "$new_backend"
+telegram_get_me "$new_backend" BACKEND
 
 section "7. PUBLIC HEALTH"
 public_http="$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' "$PUBLIC_URL/")"

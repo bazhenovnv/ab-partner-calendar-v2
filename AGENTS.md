@@ -9,9 +9,9 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `ebfb4f9db38c34e58743463a9c5200c46988dd66`;
-- backend commit/image: `ebfb4f9db38c34e58743463a9c5200c46988dd66` / `ab-afisha/backend:backend-release-ebfb4f9`;
-- bots commit/image: `a0727468eb1966cdc7fd4ca3f469eeacf51b09a5` / `ab-afisha/bots:bots-release-a072746`;
+- release anchor: `3a64511c98f7bf8cd59776dd5dce233939cd2988`;
+- backend commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/backend:backend-release-3a64511`;
+- bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - frontend commit/image: `79d85dc230b71699977bfec633db411a49c72f4f` / `ab-afisha/frontend:frontend-release-79d85dc`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
