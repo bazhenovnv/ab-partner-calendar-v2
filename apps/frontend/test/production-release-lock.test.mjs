@@ -86,8 +86,9 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(BACKEND_BOTS_DEPLOY, /force-recreate nginx/);
     assert.match(BACKEND_BOTS_DEPLOY, /family: 6/);
     assert.match(BACKEND_BOTS_DEPLOY, /for attempt in 1 2 3 4 5 6/);
-    assert.match(BACKEND_BOTS_DEPLOY, /BOTS_TELEGRAM_GET_ME_OK=true/);
-    assert.match(BACKEND_BOTS_DEPLOY, /BACKEND_TELEGRAM_GET_ME_OK=true/);
+    assert.match(BACKEND_BOTS_DEPLOY, /\$\{label\}_TELEGRAM_GET_ME_OK=true/);
+    assert.match(BACKEND_BOTS_DEPLOY, /telegram_get_me "\$new_bots" BOTS/);
+    assert.match(BACKEND_BOTS_DEPLOY, /telegram_get_me "\$new_backend" BACKEND/);
     assert.match(BACKEND_BOTS_DEPLOY, /PRODUCTION_BACKEND_BOTS_PIN_OK=true/);
     assert.match(BACKEND_BOTS_DEPLOY, /FRONTEND_UNCHANGED=true/);
     assert.match(BACKEND_BOTS_DEPLOY, /NGINX_UNCHANGED=true/);
