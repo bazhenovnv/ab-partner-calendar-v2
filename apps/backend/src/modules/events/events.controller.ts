@@ -6,6 +6,7 @@ import {
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { EventLifecycleService } from './event-lifecycle.service';
+import { EventPublicationLocationService } from './event-publication-location.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventsQueryDto } from './dto/events-query.dto';
@@ -20,6 +21,7 @@ export class EventsController {
   constructor(
     private readonly eventsService: EventsService,
     private readonly eventLifecycleService: EventLifecycleService,
+    private readonly publicationLocation: EventPublicationLocationService,
   ) {}
 
   @Get('public')
@@ -97,11 +99,14 @@ export class EventsController {
   @ApiBearerAuth()
   @Patch('admin/:id/status')
   @Roles('ADMIN', 'EDITOR')
-  setStatus(
+  async setStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('status') status: string,
     @Request() req: any,
   ) {
+    if (status === 'PUBLISHED') {
+      await this.publicationLocation.ensureCanonicalPhysicalCity(id);
+    }
     return this.eventsService.setManualStatus(id, status as any, req.user.id);
   }
 
@@ -109,7 +114,8 @@ export class EventsController {
   @ApiBearerAuth()
   @Patch('admin/:id/publish')
   @Roles('ADMIN', 'EDITOR')
-  publishEvent(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+  async publishEvent(@Param('id', ParseUUIDPipe) id: string, @Request() req: any) {
+    await this.publicationLocation.ensureCanonicalPhysicalCity(id);
     return this.eventsService.publishEvent(id, req.user.id);
   }
 
