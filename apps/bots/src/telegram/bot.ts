@@ -615,9 +615,14 @@ export function startTelegramBot(token: string) {
     }
 
     const duplicate = state.selected.has(option.id);
+    if (duplicate) {
+      await ctx.answerCallbackQuery({ text: 'Это время уже выбрано.' });
+      return;
+    }
+
     state.selected.set(option.id, option);
     state.view = 'minute';
-    await ctx.answerCallbackQuery({ text: duplicate ? 'Это время уже выбрано.' : 'Напоминание добавлено.' });
+    await ctx.answerCallbackQuery({ text: 'Напоминание добавлено.' });
     await ctx.editMessageText(selectorText(state), { reply_markup: selectorKeyboard(state) });
   });
 
