@@ -27,9 +27,9 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = 'ad481442ed706986b62d1388f0e10fb5c5263c4c';
+const RELEASE_ANCHOR = '4121d008c08f11732f2a45293ef4fa1c8749713e';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-ad48144';
+const BACKEND_TAG = 'backend-release-4121d00';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
@@ -64,12 +64,14 @@ describe('Pinned production component release', () => {
     }
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
     assert.match(RELEASE, /Город очного участия не определён или требует проверки/);
+    assert.match(RELEASE, /Формат: Очно/);
+    assert.match(RELEASE, /Где: Москва/);
     assert.match(RELEASE, /Frontend остаётся на `3b70ea5`/);
     assert.match(RELEASE, /Bots остаются на `3a64511`/);
   });
 
   test('compose pins the new backend while preserving frontend and bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-ad48144\}/);
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-4121d00\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
     assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-3b70ea5\}/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
