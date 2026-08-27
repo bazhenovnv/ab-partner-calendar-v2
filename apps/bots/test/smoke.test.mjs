@@ -60,6 +60,8 @@ describe('Reminder calendar and time selection', () => {
     const minuteHandler = source.slice(minuteStart, minuteEnd);
     assert.ok(minuteHandler.includes("state.view = 'minute'"));
     assert.ok(!minuteHandler.includes('state.pendingHour = undefined'));
+    assert.ok(minuteHandler.includes('if (duplicate)'));
+    assert.ok(minuteHandler.includes("await ctx.answerCallbackQuery({ text: 'Это время уже выбрано.' });\n      return;"));
   });
 
   test('MAX webhook uses the same multi-select flow and Accept button', () => {
