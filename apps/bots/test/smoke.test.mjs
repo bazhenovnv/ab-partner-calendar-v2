@@ -44,6 +44,8 @@ describe('Reminder calendar and time selection', () => {
     assert.ok(source.includes('reminder_remove:'));
     assert.ok(source.includes('reminder_cancel'));
     assert.ok(source.includes("bot.callbackQuery('reminder_apply'"));
+    assert.ok(source.includes('selectedTimesForHour'));
+    assert.ok(source.includes('Уже выбрано в этом часу:'));
     assert.ok(source.includes('Применить'));
     assert.ok(source.includes('Очистить'));
     assert.ok(source.includes('Отмена'));
@@ -51,6 +53,13 @@ describe('Reminder calendar and time selection', () => {
     assert.ok(!source.includes('reminder_time:'));
     assert.ok(!source.includes("bot.callbackQuery('reminder_add'"));
     assert.ok(!source.includes('reminder_toggle:'));
+
+    const minuteStart = source.indexOf('bot.callbackQuery(/^reminder_minute:');
+    const minuteEnd = source.indexOf("bot.callbackQuery('reminder_hours_back'");
+    assert.ok(minuteStart >= 0 && minuteEnd > minuteStart);
+    const minuteHandler = source.slice(minuteStart, minuteEnd);
+    assert.ok(minuteHandler.includes("state.view = 'minute'"));
+    assert.ok(!minuteHandler.includes('state.pendingHour = undefined'));
   });
 
   test('MAX webhook uses the same multi-select flow and Accept button', () => {
@@ -62,6 +71,8 @@ describe('Reminder calendar and time selection', () => {
     assert.ok(source.includes('reminder_selected'));
     assert.ok(source.includes('reminder_remove:'));
     assert.ok(source.includes('reminder_cancel'));
+    assert.ok(source.includes('selectedTimesForHour'));
+    assert.ok(source.includes('Уже выбрано в этом часу:'));
     assert.ok(source.includes("this.button('Принять', 'accept_legal')"));
     assert.ok(source.includes('Применить'));
     assert.ok(source.includes('Очистить'));
@@ -69,6 +80,13 @@ describe('Reminder calendar and time selection', () => {
     assert.ok(!source.includes('pendingTime:'));
     assert.ok(!source.includes('reminder_time:'));
     assert.ok(!source.includes("payload === 'reminder_add'"));
+
+    const minuteStart = source.indexOf('const minuteMatch = /^reminder_minute:');
+    const minuteEnd = source.indexOf("if (payload === 'reminder_hours_back')");
+    assert.ok(minuteStart >= 0 && minuteEnd > minuteStart);
+    const minuteHandler = source.slice(minuteStart, minuteEnd);
+    assert.ok(minuteHandler.includes("state.view = 'minute'"));
+    assert.ok(!minuteHandler.includes('state.pendingHour = undefined'));
   });
 
   test('MAX standalone process is disabled in webhook mode', () => {
