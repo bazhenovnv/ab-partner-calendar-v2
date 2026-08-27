@@ -83,7 +83,11 @@ const CYRILLIC_DIRECTION_HINTS: Array<{
   },
 ];
 
-const VENUE_PREFIX = /^(?:отель|гостиниц|бизнес[-\s]?центр|бц\b|конференц|центр\b|зал\b|офис\b|ресторан\b|кафе\b|экспофорум\b|экспоцентр\b|экспо\b)/i;
+const VENUE_TOKEN_END = '(?=$|[\\s,;:()])';
+const VENUE_PREFIX = new RegExp(
+  `^(?:отель${VENUE_TOKEN_END}|гостиниц|бизнес[-\\s]?центр${VENUE_TOKEN_END}|бц${VENUE_TOKEN_END}|конференц|центр${VENUE_TOKEN_END}|зал${VENUE_TOKEN_END}|офис${VENUE_TOKEN_END}|ресторан${VENUE_TOKEN_END}|кафе${VENUE_TOKEN_END}|экспофорум${VENUE_TOKEN_END}|экспоцентр${VENUE_TOKEN_END}|экспо${VENUE_TOKEN_END})`,
+  'i',
+);
 const STREET_PART = /^(?:ул\.?|улица|проспект|пр-т|пер\.?|переулок|шоссе|наб\.?|набережная|бульвар|бул\.?|пл\.?|площадь|д\.?\s*\d|дом\b)/i;
 const REGION_PART = /(?:обл\.?|область|край|респ\.?|республика|автономн|округ|ао)$/i;
 const HYBRID_PATTERN = /(?:(?:онлайн|online)\s*(?:\+|\/)\s*(?:офлайн|offline|очно)|(?:офлайн|offline|очно)\s*(?:\+|\/)\s*(?:онлайн|online))/i;
