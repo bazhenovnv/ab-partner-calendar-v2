@@ -98,6 +98,73 @@ function setAttention(result: ParsedMaxPost, reasons: string[]) {
   result.needsAttention = result.attentionReasons.length > 0;
 }
 
+function applyPhysicalWhereValue(whereValue: string, result: ParsedMaxPost) {
+  const normalized = whereValue.replace(/^Россия\s*,\s*/i, '').trim();
+  const parts = normalized
+    .split(',')
+    .map(cleanLocationPart)
+    .filter(Boolean);
+
+  result.city = null;
+  result.address = null;
+  result.venue = null;
+
+  if (parts.length === 0) return;
+
+  const first = parts[0];
+  const second = parts[1] ?? '';
+
+  // Venue-first wording is common in MAX: "Экспофорум, Санкт-Петербург".
+  // Resolve it directly instead of first misclassifying the city as venue and
+  // relying on a later swap that can duplicate the city into result.venue.
+  if (
+    VENUE_PREFIX.test(first) &&
+    second &&
+    isPlausibleCityName(second) &&
+    !looksLikeVenueLocation(second) &&
+    !STREET_PART.test(second) &&
+    !REGION_PART.test(second)
+  ) {
+    result.venue = first;
+    result.city = second;
+    const addressTail = parts.slice(2).join(', ').trim();
+    if (addressTail) result.address = addressTail;
+    return;
+  }
+
+  result.city = first;
+  const details = parts.slice(1).join(', ').trim();
+  if (!details) return;
+
+  const parentheticalAddress = details.match(/^(.+?)\s*\(([^()]+)\)\s*$/);
+  if (parentheticalAddress) {
+    result.venue = parentheticalAddress[1].trim();
+    result.address = parentheticalAddress[2].trim();
+    return;
+  }
+
+  if (STREET_PART.test(details)) {
+    result.address = details;
+    return;
+  }
+
+  const detailParts = details
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const addressTail = detailParts.length > 1
+    ? detailParts.slice(1).join(', ')
+    : '';
+
+  if (addressTail && STREET_PART.test(addressTail)) {
+    result.venue = detailParts[0];
+    result.address = addressTail;
+    return;
+  }
+
+  result.venue = details;
+}
+
 function repairHybridLocation(text: string, result: ParsedMaxPost) {
   const formatValue = text.match(/Формат\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
   if (!HYBRID_PATTERN.test(formatValue)) return;
@@ -118,32 +185,7 @@ function repairHybridLocation(text: string, result: ParsedMaxPost) {
     return;
   }
 
-  const normalized = whereValue.replace(/^Россия\s*,\s*/i, '').trim();
-  const cityAndDetails = normalized.match(/^\s*(?:г\.\s*)?([^,]+)(?:,\s*(.+))?$/i);
-  result.city = cleanLocationPart(cityAndDetails?.[1] ?? normalized);
-  result.address = null;
-  result.venue = null;
-
-  const details = cityAndDetails?.[2]?.trim() ?? '';
-  if (details) {
-    const parentheticalAddress = details.match(/^(.+?)\s*\(([^()]+)\)\s*$/);
-    if (parentheticalAddress) {
-      result.venue = parentheticalAddress[1].trim();
-      result.address = parentheticalAddress[2].trim();
-    } else if (STREET_PART.test(details)) {
-      result.address = details;
-    } else {
-      const commaParts = details.split(',').map((part) => part.trim()).filter(Boolean);
-      const addressTail = commaParts.length > 1 ? commaParts.slice(1).join(', ') : '';
-      if (addressTail && STREET_PART.test(addressTail)) {
-        result.venue = commaParts[0];
-        result.address = addressTail;
-      } else {
-        result.venue = details;
-      }
-    }
-  }
-
+  applyPhysicalWhereValue(whereValue, result);
   setAttention(result, reasons);
 }
 
@@ -152,9 +194,8 @@ function repairVenueFirstLocation(result: ParsedMaxPost) {
   if (format !== 'OFFLINE' && format !== 'HYBRID') return;
   if (!result.city || !VENUE_PREFIX.test(result.city)) return;
 
-  // Common MAX wording: "Где: Экспофорум, Санкт-Петербург". The base parser
-  // reads the first token as a city; swap it when the first token is clearly a
-  // venue and the second token is a plausible city.
+  // Legacy/base-parser fallback for formats that do not use the structured
+  // separate Формат/Где path handled by applyPhysicalWhereValue().
   if (result.venue && !result.address && !VENUE_PREFIX.test(result.venue)) {
     const venue = result.city;
     result.city = cleanLocationPart(result.venue);
@@ -221,9 +262,8 @@ export class MaxParserService extends BaseMaxParserService {
     const result = super.parse(text, postDate, supplementalUrls);
 
     // Structured MAX posts commonly put the delivery mode and physical place
-    // on separate lines: "Формат: Очно" followed by "Где: Москва". The base
-    // parser takes the first Формат|Где match and therefore sees only "Очно".
-    // Re-parse the Где value in isolation before the canonical city validator.
+    // on separate lines: "Формат: Очно" followed by "Где: Москва". Parse the
+    // Где value deterministically before canonical city validation.
     const formatValue = text.match(/Формат\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
     const whereValue = text.match(/Где\s*:\s*([^\n]+)/i)?.[1]?.trim() ?? '';
     if (
@@ -231,11 +271,8 @@ export class MaxParserService extends BaseMaxParserService {
       PHYSICAL_FORMAT_PATTERN.test(formatValue) &&
       !HYBRID_PATTERN.test(formatValue)
     ) {
-      const whereParsed = super.parse(`Где: ${whereValue}`, postDate, supplementalUrls);
       (result as unknown as { format: string | null }).format = 'OFFLINE';
-      result.city = whereParsed.city;
-      result.address = whereParsed.address;
-      result.venue = whereParsed.venue;
+      applyPhysicalWhereValue(whereValue, result);
     }
 
     repairHybridLocation(text, result);
