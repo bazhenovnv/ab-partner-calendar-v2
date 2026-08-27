@@ -114,3 +114,8 @@ jobs:
       # Build order: shared → backend (nest build) → frontend (next build) → bots (tsc)
       - name: Build all apps
         run: pnpm build
+
+      # Execute the compiled parser exactly as production does. Static source checks
+      # cannot catch pipeline bugs where city/venue fields are mutated at runtime.
+      - name: Compiled MAX parser runtime regression tests
+        run: node --test apps/backend/test/max-parser-runtime.test.mjs
