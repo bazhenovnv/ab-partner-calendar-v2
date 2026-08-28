@@ -12,14 +12,14 @@
 - release anchor: `8aeecd1140812f6c92941146cdd4fba671ae8c93`;
 - backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `b0e71314ec162149d2b5d63b43d0906bec6b09cd` / `ab-afisha/frontend:frontend-release-b0e7131`;
+- frontend commit/image: `ac52a149f0ad6141042b3d54f1a9bcfbc127279e` / `ab-afisha/frontend:frontend-release-ac52a14`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только frontend. `b0e7131` включает ранее утверждённое исправление плашки даты и финальное выравнивание публичной mobile-страницы под утверждённый макет 390 px из PR #106. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
+Для текущей promotion меняется только frontend. `ac52a14` включает утверждённый mobile layout 390 px и исправления PR #108 для ширины header-кнопок, hero artwork без crop и mobile-подзаголовка. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
 
 Backend `8aeecd1` остаётся утверждённым backend pin. Для его promotion обязателен CI-step `Compiled MAX parser runtime regression tests`, который запускает собранный `dist` и проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург`, а также блокировку не-городских значений.
 
