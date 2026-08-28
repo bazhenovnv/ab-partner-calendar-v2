@@ -5,7 +5,7 @@ ROOT="${ROOT:-/srv/ab-afisha}"
 LOCK_FILE="${LOCK_FILE:-$ROOT/infra/deploy/production-frontend.env}"
 COMPOSE_FILE="${COMPOSE_FILE:-$ROOT/docker-compose.production.v2.yml}"
 PUBLIC_URL="${PUBLIC_URL:-https://ab-event.pro}"
-EXPECTED_LEGACY_UNRESOLVED="${EXPECTED_LEGACY_UNRESOLVED:-3}"
+EXPECTED_LEGACY_UNRESOLVED="${EXPECTED_LEGACY_UNRESOLVED:-0}"
 
 fail() {
   printf 'ERROR: %s\n' "$*" >&2
@@ -62,7 +62,7 @@ const { EventPublicationLocationService } = require('./dist/modules/events/event
 const { CitiesService } = require('./dist/modules/cities/cities.service.js');
 
 const prisma = new PrismaClient();
-const expectedLegacy = Number(process.env.EXPECTED_LEGACY_UNRESOLVED ?? '3');
+const expectedLegacy = Number(process.env.EXPECTED_LEGACY_UNRESOLVED ?? '0');
 
 function normalizedRows(rows) {
   return rows
