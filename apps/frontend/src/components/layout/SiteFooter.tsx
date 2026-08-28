@@ -164,6 +164,29 @@ export function SiteFooter() {
               className="pub-footer-stationery-img"
               aria-hidden
             />
+
+            <div className="pub-footer-stationery-split" aria-hidden="true">
+              <span className="pub-footer-stationery-piece pub-footer-stationery-piece--notebook">
+                <Image
+                  src={stationeryImg}
+                  alt=""
+                  width={365}
+                  height={349}
+                  className="pub-footer-stationery-source pub-footer-stationery-source--notebook"
+                  aria-hidden
+                />
+              </span>
+              <span className="pub-footer-stationery-piece pub-footer-stationery-piece--cup">
+                <Image
+                  src={stationeryImg}
+                  alt=""
+                  width={365}
+                  height={349}
+                  className="pub-footer-stationery-source pub-footer-stationery-source--cup"
+                  aria-hidden
+                />
+              </span>
+            </div>
           </div>
         </div>
 
