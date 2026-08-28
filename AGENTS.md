@@ -9,8 +9,8 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `4121d008c08f11732f2a45293ef4fa1c8749713e`;
-- backend commit/image: `4121d008c08f11732f2a45293ef4fa1c8749713e` / `ab-afisha/backend:backend-release-4121d00`;
+- release anchor: `8aeecd1140812f6c92941146cdd4fba671ae8c93`;
+- backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - frontend commit/image: `3b70ea58e9284e8e590eb7bf08a0c394000ebcd2` / `ab-afisha/frontend:frontend-release-3b70ea5`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -18,7 +18,9 @@
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для release `4121d00` меняется только backend. Frontend, bots и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend.sh`. Не использовать `deploy-pinned-app.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh` для этого релиза.
+Для release `8aeecd1` меняется только backend. Frontend, bots и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend.sh`. Не использовать `deploy-pinned-app.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh` для этого релиза.
+
+Перед promotion этого backend обязателен CI-step `Compiled MAX parser runtime regression tests`, который запускает собранный `dist` и проверяет в том числе `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург`.
 
 Production компоненты закрепляются независимо. Нельзя определять production по `main`, `latest`, `APP_VERSION`, старому Docker-тегу или rollback-образу. Нельзя выбирать backend или bots через общий `APP_VERSION`. Новая версия становится production только после явного утверждения владельцем и обновления production lock-файлов.
 

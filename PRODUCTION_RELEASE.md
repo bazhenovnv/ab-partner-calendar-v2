@@ -5,9 +5,9 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `4121d008c08f11732f2a45293ef4fa1c8749713e`
-- Backend commit: `4121d008c08f11732f2a45293ef4fa1c8749713e`
-- Backend image: `ab-afisha/backend:backend-release-4121d00`
+- Release anchor commit: `8aeecd1140812f6c92941146cdd4fba671ae8c93`
+- Backend commit: `8aeecd1140812f6c92941146cdd4fba671ae8c93`
+- Backend image: `ab-afisha/backend:backend-release-8aeecd1`
 - Bots commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
 - Bots image: `ab-afisha/bots:bots-release-3a64511`
 - Frontend commit: `3b70ea58e9284e8e590eb7bf08a0c394000ebcd2`
@@ -24,7 +24,7 @@
 
 ## Что входит в этот релиз
 
-Backend pin `4121d00` включает предыдущую canonical-city защиту и закрывает найденный production-QA edge case структурированных MAX-постов.
+Backend pin `8aeecd1` включает предыдущую canonical-city защиту и исправляет runtime-дефект venue-first MAX location parsing, найденный отдельным read-only production QA на предыдущем backend `4121d00`.
 
 Сохраняются предыдущие гарантии:
 
@@ -35,15 +35,34 @@ Backend pin `4121d00` включает предыдущую canonical-city за�
 - ручная публикация `OFFLINE/HYBRID` через `/publish` требует активную каноническую связь `cityId -> City`;
 - ручной перевод статуса через `/status` в `PUBLISHED` проходит ту же canonical-city проверку;
 - при ручной публикации `cityName` выравнивается по имени связанного активного `City`;
-- создание и переименование записей справочника `City` отвергает очевидные значения формата, адреса и площадки.
+- создание и переименование записей справочника `City` отвергает очевидные значения формата, адреса и площадки;
+- схема `Формат: Очно` + отдельная строка `Где: Москва` даёт `format=OFFLINE`, `city=Москва` без ложного `NEEDS_ATTENTION`;
+- hybrid syntax распознаётся в обоих порядках: `онлайн + офлайн` и `офлайн + онлайн`.
 
-Дополнительно исправлен false-negative структурированного MAX-поста:
+Runtime QA предыдущего backend `4121d00` обнаружил, что строка `Где: Экспофорум, Санкт-Петербург` давала корректный `city=Санкт-Петербург`, но ошибочный `venue=Санкт-Петербург`. Причина оказалась в использовании JavaScript `\b` для кириллического venue-prefix: стандартная word-boundary семантика `\b` не считает кириллицу ASCII `\w`, поэтому `Экспофорум\b` не распознавался как ожидаемый токен.
 
-- для обычной схемы `Формат: Очно` + отдельная строка `Где: Москва` parser больше не теряет реальный город из-за первого совпадения `Формат|Где`;
-- при физическом не-гибридном формате отдельная строка `Где:` повторно разбирается именно как physical location до canonical-city validation;
-- схема `Формат: Очно` + `Где: Экспофорум, Санкт-Петербург` сохраняет venue-first repair и даёт город `Санкт-Петербург`, площадку `Экспофорум`;
-- hybrid syntax распознаётся в обоих порядках: `онлайн + офлайн` и `офлайн + онлайн`;
-- отсутствие реального места у hybrid/offline по-прежнему не приводит к угадыванию города и остаётся `NEEDS_ATTENTION`.
+В `8aeecd1`:
+
+- structured physical `Где:` разбирается детерминированно отдельным `applyPhysicalWhereValue`;
+- venue-first `Экспофорум, Санкт-Петербург` даёт `venue=Экспофорум`, `city=Санкт-Петербург` и не дублирует город в поле площадки;
+- venue-prefix использует кириллически-безопасное окончание токена вместо `\b`;
+- тот же deterministic physical-location parser используется для hybrid location;
+- legacy venue-first repair сохранён для старых/non-structured путей.
+
+### Обязательный compiled MAX parser runtime regression
+
+После обычного `pnpm build` CI обязан запускать:
+
+`node --test apps/backend/test/max-parser-runtime.test.mjs`
+
+Тест импортирует именно собранный `dist/modules/max-import/max-parser.service.js`, а не анализирует только исходный текст. Он проверяет:
+
+- `Формат: Очно` + `Где: Москва`;
+- `Формат: Очно` + `Где: Экспофорум, Санкт-Петербург` с точным `venue=Экспофорум`, `city=Санкт-Петербург` и `venue != city`;
+- блокировку `ст1`, `Очно`, venue-only `Экспофорум`;
+- hybrid без физического места остаётся в attention.
+
+Application PR #100 прошёл полный CI #777, включая этот compiled MAX parser runtime step.
 
 Frontend остаётся на `3b70ea5`: публичный city filter уже использует канонические города и общий location parser. Bots остаются на `3a64511`: reminder/legal-gate поведение не меняется.
 
@@ -66,7 +85,7 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 
 - читает component pins из release lock;
 - не двигает root Git HEAD;
-- строит только backend из detached worktree точного commit `4121d00`;
+- строит только backend из detached worktree точного commit `8aeecd1`;
 - проверяет OCI revision label и наличие compiled canonical-city guards в image;
 - фиксирует текущие backend/frontend/bots/nginx container IDs и images, nginx config SHA и полный local Git status;
 - переключает только backend через `--no-deps --force-recreate backend`;
@@ -80,9 +99,9 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 - проверяет, что frontend, bots, nginx-container, nginx image/config и local Git status остались неизменными;
 - при ошибке автоматически откатывает только backend на ранее запущенный image и после восстановления backend повторно выполняет `nginx -t` + `nginx -s reload`.
 
-После deployment обязателен отдельный read-only runtime QA parser/publication guard без создания и изменения событий.
+После deployment обязателен отдельный read-only runtime QA parser/publication guard без создания и изменения событий. Только после успешных `QA_DATABASE_UNCHANGED=true`, `READ_ONLY_PRODUCTION_QA_OK=true` и `PRODUCTION_CITY_LIFECYCLE_QA_OK=true` проблема жизненного цикла города считается полностью закрытой.
 
-Ожидаемый финальный marker:
+Ожидаемый финальный marker deployment:
 
 `PRODUCTION_BACKEND_PIN_OK=true`
 
@@ -103,7 +122,7 @@ Frontend остаётся на `3b70ea5`: публичный city filter уже 
 
 - деплоить backend, bots или frontend с тегом `latest`;
 - выбирать backend или bots через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-4121d00`;
+- деплоить любой `backend-release-*`, кроме `backend-release-8aeecd1`;
 - деплоить любой `bots-release-*`, кроме `bots-release-3a64511`;
 - деплоить любой `frontend-release-*`, кроме `frontend-release-3b70ea5`;
 - использовать rollback/preflight/temporary images как production;

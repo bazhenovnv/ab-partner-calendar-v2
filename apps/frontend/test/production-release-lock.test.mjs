@@ -12,6 +12,8 @@ const RELEASE = read('PRODUCTION_RELEASE.md');
 const COMPOSE = read('docker-compose.production.v2.yml');
 const AGENTS = read('AGENTS.md');
 const CLAUDE = read('CLAUDE.md');
+const CI = read('.github/workflows/ci.yml');
+const MAX_RUNTIME_TEST = read('apps/backend/test/max-parser-runtime.test.mjs');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -27,9 +29,9 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = '4121d008c08f11732f2a45293ef4fa1c8749713e';
+const RELEASE_ANCHOR = '8aeecd1140812f6c92941146cdd4fba671ae8c93';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-4121d00';
+const BACKEND_TAG = 'backend-release-8aeecd1';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
@@ -63,18 +65,27 @@ describe('Pinned production component release', () => {
       assert.match(content, /deploy-pinned-backend\.sh/);
     }
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /Город очного участия не определён или требует проверки/);
-    assert.match(RELEASE, /Формат: Очно/);
-    assert.match(RELEASE, /Где: Москва/);
+    assert.match(RELEASE, /Экспофорум/);
+    assert.match(RELEASE, /Санкт-Петербург/);
+    assert.match(RELEASE, /compiled MAX parser runtime/i);
     assert.match(RELEASE, /Frontend остаётся на `3b70ea5`/);
     assert.match(RELEASE, /Bots остаются на `3a64511`/);
   });
 
   test('compose pins the new backend while preserving frontend and bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-4121d00\}/);
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-8aeecd1\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
     assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-3b70ea5\}/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('requires compiled MAX parser regression in CI for the promoted backend', () => {
+    assert.match(CI, /Compiled MAX parser runtime regression tests/);
+    assert.match(CI, /node --test apps\/backend\/test\/max-parser-runtime\.test\.mjs/);
+    assert.match(MAX_RUNTIME_TEST, /Экспофорум, Санкт-Петербург/);
+    assert.match(MAX_RUNTIME_TEST, /assert\.equal\(parsed\.venue, 'Экспофорум'\)/);
+    assert.match(MAX_RUNTIME_TEST, /assert\.notEqual\(parsed\.venue, parsed\.city\)/);
+    assert.match(MAX_RUNTIME_TEST, /'ст1', 'Очно', 'Экспофорум'/);
   });
 
   test('backend-only deploy validates revision and changes only backend', () => {
