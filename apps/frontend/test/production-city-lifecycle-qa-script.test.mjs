@@ -32,6 +32,11 @@ describe('production city lifecycle read-only QA script', () => {
   test('checks classifier, city CRUD and publication guard without allowing writes', () => {
     assert.match(SCRIPT, /QA_CITY_CLASSIFIER_OK=true/);
     assert.match(SCRIPT, /CITY_QA_FORBIDDEN_DATABASE_ACCESS/);
+    assert.match(SCRIPT, /QA_CITY_CREATE_GUARD_OK=true/);
+    assert.match(SCRIPT, /CITY_RENAME_QA_FORBIDDEN_DUPLICATE_LOOKUP/);
+    assert.match(SCRIPT, /CITY_RENAME_QA_FORBIDDEN_UPDATE/);
+    assert.match(SCRIPT, /renameCitiesService\.update\('qa-existing-city', \{ name: badName \}\)/);
+    assert.match(SCRIPT, /QA_CITY_RENAME_GUARD_OK=true/);
     assert.match(SCRIPT, /QA_CITY_CRUD_GUARD_OK=true/);
     assert.match(SCRIPT, /QA_FORBIDDEN_EVENT_UPDATE/);
     assert.match(SCRIPT, /QA_CANONICAL_PUBLICATION_GUARD_OK=true/);
