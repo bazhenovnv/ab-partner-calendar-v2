@@ -7,9 +7,9 @@ import { EventGridSkeleton } from './EventCardSkeleton';
 import { EventCalendar } from './EventCalendar';
 import {
   EMPTY_EVENT_FILTERS,
-  EventFilters,
   type ActiveFilters,
 } from './EventFilters';
+import { ResponsiveEventFilters } from './ResponsiveEventFilters';
 import type {
   CityOption,
   DirectionOption,
@@ -159,7 +159,7 @@ export function EventsSection({ initialData, cities, directions }: EventsSection
       <div className="pub-events-outer">
         <div className="pub-events-controls">
           <div className="pub-events-filters-col">
-            <EventFilters
+            <ResponsiveEventFilters
               cities={cities}
               directions={directions}
               filters={filters}

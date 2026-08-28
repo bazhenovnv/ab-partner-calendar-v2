@@ -1,0 +1,846 @@
+/* Final isolated mobile layout lock for the approved 390 px homepage sketch.
+   Desktop Figma geometry and application behaviour remain owned by the existing
+   stage/final files. This file only resolves the mobile cascade at <= 767 px. */
+
+@media (max-width: 767px) {
+  /* ── Global mobile canvas ─────────────────────────────────────────────── */
+  html,
+  body,
+  .pub-site-viewport,
+  .pub-site-scale {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  .pub-site-scale {
+    min-height: 100vh !important;
+    margin: 0 !important;
+    zoom: 1 !important;
+  }
+
+  /* ── Header: approved two-row mobile composition ────────────────────── */
+  .pub-header-inner {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 10px 20px 11px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .pub-header-brand {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .pub-header-brand-mark {
+    width: 38px !important;
+    height: 40px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    flex: 0 0 38px !important;
+    object-fit: contain !important;
+  }
+
+  .pub-header-brand-title {
+    min-width: 0 !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .pub-header-actions {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.42fr) !important;
+    gap: 4px !important;
+  }
+
+  .pub-header-action {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 34px !important;
+    padding: 0 7px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    border-radius: 7px !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+  }
+
+  /* The desktop-labelled spans already exist in SiteHeader. On mobile the
+     approved sketch uses those full labels too; hide the legacy short label. */
+  .pub-header-action > .hidden {
+    display: inline !important;
+  }
+
+  .pub-header-action > .tablet\:hidden {
+    display: none !important;
+  }
+
+  .pub-header-action-icon-wrap,
+  .pub-header-action-icon,
+  .pub-header-action-icon-wrap--max,
+  .pub-header-action-icon--max {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    flex: 0 0 18px !important;
+  }
+
+  .pub-header-action-icon--max {
+    transform: scale(1.2) !important;
+    transform-origin: 50% 50% !important;
+  }
+
+  /* ── Hero: keep the supplied artwork visible on mobile ──────────────── */
+  .pub-hero {
+    padding: 8px 20px 16px !important;
+  }
+
+  .pub-hero-panel {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 430px !important;
+    min-height: 430px !important;
+    overflow: hidden !important;
+    border-radius: 22px !important;
+  }
+
+  .pub-hero-content {
+    position: relative !important;
+    z-index: 5 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 24px 20px 0 !important;
+  }
+
+  .pub-hero-title {
+    max-width: none !important;
+    margin: 0 0 10px !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    line-height: 1.14 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .pub-hero-sub {
+    max-width: 100% !important;
+    margin: 0 0 16px !important;
+    font-size: 13.5px !important;
+    line-height: 1.4 !important;
+  }
+
+  .pub-hero-sub br {
+    display: none !important;
+  }
+
+  .pub-hero-btn {
+    width: 174px !important;
+    height: 42px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+  }
+
+  .pub-hero-visual {
+    position: absolute !important;
+    inset: auto 0 0 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 226px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+  }
+
+  .pub-hero-visual::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  .pub-hero-books {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    object-position: center bottom !important;
+    transform: none !important;
+  }
+
+  .pub-hero-calendar {
+    position: absolute !important;
+    left: 16px !important;
+    bottom: 8px !important;
+    z-index: 4 !important;
+    width: auto !important;
+    height: 70% !important;
+    max-width: none !important;
+    object-fit: contain !important;
+    object-position: left bottom !important;
+    transform: none !important;
+  }
+
+  /* ── Events shell: separate filter/calendar/cards on grey canvas ────── */
+  .pub-events-section {
+    padding: 0 20px 20px !important;
+  }
+
+  .pub-events-outer {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .pub-events-controls {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .pub-events-filters-col {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Mobile filter disclosure. Desktop still renders EventFilters directly
+     through the always-visible panel below. */
+  .pub-filter-responsive {
+    width: 100% !important;
+  }
+
+  .pub-filter-mobile-toggle {
+    width: 100% !important;
+    min-height: 62px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    padding: 0 20px !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: #fff !important;
+    color: #0d2344 !important;
+    box-shadow: 0 4px 12px rgba(13, 35, 68, 0.18) !important;
+    font-family: var(--font-montserrat), sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+  }
+
+  .pub-filter-mobile-toggle-icon {
+    width: 20px !important;
+    height: 13px !important;
+    flex: 0 0 20px !important;
+    transition: transform 180ms ease !important;
+  }
+
+  .pub-filter-mobile-toggle[aria-expanded='true'] .pub-filter-mobile-toggle-icon {
+    transform: rotate(180deg) !important;
+  }
+
+  .pub-filter-mobile-panel {
+    display: none !important;
+  }
+
+  .pub-filter-mobile-panel--open {
+    display: block !important;
+    margin-top: 10px !important;
+    padding: 22px 18px 20px !important;
+    border-radius: 20px !important;
+    background: #fff !important;
+    box-shadow: 0 4px 12px rgba(13, 35, 68, 0.16) !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-title {
+    display: none !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-root {
+    height: auto !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-two-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-left-col,
+  .pub-filter-mobile-panel .pub-filter-right-col {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-right-col {
+    margin-top: 22px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-divider-v {
+    display: none !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-divider-h {
+    width: 100% !important;
+    margin: 20px 0 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-section {
+    position: static !important;
+    width: 100% !important;
+    margin: 0 0 20px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-section--last {
+    margin-bottom: 0 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-label {
+    margin: 0 0 10px !important;
+    font-size: 15px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-select {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 14px !important;
+    font-size: 14px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-options {
+    gap: 13px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-checkbox {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-check-row {
+    grid-template-columns: 18px max-content !important;
+    min-height: 20px !important;
+    column-gap: 10px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-check-text {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-dot {
+    width: 8px !important;
+    height: 8px !important;
+    flex-basis: 8px !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-actions {
+    position: static !important;
+    width: 100% !important;
+    margin: 24px 0 0 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-apply-btn {
+    width: 100% !important;
+    height: 46px !important;
+    margin: 0 !important;
+  }
+
+  .pub-filter-mobile-panel .pub-filter-reset-link {
+    margin: 12px auto 0 !important;
+  }
+
+  /* ── Calendar card ─────────────────────────────────────────────────── */
+  .pub-events-calendar-col {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 22px 18px 20px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    border-radius: 22px !important;
+    box-shadow: 0 4px 12px rgba(13, 35, 68, 0.17) !important;
+  }
+
+  .pub-calendar {
+    height: auto !important;
+    min-height: 0 !important;
+    gap: 16px !important;
+  }
+
+  .pub-calendar-header {
+    min-height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+
+  .pub-calendar-heading {
+    gap: 7px !important;
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-calendar-nav {
+    gap: 6px !important;
+  }
+
+  .pub-calendar-nav-button {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .pub-calendar-table {
+    width: 100% !important;
+    min-height: 300px !important;
+  }
+
+  .pub-calendar-weekdays {
+    flex: 0 0 38px !important;
+  }
+
+  .pub-calendar-weekday {
+    height: 38px !important;
+    font-size: 14px !important;
+  }
+
+  .pub-calendar-weekday::after {
+    height: 15px !important;
+  }
+
+  .pub-calendar-cell {
+    font-size: 16px !important;
+  }
+
+  .pub-calendar-marker {
+    border-top-width: 14px !important;
+    border-left-width: 14px !important;
+  }
+
+  /* ── Result cards ──────────────────────────────────────────────────── */
+  #events-results {
+    margin-top: 16px !important;
+    gap: 16px !important;
+  }
+
+  .pub-events-date-heading {
+    min-height: 0 !important;
+    margin: 0 0 2px !important;
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+  }
+
+  [data-event-results-grid] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  [data-event-results-grid] > * {
+    min-width: 0 !important;
+  }
+
+  /* Preserve the long-month date-badge release dimensions. */
+  [data-event-results-grid] [data-event-card-date] {
+    width: 76px !important;
+  }
+
+  /* ── Main events + quotes: grey mobile canvas, not desktop panel ───── */
+  .pub-main-quotes-wrapper {
+    padding: 0 0 24px !important;
+  }
+
+  .pub-main-quotes-inner {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* ── Quotes: restore the two supplied cut-outs from the sketch ─────── */
+  .quotes-section {
+    position: relative !important;
+    width: 100% !important;
+    height: 330px !important;
+    min-height: 330px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .quotes-layout {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 330px !important;
+    min-height: 330px !important;
+    margin: 0 !important;
+  }
+
+  .quotes-person {
+    position: absolute !important;
+    top: 18px !important;
+    bottom: auto !important;
+    z-index: 1 !important;
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .quotes-person-left {
+    left: -42px !important;
+    width: 178px !important;
+    height: auto !important;
+  }
+
+  .quotes-person-right {
+    right: -40px !important;
+    width: 172px !important;
+    height: auto !important;
+  }
+
+  .quotes-person-img--left,
+  .quotes-person-img--right {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    object-fit: contain !important;
+  }
+
+  .quotes-card--approved-frame {
+    position: absolute !important;
+    left: 20px !important;
+    right: 20px !important;
+    bottom: 14px !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    aspect-ratio: 744 / 214 !important;
+  }
+
+  .quotes-card--approved-frame .quotes-body {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: calc(100% - 64px) !important;
+    padding: 0 !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .quotes-card--approved-frame .quotes-text {
+    max-width: none !important;
+    margin: 0 auto !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  .quotes-card--approved-frame .quotes-author {
+    margin-top: 5px !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* ── Footer: compact two-column mobile composition with artwork ────── */
+  .pub-footer {
+    margin-top: 0 !important;
+    background: #f1f1f1 !important;
+  }
+
+  .pub-footer-inner {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 32px 20px 24px !important;
+    box-sizing: border-box !important;
+  }
+
+  .pub-footer-top {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 0.43fr) minmax(0, 0.57fr) !important;
+    grid-template-areas:
+      'brand brand'
+      'projects contacts' !important;
+    column-gap: 18px !important;
+    row-gap: 18px !important;
+    min-height: 0 !important;
+    align-items: start !important;
+  }
+
+  .pub-footer-brand {
+    grid-area: brand !important;
+    width: 66% !important;
+    min-width: 0 !important;
+    min-height: 136px !important;
+    margin: 0 !important;
+    padding: 22px 0 0 !important;
+    transform: none !important;
+  }
+
+  .pub-footer-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+
+  .pub-footer-logo-mark {
+    width: 46px !important;
+    height: 42px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    object-fit: contain !important;
+  }
+
+  .pub-footer-logo-text {
+    min-width: 0 !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+  }
+
+  .pub-footer-desc {
+    width: 190px !important;
+    max-width: 190px !important;
+    margin: 9px 0 0 !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .pub-footer-top > .pub-footer-col {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    transform: none !important;
+  }
+
+  .pub-footer-top > .pub-footer-col:nth-child(2) {
+    grid-area: projects !important;
+  }
+
+  .pub-footer-top > .pub-footer-col:nth-child(3) {
+    grid-area: contacts !important;
+    padding-left: 16px !important;
+    border-left: 1px solid rgba(13, 35, 68, 0.18) !important;
+  }
+
+  .pub-footer-col-title {
+    margin: 0 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+  }
+
+  .pub-footer-links {
+    gap: 8px !important;
+  }
+
+  .pub-footer-link,
+  .pub-footer-contact-secondary {
+    font-size: 10.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  .pub-footer-link--strong {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+  }
+
+  .pub-footer-contact-list {
+    gap: 12px !important;
+  }
+
+  .pub-footer-contact-row {
+    display: grid !important;
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    column-gap: 7px !important;
+    align-items: center !important;
+    min-width: 0 !important;
+  }
+
+  .pub-footer-contact-content {
+    min-width: 0 !important;
+    gap: 2px !important;
+  }
+
+  .pub-footer-contact-icon,
+  .pub-footer-contact-icon--phone,
+  .pub-footer-contact-icon--email,
+  .pub-footer-contact-icon--location {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    transform: none !important;
+    object-fit: contain !important;
+  }
+
+  .pub-footer-stationery {
+    position: absolute !important;
+    top: 0 !important;
+    right: -8px !important;
+    z-index: 2 !important;
+    display: block !important;
+    width: 162px !important;
+    height: 155px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  .pub-footer-stationery-img {
+    display: block !important;
+    width: 162px !important;
+    height: 155px !important;
+    max-width: none !important;
+    object-fit: contain !important;
+    object-position: right top !important;
+    transform: none !important;
+  }
+
+  .pub-footer-divider {
+    width: 100% !important;
+    margin: 22px 0 14px !important;
+    border-top-color: rgba(13, 35, 68, 0.16) !important;
+  }
+
+  .pub-footer-bottom {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  .pub-footer-legal {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px 10px !important;
+  }
+
+  .pub-footer-legal-link,
+  .pub-footer-copy {
+    font-size: 9px !important;
+    line-height: 1.3 !important;
+  }
+
+  .pub-footer-disclaimer,
+  .pub-footer-operator {
+    width: 100% !important;
+    max-width: none !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .pub-footer-disclaimer {
+    margin: 14px 0 0 !important;
+    font-size: 9.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  .pub-footer-operator {
+    margin: 6px 0 0 !important;
+    font-size: 8.5px !important;
+    line-height: 1.35 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  /* Exact 390 px optical tuning from the supplied mobile frame. */
+  .pub-header-inner {
+    padding-inline: 20px !important;
+  }
+
+  .pub-hero,
+  .pub-events-section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .pub-filter-mobile-toggle {
+    min-height: 60px !important;
+  }
+
+  .pub-events-calendar-col {
+    padding-inline: 18px !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .pub-header-inner,
+  .pub-hero,
+  .pub-events-section,
+  .pub-footer-inner {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .pub-header-action {
+    padding-inline: 4px !important;
+    gap: 3px !important;
+    font-size: 9px !important;
+  }
+
+  .pub-header-action-icon-wrap,
+  .pub-header-action-icon,
+  .pub-header-action-icon-wrap--max,
+  .pub-header-action-icon--max {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    max-width: 16px !important;
+    min-height: 16px !important;
+    max-height: 16px !important;
+    flex-basis: 16px !important;
+  }
+}
