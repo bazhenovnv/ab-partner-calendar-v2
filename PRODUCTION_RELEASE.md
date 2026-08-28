@@ -10,8 +10,8 @@
 - Backend image: `ab-afisha/backend:backend-release-8aeecd1`
 - Bots commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
 - Bots image: `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit: `b0e71314ec162149d2b5d63b43d0906bec6b09cd`
-- Frontend image: `ab-afisha/frontend:frontend-release-b0e7131`
+- Frontend commit: `ac52a149f0ad6141042b3d54f1a9bcfbc127279e`
+- Frontend image: `ab-afisha/frontend:frontend-release-ac52a14`
 - Дата утверждения: `2026-08-28`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -24,20 +24,19 @@
 
 ## Что входит в текущую promotion
 
-Текущая promotion является **frontend-only**. Frontend обновлён до `b0e7131`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`.
+Текущая promotion является **frontend-only**. Frontend обновлён до `ac52a14`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`.
 
-Frontend `b0e7131` включает ранее утверждённое исправление плашки даты для длинных русских названий месяцев и финальное выравнивание публичной mobile-страницы под утверждённый макет 390 px из PR #106:
+Frontend `ac52a14` включает утверждённый mobile layout 390 px из PR #106 и корректирующий PR #108 для проблем, выявленных после визуальной проверки production:
 
-- добавлен изолированный финальный mobile-слой `mobile-390-final.css`, подключённый после существующего визуального стека;
-- восстановлен утверждённый mobile hero artwork и двухрядная композиция header;
-- фильтр на mobile стал collapsed-by-default disclosure без изменения опций фильтра и API-потока;
-- фильтр, календарь и карточки событий разделены на сером mobile canvas, геометрия календаря уплотнена;
-- сохранена утверждённая геометрия плашки даты для длинных русских названий месяцев;
-- восстановлены утверждённые mobile-иллюстрации блока цитат и footer stationery;
-- desktop Figma geometry, backend, bots, API-контракты и данные не меняются;
-- добавлен source regression test для контракта 390 px.
+- верхние Telegram / MAX / «Стать партнёром» больше не ограничиваются legacy `max-width: 38px`; подписи и иконки остаются внутри своих белых кнопок;
+- существующий `/hero/hero-vase-books.png` на mobile показывается без `object-fit: cover`, поэтому изображение не увеличивается и не обрезается;
+- между белой текстовой частью hero и существующим artwork восстановлен мягкий вертикальный переход;
+- существующий desk-calendar остаётся отдельным foreground-слоем;
+- исправлен пробел в mobile-подзаголовке между `роста,` и `обмена`;
+- изображения не генерируются и не заменяются;
+- backend, bots, API-контракты, Prisma, nginx и production-данные не меняются.
 
-Application PR #106 прошёл полный CI #797 перед merge. Promotion должна пройти полный CI release-control до deployment.
+Application PR #108 прошёл полный CI #801 перед merge. Promotion должна пройти полный CI release-control до deployment.
 
 ## Сохраняемые backend-гарантии
 
@@ -85,7 +84,7 @@ Frontend-only promotion не изменяет backend, bots, Prisma migrations �
 
 `PRODUCTION_PIN_OK`
 
-После deployment обязательно визуально проверить desktop и mobile, особенно ширину 390 px: header, hero, collapsed filter, календарь, карточки событий, блок цитат и footer. Дополнительно проверить карточки событий с коротким и длинным названием месяца, в частности `августа` и `сентября`.
+После deployment обязательно визуально проверить mobile 390 px: три кнопки header, hero artwork и переход между белым блоком и изображением. Затем проверить collapsed filter, календарь, карточки событий, блок цитат и footer. Дополнительно проверить карточки событий с коротким и длинным названием месяца, в частности `августа` и `сентября`.
 
 ## Обязательное правило для новых чатов и AI-агентов
 
@@ -106,7 +105,7 @@ Frontend-only promotion не изменяет backend, bots, Prisma migrations �
 - выбирать backend или bots через общий `APP_VERSION`;
 - деплоить любой `backend-release-*`, кроме `backend-release-8aeecd1`;
 - деплоить любой `bots-release-*`, кроме `bots-release-3a64511`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-b0e7131`;
+- деплоить любой `frontend-release-*`, кроме `frontend-release-ac52a14`;
 - использовать rollback/preflight/temporary images как production;
 - определять production-версию по последнему commit в `main`;
 - менять component pins без отдельного утверждения владельцем проекта;
