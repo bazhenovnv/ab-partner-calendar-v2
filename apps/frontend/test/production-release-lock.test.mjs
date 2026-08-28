@@ -36,8 +36,8 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '6fdb0428ee0b67b4a45fabddd4d80dc45c0d23cf';
-const FRONTEND_TAG = 'frontend-release-6fdb042';
+const FRONTEND_COMMIT = 'b0e71314ec162149d2b5d63b43d0906bec6b09cd';
+const FRONTEND_TAG = 'frontend-release-b0e7131';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 
 describe('Pinned production component release', () => {
@@ -66,9 +66,11 @@ describe('Pinned production component release', () => {
       assert.match(content, /deploy-pinned-frontend\.sh/);
     }
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /Frontend обновлён до `6fdb042`/);
+    assert.match(RELEASE, /Frontend обновлён до `b0e7131`/);
     assert.match(RELEASE, /backend остаётся на `8aeecd1`/i);
     assert.match(RELEASE, /bots остаются на `3a64511`/i);
+    assert.match(RELEASE, /390 px/);
+    assert.match(RELEASE, /PR #106/);
     assert.match(RELEASE, /сентября/);
     assert.match(RELEASE, /Экспофорум/);
     assert.match(RELEASE, /Санкт-Петербург/);
@@ -78,7 +80,7 @@ describe('Pinned production component release', () => {
   test('compose pins current backend, frontend and bots images', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-8aeecd1\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-6fdb042\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-b0e7131\}/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
