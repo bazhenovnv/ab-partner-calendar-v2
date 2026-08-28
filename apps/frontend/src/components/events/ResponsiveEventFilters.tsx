@@ -26,10 +26,10 @@ export function ResponsiveEventFilters({
   };
 
   return (
-    <div className="pub-filter-responsive">
+    <div className="pub-filter-responsive h-full">
       <button
         type="button"
-        className="pub-filter-mobile-toggle"
+        className="pub-filter-mobile-toggle hidden"
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={() => setIsOpen((current) => !current)}
@@ -53,7 +53,7 @@ export function ResponsiveEventFilters({
 
       <div
         id={panelId}
-        className={`pub-filter-mobile-panel${isOpen ? ' pub-filter-mobile-panel--open' : ''}`}
+        className={`pub-filter-mobile-panel h-full${isOpen ? ' pub-filter-mobile-panel--open' : ''}`}
       >
         <EventFilters
           cities={cities}
