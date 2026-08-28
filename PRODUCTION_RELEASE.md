@@ -10,8 +10,8 @@
 - Backend image: `ab-afisha/backend:backend-release-8aeecd1`
 - Bots commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
 - Bots image: `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit: `6fdb0428ee0b67b4a45fabddd4d80dc45c0d23cf`
-- Frontend image: `ab-afisha/frontend:frontend-release-6fdb042`
+- Frontend commit: `b0e71314ec162149d2b5d63b43d0906bec6b09cd`
+- Frontend image: `ab-afisha/frontend:frontend-release-b0e7131`
 - Дата утверждения: `2026-08-28`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -24,18 +24,20 @@
 
 ## Что входит в текущую promotion
 
-Текущая promotion является **frontend-only**. Frontend обновлён до `6fdb042`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`.
+Текущая promotion является **frontend-only**. Frontend обновлён до `b0e7131`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`.
 
-Frontend `6fdb042` включает исправление плашки даты в карточке события для длинных русских названий месяцев:
+Frontend `b0e7131` включает ранее утверждённое исправление плашки даты для длинных русских названий месяцев и финальное выравнивание публичной mobile-страницы под утверждённый макет 390 px из PR #106:
 
-- desktop-плашка даты расширена с 78 до 88 px;
-- размер названия месяца уменьшен с 16 до 15 px;
-- название месяца остаётся в одну строку и центрируется;
-- внутренний отступ контента карточки скорректирован так, чтобы текст события не пересекался с расширенной плашкой;
-- mobile-плашка расширена с 68 до 76 px, размер месяца уменьшен с 14 до 13 px;
-- бизнес-логика карточки, обработчики кликов, статусы и данные события не меняются.
+- добавлен изолированный финальный mobile-слой `mobile-390-final.css`, подключённый после существующего визуального стека;
+- восстановлен утверждённый mobile hero artwork и двухрядная композиция header;
+- фильтр на mobile стал collapsed-by-default disclosure без изменения опций фильтра и API-потока;
+- фильтр, календарь и карточки событий разделены на сером mobile canvas, геометрия календаря уплотнена;
+- сохранена утверждённая геометрия плашки даты для длинных русских названий месяцев;
+- восстановлены утверждённые mobile-иллюстрации блока цитат и footer stationery;
+- desktop Figma geometry, backend, bots, API-контракты и данные не меняются;
+- добавлен source regression test для контракта 390 px.
 
-Application PR #104 прошёл полный CI #788 перед merge. Promotion должна проходить полный CI release-control до deployment.
+Application PR #106 прошёл полный CI #797 перед merge. Promotion должна пройти полный CI release-control до deployment.
 
 ## Сохраняемые backend-гарантии
 
@@ -83,7 +85,7 @@ Frontend-only promotion не изменяет backend, bots, Prisma migrations �
 
 `PRODUCTION_PIN_OK`
 
-После deployment обязательно визуально проверить карточки событий с коротким и длинным названием месяца, в частности `августа` и `сентября`, а также desktop/mobile геометрию карточки.
+После deployment обязательно визуально проверить desktop и mobile, особенно ширину 390 px: header, hero, collapsed filter, календарь, карточки событий, блок цитат и footer. Дополнительно проверить карточки событий с коротким и длинным названием месяца, в частности `августа` и `сентября`.
 
 ## Обязательное правило для новых чатов и AI-агентов
 
@@ -104,7 +106,7 @@ Frontend-only promotion не изменяет backend, bots, Prisma migrations �
 - выбирать backend или bots через общий `APP_VERSION`;
 - деплоить любой `backend-release-*`, кроме `backend-release-8aeecd1`;
 - деплоить любой `bots-release-*`, кроме `bots-release-3a64511`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-6fdb042`;
+- деплоить любой `frontend-release-*`, кроме `frontend-release-b0e7131`;
 - использовать rollback/preflight/temporary images как production;
 - определять production-версию по последнему commit в `main`;
 - менять component pins без отдельного утверждения владельцем проекта;
