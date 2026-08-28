@@ -64,7 +64,7 @@ describe('production city lifecycle read-only QA script', () => {
   });
 
   test('keeps the current legacy counter explicit but configurable', () => {
-    assert.match(SCRIPT, /EXPECTED_LEGACY_UNRESOLVED="\$\{EXPECTED_LEGACY_UNRESOLVED:-3\}"/);
+    assert.match(SCRIPT, /EXPECTED_LEGACY_UNRESOLVED="\$\{EXPECTED_LEGACY_UNRESOLVED:-0\}"/);
     assert.match(SCRIPT, /LEGACY_UNRESOLVED_PUBLISHED_LOCATIONS/);
     assert.match(SCRIPT, /assert\.equal\(legacy\.length, expectedLegacy\)/);
   });
