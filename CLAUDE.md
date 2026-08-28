@@ -12,18 +12,18 @@
 - release anchor: `8aeecd1140812f6c92941146cdd4fba671ae8c93`;
 - backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `ac52a149f0ad6141042b3d54f1a9bcfbc127279e` / `ab-afisha/frontend:frontend-release-ac52a14`;
+- frontend commit/image: `b65e7aa5d3fff87cdca783eecc4c7b2280cc45b4` / `ab-afisha/frontend:frontend-release-b65e7aa`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только frontend. `ac52a14` включает утверждённый mobile layout 390 px и исправления PR #108 для ширины header-кнопок, hero artwork без crop и mobile-подзаголовка. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
+Для текущей promotion меняется только frontend. `b65e7aa` включает mobile layout 390 px, исправления header/hero из PR #108 и PR #110 с touch-swipe «Главных событий» и раздельным notebook/cup footer artwork на базе существующего bitmap. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
 
-Backend `8aeecd1` остаётся утверждённым backend pin. Для его promotion обязателен CI-step `Compiled MAX parser runtime regression tests`, который запускает собранный `dist` и проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург`, а также блокировку не-городских значений.
+Backend `8aeecd1` остаётся утверждённым backend pin. Для его promotion обязателен CI-step `Compiled MAX parser runtime regression tests`, который проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург` и блокировку не-городских значений.
 
-Production components закрепляются независимо. Запрещено считать `main`, `latest`, `APP_VERSION`, старый release-тег или rollback-образ текущей production-версией. Запрещено выбирать backend или bots через общий `APP_VERSION`. Новая версия становится production только после отдельного явного утверждения владельцем проекта и одновременного обновления production lock-файлов.
+Production components закрепляются независимо. Запрещено считать `main`, `latest`, `APP_VERSION`, старый release-тег или rollback-образ текущей production-версией. Новая версия становится production только после отдельного явного утверждения владельцем проекта и одновременного обновления production lock-файлов.
 
 ## Роль Claude Code
 
@@ -87,8 +87,6 @@ Production components закрепляются независимо. Запре�
 
 ## Telegram
 
-Для Telegram HTML:
-
 - все внешние и пользовательские строки экранировать;
 - title, location, description, sourceUrl и другие текстовые поля нельзя вставлять в HTML без escape;
 - не менять тексты рассылки и напоминаний без отдельного указания.
@@ -107,19 +105,10 @@ Production components закрепляются независимо. Запре�
 1. Выполнить git status.
 2. Проверить git diff.
 3. Не коммитить build-кэш, tsbuildinfo, временные файлы, patch-файлы.
-4. Запустить доступные проверки:
-   - lint;
-   - typecheck;
-   - build.
+4. Запустить доступные проверки: lint, typecheck, build.
 5. Коммит должен быть маленьким и понятным.
 
-Формат коммитов:
-
-- fix: ...
-- feat: ...
-- chore: ...
-- refactor: ...
-- docs: ...
+Формат коммитов: `fix: ...`, `feat: ...`, `chore: ...`, `refactor: ...`, `docs: ...`.
 
 ## Запрещено без отдельного подтверждения
 
@@ -132,7 +121,4 @@ Production components закрепляются независимо. Запре�
 - менять env-переменные;
 - пушить напрямую в main;
 - делать force push;
-- коммитить секреты;
-- коммитить `.env`;
-- коммитить patch-файлы;
-- коммитить `tsbuildinfo`.
+- коммитить секреты, `.env`, patch-файлы или `tsbuildinfo`.
