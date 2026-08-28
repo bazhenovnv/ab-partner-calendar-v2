@@ -12,17 +12,17 @@
 - release anchor: `8aeecd1140812f6c92941146cdd4fba671ae8c93`;
 - backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `ac52a149f0ad6141042b3d54f1a9bcfbc127279e` / `ab-afisha/frontend:frontend-release-ac52a14`;
+- frontend commit/image: `b65e7aa5d3fff87cdca783eecc4c7b2280cc45b4` / `ab-afisha/frontend:frontend-release-b65e7aa`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущего release меняется только frontend: `ac52a14` включает утверждённый mobile layout 390 px и исправления PR #108 для ширины header-кнопок, hero artwork без crop и mobile-подзаголовка. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`. Не использовать `deploy-pinned-app.sh`, `deploy-pinned-backend.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh` для этой frontend-only promotion.
+Для текущего release меняется только frontend: `b65e7aa` включает mobile layout 390 px, исправления header/hero из PR #108 и PR #110 с touch-swipe «Главных событий» и раздельным позиционированием notebook/cup footer artwork без изменения bitmap asset. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
 
-Backend `8aeecd1` остаётся утверждённым backend pin. Для его предыдущей promotion был обязателен CI-step `Compiled MAX parser runtime regression tests`, который запускает собранный `dist` и проверяет в том числе `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург`.
+Backend `8aeecd1` остаётся утверждённым backend pin. CI обязан сохранять `Compiled MAX parser runtime regression tests`, включая проверку `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург`.
 
-Production компоненты закрепляются независимо. Нельзя определять production по `main`, `latest`, `APP_VERSION`, старому Docker-тегу или rollback-образу. Нельзя выбирать backend или bots через общий `APP_VERSION`. Новая версия становится production только после явного утверждения владельцем и одновременного обновления production lock-файлов.
+Production компоненты закрепляются независимо. Нельзя определять production по `main`, `latest`, `APP_VERSION`, старому Docker-тегу или rollback-образу. Новая версия становится production только после явного утверждения владельцем и одновременного обновления production lock-файлов.
 
 ## Project
 
