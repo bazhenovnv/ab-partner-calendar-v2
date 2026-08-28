@@ -55,12 +55,14 @@
   z-index: 5;
   left: 18px;
   top: -44px;
-  width: 78px;
+  width: 88px;
   height: 97px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding-inline: 4px;
   border-radius: 4px;
   background: #fff;
   box-shadow: 0 4px 12px rgba(13, 35, 68, 0.22);
@@ -74,16 +76,20 @@
 }
 
 .dateMonth {
+  width: 100%;
   margin-top: 7px;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
   font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
   text-transform: lowercase;
 }
 
 .eventBody {
   min-height: 126px;
-  padding: 18px 18px 14px 112px;
+  padding: 18px 18px 14px 122px;
   display: flex;
   flex-direction: column;
 }
@@ -469,7 +475,7 @@
   }
 
   .eventBody {
-    padding: 16px 14px 12px 94px;
+    padding: 16px 14px 12px 104px;
   }
 
   .eventTitle {
@@ -480,8 +486,9 @@
   .dateBadge {
     left: 14px;
     top: -39px;
-    width: 68px;
+    width: 76px;
     height: 86px;
+    padding-inline: 3px;
   }
 
   .dateDay {
@@ -489,7 +496,8 @@
   }
 
   .dateMonth {
-    font-size: 14px;
+    font-size: 13px;
+    letter-spacing: -0.015em;
   }
 
   .mainEventsSection {
