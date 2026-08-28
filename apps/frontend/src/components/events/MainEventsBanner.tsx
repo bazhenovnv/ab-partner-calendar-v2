@@ -320,6 +320,18 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     pointerStartXRef.current = event.clientX;
     pointerIdRef.current = event.pointerId;
     dragStartedRef.current = false;
+
+    // Touch/pen input can cross child-card bounds during a swipe. Capture the
+    // pointer immediately so Android/iOS-compatible browsers keep delivering
+    // the horizontal gesture to the carousel while CSS still permits pan-y.
+    if (event.pointerType !== 'mouse') {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Some embedded browsers can reject early capture; the move handler
+        // retries capture after the drag threshold is crossed.
+      }
+    }
   }, []);
 
   const onPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -328,7 +340,14 @@ export function MainEventsBanner({ events }: MainEventsBannerProps) {
     const delta = event.clientX - pointerStartXRef.current;
     if (!dragStartedRef.current && Math.abs(delta) >= 6) {
       dragStartedRef.current = true;
-      event.currentTarget.setPointerCapture(event.pointerId);
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch {
+          // Continue tracking when capture is unavailable; pointerId guards
+          // against unrelated pointers affecting the current interaction.
+        }
+      }
     }
 
     if (dragStartedRef.current) {
