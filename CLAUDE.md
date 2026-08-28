@@ -12,14 +12,14 @@
 - release anchor: `8aeecd1140812f6c92941146cdd4fba671ae8c93`;
 - backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `b65e7aa5d3fff87cdca783eecc4c7b2280cc45b4` / `ab-afisha/frontend:frontend-release-b65e7aa`;
+- frontend commit/image: `4d8daa1b069ee8f69f5a43c808cf7506de71d5c9` / `ab-afisha/frontend:frontend-release-4d8daa1`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только frontend. `b65e7aa` включает mobile layout 390 px, исправления header/hero из PR #108 и PR #110 с touch-swipe «Главных событий» и раздельным notebook/cup footer artwork на базе существующего bitmap. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
+Для текущей promotion меняется только frontend. `4d8daa1` включает mobile layout 390 px, touch-swipe «Главных событий» и финальную доводку PR #112: блок «Контакты» и divider сдвинуты левее, mobile-календарь слегка уменьшен, цитатам возвращён белый фон. Существующие bitmap assets не изменяются. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
 
 Backend `8aeecd1` остаётся утверждённым backend pin. Для его promotion обязателен CI-step `Compiled MAX parser runtime regression tests`, который проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург` и блокировку не-городских значений.
 
