@@ -29,6 +29,7 @@ import './homepage-controls-event-cards-final.css';
 import './event-modal-transitions.css';
 import './modal-close-spacing-scroll-final.css';
 import './mobile-390-final.css';
+import './mobile-390-buttons-hero-fix.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
