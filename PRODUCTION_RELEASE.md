@@ -6,117 +6,70 @@
 
 - Домен: `https://ab-event.pro`
 - Release anchor commit: `8aeecd1140812f6c92941146cdd4fba671ae8c93`
-- Backend commit: `8aeecd1140812f6c92941146cdd4fba671ae8c93`
-- Backend image: `ab-afisha/backend:backend-release-8aeecd1`
-- Bots commit: `3a64511c98f7bf8cd59776dd5dce233939cd2988`
-- Bots image: `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit: `ac52a149f0ad6141042b3d54f1a9bcfbc127279e`
-- Frontend image: `ab-afisha/frontend:frontend-release-ac52a14`
+- Backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`
+- Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
+- Frontend commit/image: `b65e7aa5d3fff87cdca783eecc4c7b2280cc45b4` / `ab-afisha/frontend:frontend-release-b65e7aa`
 - Дата утверждения: `2026-08-28`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
-- Backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`
-- Backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`
-- Backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Историческое имя lock-файла сохранено для совместимости. Компоненты production закрепляются **независимо**.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Что входит в текущую promotion
+## Текущая frontend-only promotion
 
-Текущая promotion является **frontend-only**. Frontend обновлён до `ac52a14`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`.
+Frontend обновлён до `b65e7aa`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`, nginx не пересоздаётся.
 
-Frontend `ac52a14` включает утверждённый mobile layout 390 px из PR #106 и корректирующий PR #108 для проблем, выявленных после визуальной проверки production:
+Frontend `b65e7aa` включает mobile layout 390 px из PR #106, исправления PR #108 и визуальную доводку PR #110:
 
-- верхние Telegram / MAX / «Стать партнёром» больше не ограничиваются legacy `max-width: 38px`; подписи и иконки остаются внутри своих белых кнопок;
-- существующий `/hero/hero-vase-books.png` на mobile показывается без `object-fit: cover`, поэтому изображение не увеличивается и не обрезается;
-- между белой текстовой частью hero и существующим artwork восстановлен мягкий вертикальный переход;
-- существующий desk-calendar остаётся отдельным foreground-слоем;
-- исправлен пробел в mobile-подзаголовке между `роста,` и `обмена`;
-- изображения не генерируются и не заменяются;
-- backend, bots, API-контракты, Prisma, nginx и production-данные не меняются.
+- header-кнопки Telegram / MAX / «Стать партнёром» удерживают иконки и подписи внутри своих белых контейнеров;
+- существующий hero artwork показывается без mobile crop, с мягким переходом из белой части;
+- пробел между `роста,` и `обмена` сохранён после скрытия desktop `<br>`;
+- «Главные события» листаются стрелками, клавиатурой и свайпом пальцем вправо/влево; touch/pen pointer capture усилен, при этом вертикальный scroll страницы сохранён;
+- существующий `notebook-stationery.png` не изменяется: на mobile блокнот/растение и кружка выводятся как два независимо позиционируемых CSS-clipped представления одного asset;
+- desktop stationery остаётся цельным;
+- изображения не генерируются и bitmap assets не заменяются.
 
-Application PR #108 прошёл полный CI #801 перед merge. Promotion должна пройти полный CI release-control до deployment.
+Application PR #110 прошёл полный CI #805 перед merge. Promotion обязана пройти полный release-control CI перед deployment.
 
 ## Сохраняемые backend-гарантии
 
-Backend pin `8aeecd1` сохраняет canonical-city защиту и исправление venue-first MAX location parsing.
+Backend pin `8aeecd1` сохраняет canonical-city защиту и venue-first MAX location parsing. CI продолжает запускать compiled MAX parser runtime regression и проверять `Экспофорум, Санкт-Петербург`, canonical city и hybrid cases. Frontend-only promotion не изменяет backend, bots, Prisma migrations, API-контракты или production-данные.
 
-В частности:
-
-- MAX parser использует общий shared location parser перед автопубликацией `OFFLINE/HYBRID` событий;
-- значения формата, улицы, дома и площадки не считаются физическим городом только потому, что поле непустое;
-- `Очно`, `офлайн + онлайн`, `ст1`, адресные фрагменты и venue-only значения без распознаваемого города дают `city=null` и требуют проверки;
-- ручная публикация `OFFLINE/HYBRID` требует активную каноническую связь `cityId -> City`;
-- structured `Формат: Очно` + `Где: Москва` даёт `format=OFFLINE`, `city=Москва`;
-- `Где: Экспофорум, Санкт-Петербург` даёт `venue=Экспофорум`, `city=Санкт-Петербург`, без дублирования города в venue;
-- hybrid syntax распознаётся в обоих порядках: `онлайн + офлайн` и `офлайн + онлайн`.
-
-### Обязательный compiled MAX parser runtime regression
-
-CI продолжает запускать compiled MAX parser runtime regression:
-
-`node --test apps/backend/test/max-parser-runtime.test.mjs`
-
-Тест импортирует собранный `dist/modules/max-import/max-parser.service.js` и проверяет, среди прочего, `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург`, блокировку не-городских значений и hybrid без физического места.
-
-Frontend-only promotion не изменяет backend, bots, Prisma migrations или production-данные.
-
-## Deployment текущего релиза
+## Deployment
 
 Использовать только `infra/scripts/deploy-pinned-frontend.sh`.
 
-Скрипт:
+Скрипт читает точный frontend pin, собирает detached worktree при необходимости, проверяет OCI revision, запускает preflight, переключает только frontend через `--no-deps --force-recreate frontend`, проверяет публичный HTTP и подтверждает неизменность backend, bots и nginx. При ошибке откатывается только frontend.
 
-- читает `PRODUCTION_FRONTEND_COMMIT`, `PRODUCTION_FRONTEND_TAG` и `PRODUCTION_FRONTEND_IMAGE` из production lock;
-- не определяет production по `main` или `latest`;
-- не двигает root Git HEAD;
-- получает точный pinned frontend commit и при отсутствии образа строит его из detached worktree;
-- проверяет OCI revision label образа против `PRODUCTION_FRONTEND_COMMIT`;
-- запускает preflight нового frontend image;
-- фиксирует текущие frontend/backend/bots/nginx container IDs/images, nginx config SHA и local Git status;
-- переключает только frontend через `--no-deps --force-recreate frontend`;
-- проверяет внутренний frontend HTTP и публичный `https://ab-event.pro`;
-- проверяет, что backend, bots, nginx и локальный production-конфиг не изменились;
-- при ошибке автоматически откатывает только frontend на предыдущий image.
+Ожидаемый финальный marker: `PRODUCTION_PIN_OK`.
 
-Ожидаемый финальный marker deployment:
+После deployment проверить mobile 390 px: header, hero, свайп «Главных событий», footer artwork, collapsed filter, календарь, карточки событий, цитаты, а также длинные месяцы `августа` и `сентября`.
 
-`PRODUCTION_PIN_OK`
+## Обязательное правило
 
-После deployment обязательно визуально проверить mobile 390 px: три кнопки header, hero artwork и переход между белым блоком и изображением. Затем проверить collapsed filter, календарь, карточки событий, блок цитат и footer. Дополнительно проверить карточки событий с коротким и длинным названием месяца, в частности `августа` и `сентября`.
-
-## Обязательное правило для новых чатов и AI-агентов
-
-Перед любыми изменениями, сборкой, откатом или deployment сначала прочитать:
+Перед любыми изменениями, сборкой, откатом или deployment прочитать:
 
 1. `PRODUCTION_RELEASE.md`;
 2. `infra/deploy/production-frontend.env`;
 3. `AGENTS.md`;
 4. `CLAUDE.md`.
 
-Нельзя считать `main`, `latest`, `APP_VERSION`, старый Docker-тег, rollback-образ или ранее собранный image утверждённой production-версией.
+Нельзя определять production по `main`, `latest`, `APP_VERSION`, rollback-образу или последнему Docker image. Разрешено использовать только component commits/images из production lock.
 
-Разрешено использовать только component commits и Docker images, указанные в `infra/deploy/production-frontend.env`.
+## Запрещено для текущего релиза
 
-## Запрещено
+- `latest` для backend, bots или frontend;
+- любой backend release кроме `backend-release-8aeecd1`;
+- любой bots release кроме `bots-release-3a64511`;
+- любой frontend release кроме `frontend-release-b65e7aa`;
+- пересоздание backend, bots или nginx при frontend-only deployment;
+- изменение `infra/nginx/conf.d/production.v2.conf`;
+- использование `deploy-pinned-app.sh`, `deploy-pinned-backend.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh` для этой promotion.
 
-- деплоить backend, bots или frontend с тегом `latest`;
-- выбирать backend или bots через общий `APP_VERSION`;
-- деплоить любой `backend-release-*`, кроме `backend-release-8aeecd1`;
-- деплоить любой `bots-release-*`, кроме `bots-release-3a64511`;
-- деплоить любой `frontend-release-*`, кроме `frontend-release-ac52a14`;
-- использовать rollback/preflight/temporary images как production;
-- определять production-версию по последнему commit в `main`;
-- менять component pins без отдельного утверждения владельцем проекта;
-- пересоздавать backend, bots или nginx при текущем frontend-only deployment;
-- изменять локальный production-конфиг `infra/nginx/conf.d/production.v2.conf`;
-- использовать для текущего релиза старый `deploy-pinned-app.sh`;
-- использовать для текущей frontend-only promotion `deploy-pinned-backend.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh`.
+## Новая версия в будущем
 
-## Как утвердить новую версию в будущем
-
-Новая версия считается production только после отдельного явного подтверждения владельца проекта и одновременного обновления:
+Новая версия становится production только после явного утверждения владельца проекта и согласованного обновления:
 
 - `infra/deploy/production-frontend.env`;
 - `PRODUCTION_RELEASE.md`;
@@ -124,5 +77,3 @@ Frontend-only promotion не изменяет backend, bots, Prisma migrations �
 - `AGENTS.md`;
 - `CLAUDE.md`;
 - `apps/frontend/test/production-release-lock.test.mjs`.
-
-Для backend-only релиза использовать `infra/scripts/deploy-pinned-backend.sh`. Для backend+frontend использовать `infra/scripts/deploy-pinned-backend-frontend.sh`. Для backend+bots использовать `infra/scripts/deploy-pinned-backend-bots.sh`. Frontend-only обновляется через `infra/scripts/deploy-pinned-frontend.sh`.

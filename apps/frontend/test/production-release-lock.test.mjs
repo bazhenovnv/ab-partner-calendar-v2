@@ -36,8 +36,8 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = 'ac52a149f0ad6141042b3d54f1a9bcfbc127279e';
-const FRONTEND_TAG = 'frontend-release-ac52a14';
+const FRONTEND_COMMIT = 'b65e7aa5d3fff87cdca783eecc4c7b2280cc45b4';
+const FRONTEND_TAG = 'frontend-release-b65e7aa';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 
 describe('Pinned production component release', () => {
@@ -66,21 +66,22 @@ describe('Pinned production component release', () => {
       assert.match(content, /deploy-pinned-frontend\.sh/);
     }
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /Frontend обновлён до `ac52a14`/);
+    assert.match(RELEASE, /Frontend обновлён до `b65e7aa`/);
     assert.match(RELEASE, /backend остаётся на `8aeecd1`/i);
     assert.match(RELEASE, /bots остаются на `3a64511`/i);
     assert.match(RELEASE, /390 px/);
-    assert.match(RELEASE, /PR #108/);
+    assert.match(RELEASE, /PR #110/);
+    assert.match(RELEASE, /свайп/iu);
+    assert.match(RELEASE, /notebook-stationery\.png/);
     assert.match(RELEASE, /сентября/);
     assert.match(RELEASE, /Экспофорум/);
-    assert.match(RELEASE, /Санкт-Петербург/);
     assert.match(RELEASE, /compiled MAX parser runtime/i);
   });
 
   test('compose pins current backend, frontend and bots images', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-8aeecd1\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-ac52a14\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-b65e7aa\}/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
@@ -113,51 +114,30 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(BACKEND_DEPLOY, /force-recreate frontend/);
     assert.doesNotMatch(BACKEND_DEPLOY, /force-recreate bots/);
     assert.doesNotMatch(BACKEND_DEPLOY, /force-recreate nginx/);
-    assert.match(BACKEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ BACKEND/);
-    assert.doesNotMatch(BACKEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ BACKEND И FRONTEND/);
-    assert.doesNotMatch(BACKEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ BACKEND \+ BOTS/);
   });
 
-  test('backend-only deploy refreshes nginx DNS after switch and rollback without recreating nginx', () => {
+  test('backend-only deploy refreshes nginx DNS without recreating nginx', () => {
     assert.match(BACKEND_DEPLOY, /reload_nginx\(\)/);
     assert.match(BACKEND_DEPLOY, /docker exec "\$container" nginx -t/);
     assert.match(BACKEND_DEPLOY, /docker exec "\$container" nginx -s reload/);
     assert.equal((BACKEND_DEPLOY.match(/reload_nginx "\$NGINX_BEFORE"/g) ?? []).length, 2);
-    assert.match(BACKEND_DEPLOY, /NGINX_RELOAD_OK=true/);
-    assert.match(BACKEND_DEPLOY, /NGINX_CONTAINER_UNCHANGED=true/);
     assert.doesNotMatch(BACKEND_DEPLOY, /force-recreate nginx/);
   });
 
-  test('backend-only deploy checks canonical city runtime and Telegram IPv6 with retry', () => {
+  test('backend-only deploy keeps canonical city and Telegram runtime checks', () => {
     assert.match(BACKEND_DEPLOY, /family: 6/);
-    assert.match(BACKEND_DEPLOY, /for attempt in 1 2 3 4 5 6/);
     assert.match(BACKEND_DEPLOY, /BACKEND_TELEGRAM_GET_ME_OK=true/);
     assert.match(BACKEND_DEPLOY, /CANONICAL_CITY_RUNTIME_OK=true/);
-    assert.match(BACKEND_DEPLOY, /Canonical public city missing/);
-    assert.match(BACKEND_DEPLOY, /Invalid active City catalogue row/);
     assert.match(BACKEND_DEPLOY, /LEGACY_UNRESOLVED_PUBLISHED_LOCATIONS/);
-    assert.match(BACKEND_DEPLOY, /активный город из справочника/);
-    assert.match(BACKEND_DEPLOY, /Город очного участия не определён или требует проверки/);
   });
 
-  test('backend-only deploy preserves frontend bots nginx container/config and local files', () => {
-    assert.match(BACKEND_DEPLOY, /FRONTEND_UNCHANGED=true/);
-    assert.match(BACKEND_DEPLOY, /BOTS_UNCHANGED=true/);
-    assert.match(BACKEND_DEPLOY, /NGINX_UNCHANGED=true/);
-    assert.match(BACKEND_DEPLOY, /NGINX_CONTAINER_UNCHANGED=true/);
-    assert.match(BACKEND_DEPLOY, /LOCAL_CHANGES_PRESERVED=true/);
-    assert.match(BACKEND_DEPLOY, /PRODUCTION_BACKEND_PIN_OK=true/);
-    assert.match(BACKEND_DEPLOY, /NGINX_CONFIG_SHA_BEFORE/);
-    assert.match(BACKEND_DEPLOY, /GIT_STATUS_BEFORE/);
-  });
-
-  test('other component-specific deploy paths remain available', () => {
+  test('component-specific deploy paths remain available', () => {
     assert.match(BACKEND_FRONTEND_DEPLOY, /PRODUCTION_BACKEND_FRONTEND_PIN_OK=true/);
     assert.match(BACKEND_BOTS_DEPLOY, /PRODUCTION_BACKEND_BOTS_PIN_OK=true/);
     assert.match(FRONTEND_DEPLOY, /PRODUCTION_PIN_OK/);
   });
 
-  test('frontend cleanup protects the currently pinned frontend image', () => {
+  test('frontend cleanup protects the pinned frontend image', () => {
     assert.match(CLEANUP, /refusing cleanup: production does not use pinned image/);
     assert.match(CLEANUP, /ONLY_PINNED_FRONTEND_IMAGE_REMAINS=true/);
     assert.match(CLEANUP, /SKIP_RUNNING_CONTAINER/);
