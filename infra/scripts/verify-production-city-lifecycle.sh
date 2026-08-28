@@ -272,12 +272,42 @@ async function expectBadRequest(label, fn) {
     },
   });
   const citiesService = new CitiesService(forbiddenPrisma);
+  const invalidCityNames = ['Очно', 'ст1', 'Экспофорум', '4-й Лесной пер.', 'офлайн + онлайн'];
 
-  for (const badName of ['Очно', 'ст1', 'Экспофорум', '4-й Лесной пер.', 'офлайн + онлайн']) {
+  for (const badName of invalidCityNames) {
     await expectBadRequest(`CITY_CREATE_REJECTED_${JSON.stringify(badName)}`, () =>
       citiesService.create({ name: badName, region: 'QA' })
     );
   }
+  console.log('QA_CITY_CREATE_GUARD_OK=true');
+
+  const renameGuardPrisma = {
+    city: {
+      findUnique: async () => ({
+        id: 'qa-existing-city',
+        name: 'Москва',
+        region: 'Москва',
+        isActive: true,
+        sortOrder: 0,
+        createdAt: new Date('2026-01-01T00:00:00Z'),
+        _count: { events: 0 },
+      }),
+      findFirst: async () => {
+        throw new Error('CITY_RENAME_QA_FORBIDDEN_DUPLICATE_LOOKUP');
+      },
+      update: async () => {
+        throw new Error('CITY_RENAME_QA_FORBIDDEN_UPDATE');
+      },
+    },
+  };
+  const renameCitiesService = new CitiesService(renameGuardPrisma);
+
+  for (const badName of invalidCityNames) {
+    await expectBadRequest(`CITY_RENAME_REJECTED_${JSON.stringify(badName)}`, () =>
+      renameCitiesService.update('qa-existing-city', { name: badName })
+    );
+  }
+  console.log('QA_CITY_RENAME_GUARD_OK=true');
   console.log('QA_CITY_CRUD_GUARD_OK=true');
 
   let forbiddenUpdateCalls = 0;
