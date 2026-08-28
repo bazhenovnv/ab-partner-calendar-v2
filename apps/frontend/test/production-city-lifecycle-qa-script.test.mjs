@@ -22,9 +22,10 @@ describe('production city lifecycle read-only QA script', () => {
     assert.match(SCRIPT, /QA_OFFLINE_MOSCOW_OK=true/);
     assert.match(SCRIPT, /QA_VENUE_FIRST_SPB_OK=true/);
     assert.match(SCRIPT, /assert\.equal\(expo\.venue, 'Экспофорум'\)/);
-    assert.match(SCRIPT, /QA_INVALID_ST1_BLOCKED=true/);
-    assert.match(SCRIPT, /QA_INVALID_OCHNO_BLOCKED=true/);
-    assert.match(SCRIPT, /QA_INVALID_VENUE_ONLY_BLOCKED=true/);
+    assert.match(SCRIPT, /\['ST1', 'ст1'\]/);
+    assert.match(SCRIPT, /\['OCHNO', 'Очно'\]/);
+    assert.match(SCRIPT, /\['VENUE_ONLY', 'Экспофорум'\]/);
+    assert.match(SCRIPT, /console\.log\(`QA_INVALID_\$\{label\}_BLOCKED=true`\)/);
     assert.match(SCRIPT, /QA_HYBRID_WITHOUT_LOCATION_BLOCKED=true/);
   });
 
