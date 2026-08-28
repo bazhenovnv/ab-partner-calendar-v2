@@ -8,7 +8,7 @@
 - Release anchor commit: `8aeecd1140812f6c92941146cdd4fba671ae8c93`
 - Backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit/image: `4d8daa1b069ee8f69f5a43c808cf7506de71d5c9` / `ab-afisha/frontend:frontend-release-4d8daa1`
+- Frontend commit/image: `8f750208a5bb2a283811d2555c5f7cd92449d30d` / `ab-afisha/frontend:frontend-release-8f75020`
 - Дата утверждения: `2026-08-28`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -18,18 +18,17 @@
 
 ## Текущая frontend-only promotion
 
-Frontend обновлён до `4d8daa1`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`, nginx не пересоздаётся.
+Frontend обновлён до `8f75020`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`, nginx не пересоздаётся.
 
-Frontend `4d8daa1` включает предыдущий mobile layout 390 px и визуальную доводку PR #112 по последнему сравнению production с Figma:
+Frontend `8f75020` включает предыдущий mobile layout 390 px и последнюю визуальную доводку PR #114 по production-скриншоту:
 
-- блок «Контакты» и его вертикальная разделительная линия сдвинуты левее к «Наши проекты», чтобы справа оставалось место для отдельной кружки;
-- mobile-календарь немного уменьшен по внешней и внутренней геометрии, чтобы правая граница и крайний столбец не выглядели обрезанными;
-- секции цитат возвращён белый фон, как в Figma;
-- touch-swipe «Главных событий» из PR #110 сохранён без изменения;
-- `notebook-stationery.png` остаётся исходным bitmap: блокнот/растение и кружка по-прежнему позиционируются независимо через CSS-clipped представления;
+- белая секция цитат увеличена до 352 px по высоте, поэтому зелёная рамка цитаты опускается ниже и остаётся полностью внутри белого фона;
+- cut-out изображения людей сохраняют утверждённые верхние позиции;
+- существующие CSS-clipped представления `notebook-stationery.png` уменьшены и сдвинуты внутрь: блокнот масштабируется до 90%, кружка до 88%, чтобы правый край блокнота не обрезался на 390 px;
+- предыдущий сдвиг блока «Контакты» и divider, уменьшение календаря и touch-swipe «Главных событий» сохранены без изменения;
 - изображения не генерируются и bitmap assets не заменяются.
 
-Application PR #112 прошёл полный CI #809 перед merge. Promotion обязана пройти полный release-control CI перед deployment.
+Application PR #114 прошёл полный CI #813 перед merge. Promotion обязана пройти полный release-control CI перед deployment.
 
 ## Сохраняемые backend-гарантии
 
@@ -43,7 +42,7 @@ Backend pin `8aeecd1` сохраняет canonical-city защиту и venue-fi
 
 Ожидаемый финальный marker: `PRODUCTION_PIN_OK`.
 
-После deployment проверить mobile 390 px: календарь справа, белый фон цитат, положение divider/«Контакты» и кружки, а также сохранность свайпа «Главных событий». Дополнительно проверить длинные месяцы `августа` и `сентября`.
+После deployment проверить mobile 390 px: высоту белого фона цитат, положение зелёной рамки, полный правый край блокнота, размер кружки, положение divider/«Контакты», календарь справа и сохранность свайпа «Главных событий». Дополнительно проверить длинные месяцы `августа` и `сентября`.
 
 ## Обязательное правило
 
@@ -61,7 +60,7 @@ Backend pin `8aeecd1` сохраняет canonical-city защиту и venue-fi
 - `latest` для backend, bots или frontend;
 - любой backend release кроме `backend-release-8aeecd1`;
 - любой bots release кроме `bots-release-3a64511`;
-- любой frontend release кроме `frontend-release-4d8daa1`;
+- любой frontend release кроме `frontend-release-8f75020`;
 - пересоздание backend, bots или nginx при frontend-only deployment;
 - изменение `infra/nginx/conf.d/production.v2.conf`;
 - использование `deploy-pinned-app.sh`, `deploy-pinned-backend.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh` для этой promotion.
