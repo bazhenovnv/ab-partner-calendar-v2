@@ -25,6 +25,15 @@ test('slightly reduces mobile calendar geometry so the right edge stays visible'
   assert.match(css, /\.pub-calendar-table\s*\{[\s\S]*?min-height:\s*292px !important;/);
 });
 
-test('restores the white Figma background behind the mobile quotes', () => {
+test('uses a taller white Figma quote band so the frame sits lower inside it', () => {
+  assert.match(css, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?height:\s*352px !important;/);
+  assert.match(css, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?min-height:\s*352px !important;/);
   assert.match(css, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?background:\s*#fff !important;/);
+});
+
+test('scales the existing notebook and cup inward without changing bitmap assets', () => {
+  assert.match(css, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*8px !important;/);
+  assert.match(css, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.9\)/);
+  assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*8px !important;/);
+  assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?scale\(0\.88\)/);
 });

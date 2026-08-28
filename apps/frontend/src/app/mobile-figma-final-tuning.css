@@ -46,10 +46,13 @@
     font-size: 15.5px !important;
   }
 
-  /* Figma uses a white quote band. Keep the cut-out people and quote frame
-     above it, but do not let the grey page canvas show through this section. */
+  /* Figma uses a taller white quote band. Increasing both containers moves
+     the bottom-anchored green quote frame down while keeping it fully inside
+     the white field; the cut-out people keep their approved top positions. */
   .quotes-section,
   .quotes-layout {
+    height: 352px !important;
+    min-height: 352px !important;
     background: #fff !important;
   }
 
@@ -68,9 +71,20 @@
     padding-left: 12px !important;
   }
 
-  /* Keep the cup optically on the far right once the contacts column moves. */
+  /* Make the existing clipped stationery views slightly smaller and move
+     them inward so the notebook edge and cup remain fully inside 390 px. */
+  .pub-footer-stationery-piece--notebook {
+    top: 16px !important;
+    right: 8px !important;
+    transform: scale(0.9) !important;
+    transform-origin: right top !important;
+  }
+
   .pub-footer-stationery-piece--cup {
-    right: -2px !important;
+    top: 228px !important;
+    right: 8px !important;
+    transform: scale(0.88) !important;
+    transform-origin: right center !important;
   }
 }
 
@@ -82,5 +96,15 @@
 
   .pub-footer-top > .pub-footer-col:nth-child(3) {
     padding-left: 10px !important;
+  }
+
+  .pub-footer-stationery-piece--notebook {
+    right: 5px !important;
+    transform: scale(0.86) !important;
+  }
+
+  .pub-footer-stationery-piece--cup {
+    right: 5px !important;
+    transform: scale(0.84) !important;
   }
 }
