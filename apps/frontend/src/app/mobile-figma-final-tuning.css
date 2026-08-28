@@ -1,0 +1,86 @@
+/* Final 390 px optical tuning from the latest production-vs-Figma review.
+   Scope is mobile only. No bitmap assets or application behaviour are changed. */
+
+@media (max-width: 767px) {
+  /* Calendar: give the right edge a little more breathing room and slightly
+     reduce the internal geometry so the final column never looks clipped. */
+  .pub-events-calendar-col {
+    width: calc(100% - 8px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 20px 14px 18px !important;
+    border-radius: 21px !important;
+  }
+
+  .pub-calendar {
+    width: calc(100% - 4px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    gap: 14px !important;
+  }
+
+  .pub-calendar-heading {
+    font-size: 21px !important;
+  }
+
+  .pub-calendar-nav-button {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .pub-calendar-table {
+    width: 100% !important;
+    min-height: 292px !important;
+  }
+
+  .pub-calendar-weekdays {
+    flex-basis: 36px !important;
+  }
+
+  .pub-calendar-weekday {
+    height: 36px !important;
+    font-size: 13.5px !important;
+  }
+
+  .pub-calendar-cell {
+    font-size: 15.5px !important;
+  }
+
+  /* Figma uses a white quote band. Keep the cut-out people and quote frame
+     above it, but do not let the grey page canvas show through this section. */
+  .quotes-section,
+  .quotes-layout {
+    background: #fff !important;
+  }
+
+  .quotes-section {
+    box-shadow: 0 2px 7px rgba(13, 35, 68, 0.08) !important;
+  }
+
+  /* Footer: move the contacts divider/column toward “Наши проекты”. This
+     frees the right side for the independently positioned cup, as in Figma. */
+  .pub-footer-top {
+    grid-template-columns: 112px minmax(0, 1fr) !important;
+    column-gap: 10px !important;
+  }
+
+  .pub-footer-top > .pub-footer-col:nth-child(3) {
+    padding-left: 12px !important;
+  }
+
+  /* Keep the cup optically on the far right once the contacts column moves. */
+  .pub-footer-stationery-piece--cup {
+    right: -2px !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .pub-footer-top {
+    grid-template-columns: 104px minmax(0, 1fr) !important;
+    column-gap: 8px !important;
+  }
+
+  .pub-footer-top > .pub-footer-col:nth-child(3) {
+    padding-left: 10px !important;
+  }
+}
