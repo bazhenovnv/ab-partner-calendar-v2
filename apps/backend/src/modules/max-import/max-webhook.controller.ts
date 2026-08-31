@@ -10,6 +10,7 @@ import {
 import { ApiTags, ApiExcludeController } from '@nestjs/swagger';
 import { timingSafeEqual } from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { EditorialMaxDiscoveryService } from '../editorial/editorial-max-discovery.service';
 import { MaxImportService } from './max-import.service';
 import { MaxBotInteractionService } from './max-bot-interaction.service';
 
@@ -28,6 +29,7 @@ export class MaxWebhookController {
   constructor(
     private readonly maxImportService: MaxImportService,
     private readonly maxBotInteractionService: MaxBotInteractionService,
+    private readonly maxEditorialDiscovery: EditorialMaxDiscoveryService,
     private readonly config: ConfigService,
   ) {}
 
@@ -51,6 +53,16 @@ export class MaxWebhookController {
         'Webhook: invalid X-Max-Bot-Api-Secret',
       );
       throw new ForbiddenException('Invalid secret');
+    }
+
+    try {
+      await this.maxEditorialDiscovery.captureUpdate(body);
+    } catch (err) {
+      this.logger.warn(
+        `MAX editorial channel discovery error: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
     }
 
     let handledByBot = false;
