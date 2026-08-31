@@ -15,9 +15,13 @@ const CLAUDE = read('CLAUDE.md');
 const CI = read('.github/workflows/ci.yml');
 const MAX_RUNTIME_TEST = read('apps/backend/test/max-parser-runtime.test.mjs');
 const BACKEND_ENTRYPOINT = read('apps/backend/docker-entrypoint.sh');
+const PRISMA_SCHEMA = read('apps/backend/prisma/schema.prisma');
 const EDITORIAL_MIGRATION = read(
   'apps/backend/prisma/migrations/20260831100000_add_editorial_publisher/migration.sql',
 );
+const EDITORIAL_SCHEDULER = read('apps/backend/src/modules/editorial/editorial-scheduler.service.ts');
+const EDITORIAL_IMAGE_SERVICE = read('apps/backend/src/modules/editorial/editorial-image.service.ts');
+const EDITORIAL_PUBLISHER = read('apps/frontend/src/app/admin/editorial/EditorialPublisher.tsx');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -33,19 +37,19 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = '0f3938dd6cd348700f6b867fdd140eb515a14791';
+const RELEASE_ANCHOR = '9ecf18060b600e3575d86755dcebd9a2ee3f14ff';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-0f3938d';
+const BACKEND_TAG = 'backend-release-9ecf180';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
 const FRONTEND_COMMIT = RELEASE_ANCHOR;
-const FRONTEND_TAG = 'frontend-release-0f3938d';
+const FRONTEND_TAG = 'frontend-release-9ecf180';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for editorial backend/frontend promotion', () => {
+  test('defines independent machine-readable pins for editorial UX backend/frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -59,7 +63,7 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-08-31/);
   });
 
-  test('documents exact backend+frontend release and preserved bots pin', () => {
+  test('documents exact backend+frontend release and preserved bots/nginx', () => {
     for (const content of [RELEASE, AGENTS, CLAUDE]) {
       assert.match(content, new RegExp(RELEASE_ANCHOR));
       assert.match(content, new RegExp(BACKEND_IMAGE));
@@ -70,34 +74,56 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /редакционн/iu);
-    assert.match(RELEASE, /PR #117/);
-    assert.match(RELEASE, /CI #828/);
+    assert.match(RELEASE, /PR #119/);
+    assert.match(RELEASE, /CI #832/);
+    assert.match(RELEASE, /каждые 15 секунд/);
+    assert.match(RELEASE, /SCHEDULED -> PUBLISHING/);
+    assert.match(RELEASE, /fit: contain/);
+    assert.match(RELEASE, /Новой Prisma migration.*нет/isu);
     assert.match(RELEASE, /20260831100000_add_editorial_publisher/);
     assert.match(RELEASE, /prisma migrate deploy/i);
-    assert.match(RELEASE, /MAX.*chat_id/isu);
-    assert.match(RELEASE, /Telegram native views/i);
+    assert.match(RELEASE, /Макс - "АБ Афиша бухгалтера простая"/);
+    assert.match(RELEASE, /Макс - "АБ\| Афиша бухгалтера"/);
     assert.match(RELEASE, /bots остаются на `3a64511`/i);
     assert.match(RELEASE, /nginx не пересоздаётся/i);
+    assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins editorial backend/frontend and preserves bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-0f3938d\}/);
+  test('compose pins editorial UX backend/frontend and preserves bots', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-9ecf180\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-0f3938d\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-9ecf180\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('editorial schema is applied through the production backend entrypoint', () => {
+  test('uses existing editorial scheduledAt without a new schema migration', () => {
     assert.match(BACKEND_ENTRYPOINT, /pnpm exec prisma migrate deploy/);
+    assert.match(PRISMA_SCHEMA, /model EditorialPost[\s\S]*scheduledAt\s+DateTime\?/);
     assert.match(EDITORIAL_MIGRATION, /CREATE TABLE "EditorialPost"/);
-    assert.match(EDITORIAL_MIGRATION, /CREATE TABLE "EditorialPublication"/);
-    assert.match(EDITORIAL_MIGRATION, /CREATE TABLE "EditorialStatsSnapshot"/);
-    assert.match(EDITORIAL_MIGRATION, /ON DELETE CASCADE/);
+    assert.match(EDITORIAL_MIGRATION, /"scheduledAt" TIMESTAMP\(3\)/);
     assert.doesNotMatch(EDITORIAL_MIGRATION, /DROP TABLE/i);
+    assert.match(EDITORIAL_SCHEDULER, /@Cron\('\*\/15 \* \* \* \* \*'\)/);
+    assert.match(EDITORIAL_SCHEDULER, /status:\s*'SCHEDULED'/);
+    assert.match(EDITORIAL_SCHEDULER, /status:\s*'PUBLISHING'/);
+    assert.match(EDITORIAL_SCHEDULER, /updateMany\(\{/);
+  });
+
+  test('locks non-cropping image processing and redesigned common preview', () => {
+    assert.match(EDITORIAL_IMAGE_SERVICE, /fit:\s*'contain'/);
+    assert.doesNotMatch(EDITORIAL_IMAGE_SERVICE, /fit:\s*'cover'/);
+    assert.match(EDITORIAL_IMAGE_SERVICE, /40|SUPPORTED_FORMATS/);
+    assert.match(EDITORIAL_PUBLISHER, /Общий предварительный просмотр/);
+    assert.match(EDITORIAL_PUBLISHER, /Макс - "АБ Афиша бухгалтера простая"/);
+    assert.match(EDITORIAL_PUBLISHER, /Макс - "АБ\| Афиша бухгалтера"/);
+    assert.match(EDITORIAL_PUBLISHER, /ChannelColumn title="Макс"/);
+    assert.match(EDITORIAL_PUBLISHER, /ChannelColumn title="ТГ"/);
+    assert.doesNotMatch(EDITORIAL_PUBLISHER, /previewPlatform/);
+    assert.match(EDITORIAL_PUBLISHER, /const failures: string\[\] = \[\]/);
+    assert.match(EDITORIAL_PUBLISHER, /if \(uploaded\.length\)/);
+    assert.match(EDITORIAL_PUBLISHER, /\/editorial\/posts\/\$\{id\}\/schedule/);
   });
 
   test('requires compiled MAX parser regression in CI for the pinned backend', () => {
