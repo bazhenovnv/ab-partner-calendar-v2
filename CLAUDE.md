@@ -9,19 +9,19 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `0f3938dd6cd348700f6b867fdd140eb515a14791`;
-- backend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/backend:backend-release-0f3938d`;
+- release anchor: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff`;
+- backend commit/image: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff` / `ab-afisha/backend:backend-release-9ecf180`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/frontend:frontend-release-0f3938d`;
+- frontend commit/image: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff` / `ab-afisha/frontend:frontend-release-9ecf180`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняются backend и frontend. Release `0f3938d` включает редакционный кабинет `/admin/editorial`, публикацию в Telegram/MAX, rich-text и emoji, шаблоны изображений, независимые per-channel статусы/ошибки/retry, MAX native views и экран `/admin/editorial/max-channels` для обнаружения/привязки MAX `chat_id`. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
+Для текущей promotion меняются backend и frontend. Release `9ecf180` улучшает редакционный кабинет `/admin/editorial`: публикация сейчас или по дате/времени, безопасный scheduler на существующем `EditorialPost.scheduledAt`, обработка изображений без скрытой обрезки, сохранение успешно обработанных файлов при частичной ошибке пачки, единый полный предпросмотр, размещение загрузки изображения перед текстом, двухколоночный список MAX/ТГ и утверждённые названия MAX-каналов. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
 
-Релиз включает аддитивную Prisma migration `20260831100000_add_editorial_publisher`. Production backend стартует через `apps/backend/docker-entrypoint.sh`, который перед NestJS выполняет `pnpm exec prisma migrate deploy`. Нельзя заменять это ручным SQL. После успешной migration rollback старого backend допустим: дополнительные таблицы не ломают предыдущую версию приложения.
+Новой Prisma migration в этой promotion нет. Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration `20260831100000_add_editorial_publisher`. Production backend стартует через `apps/backend/docker-entrypoint.sh`, который перед NestJS выполняет `pnpm exec prisma migrate deploy`; ручной SQL запрещён.
 
 Для backend обязателен CI-step `Compiled MAX parser runtime regression tests`, который проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург` и блокировку не-городских значений.
 
