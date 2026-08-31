@@ -36,7 +36,7 @@ services:
       retries: 5
 
   backend:
-    image: ${BACKEND_IMAGE:-ab-afisha/backend:backend-release-0f3938d}
+    image: ${BACKEND_IMAGE:-ab-afisha/backend:backend-release-9ecf180}
     restart: always
     environment:
       NODE_ENV: production
@@ -94,7 +94,7 @@ services:
       start_period: 30s
 
   frontend:
-    image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-0f3938d}
+    image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-9ecf180}
     restart: always
     environment:
       NODE_ENV: production
