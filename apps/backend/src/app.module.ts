@@ -24,6 +24,7 @@ import { LegalModule } from './modules/legal/legal.module';
 import { BroadcastsModule } from './modules/broadcasts/broadcasts.module';
 import { DirectionsModule } from './modules/directions/directions.module';
 import { EmailNotificationsModule } from './modules/email-notifications/email-notifications.module';
+import { EditorialModule } from './modules/editorial/editorial.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { EmailNotificationsModule } from './modules/email-notifications/email-no
     BroadcastsModule,
     DirectionsModule,
     EmailNotificationsModule,
+    EditorialModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
