@@ -9,16 +9,16 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff`;
-- backend commit/image: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff` / `ab-afisha/backend:backend-release-9ecf180`;
+- release anchor: `c8f024028616eaa9cc04282beed41ca3e2c326d1`;
+- backend commit/image: `c8f024028616eaa9cc04282beed41ca3e2c326d1` / `ab-afisha/backend:backend-release-c8f0240`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff` / `ab-afisha/frontend:frontend-release-9ecf180`;
+- frontend commit/image: `c8f024028616eaa9cc04282beed41ca3e2c326d1` / `ab-afisha/frontend:frontend-release-c8f0240`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняются backend и frontend. Release `9ecf180` исправляет редакционный кабинет `/admin/editorial`: добавляет публикацию сейчас или по дате/времени через существующее поле `scheduledAt`, безопасный scheduler с атомарным `SCHEDULED -> PUBLISHING`, обработку изображений без crop, сохранение успешных файлов при частичной ошибке загрузки, единый полный preview, новые подписи каналов и двухколоночный выбор MAX/ТГ. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
+Для текущей promotion меняются backend и frontend. Release `c8f0240` включает улучшения редакционного кабинета `/admin/editorial`: публикацию сейчас или по дате/времени через существующее поле `scheduledAt`, безопасный scheduler с атомарным `SCHEDULED -> PUBLISHING`, обработку изображений без crop, сохранение успешных файлов при частичной ошибке загрузки, единый полный preview, двухколоночный выбор MAX/ТГ и третий независимый MAX target `MAX_CHANNEL_3` (`Макс - "АБ| Пратнер"`) с `MAX_EDITORIAL_CHANNEL_3_ID` и persistent binding в `SiteConfig`. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
 
 Новой Prisma migration в этой promotion нет: поле `EditorialPost.scheduledAt` уже существует в production-схеме после ранее применённой migration `20260831100000_add_editorial_publisher`. Backend Docker entrypoint по-прежнему перед запуском приложения выполняет `pnpm exec prisma migrate deploy`; ручное изменение production-схемы запрещено.
 
