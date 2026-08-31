@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { EditorialMaxDiscoveryService } from './editorial-max-discovery.service';
 import { EditorialService } from './editorial.service';
 
 @ApiTags('editorial')
@@ -23,11 +24,34 @@ import { EditorialService } from './editorial.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 export class EditorialController {
-  constructor(private readonly editorial: EditorialService) {}
+  constructor(
+    private readonly editorial: EditorialService,
+    private readonly maxDiscovery: EditorialMaxDiscoveryService,
+  ) {}
 
   @Get('channels')
   channels() {
     return this.editorial.getChannels();
+  }
+
+  @Get('max/channels')
+  maxChannels() {
+    return this.maxDiscovery.getState();
+  }
+
+  @Post('max/channels/bind')
+  bindMaxChannel(@Body() body: { targetKey: string; chatId: string }) {
+    return this.maxDiscovery.bind(body.targetKey, body.chatId);
+  }
+
+  @Post('max/channels/unbind')
+  unbindMaxChannel(@Body() body: { targetKey: string }) {
+    return this.maxDiscovery.unbind(body.targetKey);
+  }
+
+  @Post('max/channels/refresh')
+  refreshMaxChannel(@Body() body: { chatId: string }) {
+    return this.maxDiscovery.refresh(body.chatId);
   }
 
   @Get('dashboard')
