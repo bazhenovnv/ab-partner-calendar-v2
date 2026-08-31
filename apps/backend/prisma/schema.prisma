@@ -504,3 +504,64 @@ model ErrorLog {
 
   @@index([createdAt])
 }
+
+model EditorialPost {
+  id           String   @id @default(uuid())
+  contentType  String   @default("NEWS")
+  title        String
+  contentHtml  String
+  contentText  String
+  media        Json     @default("[]")
+  channelKeys  String[] @default([])
+  status       String   @default("DRAFT")
+  scheduledAt  DateTime?
+  publishedAt  DateTime?
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  publications EditorialPublication[]
+
+  @@index([status])
+  @@index([contentType])
+  @@index([createdAt])
+}
+
+model EditorialPublication {
+  id                String   @id @default(uuid())
+  postId            String
+  post              EditorialPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  channelKey        String
+  platform          String
+  channelName       String
+  status            String   @default("PENDING")
+  providerMessageId String?
+  providerUrl       String?
+  errorCode         String?
+  errorMessage      String?
+  views             Int?
+  reposts           Int?
+  publishedAt       DateTime?
+  lastStatsAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  snapshots EditorialStatsSnapshot[]
+
+  @@unique([postId, channelKey])
+  @@index([channelKey])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model EditorialStatsSnapshot {
+  id            String   @id @default(uuid())
+  publicationId String
+  publication   EditorialPublication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  views         Int      @default(0)
+  reposts       Int?
+  capturedAt    DateTime @default(now())
+
+  @@index([publicationId])
+  @@index([capturedAt])
+}

@@ -9,9 +9,10 @@ import { MaxImportRecoveryService } from './max-import-recovery.service';
 import { MaxBotInteractionService } from './max-bot-interaction.service';
 import { BotsModule } from '../bots/bots.module';
 import { RemindersModule } from '../reminders/reminders.module';
+import { EditorialModule } from '../editorial/editorial.module';
 
 @Module({
-  imports: [BotsModule, RemindersModule],
+  imports: [BotsModule, RemindersModule, EditorialModule],
   controllers: [MaxImportController, MaxWebhookController],
   providers: [
     MaxParserService,

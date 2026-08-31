@@ -10,6 +10,7 @@ import {
 import { ApiTags, ApiExcludeController } from '@nestjs/swagger';
 import { timingSafeEqual } from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { EditorialMaxDiscoveryService } from '../editorial/editorial-max-discovery.service';
 import { MaxImportService } from './max-import.service';
 import { MaxBotInteractionService } from './max-bot-interaction.service';
 
@@ -28,6 +29,7 @@ export class MaxWebhookController {
   constructor(
     private readonly maxImportService: MaxImportService,
     private readonly maxBotInteractionService: MaxBotInteractionService,
+    private readonly maxEditorialDiscovery: EditorialMaxDiscoveryService,
     private readonly config: ConfigService,
   ) {}
 
@@ -52,6 +54,16 @@ export class MaxWebhookController {
       );
       throw new ForbiddenException('Invalid secret');
     }
+
+    // MAX expects a fast 200 response. Channel discovery may perform an outbound
+    // GET /chats/{chatId}, so keep it off the webhook's critical path.
+    void this.maxEditorialDiscovery.captureUpdate(body).catch((err) => {
+      this.logger.warn(
+        `MAX editorial channel discovery error: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    });
 
     let handledByBot = false;
 
