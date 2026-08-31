@@ -55,15 +55,15 @@ export class MaxWebhookController {
       throw new ForbiddenException('Invalid secret');
     }
 
-    try {
-      await this.maxEditorialDiscovery.captureUpdate(body);
-    } catch (err) {
+    // MAX expects a fast 200 response. Channel discovery may perform an outbound
+    // GET /chats/{chatId}, so keep it off the webhook's critical path.
+    void this.maxEditorialDiscovery.captureUpdate(body).catch((err) => {
       this.logger.warn(
         `MAX editorial channel discovery error: ${
           err instanceof Error ? err.message : String(err)
         }`,
       );
-    }
+    });
 
     let handledByBot = false;
 
