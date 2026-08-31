@@ -9,19 +9,21 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `8aeecd1140812f6c92941146cdd4fba671ae8c93`;
-- backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`;
+- release anchor: `0f3938dd6cd348700f6b867fdd140eb515a14791`;
+- backend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/backend:backend-release-0f3938d`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `8f750208a5bb2a283811d2555c5f7cd92449d30d` / `ab-afisha/frontend:frontend-release-8f75020`;
+- frontend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/frontend:frontend-release-0f3938d`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только frontend. `8f75020` включает mobile layout 390 px, touch-swipe «Главных событий» и доводку PR #114: белая секция цитат увеличена до 352 px, зелёная рамка цитаты опущена ниже, notebook/cup artwork уменьшен и сдвинут внутрь через CSS без изменения исходного bitmap. Backend `8aeecd1`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
+Для текущей promotion меняются backend и frontend. Release `0f3938d` включает редакционный кабинет `/admin/editorial`, публикацию в Telegram/MAX, rich-text и emoji, шаблоны изображений, независимые per-channel статусы/ошибки/retry, MAX native views и экран `/admin/editorial/max-channels` для обнаружения/привязки MAX `chat_id`. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
 
-Backend `8aeecd1` остаётся утверждённым backend pin. Для его promotion обязателен CI-step `Compiled MAX parser runtime regression tests`, который проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург` и блокировку не-городских значений.
+Релиз включает аддитивную Prisma migration `20260831100000_add_editorial_publisher`. Production backend стартует через `apps/backend/docker-entrypoint.sh`, который перед NestJS выполняет `pnpm exec prisma migrate deploy`. Нельзя заменять это ручным SQL. После успешной migration rollback старого backend допустим: дополнительные таблицы не ломают предыдущую версию приложения.
+
+Для backend обязателен CI-step `Compiled MAX parser runtime regression tests`, который проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург` и блокировку не-городских значений.
 
 Production components закрепляются независимо. Запрещено считать `main`, `latest`, `APP_VERSION`, старый release-тег или rollback-образ текущей production-версией. Новая версия становится production только после отдельного явного утверждения владельцем проекта и одновременного обновления production lock-файлов.
 
