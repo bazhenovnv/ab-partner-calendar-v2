@@ -19,6 +19,13 @@ const TARGETS = [
     label: 'MAX — канал 2',
     publicUrl: 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0',
   },
+  {
+    key: 'MAX_CHANNEL_3',
+    env: 'MAX_EDITORIAL_CHANNEL_3_ID',
+    configKey: 'editorial.max.binding.MAX_CHANNEL_3',
+    label: 'Макс - "АБ| Пратнер"',
+    publicUrl: 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA',
+  },
 ] as const;
 
 type DiscoveredMaxChannel = {

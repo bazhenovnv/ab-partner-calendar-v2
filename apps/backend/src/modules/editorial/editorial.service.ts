@@ -71,6 +71,13 @@ const CHANNELS: ChannelDefinition[] = [
     publicUrl: 'https://max.ru/join/LNPW5HIAqvWwUH1vQtB5V1kytLpmG18IsNURG4is4B0',
     maxChatEnv: 'MAX_EDITORIAL_CHANNEL_2_ID',
   },
+  {
+    key: 'MAX_CHANNEL_3',
+    platform: 'MAX',
+    name: 'Макс - "АБ| Пратнер"',
+    publicUrl: 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA',
+    maxChatEnv: 'MAX_EDITORIAL_CHANNEL_3_ID',
+  },
 ];
 
 const IMAGE_TEMPLATES: Record<string, { width?: number; height?: number; label: string }> = {
