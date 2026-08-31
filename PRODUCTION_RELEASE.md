@@ -5,10 +5,10 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `0f3938dd6cd348700f6b867fdd140eb515a14791`
-- Backend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/backend:backend-release-0f3938d`
+- Release anchor commit: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff`
+- Backend commit/image: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff` / `ab-afisha/backend:backend-release-9ecf180`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/frontend:frontend-release-0f3938d`
+- Frontend commit/image: `9ecf18060b600e3575d86755dcebd9a2ee3f14ff` / `ab-afisha/frontend:frontend-release-9ecf180`
 - Дата утверждения: `2026-08-31`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -16,48 +16,56 @@
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая promotion — редакционный кабинет Telegram / MAX
+## Текущая promotion — время размещения и изображения редакционного кабинета
 
-Backend и frontend обновляются до `0f3938d`; bots остаются на `3a64511`, nginx не пересоздаётся.
+Backend и frontend обновляются до `9ecf180`; bots остаются на `3a64511`, nginx не пересоздаётся.
 
-Application PR #117 добавляет отдельный редакционный кабинет `/admin/editorial` для подготовки и публикации новостей/событий в два Telegram- и два MAX-канала. PR #117 прошёл полный CI #828 перед merge.
+Application PR #119 исправляет и расширяет `/admin/editorial`. PR #119 прошёл полный CI #832 перед merge: lint, typecheck shared/bots/frontend/backend, regression tests, Prisma migration check, production build и compiled MAX parser runtime regression — успешно.
 
 В релиз входят:
 
-- rich-text редактор и Unicode emoji-панель;
-- загрузка до 10 изображений с шаблонами 1:1, 4:5, 16:9, 9:16 и original;
-- предпросмотр Telegram / MAX;
-- выбор одного или нескольких каналов;
-- раздельный статус публикации и конкретная ошибка по каждому каналу;
-- retry только проблемного канала;
-- счётчики публикаций и ошибок;
-- MAX native views с автоматическим обновлением статистики;
-- отдельный экран `/admin/editorial/max-channels` для обнаружения и привязки MAX `chat_id`;
-- автоматическое сохранение MAX-привязок в `SiteConfig` PostgreSQL;
-- сохранение редакционных изображений в существующем persistent volume `ab-afisha_uploads`.
+- режим `Разместить сейчас` или `Запланировать` с выбором даты и времени;
+- серверная очередь запланированных публикаций каждые 15 секунд;
+- атомарный переход `SCHEDULED -> PUBLISHING`, исключающий двойную отправку одной записи при пересечении cron-запусков;
+- использование уже существующего `EditorialPost.scheduledAt` без изменения production-схемы;
+- отдельный image-processing service на Sharp;
+- шаблоны изображений 1:1, 4:5, 16:9 и 9:16 сохраняют весь кадр через `fit: contain` вместо скрытого `cover` crop;
+- `Оригинальный размер` выбран как безопасный формат по умолчанию;
+- лимит backend upload увеличен до 40 МБ, что остаётся ниже production nginx `client_max_body_size 50M`;
+- понятная ошибка с именем конкретного файла, если формат/декодирование изображения не поддержано;
+- frontend сохраняет уже успешно обработанные изображения, даже если другой файл той же пачки завершился ошибкой;
+- загрузка изображения перенесена перед редактором текста;
+- один общий предварительный просмотр вместо неработающего переключателя ТГ/MAX;
+- preview показывает обработанный файл целиком — тот же URL, который передаётся провайдерам;
+- выбор каналов разделён на две вертикальные колонки: MAX слева, ТГ справа;
+- MAX-подписи: `Макс - "АБ Афиша бухгалтера простая"` и `Макс - "АБ| Афиша бухгалтера"`;
+- в списке последних публикаций показывается фактическое или запланированное время размещения.
+
+Существующий редакционный функционал сохраняется: rich text, Unicode emoji, до 10 изображений, per-channel status/error/retry, MAX native views и экран `/admin/editorial/max-channels`.
 
 Telegram native views не эмулируются: Bot API их не предоставляет. Для этого позже нужен отдельный read-only MTProto adapter.
 
-## Prisma migration
+## Prisma schema / migration
 
-Релиз включает миграцию:
+**Новой Prisma migration в этой promotion нет.** Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration:
 
 `apps/backend/prisma/migrations/20260831100000_add_editorial_publisher/migration.sql`
 
-Она создаёт новые таблицы редакционного контура (`EditorialPost`, `EditorialPublication`, `EditorialStatsSnapshot`), индексы и связи и не удаляет существующие production-данные.
+Эта migration уже была проверена в production: таблицы `EditorialPost`, `EditorialPublication`, `EditorialStatsSnapshot` существуют, а `prisma migrate status` сообщал `Database schema is up to date!`.
 
-Backend image уже использует `apps/backend/docker-entrypoint.sh`: перед запуском NestJS выполняется `pnpm exec prisma migrate deploy`. Поэтому отдельный ручной запуск migration перед переключением backend не требуется.
+Backend image использует `apps/backend/docker-entrypoint.sh`: перед запуском NestJS выполняется `pnpm exec prisma migrate deploy`. При текущем deployment эта команда должна подтвердить актуальную схему и не создавать новую migration.
 
-Миграция аддитивная. Если после её применения deployment нового приложения потребует rollback, старый backend совместим с дополнительными таблицами; автоматический rollback образов не обязан откатывать схему.
+Ручное изменение production-схемы запрещено.
 
 ## Сохраняемые production-гарантии
 
 - bots остаются на `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx container/image/config не изменяются;
+- server-local блок `ai.ab-event.pro` в `infra/nginx/conf.d/production.v2.conf` должен быть сохранён при синхронизации рабочего дерева;
 - persistent volumes PostgreSQL, Redis и uploads сохраняются;
 - Telegram IPv6 network остаётся без изменения;
-- compiled MAX parser runtime regression продолжает проверять `Экспофорум, Санкт-Петербург`, canonical city и hybrid cases;
-- существующие frontend-правки предыдущих approved promotions входят в commit `0f3938d` через историю `main`.
+- MAX channel binding/runtime config сохраняются;
+- compiled MAX parser runtime regression продолжает проверять `Экспофорум, Санкт-Петербург`, canonical city и hybrid cases.
 
 ## Deployment
 
@@ -66,7 +74,7 @@ Backend image уже использует `apps/backend/docker-entrypoint.sh`: �
 Скрипт:
 
 1. читает точные component pins из production lock;
-2. собирает backend и frontend только из release anchor commit `0f3938d` в detached worktree;
+2. собирает backend и frontend только из release anchor commit `9ecf180` в detached worktree;
 3. проверяет OCI revision обоих образов;
 4. запускает preflight;
 5. переключает backend, при старте которого entrypoint выполняет `prisma migrate deploy`;
@@ -85,17 +93,19 @@ Backend image уже использует `apps/backend/docker-entrypoint.sh`: �
 
 - `https://ab-event.pro/` → HTTP 200;
 - `https://ab-event.pro/api/health` → HTTP 200;
-- вход в admin;
-- наличие пункта `Публикации TG / MAX`;
-- открытие `/admin/editorial` без frontend/API ошибок;
-- открытие `/admin/editorial/max-channels`;
-- отображение двух Telegram и двух MAX каналов;
-- создание и повторное открытие черновика без фактической публикации;
-- загрузку тестового изображения и доступность сохранённого `/uploads/editorial/...`;
-- состояние MAX-привязок; если `chat_id` ещё неизвестен, добавить бота администратором в канал или выполнить проверку известного ID через экран настройки;
-- что bots и nginx не были пересозданы.
-
-Фактическую тестовую публикацию выполнять только после подтверждения admin-rights бота в выбранном Telegram/MAX канале, чтобы не получать заведомо ложную ошибку прав доступа.
+- `/admin/editorial` открывается без frontend/API ошибок;
+- слева отображается колонка MAX, справа ТГ, каналы идут сверху вниз;
+- MAX-каналы имеют подписи `Макс - "АБ Афиша бухгалтера простая"` и `Макс - "АБ| Афиша бухгалтера"`;
+- переключателя ТГ/MAX в preview больше нет, используется один общий preview;
+- блок загрузки изображений расположен перед редактором текста;
+- загрузка JPEG/PNG/WebP и других поддерживаемых Sharp форматов возвращает понятную per-file ошибку при неудаче;
+- если из пачки один файл не обработался, уже успешно обработанные изображения остаются в публикации;
+- шаблоны не обрезают исходный кадр и preview показывает изображение целиком;
+- немедленная публикация в уже настроенный MAX-канал работает;
+- тестовая публикация, запланированная на ближайшее будущее, автоматически отправляется один раз и получает статус `PUBLISHED`;
+- в списке последних публикаций отображается время размещения;
+- bots и nginx не были пересозданы;
+- локальный `ai.ab-event.pro` продолжает проходить `nginx -t`.
 
 ## Обязательное правило
 
@@ -111,12 +121,12 @@ Backend image уже использует `apps/backend/docker-entrypoint.sh`: �
 ## Запрещено для текущего релиза
 
 - `latest` для backend, bots или frontend;
-- любой backend release кроме `backend-release-0f3938d`;
+- любой backend release кроме `backend-release-9ecf180`;
 - любой bots release кроме `bots-release-3a64511`;
-- любой frontend release кроме `frontend-release-0f3938d`;
+- любой frontend release кроме `frontend-release-9ecf180`;
 - пересоздание bots или nginx;
-- изменение `infra/nginx/conf.d/production.v2.conf`;
-- ручное изменение production-таблиц вместо штатного `prisma migrate deploy`;
+- изменение или потеря server-local блока `ai.ab-event.pro`;
+- ручное изменение production-таблиц;
 - использование frontend-only или backend-only deploy вместо `deploy-pinned-backend-frontend.sh` для этой promotion.
 
 ## Новая версия в будущем
