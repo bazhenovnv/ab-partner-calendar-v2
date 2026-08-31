@@ -1,0 +1,157 @@
+.channelColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.channelColumn {
+  min-width: 0;
+  border: 1px solid #e0e8e5;
+  border-radius: 13px;
+  padding: 11px;
+  background: #fbfdfc;
+}
+
+.channelColumnTitle {
+  margin: 0 0 9px;
+  color: #244940;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+}
+
+.channelColumnList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.placementBox {
+  border: 1px solid #dfe8e5;
+  border-radius: 13px;
+  padding: 12px;
+  background: #fbfdfc;
+}
+
+.placementModes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.placementOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 1px solid #d7e2df;
+  border-radius: 10px;
+  padding: 0 11px;
+  background: #fff;
+  color: #36574e;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.placementOptionActive {
+  border-color: #62a995;
+  background: #f0faf7;
+  color: #246d5d;
+}
+
+.scheduleRow {
+  display: grid;
+  grid-template-columns: minmax(220px, 330px) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.datetimeInput {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #cedbd7;
+  border-radius: 10px;
+  padding: 0 11px;
+  background: #fff;
+  color: #294a42;
+  font: inherit;
+  outline: none;
+}
+
+.datetimeInput:focus {
+  border-color: #5aa996;
+  box-shadow: 0 0 0 3px rgba(74, 157, 137, 0.11);
+}
+
+.previewMediaStack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #eef2f1;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  background: #fff;
+}
+
+.mediaImageFull {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 210px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.previewChannelList {
+  overflow: hidden;
+  color: #6f7f7a;
+  font-size: 11px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+}
+
+.previewTiming {
+  margin: 0 0 9px;
+  border-radius: 9px;
+  padding: 7px 9px;
+  background: #f5f8f7;
+  color: #61726c;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.uploadSummary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: #667873;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.scheduleSuccess {
+  margin-top: 14px;
+  border: 1px solid #cce6dd;
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: #f1faf7;
+  color: #2e6c5d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 800px) {
+  .channelColumns,
+  .scheduleRow {
+    grid-template-columns: 1fr;
+  }
+}
