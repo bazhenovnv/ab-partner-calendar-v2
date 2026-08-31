@@ -5,44 +5,97 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `8aeecd1140812f6c92941146cdd4fba671ae8c93`
-- Backend commit/image: `8aeecd1140812f6c92941146cdd4fba671ae8c93` / `ab-afisha/backend:backend-release-8aeecd1`
+- Release anchor commit: `0f3938dd6cd348700f6b867fdd140eb515a14791`
+- Backend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/backend:backend-release-0f3938d`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit/image: `8f750208a5bb2a283811d2555c5f7cd92449d30d` / `ab-afisha/frontend:frontend-release-8f75020`
-- Дата утверждения: `2026-08-28`
+- Frontend commit/image: `0f3938dd6cd348700f6b867fdd140eb515a14791` / `ab-afisha/frontend:frontend-release-0f3938d`
+- Дата утверждения: `2026-08-31`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
-- Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
+- Backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая frontend-only promotion
+## Текущая promotion — редакционный кабинет Telegram / MAX
 
-Frontend обновлён до `8f75020`; backend остаётся на `8aeecd1`, bots остаются на `3a64511`, nginx не пересоздаётся.
+Backend и frontend обновляются до `0f3938d`; bots остаются на `3a64511`, nginx не пересоздаётся.
 
-Frontend `8f75020` включает предыдущий mobile layout 390 px и последнюю визуальную доводку PR #114 по production-скриншоту:
+Application PR #117 добавляет отдельный редакционный кабинет `/admin/editorial` для подготовки и публикации новостей/событий в два Telegram- и два MAX-канала. PR #117 прошёл полный CI #828 перед merge.
 
-- белая секция цитат увеличена до 352 px по высоте, поэтому зелёная рамка цитаты опускается ниже и остаётся полностью внутри белого фона;
-- cut-out изображения людей сохраняют утверждённые верхние позиции;
-- существующие CSS-clipped представления `notebook-stationery.png` уменьшены и сдвинуты внутрь: блокнот масштабируется до 90%, кружка до 88%, чтобы правый край блокнота не обрезался на 390 px;
-- предыдущий сдвиг блока «Контакты» и divider, уменьшение календаря и touch-swipe «Главных событий» сохранены без изменения;
-- изображения не генерируются и bitmap assets не заменяются.
+В релиз входят:
 
-Application PR #114 прошёл полный CI #813 перед merge. Promotion обязана пройти полный release-control CI перед deployment.
+- rich-text редактор и Unicode emoji-панель;
+- загрузка до 10 изображений с шаблонами 1:1, 4:5, 16:9, 9:16 и original;
+- предпросмотр Telegram / MAX;
+- выбор одного или нескольких каналов;
+- раздельный статус публикации и конкретная ошибка по каждому каналу;
+- retry только проблемного канала;
+- счётчики публикаций и ошибок;
+- MAX native views с автоматическим обновлением статистики;
+- отдельный экран `/admin/editorial/max-channels` для обнаружения и привязки MAX `chat_id`;
+- автоматическое сохранение MAX-привязок в `SiteConfig` PostgreSQL;
+- сохранение редакционных изображений в существующем persistent volume `ab-afisha_uploads`.
 
-## Сохраняемые backend-гарантии
+Telegram native views не эмулируются: Bot API их не предоставляет. Для этого позже нужен отдельный read-only MTProto adapter.
 
-Backend pin `8aeecd1` сохраняет canonical-city защиту и venue-first MAX location parsing. CI продолжает запускать compiled MAX parser runtime regression и проверять `Экспофорум, Санкт-Петербург`, canonical city и hybrid cases. Frontend-only promotion не изменяет backend, bots, Prisma migrations, API-контракты или production-данные.
+## Prisma migration
+
+Релиз включает миграцию:
+
+`apps/backend/prisma/migrations/20260831100000_add_editorial_publisher/migration.sql`
+
+Она создаёт новые таблицы редакционного контура (`EditorialPost`, `EditorialPublication`, `EditorialStatsSnapshot`), индексы и связи и не удаляет существующие production-данные.
+
+Backend image уже использует `apps/backend/docker-entrypoint.sh`: перед запуском NestJS выполняется `pnpm exec prisma migrate deploy`. Поэтому отдельный ручной запуск migration перед переключением backend не требуется.
+
+Миграция аддитивная. Если после её применения deployment нового приложения потребует rollback, старый backend совместим с дополнительными таблицами; автоматический rollback образов не обязан откатывать схему.
+
+## Сохраняемые production-гарантии
+
+- bots остаются на `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
+- nginx container/image/config не изменяются;
+- persistent volumes PostgreSQL, Redis и uploads сохраняются;
+- Telegram IPv6 network остаётся без изменения;
+- compiled MAX parser runtime regression продолжает проверять `Экспофорум, Санкт-Петербург`, canonical city и hybrid cases;
+- существующие frontend-правки предыдущих approved promotions входят в commit `0f3938d` через историю `main`.
 
 ## Deployment
 
-Использовать только `infra/scripts/deploy-pinned-frontend.sh`.
+Использовать только `infra/scripts/deploy-pinned-backend-frontend.sh`.
 
-Скрипт читает точный frontend pin, собирает detached worktree при необходимости, проверяет OCI revision, запускает preflight, переключает только frontend через `--no-deps --force-recreate frontend`, проверяет публичный HTTP и подтверждает неизменность backend, bots и nginx. При ошибке откатывается только frontend.
+Скрипт:
 
-Ожидаемый финальный marker: `PRODUCTION_PIN_OK`.
+1. читает точные component pins из production lock;
+2. собирает backend и frontend только из release anchor commit `0f3938d` в detached worktree;
+3. проверяет OCI revision обоих образов;
+4. запускает preflight;
+5. переключает backend, при старте которого entrypoint выполняет `prisma migrate deploy`;
+6. после healthy backend переключает frontend;
+7. проверяет публичный HTTP и существующий canonical-city контракт;
+8. подтверждает неизменность bots, nginx и локальных файлов;
+9. при ошибке автоматически откатывает backend/frontend images.
 
-После deployment проверить mobile 390 px: высоту белого фона цитат, положение зелёной рамки, полный правый край блокнота, размер кружки, положение divider/«Контакты», календарь справа и сохранность свайпа «Главных событий». Дополнительно проверить длинные месяцы `августа` и `сентября`.
+Ожидаемый финальный marker:
+
+`PRODUCTION_BACKEND_FRONTEND_PIN_OK=true`
+
+## Проверка после deployment
+
+Обязательно проверить:
+
+- `https://ab-event.pro/` → HTTP 200;
+- `https://ab-event.pro/api/health` → HTTP 200;
+- вход в admin;
+- наличие пункта `Публикации TG / MAX`;
+- открытие `/admin/editorial` без frontend/API ошибок;
+- открытие `/admin/editorial/max-channels`;
+- отображение двух Telegram и двух MAX каналов;
+- создание и повторное открытие черновика без фактической публикации;
+- загрузку тестового изображения и доступность сохранённого `/uploads/editorial/...`;
+- состояние MAX-привязок; если `chat_id` ещё неизвестен, добавить бота администратором в канал или выполнить проверку известного ID через экран настройки;
+- что bots и nginx не были пересозданы.
+
+Фактическую тестовую публикацию выполнять только после подтверждения admin-rights бота в выбранном Telegram/MAX канале, чтобы не получать заведомо ложную ошибку прав доступа.
 
 ## Обязательное правило
 
@@ -58,12 +111,13 @@ Backend pin `8aeecd1` сохраняет canonical-city защиту и venue-fi
 ## Запрещено для текущего релиза
 
 - `latest` для backend, bots или frontend;
-- любой backend release кроме `backend-release-8aeecd1`;
+- любой backend release кроме `backend-release-0f3938d`;
 - любой bots release кроме `bots-release-3a64511`;
-- любой frontend release кроме `frontend-release-8f75020`;
-- пересоздание backend, bots или nginx при frontend-only deployment;
+- любой frontend release кроме `frontend-release-0f3938d`;
+- пересоздание bots или nginx;
 - изменение `infra/nginx/conf.d/production.v2.conf`;
-- использование `deploy-pinned-app.sh`, `deploy-pinned-backend.sh`, `deploy-pinned-backend-frontend.sh` или `deploy-pinned-backend-bots.sh` для этой promotion.
+- ручное изменение production-таблиц вместо штатного `prisma migrate deploy`;
+- использование frontend-only или backend-only deploy вместо `deploy-pinned-backend-frontend.sh` для этой promotion.
 
 ## Новая версия в будущем
 
