@@ -64,6 +64,9 @@ export class EditorialMaxDiscoveryService implements OnApplicationBootstrap {
       targets: TARGETS.map((target, index) => {
         const binding = bindings[index];
         const envChatId = process.env[target.env] || null;
+        const restoredFromDatabase = Boolean(
+          binding?.chatId && envChatId && binding.chatId === envChatId,
+        );
         return {
           key: target.key,
           label: target.label,
@@ -71,7 +74,13 @@ export class EditorialMaxDiscoveryService implements OnApplicationBootstrap {
           envName: target.env,
           chatId: envChatId || binding?.chatId || null,
           configured: Boolean(envChatId || binding?.chatId),
-          source: envChatId ? 'environment' : binding ? 'database' : null,
+          source: restoredFromDatabase
+            ? 'database'
+            : envChatId
+              ? 'environment'
+              : binding
+                ? 'database'
+                : null,
           binding,
         };
       }),
@@ -93,7 +102,7 @@ export class EditorialMaxDiscoveryService implements OnApplicationBootstrap {
 
     const now = Date.now();
     const previous = this.recentlyChecked.get(chatId);
-    if (previous && now - previous < 60_000) return;
+    if (previous && now - previous < 6 * 60 * 60 * 1000) return;
     this.recentlyChecked.set(chatId, now);
 
     try {
