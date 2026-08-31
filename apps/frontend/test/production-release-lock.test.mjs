@@ -21,6 +21,8 @@ const EDITORIAL_MIGRATION = read(
 );
 const EDITORIAL_SCHEDULER = read('apps/backend/src/modules/editorial/editorial-scheduler.service.ts');
 const EDITORIAL_IMAGE_SERVICE = read('apps/backend/src/modules/editorial/editorial-image.service.ts');
+const EDITORIAL_SERVICE = read('apps/backend/src/modules/editorial/editorial.service.ts');
+const EDITORIAL_DISCOVERY = read('apps/backend/src/modules/editorial/editorial-max-discovery.service.ts');
 const EDITORIAL_PUBLISHER = read('apps/frontend/src/app/admin/editorial/EditorialPublisher.tsx');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
@@ -37,19 +39,20 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = '9ecf18060b600e3575d86755dcebd9a2ee3f14ff';
+const RELEASE_ANCHOR = 'c8f024028616eaa9cc04282beed41ca3e2c326d1';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-9ecf180';
+const BACKEND_TAG = 'backend-release-c8f0240';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
 const FRONTEND_COMMIT = RELEASE_ANCHOR;
-const FRONTEND_TAG = 'frontend-release-9ecf180';
+const FRONTEND_TAG = 'frontend-release-c8f0240';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
+const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for editorial UX backend/frontend promotion', () => {
+  test('defines independent machine-readable pins for editorial MAX3 backend/frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -76,6 +79,9 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
     assert.match(RELEASE, /PR #119/);
     assert.match(RELEASE, /CI #832/);
+    assert.match(RELEASE, /PR #121/);
+    assert.match(RELEASE, /CI #836/);
+    assert.match(RELEASE, /CI #837/);
     assert.match(RELEASE, /каждые 15 секунд/);
     assert.match(RELEASE, /SCHEDULED -> PUBLISHING/);
     assert.match(RELEASE, /fit: contain/);
@@ -84,19 +90,37 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /prisma migrate deploy/i);
     assert.match(RELEASE, /Макс - "АБ Афиша бухгалтера простая"/);
     assert.match(RELEASE, /Макс - "АБ\| Афиша бухгалтера"/);
+    assert.match(RELEASE, /Макс - "АБ\| Пратнер"/);
+    assert.ok(RELEASE.includes(MAX3_URL));
+    assert.match(RELEASE, /MAX_EDITORIAL_CHANNEL_3_ID/);
+    assert.match(RELEASE, /editorial\.max\.binding\.MAX_CHANNEL_3/);
     assert.match(RELEASE, /bots остаются на `3a64511`/i);
     assert.match(RELEASE, /nginx не пересоздаётся/i);
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins editorial UX backend/frontend and preserves bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-9ecf180\}/);
+  test('compose pins editorial MAX3 backend/frontend and preserves bots', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-c8f0240\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-9ecf180\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-c8f0240\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
+    assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('locks third MAX target and unique binding contract', () => {
+    for (const content of [EDITORIAL_SERVICE, EDITORIAL_DISCOVERY]) {
+      assert.match(content, /MAX_CHANNEL_3/);
+      assert.match(content, /MAX_EDITORIAL_CHANNEL_3_ID/);
+      assert.ok(content.includes(MAX3_URL));
+      assert.match(content, /Макс - "АБ\| Пратнер"/);
+    }
+    assert.match(EDITORIAL_DISCOVERY, /editorial\.max\.binding\.MAX_CHANNEL_3/);
+    const maxLinks = [...EDITORIAL_SERVICE.matchAll(/publicUrl: '(https:\/\/max\.ru\/join\/[^']+)'/g)].map((match) => match[1]);
+    assert.equal(maxLinks.length, 3);
+    assert.equal(new Set(maxLinks).size, 3);
   });
 
   test('uses existing editorial scheduledAt without a new schema migration', () => {
@@ -124,6 +148,7 @@ describe('Pinned production component release', () => {
     assert.match(EDITORIAL_PUBLISHER, /const failures: string\[\] = \[\]/);
     assert.match(EDITORIAL_PUBLISHER, /if \(uploaded\.length\)/);
     assert.match(EDITORIAL_PUBLISHER, /\/editorial\/posts\/\$\{id\}\/schedule/);
+    assert.match(EDITORIAL_PUBLISHER, /channels\.filter\(\(channel\) => channel\.platform === 'MAX'\)/);
   });
 
   test('requires compiled MAX parser regression in CI for the pinned backend', () => {
