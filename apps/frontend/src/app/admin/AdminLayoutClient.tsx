@@ -34,6 +34,7 @@ const MENU: MenuItem[] = [
   { href: '/admin/max-import', label: 'MAX импорт', roles: ['ADMIN'] },
   { href: '/admin/integrations', label: 'Интеграции / API', roles: ['ADMIN'] },
   { href: '/admin/editorial', label: 'Публикации TG / MAX', roles: ['ADMIN'], section: 'Коммуникации' },
+  { href: '/admin/editorial/max-channels', label: 'MAX-каналы публикаций', roles: ['ADMIN'] },
   { href: '/admin/bots-reminders', label: 'Боты и напоминания', roles: ['ADMIN'] },
   { href: '/admin/contacts', label: 'Контакты', roles: ['ADMIN'] },
   { href: '/admin/broadcasts', label: 'Рассылки', roles: ['ADMIN'] },
@@ -48,7 +49,9 @@ const MENU: MenuItem[] = [
 ];
 
 function isActive(pathname: string, href: string) {
-  return href === '/admin' ? pathname === href : pathname.startsWith(href);
+  if (href === '/admin') return pathname === href;
+  if (href === '/admin/editorial') return pathname === href;
+  return pathname.startsWith(href);
 }
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
