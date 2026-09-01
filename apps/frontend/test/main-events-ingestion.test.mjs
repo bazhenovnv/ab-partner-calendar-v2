@@ -20,20 +20,23 @@ describe('Main-events ingestion boundary', () => {
     assert.match(PAGE, /<MainEventsCarouselBridge events=\{main\} \/>/);
   });
 
-  test('allows only dedicated mainEventUrl artwork into the legacy banner', () => {
+  test('allows only dedicated mainEventUrl artwork into the rolling legacy banner', () => {
     assert.match(BRIDGE, /mainEventUrl\?\.trim\(\)/);
     assert.match(BRIDGE, /\.filter\(\(event\) => Boolean\(event\.images\?\.\[0\]\?\.mainEventUrl\?\.trim\(\)\)\)/);
     assert.match(BRIDGE, /originalUrl: image\.mainEventUrl\?\.trim\(\) \|\| null/);
     assert.ok(BRIDGE.includes('<!-- #хит -->'));
-    assert.match(BRIDGE, /<MainEventsBanner events=\{canonicalEvents\} \/>/);
+    assert.match(BRIDGE, /<MainEventsBanner events=\{alignFirstRollingWindow\(canonicalEvents\)\} \/>/);
   });
 
-  test('admin page mirrors the public five-item selection rules', () => {
+  test('admin page mirrors the rolling public selection rules', () => {
+    assert.match(ADMIN_PAGE, /const VISIBLE_MAIN_EVENTS = 5;/);
     assert.match(ADMIN_PAGE, /item\.status === 'PUBLISHED' && hasDedicatedCover\(item\)/);
     assert.match(ADMIN_PAGE, /item\.autoStatus === 'PLANNED' \|\| item\.autoStatus === 'LIVE'/);
-    assert.match(ADMIN_PAGE, /\.slice\(0, 5\)/);
-    assert.match(ADMIN_PAGE, /5 - active\.length/);
+    assert.match(ADMIN_PAGE, /if \(active\.length >= VISIBLE_MAIN_EVENTS\) return active;/);
+    assert.match(ADMIN_PAGE, /VISIBLE_MAIN_EVENTS - active\.length/);
+    assert.match(ADMIN_PAGE, /5 событий одновременно/);
+    assert.match(ADMIN_PAGE, /Участвует в цикле/);
     assert.match(ADMIN_PAGE, /Нет обложки mainEventUrl/);
-    assert.match(ADMIN_PAGE, /Не входит в первые 5/);
+    assert.doesNotMatch(ADMIN_PAGE, /Не входит в первые 5/);
   });
 });

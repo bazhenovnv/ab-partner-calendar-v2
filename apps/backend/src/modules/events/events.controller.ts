@@ -7,6 +7,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { EventLifecycleService } from './event-lifecycle.service';
 import { EventPublicationLocationService } from './event-publication-location.service';
+import { MainEventsService } from './main-events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventsQueryDto } from './dto/events-query.dto';
@@ -22,6 +23,7 @@ export class EventsController {
     private readonly eventsService: EventsService,
     private readonly eventLifecycleService: EventLifecycleService,
     private readonly publicationLocation: EventPublicationLocationService,
+    private readonly mainEventsService: MainEventsService,
   ) {}
 
   @Get('public')
@@ -36,14 +38,15 @@ export class EventsController {
 
   @Get('public/main')
   async getMainEvents() {
-    const events = await this.eventsService.getMainEvents();
+    const events = await this.mainEventsService.getMainEvents();
 
     // Defensive API boundary: the carousel must never receive ordinary events,
-    // even if an internal fallback query is changed incorrectly later.
+    // even if an internal query is changed incorrectly later. Do not cap the
+    // result here: the client advances a five-card rolling window through the
+    // complete ordered main-events sequence.
     return events
       .filter((event) => event.status === 'PUBLISHED' && event.mainEvent === true)
-      .filter((event) => Boolean(event.images?.[0]?.mainEventUrl))
-      .slice(0, 5);
+      .filter((event) => Boolean(event.images?.[0]?.mainEventUrl));
   }
 
   @Get('public/:id')
