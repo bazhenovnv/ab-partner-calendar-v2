@@ -27,9 +27,8 @@ const EDITORIAL_PUBLISHER = read('apps/frontend/src/app/admin/editorial/Editoria
 const MAIN_EVENTS_SERVICE = read('apps/backend/src/modules/events/main-events.service.ts');
 const MAIN_EVENTS_CONTROLLER = read('apps/backend/src/modules/events/events.controller.ts');
 const MAIN_EVENTS_ROLLING_TEST = read('apps/frontend/test/main-events-rolling-window.test.mjs');
-const NEEDS_ATTENTION_MAX_LINK = read(
-  'apps/frontend/src/components/admin/NeedsAttentionMaxSourceLink.tsx',
-);
+const EVENT_EDIT_PAGE = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
+const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-link.test.mjs');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -52,13 +51,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '4aa93c4ae709c46ca2733c13a5faafe85c0af264';
-const FRONTEND_TAG = 'frontend-release-4aa93c4';
+const FRONTEND_COMMIT = '3420a9d37b64ed00be26932a6a09cf72d02307cd';
+const FRONTEND_TAG = 'frontend-release-3420a9d';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for MAX source-link frontend promotion', () => {
+  test('defines independent machine-readable pins for adjacent source-link frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -84,8 +83,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /PR #127/);
-    assert.match(RELEASE, /CI #851/);
+    assert.match(RELEASE, /PR #129/);
+    assert.match(RELEASE, /CI #855/);
     assert.match(RELEASE, /PR #125/);
     assert.match(RELEASE, /CI #847/);
     assert.match(RELEASE, /PR #123/);
@@ -96,7 +95,8 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /CI #836/);
     assert.match(RELEASE, /CI #837/);
     assert.match(RELEASE, /sourcePostUrl/);
-    assert.match(RELEASE, /Перейти к событию/);
+    assert.match(RELEASE, /Ссылка на источник/);
+    assert.match(RELEASE, /Перейти на источник/);
     assert.match(RELEASE, /cityId/);
     assert.match(RELEASE, /cityName/);
     assert.match(RELEASE, /exact match/i);
@@ -118,10 +118,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins aa13b0f backend, 4aa93c4 frontend and preserves bots', () => {
+  test('compose pins aa13b0f backend, 3420a9d frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-aa13b0f\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-4aa93c4\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-3420a9d\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
@@ -129,14 +129,20 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('locks MAX source-link contract for needs-attention event editor', () => {
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /sourceEvent\.status !== 'NEEDS_ATTENTION'/);
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /sourceEvent\.source !== 'MAX'/);
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /sourceEvent\.sourcePostUrl/);
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /url\.protocol !== 'https:' && url\.protocol !== 'http:'/);
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /target="_blank"/);
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /rel="noopener noreferrer"/);
-    assert.match(NEEDS_ATTENTION_MAX_LINK, /Перейти к событию/);
+  test('locks adjacent source navigation contract in the event editor', () => {
+    assert.match(EVENT_EDIT_PAGE, /Ссылка на источник/);
+    assert.match(EVENT_EDIT_PAGE, /value=\{sourcePostUrl\}/);
+    assert.match(EVENT_EDIT_PAGE, /readOnly/);
+    assert.match(EVENT_EDIT_PAGE, /safeHttpUrl\(sourcePostUrl\)/);
+    assert.match(EVENT_EDIT_PAGE, /url\.protocol !== 'https:' && url\.protocol !== 'http:'/);
+    assert.match(EVENT_EDIT_PAGE, /href=\{sourceHref\}/);
+    assert.match(EVENT_EDIT_PAGE, /target="_blank"/);
+    assert.match(EVENT_EDIT_PAGE, /rel="noopener noreferrer"/);
+    assert.match(EVENT_EDIT_PAGE, /Перейти на источник/);
+    assert.doesNotMatch(EVENT_EDIT_PAGE, /NeedsAttentionMaxSourceLink/);
+    assert.doesNotMatch(EVENT_EDIT_PAGE, />\s*Перейти к событию\s*</);
+    assert.match(SOURCE_LINK_TEST, /value=\\\{sourcePostUrl\\\}/);
+    assert.match(SOURCE_LINK_TEST, /Перейти на источник/);
   });
 
   test('locks rolling main-events contract with completed fallback only below five active items', () => {
