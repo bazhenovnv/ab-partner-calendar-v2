@@ -42,20 +42,20 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = '27b48f745e50f41231489da045e745f0da12c51d';
+const RELEASE_ANCHOR = 'aa13b0f8cf5ea226e05cef5a9edc053428bc70f8';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-27b48f7';
+const BACKEND_TAG = 'backend-release-aa13b0f';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
 const FRONTEND_COMMIT = RELEASE_ANCHOR;
-const FRONTEND_TAG = 'frontend-release-27b48f7';
+const FRONTEND_TAG = 'frontend-release-aa13b0f';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for rolling-main-events backend/frontend promotion', () => {
+  test('defines independent machine-readable pins for canonical-city backend/frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -80,6 +80,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #125/);
+    assert.match(RELEASE, /CI #847/);
     assert.match(RELEASE, /PR #123/);
     assert.match(RELEASE, /CI #842/);
     assert.match(RELEASE, /PR #119/);
@@ -87,6 +89,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /PR #121/);
     assert.match(RELEASE, /CI #836/);
     assert.match(RELEASE, /CI #837/);
+    assert.match(RELEASE, /cityId/);
+    assert.match(RELEASE, /cityName/);
+    assert.match(RELEASE, /exact match/i);
+    assert.match(RELEASE, /fuzzy/i);
     assert.match(RELEASE, /каждые 15 секунд/);
     assert.match(RELEASE, /SCHEDULED -> PUBLISHING/);
     assert.match(RELEASE, /fit: contain/);
@@ -104,10 +110,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 27b48f7 backend/frontend and preserves bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-27b48f7\}/);
+  test('compose pins aa13b0f backend/frontend and preserves bots', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-aa13b0f\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-27b48f7\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-aa13b0f\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
