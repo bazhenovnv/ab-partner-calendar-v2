@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi } from '@/lib/admin-api';
 
+const VISIBLE_MAIN_EVENTS = 5;
+
 type MainEvent = {
   id: string;
   title: string;
@@ -28,10 +30,12 @@ function selectPublicCarousel(items: MainEvent[]) {
   const eligible = items.filter(isPublicEligible);
   const active = eligible
     .filter((item) => item.autoStatus === 'PLANNED' || item.autoStatus === 'LIVE')
-    .sort((a, b) => a.sortOrder - b.sortOrder || new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .slice(0, 5);
+    .sort((a, b) => a.sortOrder - b.sortOrder || new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
-  if (active.length >= 5) return active;
+  // Five cards are visible at once, but every active main event participates in
+  // the rolling cycle. Completed events are only a fallback to fill an initial
+  // five-card set when there are fewer than five active items.
+  if (active.length >= VISIBLE_MAIN_EVENTS) return active;
 
   const completed = eligible
     .filter((item) => item.autoStatus === 'COMPLETED')
@@ -39,16 +43,17 @@ function selectPublicCarousel(items: MainEvent[]) {
       new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
-    .slice(0, 5 - active.length);
+    .slice(0, VISIBLE_MAIN_EVENTS - active.length);
 
-  return [...active, ...completed].slice(0, 5);
+  return [...active, ...completed];
 }
 
 function publicReason(item: MainEvent, selectedIds: Set<string>) {
-  if (selectedIds.has(item.id)) return 'Показывается';
+  if (selectedIds.has(item.id)) return 'Участвует в цикле';
   if (item.status !== 'PUBLISHED') return `Не опубликовано (${item.status})`;
   if (!hasDedicatedCover(item)) return 'Нет обложки mainEventUrl';
-  return 'Не входит в первые 5';
+  if (item.autoStatus === 'COMPLETED') return 'Завершено — резерв не требуется';
+  return 'Не участвует';
 }
 
 export default function MainEventsAdminPage() {
@@ -71,7 +76,7 @@ export default function MainEventsAdminPage() {
         <div>
           <h1 className="adm-page-title">Главные события</h1>
           <p className="adm-muted">
-            Публичная карусель показывает максимум 5 опубликованных событий с mainEvent=true и отдельной обложкой mainEventUrl.
+            Публичная карусель показывает 5 событий одновременно и циклически проводит через окно все опубликованные активные события с mainEvent=true и отдельной обложкой mainEventUrl.
           </p>
         </div>
         <button className="adm-btn" onClick={() => void load()} type="button">Обновить</button>
@@ -79,7 +84,7 @@ export default function MainEventsAdminPage() {
 
       <div className="adm-card" style={{ marginBottom: '1rem' }}>
         <p className="adm-muted">
-          Сейчас в публичной карусели: <strong>{publicItems.length}</strong> из 5.
+          Сейчас участвуют в публичном цикле: <strong>{publicItems.length}</strong>. Одновременно видно до {VISIBLE_MAIN_EVENTS}.
           {attentionCount > 0 ? ` Требуют обложку: ${attentionCount}.` : ''}
         </p>
       </div>
