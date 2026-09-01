@@ -5,34 +5,46 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`
+- Release anchor/backend commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`
 - Backend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/backend:backend-release-aa13b0f`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/frontend:frontend-release-aa13b0f`
+- Frontend commit/image: `4aa93c4ae709c46ca2733c13a5faafe85c0af264` / `ab-afisha/frontend:frontend-release-4aa93c4`
 - Дата утверждения: `2026-09-01`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
-- Backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`
+- Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая promotion — канонический город при публикации событий
+## Текущая promotion — переход к исходному событию MAX
 
-Backend и frontend обновляются до `aa13b0f`; bots остаются на `3a64511`, nginx не пересоздаётся.
+Меняется только frontend до `4aa93c4`; backend остаётся на `aa13b0f`, bots — на `3a64511`, nginx не пересоздаётся.
 
-Релиз включает исправление PR #125, проверенное полным CI #847. Контракт публикации города:
+Релиз включает PR #127, проверенный полным CI #851. Контракт кнопки «Перейти к событию»:
+
+- кнопка отображается в редакторе события только при `status=NEEDS_ATTENTION`;
+- источник события должен быть `MAX`;
+- используется только уже сохранённый в событии прямой `sourcePostUrl`;
+- URL на MAX не собирается и не угадывается на frontend;
+- ссылка должна иметь протокол HTTP(S), иначе кнопка скрыта;
+- ссылка открывается в новой вкладке с `noopener noreferrer`;
+- если `sourcePostUrl` отсутствует, кнопка не отображается;
+- backend, Prisma schema, migrations, импорт MAX, bots и nginx не изменяются.
+
+## Сохраняемый canonical-city publication flow
+
+Предыдущая promotion PR #125 / CI #847 остаётся действующей на backend `aa13b0f`:
 
 - формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник городов вместо произвольного текста;
 - сохраняются согласованные `cityId` и канонический `cityName`;
 - readiness-индикатор использует то же правило, что и реальный backend publication guard;
 - legacy-событие без `cityId` может быть автоматически привязано только при единственном активном case-insensitive exact match по `cityName`;
 - fuzzy/contains и неоднозначное совпадение не допускаются;
-- `HYBRID` поддерживается формой создания согласованно с backend DTO;
-- Prisma schema и migrations не менялись.
+- `HYBRID` поддерживается формой создания согласованно с backend DTO.
 
 ## Сохраняемый контракт карусели «Главные события»
 
-Предыдущая promotion PR #123, проверенная полным CI #842, остаётся частью release anchor. Сохраняется следующий контракт:
+PR #123 / CI #842 остаётся частью production:
 
 - backend отдаёт весь упорядоченный список опубликованных главных событий с `mainEvent=true`, отдельной `mainEventUrl` и активным состоянием `PLANNED` или `LIVE`;
 - одновременно отображается до пяти карточек;
@@ -46,7 +58,7 @@ Backend и frontend обновляются до `aa13b0f`; bots остаются
 
 ## Сохраняемый редакционный функционал
 
-Предыдущие Application PR #119 и PR #121 остаются частью release anchor. Они прошли CI #832 и CI #836; предыдущий merge также проверялся CI #837.
+Application PR #119 и PR #121 остаются частью production. Они прошли CI #832 и CI #836; предыдущий merge также проверялся CI #837.
 
 Сохраняются:
 
@@ -71,14 +83,15 @@ Backend и frontend обновляются до `aa13b0f`; bots остаются
 
 ## Prisma schema / migration
 
-**Новой Prisma migration в этой promotion нет.** Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration:
+**Новой Prisma migration в этой promotion нет. Backend не меняется.** Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration:
 
 `apps/backend/prisma/migrations/20260831100000_add_editorial_publisher/migration.sql`
 
-Backend image использует `apps/backend/docker-entrypoint.sh`: перед запуском NestJS выполняется `pnpm exec prisma migrate deploy`. При текущем deployment команда должна подтвердить актуальную схему. Ручное изменение production-схемы запрещено.
+Ручное изменение production-схемы запрещено.
 
 ## Сохраняемые production-гарантии
 
+- backend остаётся на `aa13b0f` / `ab-afisha/backend:backend-release-aa13b0f` и не пересоздаётся;
 - bots остаются на `3a64511` / `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` должен быть сохранён;
@@ -89,41 +102,35 @@ Backend image использует `apps/backend/docker-entrypoint.sh`: пере
 
 ## Deployment
 
-Использовать только `infra/scripts/deploy-pinned-backend-frontend.sh`.
+Использовать только `infra/scripts/deploy-pinned-frontend.sh`.
 
 Скрипт должен:
 
-1. прочитать точные component pins из production lock;
-2. собрать backend и frontend из release anchor `aa13b0f` в detached worktree;
-3. проверить `org.opencontainers.image.revision` обоих образов;
-4. выполнить preflight;
-5. переключить backend, где entrypoint запускает `prisma migrate deploy`;
-6. дождаться healthy backend;
-7. переключить frontend;
-8. проверить публичный HTTP и canonical-city runtime contract;
-9. подтвердить неизменность bots, nginx и server-local файлов;
-10. при ошибке автоматически откатить backend/frontend images.
+1. прочитать точный frontend pin из production lock;
+2. собрать frontend из commit `4aa93c4ae709c46ca2733c13a5faafe85c0af264` в detached worktree;
+3. проверить `org.opencontainers.image.revision` образа;
+4. выполнить frontend preflight;
+5. переключить только frontend через `--no-deps --force-recreate frontend`;
+6. проверить публичный HTTP;
+7. подтвердить неизменность backend, bots, nginx, server-local config и root git status;
+8. при ошибке автоматически откатить только frontend image.
 
 Ожидаемый финальный marker:
 
-`PRODUCTION_BACKEND_FRONTEND_PIN_OK=true`
+`PRODUCTION_PIN_OK`
 
 ## Проверка после deployment
 
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- `https://ab-event.pro/api/health` → HTTP 200;
-- публичный справочник городов содержит каноническую `Москва` и не содержит не-городские значения;
-- legacy published events с единственным точным активным совпадением города корректно проходят canonical-city runtime contract;
-- `/events/public/main` не обрезается до пяти активных событий;
-- при 7 активных главных событиях порядок окна соответствует `1–5 → 2–6 → 3–7 → 4–7+1`;
-- если активных событий 3, карусель содержит эти 3 активных и до 2 последних `COMPLETED`;
-- завершённые не вытесняют активные;
-- `/admin/main-events` показывает все участвующие активные события и корректный резерв завершённых;
-- `/admin/editorial` и третий MAX target продолжают работать;
-- bots и nginx не были пересозданы;
-- локальный `ai.ab-event.pro` продолжает проходить `nginx -t`.
+- `/admin/events/:id` для MAX-события `NEEDS_ATTENTION` с `sourcePostUrl` показывает кнопку «Перейти к событию»;
+- кнопка открывает исходный MAX-пост в новой вкладке;
+- для события не из MAX, не `NEEDS_ATTENTION` или без `sourcePostUrl` кнопка отсутствует;
+- canonical-city publication flow продолжает работать;
+- карусель «Главные события» сохраняет утверждённый циклический контракт;
+- backend, bots и nginx не были пересозданы;
+- локальный `ai.ab-event.pro` и server-local nginx config сохранены.
 
 ## Обязательное правило
 
@@ -141,11 +148,11 @@ Backend image использует `apps/backend/docker-entrypoint.sh`: пере
 - `latest` для backend, bots или frontend;
 - любой backend release кроме `backend-release-aa13b0f`;
 - любой bots release кроме `bots-release-3a64511`;
-- любой frontend release кроме `frontend-release-aa13b0f`;
-- пересоздание bots или nginx;
+- любой frontend release кроме `frontend-release-4aa93c4`;
+- пересоздание backend, bots или nginx;
 - изменение или потеря server-local блока `ai.ab-event.pro`;
 - ручное изменение production-таблиц;
-- использование frontend-only или backend-only deploy вместо `deploy-pinned-backend-frontend.sh` для этой promotion.
+- использование backend-only или backend+frontend deploy вместо `deploy-pinned-frontend.sh` для этой promotion.
 
 ## Новая версия в будущем
 
