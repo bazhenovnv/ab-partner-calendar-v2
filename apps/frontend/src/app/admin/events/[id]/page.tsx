@@ -13,7 +13,6 @@ import {
 } from '@/lib/admin-api';
 import CityPicker from '@/components/admin/CityPicker';
 import DirectionsPicker from '@/components/admin/DirectionsPicker';
-import NeedsAttentionMaxSourceLink from '@/components/admin/NeedsAttentionMaxSourceLink';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
   DRAFT: 'Черновик',
@@ -58,6 +57,19 @@ interface FormState {
 function toDateInput(iso: string | null | undefined): string {
   if (!iso) return '';
   return iso.split('T')[0];
+}
+
+function safeHttpUrl(value: string): string | null {
+  const candidate = value.trim();
+  if (!candidate) return null;
+
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    return candidate;
+  } catch {
+    return null;
+  }
 }
 
 function eventToForm(ev: AdminEvent): FormState {
@@ -273,6 +285,9 @@ export default function EventEditPage() {
   ) ?? false;
   const showLocalCityIssue = citySelectionMissing && !hasServerCityIssue;
   const hasPublicationIssues = (event.publicationIssues?.length ?? 0) > 0 || showLocalCityIssue;
+  const sourcePostUrlValue = (event as AdminEvent & { sourcePostUrl?: unknown }).sourcePostUrl;
+  const sourcePostUrl = typeof sourcePostUrlValue === 'string' ? sourcePostUrlValue : '';
+  const sourceHref = safeHttpUrl(sourcePostUrl);
 
   const backHref = isArchivedOrDeleted
     ? '/admin/archive'
@@ -296,7 +311,6 @@ export default function EventEditPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className={STATUS_BADGE[event.status]}>{STATUS_LABELS[event.status]}</span>
-          <NeedsAttentionMaxSourceLink event={event} />
           {(event.status === 'DRAFT' || event.status === 'NEEDS_ATTENTION') && (
             <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={handlePublish} type="button">
               Опубликовать
@@ -544,6 +558,32 @@ export default function EventEditPage() {
             onChange={(e) => setField('speaker', e.target.value)}
           />
         </label>
+
+        {sourcePostUrl && (
+          <div className="adm-label">
+            Ссылка на источник
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input
+                className="adm-input"
+                type="url"
+                value={sourcePostUrl}
+                readOnly
+                style={{ flex: '1 1 auto', minWidth: 0 }}
+              />
+              {sourceHref && (
+                <a
+                  href={sourceHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="adm-btn adm-btn--secondary"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Перейти на источник
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         <label className="adm-label">
           Ссылка на мероприятие

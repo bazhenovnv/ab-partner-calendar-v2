@@ -7,24 +7,27 @@ const root = resolve(import.meta.dirname, '../../..');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 
 const page = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
-const link = read('apps/frontend/src/components/admin/NeedsAttentionMaxSourceLink.tsx');
 
-test('event edit page renders the MAX source-link control', () => {
-  assert.match(page, /NeedsAttentionMaxSourceLink/);
-  assert.match(page, /<NeedsAttentionMaxSourceLink event=\{event\} \/>/);
+test('event editor keeps the source URL visible and adds navigation beside it', () => {
+  assert.match(page, /Ссылка на источник/);
+  assert.match(page, /value=\{sourcePostUrl\}/);
+  assert.match(page, /readOnly/);
+  assert.match(page, />\s*Перейти на источник\s*<\/a>/);
+  assert.match(page, /display: 'flex'/);
+  assert.match(page, /gap: '0\.5rem'/);
 });
 
-test('MAX source link is restricted to needs-attention events with a direct sourcePostUrl', () => {
-  assert.match(link, /sourceEvent\.status !== 'NEEDS_ATTENTION'/);
-  assert.match(link, /sourceEvent\.source !== 'MAX'/);
-  assert.match(link, /typeof sourceEvent\.sourcePostUrl !== 'string'/);
-  assert.match(link, /safeHttpUrl\(sourceEvent\.sourcePostUrl\)/);
-  assert.match(link, /url\.protocol !== 'https:' && url\.protocol !== 'http:'/);
+test('source navigation validates HTTP(S) but does not rewrite the displayed source URL', () => {
+  assert.match(page, /const sourcePostUrl = typeof sourcePostUrlValue === 'string' \? sourcePostUrlValue : ''/);
+  assert.match(page, /const sourceHref = safeHttpUrl\(sourcePostUrl\)/);
+  assert.match(page, /url\.protocol !== 'https:' && url\.protocol !== 'http:'/);
+  assert.match(page, /return candidate/);
+  assert.match(page, /href=\{sourceHref\}/);
 });
 
-test('MAX source link opens the original event safely in a new tab', () => {
-  assert.match(link, />\s*Перейти к событию\s*<\/a>/);
-  assert.match(link, /target="_blank"/);
-  assert.match(link, /rel="noopener noreferrer"/);
-  assert.match(link, /href=\{href\}/);
+test('source navigation opens safely in a new tab and the old header action is removed', () => {
+  assert.match(page, /target="_blank"/);
+  assert.match(page, /rel="noopener noreferrer"/);
+  assert.doesNotMatch(page, /NeedsAttentionMaxSourceLink/);
+  assert.doesNotMatch(page, /Перейти к событию/);
 });
