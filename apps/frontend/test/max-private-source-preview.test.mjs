@@ -24,7 +24,7 @@ describe('MAX private source preview in event editor', () => {
     assert.match(PREVIEW, /Канал MAX приватный/);
     assert.match(PREVIEW, /искать[\s\S]*вручную[\s\S]*не требуется/);
     assert.match(PREVIEW, /preview\.message\.text/);
-    assert.match(PREVIEW, /preview\.message\?\.attachments/);
+    assert.match(PREVIEW, /preview\?\.message\?\.attachments/);
     assert.match(PREVIEW, /Опубликовано:/);
     assert.match(PREVIEW, /Перейти к посту MAX/);
     assert.match(PREVIEW, /Открыть канал MAX/);
