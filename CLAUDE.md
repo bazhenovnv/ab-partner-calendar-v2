@@ -9,17 +9,17 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `27b48f745e50f41231489da045e745f0da12c51d`;
-- backend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/backend:backend-release-27b48f7`;
+- release anchor: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`;
+- backend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/backend:backend-release-aa13b0f`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/frontend:frontend-release-27b48f7`;
+- frontend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/frontend:frontend-release-aa13b0f`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняются backend и frontend. Release `27b48f7` сохраняет редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3` и все предыдущие production-гарантии, а также исправляет карусель «Главные события». Одновременно отображается до пяти карточек; backend передаёт полный упорядоченный список активных `PLANNED`/`LIVE` главных событий; frontend ведёт циклическое пятиэлементное окно `1–5 → 2–6 → 3–7 → …`, а после последнего нового события продолжает с первого. Когда активных событий меньше пяти, только недостающие места добираются последними `COMPLETED` событиями. Завершённые события не вытесняют активные. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
+Для текущей promotion меняются backend и frontend. Release `aa13b0f` включает PR #125 / CI #847 и исправляет canonical-city publication flow: формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник и сохраняют согласованные `cityId + cityName`; readiness совпадает с реальным backend publication guard; legacy `cityName` без `cityId` автоматически связывается только при единственном активном case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3`, контракт карусели «Главные события» и все предыдущие production-гарантии. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
 
 Новой Prisma migration в этой promotion нет. Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration `20260831100000_add_editorial_publisher`. Production backend стартует через `apps/backend/docker-entrypoint.sh`, который перед NestJS выполняет `pnpm exec prisma migrate deploy`; ручной SQL запрещён.
 
