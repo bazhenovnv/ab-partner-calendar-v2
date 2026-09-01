@@ -7,6 +7,7 @@ import { MaxWebhookController } from './max-webhook.controller';
 import { MaxImportBootstrapService } from './max-import-bootstrap.service';
 import { MaxImportRecoveryService } from './max-import-recovery.service';
 import { MaxBotInteractionService } from './max-bot-interaction.service';
+import { MaxSourcePostLinkService } from './max-source-post-link.service';
 import { BotsModule } from '../bots/bots.module';
 import { RemindersModule } from '../reminders/reminders.module';
 import { EditorialModule } from '../editorial/editorial.module';
@@ -24,12 +25,14 @@ import { EditorialModule } from '../editorial/editorial.module';
     MaxImportRecoveryService,
     MaxImportBootstrapService,
     MaxBotInteractionService,
+    MaxSourcePostLinkService,
   ],
   exports: [
     MaxImportService,
     MaxReliableImportService,
     MaxParserService,
     MaxImportRecoveryService,
+    MaxSourcePostLinkService,
   ],
 })
 export class MaxImportModule {}
