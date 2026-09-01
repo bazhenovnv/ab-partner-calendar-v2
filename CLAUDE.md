@@ -9,17 +9,17 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `c8f024028616eaa9cc04282beed41ca3e2c326d1`;
-- backend commit/image: `c8f024028616eaa9cc04282beed41ca3e2c326d1` / `ab-afisha/backend:backend-release-c8f0240`;
+- release anchor: `27b48f745e50f41231489da045e745f0da12c51d`;
+- backend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/backend:backend-release-27b48f7`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `c8f024028616eaa9cc04282beed41ca3e2c326d1` / `ab-afisha/frontend:frontend-release-c8f0240`;
+- frontend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/frontend:frontend-release-27b48f7`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняются backend и frontend. Release `c8f0240` улучшает редакционный кабинет `/admin/editorial`: публикация сейчас или по дате/времени, безопасный scheduler на существующем `EditorialPost.scheduledAt`, обработка изображений без скрытой обрезки, сохранение успешно обработанных файлов при частичной ошибке пачки, единый полный предпросмотр, двухколоночный список MAX/ТГ и третий независимый MAX target `MAX_CHANNEL_3` (`Макс - "АБ| Пратнер"`) с join-link `https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA`, runtime env `MAX_EDITORIAL_CHANNEL_3_ID` и persistent binding в `SiteConfig`. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
+Для текущей promotion меняются backend и frontend. Release `27b48f7` сохраняет редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3` и все предыдущие production-гарантии, а также исправляет карусель «Главные события». Одновременно отображается до пяти карточек; backend передаёт полный упорядоченный список активных `PLANNED`/`LIVE` главных событий; frontend ведёт циклическое пятиэлементное окно `1–5 → 2–6 → 3–7 → …`, а после последнего нового события продолжает с первого. Когда активных событий меньше пяти, только недостающие места добираются последними `COMPLETED` событиями. Завершённые события не вытесняют активные. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
 
 Новой Prisma migration в этой promotion нет. Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration `20260831100000_add_editorial_publisher`. Production backend стартует через `apps/backend/docker-entrypoint.sh`, который перед NestJS выполняет `pnpm exec prisma migrate deploy`; ручной SQL запрещён.
 

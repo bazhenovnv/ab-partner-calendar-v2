@@ -24,6 +24,9 @@ const EDITORIAL_IMAGE_SERVICE = read('apps/backend/src/modules/editorial/editori
 const EDITORIAL_SERVICE = read('apps/backend/src/modules/editorial/editorial.service.ts');
 const EDITORIAL_DISCOVERY = read('apps/backend/src/modules/editorial/editorial-max-discovery.service.ts');
 const EDITORIAL_PUBLISHER = read('apps/frontend/src/app/admin/editorial/EditorialPublisher.tsx');
+const MAIN_EVENTS_SERVICE = read('apps/backend/src/modules/events/main-events.service.ts');
+const MAIN_EVENTS_CONTROLLER = read('apps/backend/src/modules/events/events.controller.ts');
+const MAIN_EVENTS_ROLLING_TEST = read('apps/frontend/test/main-events-rolling-window.test.mjs');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -39,20 +42,20 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = 'c8f024028616eaa9cc04282beed41ca3e2c326d1';
+const RELEASE_ANCHOR = '27b48f745e50f41231489da045e745f0da12c51d';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-c8f0240';
+const BACKEND_TAG = 'backend-release-27b48f7';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
 const FRONTEND_COMMIT = RELEASE_ANCHOR;
-const FRONTEND_TAG = 'frontend-release-c8f0240';
+const FRONTEND_TAG = 'frontend-release-27b48f7';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for editorial MAX3 backend/frontend promotion', () => {
+  test('defines independent machine-readable pins for rolling-main-events backend/frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -63,7 +66,7 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_COMMIT=${FRONTEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_TAG=${FRONTEND_TAG}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_IMAGE=${FRONTEND_IMAGE}`));
-    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-08-31/);
+    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-01/);
   });
 
   test('documents exact backend+frontend release and preserved bots/nginx', () => {
@@ -77,6 +80,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #123/);
+    assert.match(RELEASE, /CI #842/);
     assert.match(RELEASE, /PR #119/);
     assert.match(RELEASE, /CI #832/);
     assert.match(RELEASE, /PR #121/);
@@ -99,15 +104,31 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins editorial MAX3 backend/frontend and preserves bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-c8f0240\}/);
+  test('compose pins 27b48f7 backend/frontend and preserves bots', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-27b48f7\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-c8f0240\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-27b48f7\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('locks rolling main-events contract with completed fallback only below five active items', () => {
+    assert.match(MAIN_EVENTS_SERVICE, /in: \[EventAutoStatus\.PLANNED, EventAutoStatus\.LIVE\]/);
+    assert.match(MAIN_EVENTS_SERVICE, /if \(activeEvents\.length >= MAIN_EVENTS_WINDOW_SIZE\)/);
+    assert.match(MAIN_EVENTS_SERVICE, /autoStatus: EventAutoStatus\.COMPLETED/);
+    assert.match(MAIN_EVENTS_SERVICE, /take: MAIN_EVENTS_WINDOW_SIZE - activeEvents\.length/);
+    assert.match(MAIN_EVENTS_SERVICE, /return \[\.\.\.activeEvents, \.\.\.completedEvents\]/);
+    assert.match(MAIN_EVENTS_CONTROLLER, /await this\.mainEventsService\.getMainEvents\(\)/);
+    const publicMainHandler = MAIN_EVENTS_CONTROLLER.match(
+      /@Get\('public\/main'\)[\s\S]*?\n  \}\n\n  @Get\('public\/:id'\)/,
+    )?.[0] ?? '';
+    assert.doesNotMatch(publicMainHandler, /slice\(0,\s*5\)/);
+    assert.match(MAIN_EVENTS_ROLLING_TEST, /1, 2, 3, 4, 5/);
+    assert.match(MAIN_EVENTS_ROLLING_TEST, /2, 3, 4, 5, 6/);
+    assert.match(MAIN_EVENTS_ROLLING_TEST, /3, 4, 5, 6, 7/);
   });
 
   test('locks third MAX target and unique binding contract', () => {
