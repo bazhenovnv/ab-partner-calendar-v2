@@ -32,22 +32,59 @@ export class EventPublicationLocationService {
     if (event.format !== 'OFFLINE' && event.format !== 'HYBRID') return;
 
     const canonicalCity = event.city;
-    if (
-      !event.cityId ||
-      !canonicalCity ||
-      !canonicalCity.isActive ||
-      !isPlausibleCityName(canonicalCity.name)
-    ) {
-      throw new BadRequestException(
-        'Для публикации офлайн/гибридного мероприятия выберите активный город из справочника городов.',
-      );
+    const hasValidCanonicalCity = Boolean(
+      event.cityId &&
+      canonicalCity &&
+      canonicalCity.isActive &&
+      isPlausibleCityName(canonicalCity.name),
+    );
+
+    if (hasValidCanonicalCity && canonicalCity) {
+      if (event.cityName?.trim() !== canonicalCity.name) {
+        await this.prisma.event.update({
+          where: { id: event.id },
+          data: { cityName: canonicalCity.name },
+        });
+      }
+      return;
     }
 
-    if (event.cityName?.trim() !== canonicalCity.name) {
-      await this.prisma.event.update({
-        where: { id: event.id },
-        data: { cityName: canonicalCity.name },
+    // Legacy imported/edited events may contain a valid cityName but have no
+    // canonical cityId. Auto-link only an unambiguous exact (case-insensitive)
+    // match from the active city catalogue. Never use fuzzy matching here.
+    const legacyCityName = event.cityName?.trim();
+    if (legacyCityName && isPlausibleCityName(legacyCityName)) {
+      const exactMatches = await this.prisma.city.findMany({
+        where: {
+          isActive: true,
+          name: {
+            equals: legacyCityName,
+            mode: 'insensitive',
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          isActive: true,
+        },
+        take: 2,
       });
+
+      if (exactMatches.length === 1) {
+        const matchedCity = exactMatches[0];
+        await this.prisma.event.update({
+          where: { id: event.id },
+          data: {
+            cityId: matchedCity.id,
+            cityName: matchedCity.name,
+          },
+        });
+        return;
+      }
     }
+
+    throw new BadRequestException(
+      'Для публикации офлайн/гибридного мероприятия выберите активный город из справочника городов.',
+    );
   }
 }
