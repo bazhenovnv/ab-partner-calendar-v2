@@ -12,7 +12,9 @@ test('event editor keeps the source URL visible and adds navigation beside it', 
   assert.match(page, /Ссылка на источник/);
   assert.match(page, /value=\{sourcePostUrl\}/);
   assert.match(page, /readOnly/);
-  assert.match(page, />\s*Перейти на источник\s*<\/a>/);
+  assert.match(page, /sourcePostUrl\.includes\('\/join\/'\)/);
+  assert.match(page, /Открыть канал MAX/);
+  assert.match(page, /Перейти на источник/);
   assert.match(page, /display: 'flex'/);
   assert.match(page, /gap: '0\.5rem'/);
 });

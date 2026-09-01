@@ -4,6 +4,7 @@ import { EventsService } from './events.service';
 import { EventLifecycleService } from './event-lifecycle.service';
 import { EventPublicationLocationService } from './event-publication-location.service';
 import { MainEventsService } from './main-events.service';
+import { MaxSourcePreviewService } from './max-source-preview.service';
 
 @Module({
   controllers: [EventsController],
@@ -12,6 +13,7 @@ import { MainEventsService } from './main-events.service';
     EventLifecycleService,
     EventPublicationLocationService,
     MainEventsService,
+    MaxSourcePreviewService,
   ],
   exports: [EventsService],
 })
