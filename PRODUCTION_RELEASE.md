@@ -5,10 +5,10 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor commit: `27b48f745e50f41231489da045e745f0da12c51d`
-- Backend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/backend:backend-release-27b48f7`
+- Release anchor commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`
+- Backend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/backend:backend-release-aa13b0f`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/frontend:frontend-release-27b48f7`
+- Frontend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/frontend:frontend-release-aa13b0f`
 - Дата утверждения: `2026-09-01`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -16,11 +16,23 @@
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая promotion — циклическая карусель «Главные события»
+## Текущая promotion — канонический город при публикации событий
 
-Backend и frontend обновляются до `27b48f7`; bots остаются на `3a64511`, nginx не пересоздаётся.
+Backend и frontend обновляются до `aa13b0f`; bots остаются на `3a64511`, nginx не пересоздаётся.
 
-Релиз включает исправление PR #123, проверенное полным CI #842. Главный контракт карусели:
+Релиз включает исправление PR #125, проверенное полным CI #847. Контракт публикации города:
+
+- формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник городов вместо произвольного текста;
+- сохраняются согласованные `cityId` и канонический `cityName`;
+- readiness-индикатор использует то же правило, что и реальный backend publication guard;
+- legacy-событие без `cityId` может быть автоматически привязано только при единственном активном case-insensitive exact match по `cityName`;
+- fuzzy/contains и неоднозначное совпадение не допускаются;
+- `HYBRID` поддерживается формой создания согласованно с backend DTO;
+- Prisma schema и migrations не менялись.
+
+## Сохраняемый контракт карусели «Главные события»
+
+Предыдущая promotion PR #123, проверенная полным CI #842, остаётся частью release anchor. Сохраняется следующий контракт:
 
 - backend отдаёт весь упорядоченный список опубликованных главных событий с `mainEvent=true`, отдельной `mainEventUrl` и активным состоянием `PLANNED` или `LIVE`;
 - одновременно отображается до пяти карточек;
@@ -31,8 +43,6 @@ Backend и frontend обновляются до `27b48f7`; bots остаются
 - завершившееся событие больше не входит в активную последовательность;
 - если активных `PLANNED`/`LIVE` событий меньше пяти, только недостающие места заполняются последними `COMPLETED` главными событиями;
 - завершённые события никогда не вытесняют активные и не ограничивают полный цикл активных событий.
-
-Новой Prisma migration для этой promotion нет. Изменяются только backend/frontend application logic и production release-control.
 
 ## Сохраняемый редакционный функционал
 
@@ -84,7 +94,7 @@ Backend image использует `apps/backend/docker-entrypoint.sh`: пере
 Скрипт должен:
 
 1. прочитать точные component pins из production lock;
-2. собрать backend и frontend из release anchor `27b48f7` в detached worktree;
+2. собрать backend и frontend из release anchor `aa13b0f` в detached worktree;
 3. проверить `org.opencontainers.image.revision` обоих образов;
 4. выполнить preflight;
 5. переключить backend, где entrypoint запускает `prisma migrate deploy`;
@@ -104,6 +114,8 @@ Backend image использует `apps/backend/docker-entrypoint.sh`: пере
 
 - `https://ab-event.pro/` → HTTP 200;
 - `https://ab-event.pro/api/health` → HTTP 200;
+- публичный справочник городов содержит каноническую `Москва` и не содержит не-городские значения;
+- legacy published events с единственным точным активным совпадением города корректно проходят canonical-city runtime contract;
 - `/events/public/main` не обрезается до пяти активных событий;
 - при 7 активных главных событиях порядок окна соответствует `1–5 → 2–6 → 3–7 → 4–7+1`;
 - если активных событий 3, карусель содержит эти 3 активных и до 2 последних `COMPLETED`;
@@ -127,9 +139,9 @@ Backend image использует `apps/backend/docker-entrypoint.sh`: пере
 ## Запрещено для текущего релиза
 
 - `latest` для backend, bots или frontend;
-- любой backend release кроме `backend-release-27b48f7`;
+- любой backend release кроме `backend-release-aa13b0f`;
 - любой bots release кроме `bots-release-3a64511`;
-- любой frontend release кроме `frontend-release-27b48f7`;
+- любой frontend release кроме `frontend-release-aa13b0f`;
 - пересоздание bots или nginx;
 - изменение или потеря server-local блока `ai.ab-event.pro`;
 - ручное изменение production-таблиц;
