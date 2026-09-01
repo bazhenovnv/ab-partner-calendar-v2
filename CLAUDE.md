@@ -12,14 +12,14 @@
 - release anchor/backend commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`;
 - backend image: `ab-afisha/backend:backend-release-aa13b0f`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `4aa93c4ae709c46ca2733c13a5faafe85c0af264` / `ab-afisha/frontend:frontend-release-4aa93c4`;
+- frontend commit/image: `3420a9d37b64ed00be26932a6a09cf72d02307cd` / `ab-afisha/frontend:frontend-release-3420a9d`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только frontend. Frontend `4aa93c4` включает PR #127 / CI #851: редактор события показывает кнопку «Перейти к событию» только для `NEEDS_ATTENTION` событий источника `MAX`, когда у события есть валидный HTTP(S) `sourcePostUrl`. Кнопка использует сохранённую прямую ссылку на исходный MAX-пост, не конструирует URL и открывает его в новой вкладке с `noopener noreferrer`. Backend `aa13b0f`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
+Для текущей promotion меняется только frontend. Frontend `3420a9d` включает PR #129 / CI #855: форма редактирования события показывает сохранённый `sourcePostUrl` как read-only поле «Ссылка на источник» и рядом кнопку «Перейти на источник». Кнопка открывает тот же сохранённый URL в новой вкладке с `noopener noreferrer`, только если URL имеет HTTP(S). Значение `sourcePostUrl` не переписывается и не конструируется заново. Прежняя верхняя кнопка «Перейти к событию» удалена. Backend `aa13b0f`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
 
 Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник и сохраняют согласованные `cityId + cityName`; readiness совпадает с реальным backend publication guard; legacy `cityName` без `cityId` автоматически связывается только при единственном активном case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3`, контракт карусели «Главные события» и все предыдущие production-гарантии.
 
