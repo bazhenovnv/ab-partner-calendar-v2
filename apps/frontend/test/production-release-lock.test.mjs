@@ -29,6 +29,9 @@ const MAIN_EVENTS_CONTROLLER = read('apps/backend/src/modules/events/events.cont
 const MAIN_EVENTS_ROLLING_TEST = read('apps/frontend/test/main-events-rolling-window.test.mjs');
 const EVENT_EDIT_PAGE = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
 const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-link.test.mjs');
+const MAX_SOURCE_POST_LINK_SERVICE = read(
+  'apps/backend/src/modules/max-import/max-source-post-link.service.ts',
+);
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -44,9 +47,9 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = 'aa13b0f8cf5ea226e05cef5a9edc053428bc70f8';
+const RELEASE_ANCHOR = '8f2f74ac633e12212688f2d52b2df86502850cdd';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-aa13b0f';
+const BACKEND_TAG = 'backend-release-8f2f74a';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
@@ -57,7 +60,7 @@ const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for adjacent source-link frontend promotion', () => {
+  test('defines independent machine-readable pins for canonical MAX link backend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -71,7 +74,7 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-01/);
   });
 
-  test('documents exact component pins and frontend-only deployment', () => {
+  test('documents exact component pins and backend-only deployment', () => {
     for (const content of [RELEASE, AGENTS, CLAUDE]) {
       assert.match(content, new RegExp(RELEASE_ANCHOR));
       assert.match(content, new RegExp(BACKEND_IMAGE));
@@ -79,10 +82,12 @@ describe('Pinned production component release', () => {
       assert.match(content, new RegExp(BOTS_IMAGE));
       assert.match(content, new RegExp(FRONTEND_COMMIT));
       assert.match(content, new RegExp(FRONTEND_IMAGE));
-      assert.match(content, /deploy-pinned-frontend\.sh/);
+      assert.match(content, /deploy-pinned-backend\.sh/);
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #131/);
+    assert.match(RELEASE, /CI #859/);
     assert.match(RELEASE, /PR #129/);
     assert.match(RELEASE, /CI #855/);
     assert.match(RELEASE, /PR #125/);
@@ -95,6 +100,8 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /CI #836/);
     assert.match(RELEASE, /CI #837/);
     assert.match(RELEASE, /sourcePostUrl/);
+    assert.match(RELEASE, /message\.url/);
+    assert.match(RELEASE, /message_ids/);
     assert.match(RELEASE, /Ссылка на источник/);
     assert.match(RELEASE, /Перейти на источник/);
     assert.match(RELEASE, /cityId/);
@@ -112,14 +119,14 @@ describe('Pinned production component release', () => {
     assert.ok(RELEASE.includes(MAX3_URL));
     assert.match(RELEASE, /MAX_EDITORIAL_CHANNEL_3_ID/);
     assert.match(RELEASE, /editorial\.max\.binding\.MAX_CHANNEL_3/);
-    assert.match(RELEASE, /backend остаётся на `aa13b0f`/i);
-    assert.match(RELEASE, /bots остаются на `3a64511`/i);
+    assert.match(RELEASE, /frontend остаётся `3420a9d`/i);
+    assert.match(RELEASE, /bots остаются `3a64511`/i);
     assert.match(RELEASE, /nginx не пересоздаётся/i);
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins aa13b0f backend, 3420a9d frontend and preserves bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-aa13b0f\}/);
+  test('compose pins 8f2f74a backend, 3420a9d frontend and preserves bots', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-8f2f74a\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
     assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-3420a9d\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
@@ -127,6 +134,20 @@ describe('Pinned production component release', () => {
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('locks canonical MAX source-post repair instead of constructed join links', () => {
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message_ids/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /mids\.join\(','\)/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message\.body\?\.mid/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message\.url/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message\.recipient\?\.chat_id !== sourceChannelId/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /sourcePostUrl:\s*\{ contains: '\/join\/' \}/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /url\.protocol !== 'https:'/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /hostname !== 'max\.ru'/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /@Cron\('\*\/1 \* \* \* \*'/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /data:\s*\{ sourcePostUrl: exactUrl \}/);
+    assert.doesNotMatch(MAX_SOURCE_POST_LINK_SERVICE, /\?mid=/);
   });
 
   test('locks adjacent source navigation contract in the event editor', () => {
