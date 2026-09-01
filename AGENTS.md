@@ -9,20 +9,29 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor/backend commit: `8f2f74ac633e12212688f2d52b2df86502850cdd`;
-- backend image: `ab-afisha/backend:backend-release-8f2f74a`;
+- release anchor/backend/frontend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
+- backend image: `ab-afisha/backend:backend-release-213e507`;
+- frontend image: `ab-afisha/frontend:frontend-release-213e507`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `3420a9d37b64ed00be26932a6a09cf72d02307cd` / `ab-afisha/frontend:frontend-release-3420a9d`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только backend. Backend `8f2f74a` включает PR #131 / CI #859: legacy MAX `sourcePostUrl`, ранее сформированные как `/join/...?...mid=...`, ремонтируются через официальный `GET /messages?message_ids=...`; сохраняется только `message.url`, возвращённый MAX, после проверки `MAX_SOURCE_CHANNEL_ID`, HTTPS и домена `max.ru`. Repair запускается при старте backend и каждую минуту. Если MAX не возвращает `message.url`, permalink не придумывается. Frontend `3420a9d`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend.sh`.
+Текущая promotion — backend+frontend из PR #133, финально проверенного CI #865. Production runtime подтвердил для source channel MAX: `type=channel`, `is_public=false`, а точный `GET /messages/{mid}` возвращает нужное сообщение и `chat_id`, но не возвращает `message.url`. Поэтому запрещено выдавать `/join/...?...mid=...` за permalink конкретного поста.
 
-Frontend `3420a9d` сохраняет PR #129 / CI #855: в форме редактирования `sourcePostUrl` показывается read-only полем «Ссылка на источник», рядом кнопка «Перейти на источник». После backend repair форма автоматически использует обновлённый официальный URL.
+Контракт текущего релиза:
 
-Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания/редактирования физического события сохраняют согласованные `cityId + cityName`, readiness использует тот же контракт, что real publication guard, а legacy `cityName` без `cityId` может быть автоматически привязан только по единственному активному case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются также контракт карусели «Главные события», редакционный кабинет и третий MAX target.
+- защищённый `GET /events/admin/:id/source-preview` получает точное MAX-сообщение по сохранённому `externalId` и проверяет `MAX_SOURCE_CHANNEL_ID`;
+- редактор события показывает блок «Исходный пост MAX»: исходный текст, дату/время, message ID и доступное изображение;
+- для приватного канала join-link остаётся без переписывания и действие называется «Открыть канал MAX»;
+- если MAX когда-либо вернёт валидный `message.url`, интерфейс может показать «Перейти к посту MAX»;
+- repair-сервис сначала проверяет visibility канала, кэширует её на 6 часов и для приватного канала не выполняет бессмысленные minute-by-minute batch `/messages` запросы;
+- Prisma schema/migrations не меняются;
+- bots `3a64511` и nginx не пересоздаются;
+- использовать только `deploy-pinned-backend-frontend.sh`.
+
+Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания/редактирования физического события сохраняют согласованные `cityId + cityName`, readiness использует тот же контракт, что real publication guard, а legacy `cityName` без `cityId` может быть автоматически привязан только по единственному активному case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются также контракт карусели «Главные события», редакционный кабинет, три MAX target и Telegram IPv6 runtime.
 
 Новой Prisma migration в этой promotion нет. Ручное изменение production-схемы запрещено.
 
