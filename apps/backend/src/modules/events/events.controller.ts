@@ -8,6 +8,7 @@ import { EventsService } from './events.service';
 import { EventLifecycleService } from './event-lifecycle.service';
 import { EventPublicationLocationService } from './event-publication-location.service';
 import { MainEventsService } from './main-events.service';
+import { MaxSourcePreviewService } from './max-source-preview.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { EventsQueryDto } from './dto/events-query.dto';
@@ -24,6 +25,7 @@ export class EventsController {
     private readonly eventLifecycleService: EventLifecycleService,
     private readonly publicationLocation: EventPublicationLocationService,
     private readonly mainEventsService: MainEventsService,
+    private readonly maxSourcePreviewService: MaxSourcePreviewService,
   ) {}
 
   @Get('public')
@@ -68,6 +70,14 @@ export class EventsController {
   @Roles('ADMIN', 'EDITOR')
   getNeedsAttention() {
     return this.eventsService.getNeedsAttention();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Get('admin/:id/source-preview')
+  @Roles('ADMIN', 'EDITOR')
+  getSourcePreview(@Param('id', ParseUUIDPipe) id: string) {
+    return this.maxSourcePreviewService.getEventSourcePreview(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
