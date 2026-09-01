@@ -5,38 +5,50 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor/backend commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`
-- Backend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/backend:backend-release-aa13b0f`
+- Release anchor/backend commit: `8f2f74ac633e12212688f2d52b2df86502850cdd`
+- Backend commit/image: `8f2f74ac633e12212688f2d52b2df86502850cdd` / `ab-afisha/backend:backend-release-8f2f74a`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Frontend commit/image: `3420a9d37b64ed00be26932a6a09cf72d02307cd` / `ab-afisha/frontend:frontend-release-3420a9d`
 - Дата утверждения: `2026-09-01`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
-- Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
+- Backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая promotion — ссылка на источник в карточке события
+## Текущая promotion — каноническая ссылка на исходный пост MAX
 
-Меняется только frontend до `3420a9d`; backend остаётся на `aa13b0f`, bots — на `3a64511`, nginx не пересоздаётся.
+Меняется только backend до `8f2f74a`; frontend остаётся `3420a9d`, bots — `3a64511`, nginx не пересоздаётся.
 
-Релиз включает PR #129, проверенный полным CI #855. Контракт строки «Ссылка на источник»:
+Релиз включает PR #131, проверенный полным CI #859. Исправлен механизм `sourcePostUrl` для импортированных событий MAX:
 
-- сохранённый `sourcePostUrl` отображается в форме редактирования как отдельное read-only поле «Ссылка на источник»;
-- значение `sourcePostUrl` не изменяется и не конструируется заново;
-- рядом с полем отображается кнопка «Перейти на источник»;
+- прежний импорт формировал `sourcePostUrl` как join-ссылку канала с `?mid=...`; такая ссылка открывает канал, но не гарантирует переход к конкретному сообщению;
+- backend использует сохранённый `externalId` сообщения (`mid`) и официальный MAX endpoint `GET /messages?message_ids=...`;
+- в `sourcePostUrl` сохраняется только официальный `message.url`, возвращённый MAX;
+- перед сохранением проверяется соответствие `recipient.chat_id` настроенному `MAX_SOURCE_CHANNEL_ID`;
+- принимаются только HTTPS URL на `max.ru` или его поддомене;
+- старые записи с отсутствующей ссылкой или `/join/` ремонтируются при старте backend и затем проверяются каждую минуту;
+- если MAX не возвращает `message.url`, backend не придумывает permalink;
+- Prisma schema и migrations не меняются.
+
+## Сохраняемая строка «Ссылка на источник» в админке
+
+Frontend `3420a9d` из PR #129 / CI #855 остаётся без изменений:
+
+- сохранённый `sourcePostUrl` отображается в форме редактирования как read-only поле «Ссылка на источник»;
+- рядом находится кнопка «Перейти на источник»;
 - кнопка открывает тот же сохранённый URL в новой вкладке с `noopener noreferrer`;
-- кнопка активна только для HTTP(S)-ссылки;
-- прежняя верхняя кнопка «Перейти к событию» удалена;
-- backend, Prisma schema, migrations, импорт MAX, bots и nginx не изменяются.
+- верхняя кнопка «Перейти к событию» отсутствует.
+
+После backend-ремонта эта же форма автоматически начинает показывать и открывать официальный `message.url` без дополнительного frontend-релиза.
 
 ## Сохраняемый canonical-city publication flow
 
-Предыдущая promotion PR #125 / CI #847 остаётся действующей на backend `aa13b0f`:
+PR #125 / CI #847 остаётся действующим в новом backend как часть его истории:
 
-- формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник городов вместо произвольного текста;
+- формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник городов;
 - сохраняются согласованные `cityId` и канонический `cityName`;
-- readiness-индикатор использует то же правило, что и реальный backend publication guard;
+- readiness-индикатор использует то же правило, что и backend publication guard;
 - legacy-событие без `cityId` может быть автоматически привязано только при единственном активном case-insensitive exact match по `cityName`;
 - fuzzy/contains и неоднозначное совпадение не допускаются;
 - `HYBRID` поддерживается формой создания согласованно с backend DTO.
@@ -82,7 +94,7 @@ Application PR #119 и PR #121 остаются частью production. Они 
 
 ## Prisma schema / migration
 
-**Новой Prisma migration в этой promotion нет. Backend не меняется.** Поле `EditorialPost.scheduledAt` уже присутствует в production-схеме после ранее применённой migration:
+**Новой Prisma migration в этой promotion нет.** Существующая production-схема не меняется. Поле `EditorialPost.scheduledAt` уже присутствует после migration:
 
 `apps/backend/prisma/migrations/20260831100000_add_editorial_publisher/migration.sql`
 
@@ -90,10 +102,10 @@ Application PR #119 и PR #121 остаются частью production. Они 
 
 ## Сохраняемые production-гарантии
 
-- backend остаётся на `aa13b0f` / `ab-afisha/backend:backend-release-aa13b0f` и не пересоздаётся;
-- bots остаются на `3a64511` / `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
+- frontend остаётся `3420a9d` / `ab-afisha/frontend:frontend-release-3420a9d` и не пересоздаётся;
+- bots остаются `3a64511` / `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
-- server-local блок `ai.ab-event.pro` должен быть сохранён;
+- server-local блок `ai.ab-event.pro` сохраняется;
 - persistent volumes PostgreSQL, Redis и uploads сохраняются;
 - Telegram IPv6 network остаётся без изменения;
 - MAX bindings и редакционный функционал сохраняются;
@@ -101,36 +113,30 @@ Application PR #119 и PR #121 остаются частью production. Они 
 
 ## Deployment
 
-Использовать только `infra/scripts/deploy-pinned-frontend.sh`.
+Использовать только `infra/scripts/deploy-pinned-backend.sh`.
 
 Скрипт должен:
 
-1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `3420a9d37b64ed00be26932a6a09cf72d02307cd` в detached worktree;
+1. прочитать точный backend pin из production lock;
+2. собрать backend из commit `8f2f74ac633e12212688f2d52b2df86502850cdd` в detached worktree;
 3. проверить `org.opencontainers.image.revision` образа;
-4. выполнить frontend preflight;
-5. переключить только frontend через `--no-deps --force-recreate frontend`;
-6. проверить публичный HTTP;
-7. подтвердить неизменность backend, bots, nginx, server-local config и root git status;
-8. при ошибке автоматически откатить только frontend image.
-
-Ожидаемый финальный marker:
-
-`PRODUCTION_PIN_OK`
+4. выполнить backend preflight и health checks;
+5. переключить только backend через `--no-deps --force-recreate backend`;
+6. проверить публичный health/runtime;
+7. подтвердить неизменность frontend, bots, nginx и server-local config;
+8. при ошибке автоматически откатить только backend image.
 
 ## Проверка после deployment
 
 Обязательно проверить:
 
-- `https://ab-event.pro/` → HTTP 200;
-- `/admin/events/:id` для события с `sourcePostUrl` показывает read-only поле «Ссылка на источник»;
-- рядом с ним находится кнопка «Перейти на источник»;
-- кнопка открывает тот же сохранённый URL в новой вкладке;
-- верхней кнопки «Перейти к событию» больше нет;
-- canonical-city publication flow продолжает работать;
-- карусель «Главные события» сохраняет утверждённый циклический контракт;
-- backend, bots и nginx не были пересозданы;
-- локальный `ai.ab-event.pro` и server-local nginx config сохранены.
+- `https://ab-event.pro/` и `/api/health` → HTTP 200;
+- backend image/revision соответствует `8f2f74a`;
+- в backend log присутствует результат `MAX source-link repair` либо отсутствуют legacy `/join/` записи;
+- для контрольного `externalId=mid.ffffbab719b28a8e01a05c80a30b2250` поле `sourcePostUrl` после ремонта больше не является join-ссылкой, если MAX вернул `message.url`;
+- в `/admin/events/:id` поле «Ссылка на источник» показывает обновлённый URL, а кнопка «Перейти на источник» открывает именно его;
+- frontend, bots и nginx не были пересозданы;
+- canonical-city publication flow и карусель «Главные события» сохраняют утверждённые контракты.
 
 ## Обязательное правило
 
@@ -146,13 +152,13 @@ Application PR #119 и PR #121 остаются частью production. Они 
 ## Запрещено для текущего релиза
 
 - `latest` для backend, bots или frontend;
-- любой backend release кроме `backend-release-aa13b0f`;
+- любой backend release кроме `backend-release-8f2f74a`;
 - любой bots release кроме `bots-release-3a64511`;
 - любой frontend release кроме `frontend-release-3420a9d`;
-- пересоздание backend, bots или nginx;
+- пересоздание frontend, bots или nginx;
 - изменение или потеря server-local блока `ai.ab-event.pro`;
 - ручное изменение production-таблиц;
-- использование backend-only или backend+frontend deploy вместо `deploy-pinned-frontend.sh` для этой promotion.
+- использование frontend-only или backend+frontend deploy вместо `deploy-pinned-backend.sh` для этой promotion.
 
 ## Новая версия в будущем
 
