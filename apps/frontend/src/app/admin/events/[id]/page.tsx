@@ -13,6 +13,7 @@ import {
 } from '@/lib/admin-api';
 import CityPicker from '@/components/admin/CityPicker';
 import DirectionsPicker from '@/components/admin/DirectionsPicker';
+import NeedsAttentionMaxSourceLink from '@/components/admin/NeedsAttentionMaxSourceLink';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
   DRAFT: 'Черновик',
@@ -295,6 +296,7 @@ export default function EventEditPage() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className={STATUS_BADGE[event.status]}>{STATUS_LABELS[event.status]}</span>
+          <NeedsAttentionMaxSourceLink event={event} />
           {(event.status === 'DRAFT' || event.status === 'NEEDS_ATTENTION') && (
             <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={handlePublish} type="button">
               Опубликовать
