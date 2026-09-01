@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { adminApi, ApiError } from '@/lib/admin-api';
 import type { EventFormat, PriceType } from '@/lib/admin-api';
+import CityPicker from '@/components/admin/CityPicker';
 import DirectionsPicker from '@/components/admin/DirectionsPicker';
 
 interface FormState {
@@ -15,6 +16,7 @@ interface FormState {
   endDate: string;
   startTime: string;
   format: EventFormat;
+  cityId: string;
   cityName: string;
   address: string;
   venue: string;
@@ -36,6 +38,7 @@ const INITIAL: FormState = {
   endDate: '',
   startTime: '',
   format: 'ONLINE',
+  cityId: '',
   cityName: '',
   address: '',
   venue: '',
@@ -60,11 +63,14 @@ export default function EventNewPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  const physicalFormat = form.format === 'OFFLINE' || form.format === 'HYBRID';
+
   function validate(): string {
     if (!form.title.trim() || form.title.trim().length < 2) return 'Введите название (минимум 2 символа)';
     if (!form.startDate) return 'Укажите дату начала';
     if (!form.priceType) return 'Укажите тип цены';
     if (!form.format) return 'Укажите формат';
+    if (physicalFormat && !form.cityId) return 'Выберите активный город из справочника городов';
     return '';
   }
 
@@ -81,12 +87,13 @@ export default function EventNewPage() {
         startDate: form.startDate,
         format: form.format,
         priceType: form.priceType,
+        cityId: form.cityId || null,
+        cityName: form.cityName.trim() || null,
       };
       if (form.shortDescription.trim()) body.shortDescription = form.shortDescription.trim();
       if (form.fullDescription.trim()) body.fullDescription = form.fullDescription.trim();
       if (form.endDate) body.endDate = form.endDate;
       if (form.startTime) body.startTime = form.startTime;
-      if (form.cityName.trim()) body.cityName = form.cityName.trim();
       if (form.address.trim()) body.address = form.address.trim();
       if (form.venue.trim()) body.venue = form.venue.trim();
       if (form.speaker.trim()) body.speaker = form.speaker.trim();
@@ -192,6 +199,7 @@ export default function EventNewPage() {
             >
               <option value="ONLINE">Онлайн</option>
               <option value="OFFLINE">Офлайн</option>
+              <option value="HYBRID">Онлайн + офлайн</option>
             </select>
           </label>
           <label className="adm-label adm-label--grow">
@@ -220,15 +228,18 @@ export default function EventNewPage() {
         )}
 
         <label className="adm-label">
-          Город
-          <input
-            className="adm-input"
-            value={form.cityName}
-            onChange={(e) => set('cityName', e.target.value)}
+          Город{physicalFormat ? ' *' : ''}
+          <CityPicker
+            selectedId={form.cityId}
+            cityName={form.cityName}
+            required={physicalFormat}
+            onChange={(cityId, cityName) => {
+              setForm((prev) => ({ ...prev, cityId, cityName }));
+            }}
           />
         </label>
 
-        {form.format === 'OFFLINE' && (
+        {physicalFormat && (
           <>
             <label className="adm-label">
               Адрес
