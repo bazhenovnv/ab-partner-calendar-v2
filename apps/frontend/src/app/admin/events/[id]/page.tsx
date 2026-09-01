@@ -13,6 +13,7 @@ import {
 } from '@/lib/admin-api';
 import CityPicker from '@/components/admin/CityPicker';
 import DirectionsPicker from '@/components/admin/DirectionsPicker';
+import MaxSourcePreviewCard from '@/components/admin/MaxSourcePreviewCard';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
   DRAFT: 'Черновик',
@@ -559,6 +560,8 @@ export default function EventEditPage() {
           />
         </label>
 
+        <MaxSourcePreviewCard event={event} />
+
         {sourcePostUrl && (
           <div className="adm-label">
             Ссылка на источник
@@ -578,7 +581,7 @@ export default function EventEditPage() {
                   className="adm-btn adm-btn--secondary"
                   style={{ whiteSpace: 'nowrap' }}
                 >
-                  Перейти на источник
+                  {sourcePostUrl.includes('/join/') ? 'Открыть канал MAX' : 'Перейти на источник'}
                 </a>
               )}
             </div>
