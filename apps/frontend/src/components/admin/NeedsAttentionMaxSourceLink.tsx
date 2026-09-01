@@ -1,13 +1,17 @@
 'use client';
 
-interface NeedsAttentionMaxSourceLinkProps {
-  status: string;
-  source?: string | null;
-  sourcePostUrl?: string | null;
+interface SourceAwareEvent {
+  status?: unknown;
+  source?: unknown;
+  sourcePostUrl?: unknown;
 }
 
-function safeHttpUrl(value?: string | null): string | null {
-  const candidate = value?.trim();
+interface NeedsAttentionMaxSourceLinkProps {
+  event: object;
+}
+
+function safeHttpUrl(value: string): string | null {
+  const candidate = value.trim();
   if (!candidate) return null;
 
   try {
@@ -19,14 +23,12 @@ function safeHttpUrl(value?: string | null): string | null {
   }
 }
 
-export default function NeedsAttentionMaxSourceLink({
-  status,
-  source,
-  sourcePostUrl,
-}: NeedsAttentionMaxSourceLinkProps) {
-  if (status !== 'NEEDS_ATTENTION' || source !== 'MAX') return null;
+export default function NeedsAttentionMaxSourceLink({ event }: NeedsAttentionMaxSourceLinkProps) {
+  const sourceEvent = event as SourceAwareEvent;
+  if (sourceEvent.status !== 'NEEDS_ATTENTION' || sourceEvent.source !== 'MAX') return null;
+  if (typeof sourceEvent.sourcePostUrl !== 'string') return null;
 
-  const href = safeHttpUrl(sourcePostUrl);
+  const href = safeHttpUrl(sourceEvent.sourcePostUrl);
   if (!href) return null;
 
   return (
