@@ -8,7 +8,7 @@
 - Release anchor/backend commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`
 - Backend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/backend:backend-release-aa13b0f`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Frontend commit/image: `4aa93c4ae709c46ca2733c13a5faafe85c0af264` / `ab-afisha/frontend:frontend-release-4aa93c4`
+- Frontend commit/image: `3420a9d37b64ed00be26932a6a09cf72d02307cd` / `ab-afisha/frontend:frontend-release-3420a9d`
 - Дата утверждения: `2026-09-01`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
@@ -16,19 +16,18 @@
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая promotion — переход к исходному событию MAX
+## Текущая promotion — ссылка на источник в карточке события
 
-Меняется только frontend до `4aa93c4`; backend остаётся на `aa13b0f`, bots — на `3a64511`, nginx не пересоздаётся.
+Меняется только frontend до `3420a9d`; backend остаётся на `aa13b0f`, bots — на `3a64511`, nginx не пересоздаётся.
 
-Релиз включает PR #127, проверенный полным CI #851. Контракт кнопки «Перейти к событию»:
+Релиз включает PR #129, проверенный полным CI #855. Контракт строки «Ссылка на источник»:
 
-- кнопка отображается в редакторе события только при `status=NEEDS_ATTENTION`;
-- источник события должен быть `MAX`;
-- используется только уже сохранённый в событии прямой `sourcePostUrl`;
-- URL на MAX не собирается и не угадывается на frontend;
-- ссылка должна иметь протокол HTTP(S), иначе кнопка скрыта;
-- ссылка открывается в новой вкладке с `noopener noreferrer`;
-- если `sourcePostUrl` отсутствует, кнопка не отображается;
+- сохранённый `sourcePostUrl` отображается в форме редактирования как отдельное read-only поле «Ссылка на источник»;
+- значение `sourcePostUrl` не изменяется и не конструируется заново;
+- рядом с полем отображается кнопка «Перейти на источник»;
+- кнопка открывает тот же сохранённый URL в новой вкладке с `noopener noreferrer`;
+- кнопка активна только для HTTP(S)-ссылки;
+- прежняя верхняя кнопка «Перейти к событию» удалена;
 - backend, Prisma schema, migrations, импорт MAX, bots и nginx не изменяются.
 
 ## Сохраняемый canonical-city publication flow
@@ -107,7 +106,7 @@ Application PR #119 и PR #121 остаются частью production. Они 
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `4aa93c4ae709c46ca2733c13a5faafe85c0af264` в detached worktree;
+2. собрать frontend из commit `3420a9d37b64ed00be26932a6a09cf72d02307cd` в detached worktree;
 3. проверить `org.opencontainers.image.revision` образа;
 4. выполнить frontend preflight;
 5. переключить только frontend через `--no-deps --force-recreate frontend`;
@@ -124,9 +123,10 @@ Application PR #119 и PR #121 остаются частью production. Они 
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- `/admin/events/:id` для MAX-события `NEEDS_ATTENTION` с `sourcePostUrl` показывает кнопку «Перейти к событию»;
-- кнопка открывает исходный MAX-пост в новой вкладке;
-- для события не из MAX, не `NEEDS_ATTENTION` или без `sourcePostUrl` кнопка отсутствует;
+- `/admin/events/:id` для события с `sourcePostUrl` показывает read-only поле «Ссылка на источник»;
+- рядом с ним находится кнопка «Перейти на источник»;
+- кнопка открывает тот же сохранённый URL в новой вкладке;
+- верхней кнопки «Перейти к событию» больше нет;
 - canonical-city publication flow продолжает работать;
 - карусель «Главные события» сохраняет утверждённый циклический контракт;
 - backend, bots и nginx не были пересозданы;
@@ -148,7 +148,7 @@ Application PR #119 и PR #121 остаются частью production. Они 
 - `latest` для backend, bots или frontend;
 - любой backend release кроме `backend-release-aa13b0f`;
 - любой bots release кроме `bots-release-3a64511`;
-- любой frontend release кроме `frontend-release-4aa93c4`;
+- любой frontend release кроме `frontend-release-3420a9d`;
 - пересоздание backend, bots или nginx;
 - изменение или потеря server-local блока `ai.ab-event.pro`;
 - ручное изменение production-таблиц;
