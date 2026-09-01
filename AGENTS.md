@@ -9,16 +9,16 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor: `27b48f745e50f41231489da045e745f0da12c51d`;
-- backend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/backend:backend-release-27b48f7`;
+- release anchor: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`;
+- backend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/backend:backend-release-aa13b0f`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `27b48f745e50f41231489da045e745f0da12c51d` / `ab-afisha/frontend:frontend-release-27b48f7`;
+- frontend commit/image: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8` / `ab-afisha/frontend:frontend-release-aa13b0f`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняются backend и frontend. Release `27b48f7` сохраняет редакционный кабинет и третий MAX target из предыдущего production и добавляет исправленный контракт карусели «Главные события»: одновременно видно до пяти карточек; все активные `PLANNED`/`LIVE` главные события проходят через циклическое пятиэлементное окно; при прокрутке самое старое видимое событие уходит, следующее новое входит; после исчерпания новых список продолжается с первого события. Если активных главных событий меньше пяти, недостающие места заполняются последними `COMPLETED` событиями. Завершённые события не конкурируют с активными и используются только для такого добора. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
+Для текущей promotion меняются backend и frontend. Release `aa13b0f` включает PR #125 / CI #847 и исправляет canonical-city publication flow: формы создания/редактирования физического события сохраняют согласованные `cityId + cityName`, readiness использует тот же контракт, что реальный publication guard, а legacy `cityName` без `cityId` может быть автоматически привязан только по единственному активному case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются предыдущий контракт карусели «Главные события», редакционный кабинет и третий MAX target. Bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend-frontend.sh`.
 
 Новой Prisma migration в этой promotion нет. Поле `EditorialPost.scheduledAt` уже существует в production-схеме после ранее применённой migration `20260831100000_add_editorial_publisher`. Backend Docker entrypoint по-прежнему перед запуском приложения выполняет `pnpm exec prisma migrate deploy`; ручное изменение production-схемы запрещено.
 
