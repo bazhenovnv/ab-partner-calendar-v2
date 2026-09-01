@@ -63,13 +63,21 @@ describe('Canonical physical city publication', () => {
     );
   });
 
-  test('manual publication requires an active canonical City relation', () => {
+  test('manual publication requires an active canonical City relation or one exact legacy match', () => {
     assert.match(PUBLICATION_LOCATION, /event\.format !== 'OFFLINE'/);
     assert.match(PUBLICATION_LOCATION, /event\.format !== 'HYBRID'/);
-    assert.match(PUBLICATION_LOCATION, /!event\.cityId/);
-    assert.match(PUBLICATION_LOCATION, /!canonicalCity\.isActive/);
-    assert.match(PUBLICATION_LOCATION, /!isPlausibleCityName\(canonicalCity\.name\)/);
-    assert.match(PUBLICATION_LOCATION, /cityName: canonicalCity\.name/);
+    assert.match(PUBLICATION_LOCATION, /const hasValidCanonicalCity = Boolean\(/);
+    assert.match(PUBLICATION_LOCATION, /event\.cityId &&/);
+    assert.match(PUBLICATION_LOCATION, /canonicalCity\.isActive &&/);
+    assert.match(PUBLICATION_LOCATION, /isPlausibleCityName\(canonicalCity\.name\)/);
+    assert.match(PUBLICATION_LOCATION, /name:\s*\{\s*equals: legacyCityName,\s*mode: 'insensitive'/s);
+    assert.match(PUBLICATION_LOCATION, /isActive: true/);
+    assert.match(PUBLICATION_LOCATION, /take: 2/);
+    assert.match(PUBLICATION_LOCATION, /exactMatches\.length === 1/);
+    assert.match(PUBLICATION_LOCATION, /cityId: matchedCity\.id/);
+    assert.match(PUBLICATION_LOCATION, /cityName: matchedCity\.name/);
+    assert.doesNotMatch(PUBLICATION_LOCATION, /contains: legacyCityName/);
+    assert.doesNotMatch(PUBLICATION_LOCATION, /startsWith: legacyCityName/);
   });
 
   test('both publish endpoints enforce canonical physical city validation', () => {
