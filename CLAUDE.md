@@ -9,8 +9,8 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor/backend commit: `aa13b0f8cf5ea226e05cef5a9edc053428bc70f8`;
-- backend image: `ab-afisha/backend:backend-release-aa13b0f`;
+- release anchor/backend commit: `8f2f74ac633e12212688f2d52b2df86502850cdd`;
+- backend image: `ab-afisha/backend:backend-release-8f2f74a`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - frontend commit/image: `3420a9d37b64ed00be26932a6a09cf72d02307cd` / `ab-afisha/frontend:frontend-release-3420a9d`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
@@ -19,11 +19,13 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только frontend. Frontend `3420a9d` включает PR #129 / CI #855: форма редактирования события показывает сохранённый `sourcePostUrl` как read-only поле «Ссылка на источник» и рядом кнопку «Перейти на источник». Кнопка открывает тот же сохранённый URL в новой вкладке с `noopener noreferrer`, только если URL имеет HTTP(S). Значение `sourcePostUrl` не переписывается и не конструируется заново. Прежняя верхняя кнопка «Перейти к событию» удалена. Backend `aa13b0f`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-frontend.sh`.
+Для текущей promotion меняется только backend. Backend `8f2f74a` включает PR #131 / CI #859: старые MAX `sourcePostUrl`, сформированные как channel join URL с `?mid=...`, заменяются только на официальный `message.url`, полученный через MAX `GET /messages?message_ids=...`. Перед записью проверяются `recipient.chat_id === MAX_SOURCE_CHANNEL_ID`, HTTPS и host `max.ru`; при отсутствии `message.url` ссылка не конструируется. Repair запускается после старта backend и каждую минуту. Frontend `3420a9d`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend.sh`.
+
+Frontend `3420a9d` сохраняет PR #129 / CI #855: `sourcePostUrl` отображается read-only полем «Ссылка на источник», рядом кнопка «Перейти на источник». Поэтому backend repair автоматически исправляет destination этой кнопки без нового frontend-релиза.
 
 Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник и сохраняют согласованные `cityId + cityName`; readiness совпадает с реальным backend publication guard; legacy `cityName` без `cityId` автоматически связывается только при единственном активном case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3`, контракт карусели «Главные события» и все предыдущие production-гарантии.
 
-Новой Prisma migration в этой promotion нет. Backend не меняется; ручной SQL запрещён.
+Новой Prisma migration в этой promotion нет; ручной SQL запрещён.
 
 Для backend обязателен CI-step `Compiled MAX parser runtime regression tests`, который проверяет `Экспофорум, Санкт-Петербург -> venue=Экспофорум, city=Санкт-Петербург` и блокировку не-городских значений.
 
