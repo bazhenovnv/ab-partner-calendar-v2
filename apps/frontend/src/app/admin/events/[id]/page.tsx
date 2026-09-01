@@ -11,6 +11,7 @@ import {
   type EventFormat,
   type PriceType,
 } from '@/lib/admin-api';
+import CityPicker from '@/components/admin/CityPicker';
 import DirectionsPicker from '@/components/admin/DirectionsPicker';
 
 const STATUS_LABELS: Record<EventStatus, string> = {
@@ -39,6 +40,7 @@ interface FormState {
   endDate: string;
   startTime: string;
   format: EventFormat;
+  cityId: string;
   cityName: string;
   address: string;
   venue: string;
@@ -66,6 +68,7 @@ function eventToForm(ev: AdminEvent): FormState {
     endDate: toDateInput(ev.endDate),
     startTime: ev.startTime ?? '',
     format: ev.format,
+    cityId: ev.cityId ?? '',
     cityName: ev.cityName ?? ev.city?.name ?? '',
     address: ev.address ?? '',
     venue: ev.venue ?? '',
@@ -127,6 +130,9 @@ export default function EventEditPage() {
     if (!form) return 'Форма не загружена';
     if (!form.title.trim() || form.title.trim().length < 2) return 'Введите название (минимум 2 символа)';
     if (!form.startDate) return 'Укажите дату начала';
+    if ((form.format === 'OFFLINE' || form.format === 'HYBRID') && !form.cityId) {
+      return 'Выберите активный город из справочника городов';
+    }
     return '';
   }
 
@@ -153,6 +159,7 @@ export default function EventEditPage() {
         fullDescription: form.fullDescription.trim() || null,
         endDate: form.endDate || null,
         startTime: form.startTime || null,
+        cityId: form.cityId || null,
         cityName: form.cityName.trim() || null,
         address: form.address.trim() || null,
         venue: form.venue.trim() || null,
@@ -258,6 +265,14 @@ export default function EventEditPage() {
   const isArchivedOrDeleted = event.status === 'ARCHIVE' || event.status === 'DELETED';
   const isDeleted = event.status === 'DELETED';
   const isNeedsAttention = event.status === 'NEEDS_ATTENTION';
+  const physicalFormat = form.format === 'OFFLINE' || form.format === 'HYBRID';
+  const citySelectionMissing = physicalFormat && !form.cityId;
+  const hasServerCityIssue = event.publicationIssues?.some((item) =>
+    item.reason.toLocaleLowerCase('ru-RU').includes('город'),
+  ) ?? false;
+  const showLocalCityIssue = citySelectionMissing && !hasServerCityIssue;
+  const hasPublicationIssues = (event.publicationIssues?.length ?? 0) > 0 || showLocalCityIssue;
+
   const backHref = isArchivedOrDeleted
     ? '/admin/archive'
     : isNeedsAttention
@@ -362,13 +377,19 @@ export default function EventEditPage() {
 
           <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
             <div style={{ fontWeight: 700, marginBottom: '0.45rem' }}>Что мешает публикации сейчас</div>
-            {(event.publicationIssues?.length ?? 0) > 0 ? (
+            {hasPublicationIssues ? (
               <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                 {event.publicationIssues?.map((item, index) => (
                   <li key={`${item.reason}-${index}`} style={{ marginBottom: '0.4rem' }}>
                     <strong>{item.reason}.</strong> {item.action}
                   </li>
                 ))}
+                {showLocalCityIssue && (
+                  <li style={{ marginBottom: '0.4rem' }}>
+                    <strong>Не выбран активный город из справочника.</strong>{' '}
+                    Для офлайн/гибридного мероприятия выберите город в поле ниже и сохраните карточку.
+                  </li>
+                )}
               </ul>
             ) : (
               <p className="adm-ok" style={{ margin: 0 }}>
@@ -481,15 +502,18 @@ export default function EventEditPage() {
         )}
 
         <label className="adm-label">
-          Город
-          <input
-            className="adm-input"
-            value={form.cityName}
-            onChange={(e) => setField('cityName', e.target.value)}
+          Город{physicalFormat ? ' *' : ''}
+          <CityPicker
+            selectedId={form.cityId}
+            cityName={form.cityName}
+            required={physicalFormat}
+            onChange={(cityId, cityName) => {
+              setForm((prev) => prev ? { ...prev, cityId, cityName } : prev);
+            }}
           />
         </label>
 
-        {(form.format === 'OFFLINE' || form.format === 'HYBRID') && (
+        {physicalFormat && (
           <>
             <label className="adm-label">
               Адрес
