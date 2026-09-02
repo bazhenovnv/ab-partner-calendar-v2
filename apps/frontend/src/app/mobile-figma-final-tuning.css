@@ -71,27 +71,28 @@
     padding-left: 12px !important;
   }
 
-  /* The mobile artwork is rendered through clipped views of the shared
-     stationery bitmap. The old 124x158 notebook crop cut the notebook's right
-     edge and the lowest plant leaves even though the whole piece was already
-     inside the viewport. Keep the crop just left of the cup source region,
-     scale only the notebook source slightly down and expose its full height. */
+  /* Keep the notebook/plant crop fully inside the viewport. The bitmap has
+     transparent space on its left, so shift the source left inside a slightly
+     wider/taller crop instead of pushing the crop outside the screen. This
+     exposes the notebook's right edge and the lowest mint leaves without
+     changing the shared bitmap or desktop footer. */
   .pub-footer-stationery-piece--notebook {
-    top: 14px !important;
-    right: 10px !important;
-    width: 129px !important;
-    height: 174px !important;
+    top: 12px !important;
+    right: 14px !important;
+    width: 136px !important;
+    height: 186px !important;
     transform: scale(0.9) !important;
     transform-origin: right top !important;
   }
 
   .pub-footer-stationery-source--notebook {
     width: 180px !important;
+    left: -10px !important;
   }
 
   .pub-footer-stationery-piece--cup {
     top: 228px !important;
-    right: 8px !important;
+    right: 10px !important;
     transform: scale(0.88) !important;
     transform-origin: right center !important;
   }
@@ -108,12 +109,17 @@
   }
 
   .pub-footer-stationery-piece--notebook {
-    right: 5px !important;
+    right: 8px !important;
+    width: 132px !important;
     transform: scale(0.86) !important;
   }
 
+  .pub-footer-stationery-source--notebook {
+    left: -8px !important;
+  }
+
   .pub-footer-stationery-piece--cup {
-    right: 5px !important;
+    right: 7px !important;
     transform: scale(0.84) !important;
   }
 }
