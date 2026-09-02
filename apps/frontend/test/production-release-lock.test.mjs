@@ -38,6 +38,9 @@ const MAX_SOURCE_PREVIEW_SERVICE = read(
 const MAX_SOURCE_PREVIEW_CARD = read(
   'apps/frontend/src/components/admin/MaxSourcePreviewCard.tsx',
 );
+const MOBILE_FOOTER_TUNING = read('apps/frontend/src/app/mobile-figma-final-tuning.css');
+const MOBILE_FOOTER_ARTWORK = read('apps/frontend/src/app/mobile-footer-artwork-final.css');
+const MOBILE_FOOTER_TEST = read('apps/frontend/test/mobile-footer-artwork-clipping.test.mjs');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -60,13 +63,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = RELEASE_ANCHOR;
-const FRONTEND_TAG = 'frontend-release-213e507';
+const FRONTEND_COMMIT = 'afc024cfc9f46ebcba1bb383f77f63779062e648';
+const FRONTEND_TAG = 'frontend-release-afc024c';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for private MAX source preview promotion', () => {
+  test('defines independent machine-readable pins for mobile footer frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -77,10 +80,10 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_COMMIT=${FRONTEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_TAG=${FRONTEND_TAG}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_IMAGE=${FRONTEND_IMAGE}`));
-    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-01/);
+    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-02/);
   });
 
-  test('documents exact component pins and backend plus frontend deployment', () => {
+  test('documents exact component pins and frontend-only deployment', () => {
     for (const content of [RELEASE, AGENTS, CLAUDE]) {
       assert.match(content, new RegExp(RELEASE_ANCHOR));
       assert.match(content, new RegExp(BACKEND_IMAGE));
@@ -88,10 +91,16 @@ describe('Pinned production component release', () => {
       assert.match(content, new RegExp(BOTS_IMAGE));
       assert.match(content, new RegExp(FRONTEND_COMMIT));
       assert.match(content, new RegExp(FRONTEND_IMAGE));
-      assert.match(content, /deploy-pinned-backend-frontend\.sh/);
+      assert.match(content, /deploy-pinned-frontend\.sh/);
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #136/);
+    assert.match(RELEASE, /CI #870/);
+    assert.match(RELEASE, /124×158 px/);
+    assert.match(RELEASE, /129×174 px/);
+    assert.match(RELEASE, /notebook source width: `180 px`/i);
+    assert.match(RELEASE, /mobile-footer-artwork-clipping\.test\.mjs/);
     assert.match(RELEASE, /PR #133/);
     assert.match(RELEASE, /CI #865/);
     assert.match(RELEASE, /is_public=false/);
@@ -111,20 +120,31 @@ describe('Pinned production component release', () => {
     assert.ok(RELEASE.includes(MAX3_URL));
     assert.match(RELEASE, /MAX_EDITORIAL_CHANNEL_3_ID/);
     assert.match(RELEASE, /editorial\.max\.binding\.MAX_CHANNEL_3/);
+    assert.match(RELEASE, /backend остаётся `ab-afisha\/backend:backend-release-213e507`/i);
     assert.match(RELEASE, /bots остаются `ab-afisha\/bots:bots-release-3a64511`/i);
     assert.match(RELEASE, /nginx не пересоздаётся/i);
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend and frontend while preserving bots', () => {
+  test('compose pins 213e507 backend, afc024c frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-213e507\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-afc024c\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('locks the mobile footer notebook crop without changing the shared bitmap contract', () => {
+    assert.match(MOBILE_FOOTER_ARTWORK, /\.pub-footer-stationery-piece\s*\{[\s\S]*?overflow:\s*hidden\s*!important/);
+    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*129px\s*!important/);
+    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*174px\s*!important/);
+    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*180px\s*!important/);
+    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*10px\s*!important/);
+    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*8px\s*!important/);
+    assert.match(MOBILE_FOOTER_TEST, /notebook right edge and bottom leaves/);
   });
 
   test('skips canonical MAX link repair for private channels and caches visibility', () => {
@@ -237,7 +257,22 @@ describe('Pinned production component release', () => {
     assert.match(MAX_RUNTIME_TEST, /'ст1', 'Очно', 'Экспофорум'/);
   });
 
-  test('backend+frontend deploy reads the shared anchor and preserves bots/nginx', () => {
+  test('current promotion uses frontend-only deploy and preserves backend, bots and nginx', () => {
+    assert.match(FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_COMMIT/);
+    assert.match(FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_IMAGE/);
+    assert.match(FRONTEND_DEPLOY, /org\.opencontainers\.image\.revision/);
+    assert.match(FRONTEND_DEPLOY, /up -d --no-deps --force-recreate frontend/);
+    assert.doesNotMatch(FRONTEND_DEPLOY, /force-recreate backend/);
+    assert.doesNotMatch(FRONTEND_DEPLOY, /force-recreate bots/);
+    assert.doesNotMatch(FRONTEND_DEPLOY, /force-recreate nginx/);
+    assert.match(FRONTEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ FRONTEND/);
+    assert.match(FRONTEND_DEPLOY, /PRODUCTION_PIN_OK/);
+    assert.match(RELEASE, /backend.*не пересоздаётся/isu);
+    assert.match(RELEASE, /bots.*не пересозда/isu);
+    assert.match(RELEASE, /nginx не пересоздаётся/i);
+  });
+
+  test('backend+frontend deploy remains available and preserves bots/nginx', () => {
     assert.match(BACKEND_FRONTEND_DEPLOY, /PRODUCTION_RELEASE_COMMIT/);
     assert.match(BACKEND_FRONTEND_DEPLOY, /PRODUCTION_BACKEND_COMMIT/);
     assert.match(BACKEND_FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_COMMIT/);
@@ -249,18 +284,6 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(BACKEND_FRONTEND_DEPLOY, /force-recreate nginx/);
     assert.match(BACKEND_FRONTEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ BACKEND И FRONTEND/);
     assert.match(BACKEND_FRONTEND_DEPLOY, /PRODUCTION_BACKEND_FRONTEND_PIN_OK=true/);
-  });
-
-  test('frontend-only deploy remains available and changes only frontend', () => {
-    assert.match(FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_COMMIT/);
-    assert.match(FRONTEND_DEPLOY, /PRODUCTION_FRONTEND_IMAGE/);
-    assert.match(FRONTEND_DEPLOY, /org\.opencontainers\.image\.revision/);
-    assert.match(FRONTEND_DEPLOY, /up -d --no-deps --force-recreate frontend/);
-    assert.doesNotMatch(FRONTEND_DEPLOY, /force-recreate backend/);
-    assert.doesNotMatch(FRONTEND_DEPLOY, /force-recreate bots/);
-    assert.doesNotMatch(FRONTEND_DEPLOY, /force-recreate nginx/);
-    assert.match(FRONTEND_DEPLOY, /АВТОМАТИЧЕСКИЙ ОТКАТ FRONTEND/);
-    assert.match(FRONTEND_DEPLOY, /PRODUCTION_PIN_OK/);
   });
 
   test('backend-only deploy validates revision and changes only backend', () => {
