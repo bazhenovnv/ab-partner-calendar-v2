@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(ROOT, path), 'utf8');
 
 const BRIDGE = read('apps/frontend/src/components/events/MainEventsCarouselBridge.tsx');
 const BANNER = read('apps/frontend/src/components/events/MainEventsBanner.tsx');
+const CAROUSEL_CSS = read('apps/frontend/src/components/events/main-events-carousel.module.css');
 
 function rotateForBanner(source) {
   return [...source.slice(2), ...source.slice(0, 2)];
@@ -46,5 +47,16 @@ describe('Main events five-card rolling window', () => {
     assert.match(BANNER, /carouselEvents\[normalizeIndex\(virtualIndex, total\)\]/);
     assert.match(BANNER, /visible: Math\.abs\(offset\) <= VISIBLE_RADIUS/);
     assert.match(BANNER, /moveBy\(1\)/);
+  });
+
+  test('keeps compact side cards horizontally level while preserving depth geometry', () => {
+    const compactBlock = CAROUSEL_CSS.match(/@media \(max-width: 1023px\) \{[\s\S]*?\n\}/)?.[0] ?? '';
+
+    assert.match(compactBlock, /--card-rotate-y:\s*0deg\s*!important/);
+    assert.match(compactBlock, /--card-rotate-z:\s*0deg\s*!important/);
+    assert.match(BANNER, /translateZ:\s*-90/);
+    assert.match(BANNER, /translateZ:\s*-210/);
+    assert.match(BANNER, /scale:\s*0\.86/);
+    assert.match(BANNER, /scale:\s*0\.68/);
   });
 });
