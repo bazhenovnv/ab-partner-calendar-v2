@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `f168c80aa9e549d248aef81b7e424d63dbdb7baa`;
-- frontend image: `ab-afisha/frontend:frontend-release-f168c80`;
+- frontend commit: `0549f7c10f053dc04813f317cc5df23971f5135a`;
+- frontend image: `ab-afisha/frontend:frontend-release-0549f7c`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,12 +20,12 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `f168c80` включает PR #138, финально проверенный CI #873. Исправление касается только мобильного футера: декоративный блокнот и мятные листья удерживаются внутри viewport, crop расширен, исходный bitmap смещается внутри crop, для <=350 px используются отдельные положительные right-offset. Desktop footer и bitmap asset не меняются.
+Текущая promotion — **frontend-only**. Application commit `0549f7c` включает PR #140, финально проверенный CI #879. Исправление касается только мобильного футера: декоративный блокнот возвращён к правой границе положительным right-offset, отрицательный внутренний `left` source bitmap удалён, crop сужен так, чтобы справа не показывался фрагмент чашки из общего bitmap, при этом высота для нижних мятных листьев сохранена. Для <=350 px используется отдельная безопасная геометрия. Desktop footer и bitmap asset не меняются.
 
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-f168c80`;
+- frontend меняется только на `frontend-release-0549f7c`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.

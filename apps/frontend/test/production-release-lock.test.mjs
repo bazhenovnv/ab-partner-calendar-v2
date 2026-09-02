@@ -60,13 +60,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = 'f168c80aa9e549d248aef81b7e424d63dbdb7baa';
-const FRONTEND_TAG = 'frontend-release-f168c80';
+const FRONTEND_COMMIT = '0549f7c10f053dc04813f317cc5df23971f5135a';
+const FRONTEND_TAG = 'frontend-release-0549f7c';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for mobile footer frontend promotion', () => {
+  test('defines independent machine-readable pins for final mobile footer frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -92,8 +92,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /PR #138/);
-    assert.match(RELEASE, /CI #873/);
+    assert.match(RELEASE, /PR #140/);
+    assert.match(RELEASE, /CI #879/);
     assert.match(RELEASE, /мобильного футера/i);
     assert.match(RELEASE, /right-offset/i);
     assert.match(RELEASE, /desktop footer/i);
@@ -119,10 +119,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, f168c80 frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, 0549f7c frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-f168c80\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-0549f7c\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);

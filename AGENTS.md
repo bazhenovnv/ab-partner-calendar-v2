@@ -11,20 +11,20 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `f168c80aa9e549d248aef81b7e424d63dbdb7baa`;
-- frontend image: `ab-afisha/frontend:frontend-release-f168c80`;
+- frontend commit: `0549f7c10f053dc04813f317cc5df23971f5135a`;
+- frontend image: `ab-afisha/frontend:frontend-release-0549f7c`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only** из PR #138, финально проверенного CI #873. Исправление касается мобильного футера: crop блокнота/мятных листьев удерживается внутри viewport положительными right-offset, расширен по ширине/высоте, а source bitmap сдвигается внутри crop вместо выноса контейнера за экран. Desktop footer и bitmap asset не меняются.
+Текущая promotion — **frontend-only** из PR #140, финально проверенного CI #879. Исправление касается мобильного футера: блокнот возвращён к правой границе положительным right-offset, отрицательный внутренний `left` source bitmap удалён, crop сужен так, чтобы не показывать справа фрагмент чашки из общего bitmap, при этом высота для нижних мятных листьев сохранена. Для <=350 px используется отдельная безопасная геометрия. Desktop footer и bitmap asset не меняются.
 
 Контракт текущего релиза:
 
 - backend `213e507` не пересоздаётся;
-- frontend переключается только на `frontend-release-f168c80`;
+- frontend переключается только на `frontend-release-0549f7c`;
 - bots `3a64511` и nginx не пересоздаются;
 - использовать только `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются;
