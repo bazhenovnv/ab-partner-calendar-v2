@@ -16,10 +16,16 @@ test('mobile footer keeps notebook and plant as a separate clipped artwork view'
   assert.match(artwork, /\.pub-footer-stationery-piece\s*\{[\s\S]*?overflow:\s*hidden\s*!important/);
 });
 
-test('final mobile crop exposes the notebook right edge and bottom leaves without entering the cup crop', () => {
-  assert.match(tuning, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*129px\s*!important/);
-  assert.match(tuning, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*174px\s*!important/);
+test('final mobile crop keeps the notebook and lower leaves inside the viewport', () => {
+  assert.match(tuning, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*14px\s*!important/);
+  assert.match(tuning, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*136px\s*!important/);
+  assert.match(tuning, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*186px\s*!important/);
   assert.match(tuning, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*180px\s*!important/);
-  assert.match(tuning, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*10px\s*!important/);
-  assert.match(tuning, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*8px\s*!important/);
+  assert.match(tuning, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?left:\s*-10px\s*!important/);
+  assert.match(tuning, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*10px\s*!important/);
+});
+
+test('narrow mobile tuning never pushes the footer artwork beyond the right edge', () => {
+  assert.match(tuning, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*8px\s*!important/);
+  assert.match(tuning, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*7px\s*!important/);
 });
