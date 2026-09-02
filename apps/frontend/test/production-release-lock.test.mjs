@@ -32,6 +32,12 @@ const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-lin
 const MAX_SOURCE_POST_LINK_SERVICE = read(
   'apps/backend/src/modules/max-import/max-source-post-link.service.ts',
 );
+const MAX_SOURCE_PREVIEW_SERVICE = read(
+  'apps/backend/src/modules/events/max-source-preview.service.ts',
+);
+const MAX_SOURCE_PREVIEW_CARD = read(
+  'apps/frontend/src/components/admin/MaxSourcePreviewCard.tsx',
+);
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -47,20 +53,20 @@ const BACKEND_BOTS_DEPLOY = read('infra/scripts/deploy-pinned-backend-bots.sh');
 const FRONTEND_DEPLOY = read('infra/scripts/deploy-pinned-frontend.sh');
 const CLEANUP = read('infra/scripts/cleanup-old-frontend-releases.sh');
 
-const RELEASE_ANCHOR = '8f2f74ac633e12212688f2d52b2df86502850cdd';
+const RELEASE_ANCHOR = '213e5076fc274254abf9a56612bd086df2155ce5';
 const BACKEND_COMMIT = RELEASE_ANCHOR;
-const BACKEND_TAG = 'backend-release-8f2f74a';
+const BACKEND_TAG = 'backend-release-213e507';
 const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '3420a9d37b64ed00be26932a6a09cf72d02307cd';
-const FRONTEND_TAG = 'frontend-release-3420a9d';
+const FRONTEND_COMMIT = RELEASE_ANCHOR;
+const FRONTEND_TAG = 'frontend-release-213e507';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for canonical MAX link backend promotion', () => {
+  test('defines independent machine-readable pins for private MAX source preview promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -74,7 +80,7 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-01/);
   });
 
-  test('documents exact component pins and backend-only deployment', () => {
+  test('documents exact component pins and backend plus frontend deployment', () => {
     for (const content of [RELEASE, AGENTS, CLAUDE]) {
       assert.match(content, new RegExp(RELEASE_ANCHOR));
       assert.match(content, new RegExp(BACKEND_IMAGE));
@@ -82,30 +88,19 @@ describe('Pinned production component release', () => {
       assert.match(content, new RegExp(BOTS_IMAGE));
       assert.match(content, new RegExp(FRONTEND_COMMIT));
       assert.match(content, new RegExp(FRONTEND_IMAGE));
-      assert.match(content, /deploy-pinned-backend\.sh/);
+      assert.match(content, /deploy-pinned-backend-frontend\.sh/);
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /PR #131/);
-    assert.match(RELEASE, /CI #859/);
-    assert.match(RELEASE, /PR #129/);
-    assert.match(RELEASE, /CI #855/);
-    assert.match(RELEASE, /PR #125/);
-    assert.match(RELEASE, /CI #847/);
-    assert.match(RELEASE, /PR #123/);
-    assert.match(RELEASE, /CI #842/);
-    assert.match(RELEASE, /PR #119/);
-    assert.match(RELEASE, /CI #832/);
-    assert.match(RELEASE, /PR #121/);
-    assert.match(RELEASE, /CI #836/);
-    assert.match(RELEASE, /CI #837/);
-    assert.match(RELEASE, /sourcePostUrl/);
+    assert.match(RELEASE, /PR #133/);
+    assert.match(RELEASE, /CI #865/);
+    assert.match(RELEASE, /is_public=false/);
     assert.match(RELEASE, /message\.url/);
-    assert.match(RELEASE, /message_ids/);
-    assert.match(RELEASE, /Ссылка на источник/);
-    assert.match(RELEASE, /Перейти на источник/);
-    assert.match(RELEASE, /cityId/);
-    assert.match(RELEASE, /cityName/);
+    assert.match(RELEASE, /Исходный пост MAX/);
+    assert.match(RELEASE, /Открыть канал MAX/);
+    assert.match(RELEASE, /Перейти к посту MAX/);
+    assert.match(RELEASE, /6 часов/);
+    assert.match(RELEASE, /cityId \+ cityName/);
     assert.match(RELEASE, /exact match/i);
     assert.match(RELEASE, /fuzzy/i);
     assert.match(RELEASE, /каждые 15 секунд/);
@@ -113,22 +108,18 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /fit: contain/);
     assert.match(RELEASE, /Новой Prisma migration.*нет/isu);
     assert.match(RELEASE, /20260831100000_add_editorial_publisher/);
-    assert.match(RELEASE, /Макс - "АБ Афиша бухгалтера простая"/);
-    assert.match(RELEASE, /Макс - "АБ\| Афиша бухгалтера"/);
-    assert.match(RELEASE, /Макс - "АБ\| Пратнер"/);
     assert.ok(RELEASE.includes(MAX3_URL));
     assert.match(RELEASE, /MAX_EDITORIAL_CHANNEL_3_ID/);
     assert.match(RELEASE, /editorial\.max\.binding\.MAX_CHANNEL_3/);
-    assert.match(RELEASE, /frontend остаётся `3420a9d`/i);
-    assert.match(RELEASE, /bots остаются `3a64511`/i);
+    assert.match(RELEASE, /bots остаются `ab-afisha\/bots:bots-release-3a64511`/i);
     assert.match(RELEASE, /nginx не пересоздаётся/i);
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 8f2f74a backend, 3420a9d frontend and preserves bots', () => {
-    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-8f2f74a\}/);
+  test('compose pins 213e507 backend and frontend while preserving bots', () => {
+    assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-3420a9d\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-213e507\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
@@ -136,34 +127,48 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('locks canonical MAX source-post repair instead of constructed join links', () => {
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message_ids/);
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /mids\.join\(','\)/);
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message\.body\?\.mid/);
+  test('skips canonical MAX link repair for private channels and caches visibility', () => {
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /CHANNEL_VISIBILITY_TTL_MS = 6 \* 60 \* 60 \* 1000/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /\/chats\/\$\{encodeURIComponent\(String\(sourceChannelId\)\)\}/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /data\.is_public === true/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /if \(!isPublic\)/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /source channel is private/);
     assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message\.url/);
+    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message_ids/);
     assert.match(MAX_SOURCE_POST_LINK_SERVICE, /message\.recipient\?\.chat_id !== sourceChannelId/);
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /sourcePostUrl:\s*\{ contains: '\/join\/' \}/);
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /url\.protocol !== 'https:'/);
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /hostname !== 'max\.ru'/);
     assert.match(MAX_SOURCE_POST_LINK_SERVICE, /@Cron\('\*\/1 \* \* \* \*'/);
-    assert.match(MAX_SOURCE_POST_LINK_SERVICE, /data:\s*\{ sourcePostUrl: exactUrl \}/);
     assert.doesNotMatch(MAX_SOURCE_POST_LINK_SERVICE, /\?mid=/);
   });
 
-  test('locks adjacent source navigation contract in the event editor', () => {
+  test('protects exact MAX source preview and validates message identity', () => {
+    assert.match(MAIN_EVENTS_CONTROLLER, /@Get\('admin\/:id\/source-preview'\)/);
+    assert.match(MAIN_EVENTS_CONTROLLER, /@Roles\('ADMIN', 'EDITOR'\)/);
+    assert.match(MAIN_EVENTS_CONTROLLER, /maxSourcePreviewService\.getEventSourcePreview\(id\)/);
+    assert.match(MAX_SOURCE_PREVIEW_SERVICE, /\/messages\/\$\{encodeURIComponent\(event\.externalId\)\}/);
+    assert.match(MAX_SOURCE_PREVIEW_SERVICE, /returnedMid !== event\.externalId/);
+    assert.match(MAX_SOURCE_PREVIEW_SERVICE, /returnedChatId !== configuredChatId/);
+    assert.match(MAX_SOURCE_PREVIEW_SERVICE, /directPostUrl/);
+    assert.match(MAX_SOURCE_PREVIEW_SERVICE, /attachments/);
+    assert.match(MAX_SOURCE_PREVIEW_SERVICE, /isPublic: chat\?\.is_public === true/);
+  });
+
+  test('renders exact MAX source post in the event editor without fake permalink', () => {
+    assert.match(EVENT_EDIT_PAGE, /MaxSourcePreviewCard/);
+    assert.match(EVENT_EDIT_PAGE, /<MaxSourcePreviewCard event=\{event\} \/>/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /\/events\/admin\/\$\{eventId\}\/source-preview/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /Исходный пост MAX/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /preview\?\.message\?\.attachments/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /preview\.message\.text/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /Канал MAX приватный/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /Открыть канал MAX/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /Перейти к посту MAX/);
+    assert.match(MAX_SOURCE_PREVIEW_CARD, /directPostUrl \? 'Перейти к посту MAX' : 'Открыть канал MAX'/);
     assert.match(EVENT_EDIT_PAGE, /Ссылка на источник/);
     assert.match(EVENT_EDIT_PAGE, /value=\{sourcePostUrl\}/);
-    assert.match(EVENT_EDIT_PAGE, /readOnly/);
-    assert.match(EVENT_EDIT_PAGE, /safeHttpUrl\(sourcePostUrl\)/);
-    assert.match(EVENT_EDIT_PAGE, /url\.protocol !== 'https:' && url\.protocol !== 'http:'/);
-    assert.match(EVENT_EDIT_PAGE, /href=\{sourceHref\}/);
-    assert.match(EVENT_EDIT_PAGE, /target="_blank"/);
-    assert.match(EVENT_EDIT_PAGE, /rel="noopener noreferrer"/);
-    assert.match(EVENT_EDIT_PAGE, /Перейти на источник/);
+    assert.match(EVENT_EDIT_PAGE, /sourcePostUrl\.includes\('\/join\/'\) \? 'Открыть канал MAX' : 'Перейти на источник'/);
+    assert.match(SOURCE_LINK_TEST, /Открыть канал MAX/);
     assert.doesNotMatch(EVENT_EDIT_PAGE, /NeedsAttentionMaxSourceLink/);
     assert.doesNotMatch(EVENT_EDIT_PAGE, />\s*Перейти к событию\s*</);
-    assert.match(SOURCE_LINK_TEST, /value=\\\{sourcePostUrl\\\}/);
-    assert.match(SOURCE_LINK_TEST, /Перейти на источник/);
   });
 
   test('locks rolling main-events contract with completed fallback only below five active items', () => {
