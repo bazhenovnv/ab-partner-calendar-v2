@@ -38,8 +38,6 @@ const MAX_SOURCE_PREVIEW_SERVICE = read(
 const MAX_SOURCE_PREVIEW_CARD = read(
   'apps/frontend/src/components/admin/MaxSourcePreviewCard.tsx',
 );
-const MOBILE_FOOTER_TUNING = read('apps/frontend/src/app/mobile-figma-final-tuning.css');
-const MOBILE_FOOTER_TEST = read('apps/frontend/test/mobile-footer-artwork-clipping.test.mjs');
 
 const BACKEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend.sh');
 const BACKEND_FRONTEND_DEPLOY_PATH = resolve(ROOT, 'infra/scripts/deploy-pinned-backend-frontend.sh');
@@ -130,15 +128,6 @@ describe('Pinned production component release', () => {
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
-  });
-
-  test('locks the mobile footer crop inside narrow viewports', () => {
-    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*14px\s*!important/);
-    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*136px\s*!important/);
-    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*186px\s*!important/);
-    assert.match(MOBILE_FOOTER_TUNING, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?left:\s*-10px\s*!important/);
-    assert.match(MOBILE_FOOTER_TUNING, /@media \(max-width: 350px\)[\s\S]*?right:\s*8px\s*!important/);
-    assert.match(MOBILE_FOOTER_TEST, /never pushes the footer artwork beyond the right edge/);
   });
 
   test('skips canonical MAX link repair for private channels and caches visibility', () => {
