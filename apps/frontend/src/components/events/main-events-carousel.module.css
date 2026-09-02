@@ -262,6 +262,8 @@
   }
 
   .card {
+    --card-rotate-y: 0deg !important;
+    --card-rotate-z: 0deg !important;
     width: 270px;
   }
 }
