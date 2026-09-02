@@ -7,31 +7,39 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `0549f7c10f053dc04813f317cc5df23971f5135a`
-- Frontend image: `ab-afisha/frontend:frontend-release-0549f7c`
+- Frontend commit: `0f731e1724387b566abcba98652df808635cc13b`
+- Frontend image: `ab-afisha/frontend:frontend-release-0f731e1`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-02`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `0549f7c`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `0f731e1`.
 
-## Текущая promotion — финальная коррекция мобильного футера
+## Текущая promotion — горизонтальное выравнивание карточек «Главные события»
 
-Текущая promotion меняет **только frontend** до application merge commit `0549f7c10f053dc04813f317cc5df23971f5135a` из PR #140. Изменение прошло полный CI #879.
+Текущая promotion меняет **только frontend** до application merge commit `0f731e1724387b566abcba98652df808635cc13b` из PR #142. Изменение прошло полный CI #887.
 
-Исправление относится только к мобильному футеру (`max-width: 767px`):
+Исправление относится к compact-режиму карусели (`max-width: 1023px`):
 
-- декоративный блокнот возвращён ближе к правой границе viewport положительным right-offset;
-- предыдущий отрицательный внутренний сдвиг source bitmap удалён: `left: 0` вместо `left: -10px`;
-- crop блокнота сужен до безопасной области, чтобы справа не попадал фрагмент чашки из общего bitmap;
-- высота crop сохранена, поэтому нижние мятные листья остаются видимыми;
-- для экранов до 350 px закреплена отдельная безопасная геометрия;
-- чашка остаётся отдельным независимо позиционируемым фрагментом;
-- исходный `notebook-stationery.png` не меняется;
-- desktop footer не меняется;
+- боковые карточки больше не имеют пространственного наклона `rotateY`;
+- боковые карточки больше не имеют углового наклона `rotateZ`;
+- верхние и нижние края карточек остаются горизонтальными, боковые края — вертикальными;
+- сохраняются существующие `translateX`, `translateY`, `translateZ`, `scale`, `opacity`, `brightness`, `blur` и `z-index`, поэтому эффект глубины и перекрытия карусели не теряется;
+- desktop-геометрия не меняется;
 - backend, Prisma schema/migrations, bots и nginx не меняются.
+
+## Сохраняемая коррекция мобильного футера
+
+Сохраняются PR #138 / CI #873 и PR #140 / CI #879:
+
+- блокнот расположен у правой границы мобильного viewport;
+- отрицательный внутренний сдвиг source bitmap удалён;
+- crop блокнота не показывает лишний фрагмент чашки справа;
+- нижние мятные листья остаются видимыми;
+- для экранов до 350 px используется отдельная безопасная геометрия;
+- desktop footer не меняется.
 
 ## Сохраняемый контракт приватного MAX source preview
 
@@ -59,12 +67,13 @@
 
 ## Сохраняемый контракт карусели «Главные события»
 
-Сохраняется PR #123 / CI #842:
+Сохраняется PR #123 / CI #842 и дополняется PR #142 / CI #887:
 
 - backend отдаёт полный упорядоченный список опубликованных `mainEvent=true` с `PLANNED` или `LIVE`;
 - одновременно показывается до пяти карточек;
 - окно циклически сдвигается на одну карточку;
-- завершённые события используются только как fallback, если активных меньше пяти.
+- завершённые события используются только как fallback, если активных меньше пяти;
+- в compact-режиме боковые карточки выровнены без `rotateY`/`rotateZ`, но глубина за счёт translate/scale сохраняется.
 
 ## Сохраняемый редакционный функционал
 
@@ -90,7 +99,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-0549f7c`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-0f731e1`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -108,7 +117,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `0549f7c10f053dc04813f317cc5df23971f5135a` в detached worktree;
+2. собрать frontend из commit `0f731e1724387b566abcba98652df808635cc13b` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -121,13 +130,15 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-0549f7c`;
-- frontend revision = `0549f7c10f053dc04813f317cc5df23971f5135a`;
+- frontend image = `ab-afisha/frontend:frontend-release-0f731e1`;
+- frontend revision = `0f731e1724387b566abcba98652df808635cc13b`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
-- на мобильном viewport блокнот расположен у правой границы, нижние листья видимы и фрагмент второй чашки справа не появляется;
-- desktop footer визуально не изменён.
+- на мобильном/tablet viewport боковые карточки «Главные события» стоят ровно без наклона по углам;
+- эффект глубины, масштаб и перекрытие боковых карточек сохранены;
+- мобильный футер сохраняет предыдущую исправленную геометрию;
+- desktop carousel и footer визуально не изменены.
 
 ## Обязательное правило
 
@@ -144,7 +155,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-0549f7c`;
+- frontend release кроме `frontend-release-0f731e1`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
