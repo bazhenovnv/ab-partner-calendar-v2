@@ -71,13 +71,22 @@
     padding-left: 12px !important;
   }
 
-  /* Make the existing clipped stationery views slightly smaller and move
-     them inward so the notebook edge and cup remain fully inside 390 px. */
+  /* The mobile artwork is rendered through clipped views of the shared
+     stationery bitmap. The old 124x158 notebook crop cut the notebook's right
+     edge and the lowest plant leaves even though the whole piece was already
+     inside the viewport. Keep the crop just left of the cup source region,
+     scale only the notebook source slightly down and expose its full height. */
   .pub-footer-stationery-piece--notebook {
-    top: 16px !important;
-    right: 8px !important;
+    top: 14px !important;
+    right: 10px !important;
+    width: 129px !important;
+    height: 174px !important;
     transform: scale(0.9) !important;
     transform-origin: right top !important;
+  }
+
+  .pub-footer-stationery-source--notebook {
+    width: 180px !important;
   }
 
   .pub-footer-stationery-piece--cup {
