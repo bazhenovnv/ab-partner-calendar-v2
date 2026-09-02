@@ -5,84 +5,61 @@
 ## Закреплённый релиз
 
 - Домен: `https://ab-event.pro`
-- Release anchor: `213e5076fc274254abf9a56612bd086df2155ce5`
+- Release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend commit/image: `213e5076fc274254abf9a56612bd086df2155ce5` / `ab-afisha/backend:backend-release-213e507`
-- Frontend commit/image: `213e5076fc274254abf9a56612bd086df2155ce5` / `ab-afisha/frontend:frontend-release-213e507`
+- Frontend commit/image: `afc024cfc9f46ebcba1bb383f77f63779062e648` / `ab-afisha/frontend:frontend-release-afc024c`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Дата утверждения: `2026-09-01`
+- Дата утверждения: `2026-09-02`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
-- Backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`
+- Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
 Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо.
 
-## Текущая promotion — исходный пост приватного MAX-канала
+## Текущая promotion — мобильный футер
 
-Текущая promotion меняет **backend и frontend** до application merge commit `213e5076fc274254abf9a56612bd086df2155ce5`. Bots остаются `3a64511`, nginx не пересоздаётся.
+Текущая promotion меняет **только frontend** до application merge commit `afc024cfc9f46ebcba1bb383f77f63779062e648`. Backend остаётся `213e507`, bots — `3a64511`, nginx не пересоздаётся.
 
-Релиз включает application PR #133, проверенный полным CI #865. Runtime-диагностика MAX подтвердила для исходного канала:
+Релиз включает application PR #136, проверенный полным CI #870. Исправлен дефект мобильной версии, показанный на реальном телефонном скриншоте: декоративный блокнот и нижние листья растения в футере обрезались не краем viewport, а внутренним `overflow: hidden` crop-окном.
+
+Корень проблемы:
+
+- mobile footer использует один bitmap `notebook-stationery.png`, но отображает блокнот/растение и чашку через два независимых clipped view;
+- старое окно блокнота имело размер `124×158 px`;
+- правая кромка блокнота и нижние листья выходили за crop, хотя сама композиция уже находилась внутри мобильного viewport;
+- простого сдвига `right` было недостаточно, потому что обрезка происходила внутри crop-контейнера.
+
+Исправление:
+
+- notebook/plant crop: `129×174 px`;
+- notebook source width: `180 px` вместо `190 px`;
+- notebook position: `right: 10px`;
+- существующий `transform: scale(0.9)` сохраняется;
+- отдельная чашка сохраняет свою геометрию;
+- bitmap `notebook-stationery.png` не меняется;
+- desktop/tablet layout не меняется;
+- для `max-width: 350px` сохраняется отдельное уменьшение artwork;
+- добавлен regression-test `apps/frontend/test/mobile-footer-artwork-clipping.test.mjs`.
+
+## Сохраняемый private MAX source-preview contract
+
+Backend `213e507` и соответствующий frontend-функционал из PR #133 / CI #865 остаются без изменений.
+
+Runtime-диагностика MAX ранее подтвердила для исходного канала:
 
 - `chat.type=channel`;
 - `chat.is_public=false`;
 - точный `GET /messages/{mid}` возвращает нужное сообщение и правильный `recipient.chat_id`;
 - `message.url` отсутствует даже для точного `mid`;
-- следовательно, MAX API не предоставляет canonical permalink на отдельный пост этого приватного канала.
+- MAX API не предоставляет canonical permalink на отдельный пост этого приватного канала.
 
 Придумывать или конструировать прямую ссылку на сообщение запрещено.
 
-## Backend: защищённый source preview
+Backend предоставляет защищённый endpoint `GET /events/admin/:id/source-preview` для `ADMIN` и `EDITOR`. Он получает точное MAX-сообщение по сохранённому `externalId`, проверяет `mid` и `MAX_SOURCE_CHANNEL_ID`, возвращает исходный текст, timestamp, attachments и `directPostUrl` только если MAX реально его предоставил.
 
-Backend добавляет защищённый endpoint:
+Редактор события показывает блок `Исходный пост MAX`. Если canonical permalink отсутствует, join/channel URL используется только как `Открыть канал MAX`. Если MAX когда-либо вернёт валидный `message.url`, интерфейс может показать `Перейти к посту MAX`.
 
-`GET /events/admin/:id/source-preview`
-
-Доступ — только `ADMIN` и `EDITOR` через существующие `JwtAuthGuard` + `RolesGuard`.
-
-`MaxSourcePreviewService`:
-
-- загружает Event из БД и использует сохранённый `externalId` как точный MAX `mid`;
-- запрашивает `GET https://platform-api2.max.ru/messages/{mid}`;
-- проверяет, что возвращённый `body.mid` совпадает с `externalId`;
-- проверяет, что `recipient.chat_id === MAX_SOURCE_CHANNEL_ID`;
-- отдельно читает данные канала через `/chats/{chat_id}`;
-- возвращает исходный текст, timestamp, вложения, данные канала и `directPostUrl`, только если MAX реально вернул допустимый URL;
-- не создаёт фиктивный permalink;
-- Prisma schema и migrations не меняет.
-
-## Backend: отключение бессмысленного repair для приватного канала
-
-Существующий `MaxSourcePostLinkService` сохраняется для случая, если исходный канал когда-либо станет публичным, но теперь перед попытками ремонта проверяет `is_public` канала.
-
-Для приватного канала:
-
-- repair возвращает `skipped=true` до запроса пачки сообщений;
-- ежеминутные бессмысленные запросы за отсутствующими `message.url` прекращаются;
-- visibility канала кэшируется на `6 часов` (`CHANNEL_VISIBILITY_TTL_MS`), чтобы не создавать лишний MAX API traffic;
-- в лог один раз выводится понятное сообщение: source-link repair пропущен, потому что канал приватный и MAX не выдаёт canonical `message.url`;
-- если канал в будущем станет публичным, после истечения TTL проверка может снова разрешить canonical repair.
-
-Cron остаётся раз в минуту, но для приватного канала фактический message-link repair не выполняется.
-
-## Frontend: исходный MAX-пост прямо в редакторе события
-
-В `/admin/events/:id` добавлен `MaxSourcePreviewCard`.
-
-Для MAX-события карточка показывает:
-
-- заголовок `Исходный пост MAX`;
-- исходный текст сообщения;
-- время публикации в `Europe/Moscow`;
-- название канала;
-- точный `mid`;
-- изображения из MAX attachment, а при их отсутствии — безопасный fallback на сохранённое изображение события;
-- понятное сообщение для приватного канала о том, что MAX API не предоставляет прямую ссылку на отдельный пост.
-
-Навигация имеет два режима:
-
-- если MAX реально вернул `directPostUrl` — кнопка `Перейти к посту MAX`;
-- если canonical permalink отсутствует, но доступна join/channel URL — кнопка `Открыть канал MAX`.
-
-Сохранённое поле `sourcePostUrl` по-прежнему отображается read-only как `Ссылка на источник`. Если это `/join/` URL приватного канала, он не называется прямой ссылкой на пост.
+`MaxSourcePostLinkService` проверяет `is_public`, кэширует visibility канала на `6 часов` и для приватного source channel не выполняет бессмысленные minute-by-minute batch `/messages` запросы.
 
 ## Сохраняемый canonical-city publication flow
 
@@ -123,9 +100,7 @@ Cron остаётся раз в минуту, но для приватного �
 
 **Новой Prisma migration в этой promotion нет.**
 
-Backend entrypoint продолжает использовать:
-
-`pnpm exec prisma migrate deploy`
+Backend entrypoint продолжает использовать `pnpm exec prisma migrate deploy`.
 
 Существующая migration редакционного кабинета:
 
@@ -135,8 +110,8 @@ Backend entrypoint продолжает использовать:
 
 ## Production-гарантии
 
-- backend меняется только на `ab-afisha/backend:backend-release-213e507`;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-213e507`;
+- backend остаётся `ab-afisha/backend:backend-release-213e507` и **не пересоздаётся**;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-afc024c`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -149,39 +124,32 @@ Backend entrypoint продолжает использовать:
 
 Использовать только:
 
-`infra/scripts/deploy-pinned-backend-frontend.sh`
+`infra/scripts/deploy-pinned-frontend.sh`
 
 Скрипт должен:
 
-1. прочитать точные backend/frontend pins из production lock;
-2. собрать backend и frontend из commit `213e5076fc274254abf9a56612bd086df2155ce5` в detached worktree;
-3. проверить `org.opencontainers.image.revision` обоих образов;
-4. выполнить preflight и health checks;
-5. переключить только backend и frontend;
-6. не пересоздавать bots и nginx;
-7. проверить публичный HTTP/health;
-8. при ошибке автоматически откатить backend и frontend на предыдущие образы.
+1. прочитать точный frontend pin из production lock;
+2. собрать frontend из commit `afc024cfc9f46ebcba1bb383f77f63779062e648` в detached worktree;
+3. проверить `org.opencontainers.image.revision` образа;
+4. выполнить frontend preflight;
+5. переключить только frontend через `--no-deps --force-recreate frontend`;
+6. не пересоздавать backend, bots или nginx;
+7. проверить публичный HTTP;
+8. проверить неизменность backend/bots/nginx и server-local файлов;
+9. при ошибке автоматически откатить только frontend image.
 
 ## Проверка после deployment
 
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- `https://ab-event.pro/api/health` → HTTP 200;
-- backend image/revision = `213e5076fc274254abf9a56612bd086df2155ce5`;
-- frontend image/revision = `213e5076fc274254abf9a56612bd086df2155ce5`;
+- frontend image/revision = `afc024cfc9f46ebcba1bb383f77f63779062e648`;
+- backend остаётся `213e507`;
 - bots остаются `3a64511`;
 - nginx не пересоздан;
-- backend log для приватного исходного MAX-канала содержит однократный skip source-link repair вместо повторяющихся message-link ошибок;
-- в редакторе реального MAX-события блок `Исходный пост MAX` загружает точный текст и `mid`;
-- для приватного канала отображается `Открыть канал MAX`, а не обещание прямого перехода на конкретный пост;
-- если `directPostUrl` отсутствует, никакой permalink не конструируется.
-
-Контрольный `mid` из runtime-диагностики:
-
-`mid.ffffbab719b28a8e01a05c80a30b2250`
-
-Для него MAX подтвердил принадлежность исходному каналу, но не вернул `message.url`.
+- в мобильном футере полностью видны правая кромка блокнота и нижние листья растения;
+- чашка остаётся отдельным нижним правым объектом и не дублируется рядом с блокнотом;
+- desktop/tablet footer не изменён.
 
 ## Обязательное правило
 
@@ -198,13 +166,13 @@ Backend entrypoint продолжает использовать:
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-213e507`;
+- frontend release кроме `frontend-release-afc024c`;
 - bots release кроме `bots-release-3a64511`;
-- пересоздавать bots или nginx;
+- пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
 - менять production-таблицы вручную;
-- придумывать MAX permalink для приватного сообщения;
-- использовать frontend-only или backend-only deployment для этой promotion.
+- менять bitmap `notebook-stationery.png` в рамках этой promotion;
+- использовать backend-only или backend+frontend deployment вместо `deploy-pinned-frontend.sh`.
 
 ## Новая версия в будущем
 

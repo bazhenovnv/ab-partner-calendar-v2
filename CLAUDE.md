@@ -9,9 +9,9 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor/backend/frontend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
+- release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend image: `ab-afisha/frontend:frontend-release-213e507`;
+- frontend commit/image: `afc024cfc9f46ebcba1bb383f77f63779062e648` / `ab-afisha/frontend:frontend-release-afc024c`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -19,19 +19,18 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion меняет backend и frontend одновременно. Application commit `213e507` включает PR #133, финально проверенный CI #865. Production runtime подтвердил, что source channel MAX приватный (`type=channel`, `is_public=false`) и точный `GET /messages/{mid}` не возвращает `message.url`, поэтому join URL с `?mid=` не является прямым permalink отдельного поста.
+Текущая promotion — **frontend-only**. Application commit `afc024c` включает PR #136, проверенный полным CI #870. Исправляется мобильная декоративная композиция футера без изменения desktop/tablet и bitmap asset: прежнее notebook/plant crop-окно `124×158 px` обрезало правую кромку блокнота и нижние листья. Финальный mobile override использует crop `129×174 px`, notebook source `180 px`, позицию `right: 10px` и сохраняет отдельную чашку.
 
-Текущий контракт:
+Для текущего релиза:
 
-- backend предоставляет защищённый `GET /events/admin/:id/source-preview` для ADMIN/EDITOR;
-- endpoint получает точное MAX-сообщение по сохранённому `externalId`, сверяет `mid` и `recipient.chat_id` с `MAX_SOURCE_CHANNEL_ID`, не пишет данные в БД;
-- frontend показывает в редакторе блок «Исходный пост MAX» с исходным текстом, датой/временем, message ID и доступными изображениями;
-- для приватного канала сохранённый join URL не переписывается, а кнопка называется «Открыть канал MAX»;
-- если MAX когда-либо вернёт валидный `message.url`, разрешена кнопка «Перейти к посту MAX»;
-- repair-сервис проверяет `is_public`, кэширует visibility на 6 часов и не выполняет бессмысленные batch `/messages` запросы для приватного канала, устраняя повторяющиеся 400/502 в scheduler logs;
+- backend `213e507` не меняется и не пересоздаётся;
+- bots `3a64511` не меняются и не пересоздаются;
+- nginx, volumes, Telegram IPv6 и server-local `ai.ab-event.pro` сохраняются;
 - Prisma schema/migrations не меняются;
-- bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
-- deployment только через `deploy-pinned-backend-frontend.sh`.
+- deployment только через `deploy-pinned-frontend.sh`;
+- regression `mobile-footer-artwork-clipping.test.mjs` обязателен в frontend test suite.
+
+Сохраняется private MAX source-preview contract из PR #133 / CI #865. Production runtime подтвердил, что source channel MAX приватный (`type=channel`, `is_public=false`) и точный `GET /messages/{mid}` не возвращает `message.url`, поэтому join URL с `?mid=` не является прямым permalink отдельного поста. Backend предоставляет защищённый `GET /events/admin/:id/source-preview`; frontend показывает «Исходный пост MAX»; для приватного канала действие называется «Открыть канал MAX»; repair-service кэширует visibility на 6 часов и не выполняет бессмысленные batch `/messages` запросы для private source channel.
 
 Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник и сохраняют согласованные `cityId + cityName`; readiness совпадает с реальным backend publication guard; legacy `cityName` без `cityId` автоматически связывается только при единственном активном case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3`, контракт карусели «Главные события» и все предыдущие production-гарантии.
 
