@@ -9,19 +9,29 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor/backend commit: `8f2f74ac633e12212688f2d52b2df86502850cdd`;
-- backend image: `ab-afisha/backend:backend-release-8f2f74a`;
+- release anchor/backend/frontend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
+- backend image: `ab-afisha/backend:backend-release-213e507`;
+- frontend image: `ab-afisha/frontend:frontend-release-213e507`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
-- frontend commit/image: `3420a9d37b64ed00be26932a6a09cf72d02307cd` / `ab-afisha/frontend:frontend-release-3420a9d`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend + frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Для текущей promotion меняется только backend. Backend `8f2f74a` включает PR #131 / CI #859: старые MAX `sourcePostUrl`, сформированные как channel join URL с `?mid=...`, заменяются только на официальный `message.url`, полученный через MAX `GET /messages?message_ids=...`. Перед записью проверяются `recipient.chat_id === MAX_SOURCE_CHANNEL_ID`, HTTPS и host `max.ru`; при отсутствии `message.url` ссылка не конструируется. Repair запускается после старта backend и каждую минуту. Frontend `3420a9d`, bots `3a64511` и nginx должны остаться без пересоздания. Использовать только `deploy-pinned-backend.sh`.
+Текущая promotion меняет backend и frontend одновременно. Application commit `213e507` включает PR #133, финально проверенный CI #865. Production runtime подтвердил, что source channel MAX приватный (`type=channel`, `is_public=false`) и точный `GET /messages/{mid}` не возвращает `message.url`, поэтому join URL с `?mid=` не является прямым permalink отдельного поста.
 
-Frontend `3420a9d` сохраняет PR #129 / CI #855: `sourcePostUrl` отображается read-only полем «Ссылка на источник», рядом кнопка «Перейти на источник». Поэтому backend repair автоматически исправляет destination этой кнопки без нового frontend-релиза.
+Текущий контракт:
+
+- backend предоставляет защищённый `GET /events/admin/:id/source-preview` для ADMIN/EDITOR;
+- endpoint получает точное MAX-сообщение по сохранённому `externalId`, сверяет `mid` и `recipient.chat_id` с `MAX_SOURCE_CHANNEL_ID`, не пишет данные в БД;
+- frontend показывает в редакторе блок «Исходный пост MAX» с исходным текстом, датой/временем, message ID и доступными изображениями;
+- для приватного канала сохранённый join URL не переписывается, а кнопка называется «Открыть канал MAX»;
+- если MAX когда-либо вернёт валидный `message.url`, разрешена кнопка «Перейти к посту MAX»;
+- repair-сервис проверяет `is_public`, кэширует visibility на 6 часов и не выполняет бессмысленные batch `/messages` запросы для приватного канала, устраняя повторяющиеся 400/502 в scheduler logs;
+- Prisma schema/migrations не меняются;
+- bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
+- deployment только через `deploy-pinned-backend-frontend.sh`.
 
 Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания и редактирования `OFFLINE`/`HYBRID` событий используют активный справочник и сохраняют согласованные `cityId + cityName`; readiness совпадает с реальным backend publication guard; legacy `cityName` без `cityId` автоматически связывается только при единственном активном case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются редакционный кабинет `/admin/editorial`, третий независимый MAX target `MAX_CHANNEL_3`, контракт карусели «Главные события» и все предыдущие production-гарантии.
 
