@@ -27,6 +27,9 @@ const EDITORIAL_PUBLISHER = read('apps/frontend/src/app/admin/editorial/Editoria
 const MAIN_EVENTS_SERVICE = read('apps/backend/src/modules/events/main-events.service.ts');
 const MAIN_EVENTS_CONTROLLER = read('apps/backend/src/modules/events/events.controller.ts');
 const MAIN_EVENTS_ROLLING_TEST = read('apps/frontend/test/main-events-rolling-window.test.mjs');
+const MAIN_EVENTS_CAROUSEL_CSS = read(
+  'apps/frontend/src/components/events/main-events-carousel.module.css',
+);
 const EVENT_EDIT_PAGE = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
 const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-link.test.mjs');
 const MAX_SOURCE_POST_LINK_SERVICE = read(
@@ -60,13 +63,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '0549f7c10f053dc04813f317cc5df23971f5135a';
-const FRONTEND_TAG = 'frontend-release-0549f7c';
+const FRONTEND_COMMIT = '0f731e1724387b566abcba98652df808635cc13b';
+const FRONTEND_TAG = 'frontend-release-0f731e1';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for final mobile footer frontend promotion', () => {
+  test('defines independent machine-readable pins for compact carousel frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -92,10 +95,13 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
-    assert.match(RELEASE, /PR #140/);
-    assert.match(RELEASE, /CI #879/);
+    assert.match(RELEASE, /PR #142/);
+    assert.match(RELEASE, /CI #887/);
+    assert.match(RELEASE, /Главные события/i);
+    assert.match(RELEASE, /rotateY/);
+    assert.match(RELEASE, /rotateZ/);
+    assert.match(RELEASE, /compact/i);
     assert.match(RELEASE, /мобильного футера/i);
-    assert.match(RELEASE, /right-offset/i);
     assert.match(RELEASE, /desktop footer/i);
     assert.match(RELEASE, /is_public=false/);
     assert.match(RELEASE, /message\.url/);
@@ -119,10 +125,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, 0549f7c frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, 0f731e1 frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-0549f7c\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-0f731e1\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
@@ -174,7 +180,7 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(EVENT_EDIT_PAGE, />\s*Перейти к событию\s*</);
   });
 
-  test('locks rolling main-events contract with completed fallback only below five active items', () => {
+  test('locks rolling main-events contract and level compact card geometry', () => {
     assert.match(MAIN_EVENTS_SERVICE, /in: \[EventAutoStatus\.PLANNED, EventAutoStatus\.LIVE\]/);
     assert.match(MAIN_EVENTS_SERVICE, /if \(activeEvents\.length >= MAIN_EVENTS_WINDOW_SIZE\)/);
     assert.match(MAIN_EVENTS_SERVICE, /autoStatus: EventAutoStatus\.COMPLETED/);
@@ -188,6 +194,12 @@ describe('Pinned production component release', () => {
     assert.match(MAIN_EVENTS_ROLLING_TEST, /1, 2, 3, 4, 5/);
     assert.match(MAIN_EVENTS_ROLLING_TEST, /2, 3, 4, 5, 6/);
     assert.match(MAIN_EVENTS_ROLLING_TEST, /3, 4, 5, 6, 7/);
+    assert.match(MAIN_EVENTS_ROLLING_TEST, /horizontally level/);
+    const compactBlock = MAIN_EVENTS_CAROUSEL_CSS.match(
+      /@media \(max-width: 1023px\) \{[\s\S]*?\n\}/,
+    )?.[0] ?? '';
+    assert.match(compactBlock, /--card-rotate-y:\s*0deg\s*!important/);
+    assert.match(compactBlock, /--card-rotate-z:\s*0deg\s*!important/);
   });
 
   test('locks third MAX target and unique binding contract', () => {
