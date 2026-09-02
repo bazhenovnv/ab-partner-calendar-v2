@@ -31,9 +31,11 @@ test('uses a taller white Figma quote band so the frame sits lower inside it', (
   assert.match(css, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?background:\s*#fff !important;/);
 });
 
-test('scales the existing notebook and cup inward without changing bitmap assets', () => {
-  assert.match(css, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*8px !important;/);
+test('positions the notebook near the right edge without exposing the cup source', () => {
+  assert.match(css, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*2px !important;/);
+  assert.match(css, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*132px !important;/);
+  assert.match(css, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?left:\s*0 !important;/);
   assert.match(css, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.9\)/);
-  assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*8px !important;/);
+  assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*10px !important;/);
   assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?scale\(0\.88\)/);
 });
