@@ -7,26 +7,27 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `f168c80aa9e549d248aef81b7e424d63dbdb7baa`
-- Frontend image: `ab-afisha/frontend:frontend-release-f168c80`
+- Frontend commit: `0549f7c10f053dc04813f317cc5df23971f5135a`
+- Frontend image: `ab-afisha/frontend:frontend-release-0549f7c`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-02`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `f168c80`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `0549f7c`.
 
-## Текущая promotion — исправление мобильного футера
+## Текущая promotion — финальная коррекция мобильного футера
 
-Текущая promotion меняет **только frontend** до application merge commit `f168c80aa9e549d248aef81b7e424d63dbdb7baa` из PR #138. Изменение прошло полный CI #873.
+Текущая promotion меняет **только frontend** до application merge commit `0549f7c10f053dc04813f317cc5df23971f5135a` из PR #140. Изменение прошло полный CI #879.
 
 Исправление относится только к мобильному футеру (`max-width: 767px`):
 
-- декоративный блокнот и мятные листья больше не выталкиваются за правую границу viewport;
-- crop блокнота расширен до безопасной области, чтобы не обрезать правый край и нижние листья;
-- исходный bitmap смещается внутри crop, а не весь crop за пределы экрана;
-- для экранов до 350 px закреплены отдельные положительные right-offset;
+- декоративный блокнот возвращён ближе к правой границе viewport положительным right-offset;
+- предыдущий отрицательный внутренний сдвиг source bitmap удалён: `left: 0` вместо `left: -10px`;
+- crop блокнота сужен до безопасной области, чтобы справа не попадал фрагмент чашки из общего bitmap;
+- высота crop сохранена, поэтому нижние мятные листья остаются видимыми;
+- для экранов до 350 px закреплена отдельная безопасная геометрия;
 - чашка остаётся отдельным независимо позиционируемым фрагментом;
 - исходный `notebook-stationery.png` не меняется;
 - desktop footer не меняется;
@@ -89,7 +90,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-f168c80`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-0549f7c`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -107,7 +108,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `f168c80aa9e549d248aef81b7e424d63dbdb7baa` в detached worktree;
+2. собрать frontend из commit `0549f7c10f053dc04813f317cc5df23971f5135a` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -120,12 +121,12 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-f168c80`;
-- frontend revision = `f168c80aa9e549d248aef81b7e424d63dbdb7baa`;
+- frontend image = `ab-afisha/frontend:frontend-release-0549f7c`;
+- frontend revision = `0549f7c10f053dc04813f317cc5df23971f5135a`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
-- на мобильном viewport блокнот и нижние листья в футере полностью видимы и не режутся правой границей;
+- на мобильном viewport блокнот расположен у правой границы, нижние листья видимы и фрагмент второй чашки справа не появляется;
 - desktop footer визуально не изменён.
 
 ## Обязательное правило
@@ -143,7 +144,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-f168c80`;
+- frontend release кроме `frontend-release-0549f7c`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
