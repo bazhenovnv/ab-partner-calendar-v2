@@ -9,27 +9,28 @@
 
 Единственная утверждённая production-конфигурация:
 
-- release anchor/backend/frontend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
+- release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend image: `ab-afisha/frontend:frontend-release-213e507`;
+- frontend commit: `f168c80aa9e549d248aef81b7e424d63dbdb7baa`;
+- frontend image: `ab-afisha/frontend:frontend-release-f168c80`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — backend+frontend из PR #133, финально проверенного CI #865. Production runtime подтвердил для source channel MAX: `type=channel`, `is_public=false`, а точный `GET /messages/{mid}` возвращает нужное сообщение и `chat_id`, но не возвращает `message.url`. Поэтому запрещено выдавать `/join/...?...mid=...` за permalink конкретного поста.
+Текущая promotion — **frontend-only** из PR #138, финально проверенного CI #873. Исправление касается мобильного футера: crop блокнота/мятных листьев удерживается внутри viewport положительными right-offset, расширен по ширине/высоте, а source bitmap сдвигается внутри crop вместо выноса контейнера за экран. Desktop footer и bitmap asset не меняются.
 
 Контракт текущего релиза:
 
-- защищённый `GET /events/admin/:id/source-preview` получает точное MAX-сообщение по сохранённому `externalId` и проверяет `MAX_SOURCE_CHANNEL_ID`;
-- редактор события показывает блок «Исходный пост MAX»: исходный текст, дату/время, message ID и доступное изображение;
-- для приватного канала join-link остаётся без переписывания и действие называется «Открыть канал MAX»;
-- если MAX когда-либо вернёт валидный `message.url`, интерфейс может показать «Перейти к посту MAX»;
-- repair-сервис сначала проверяет visibility канала, кэширует её на 6 часов и для приватного канала не выполняет бессмысленные minute-by-minute batch `/messages` запросы;
-- Prisma schema/migrations не меняются;
+- backend `213e507` не пересоздаётся;
+- frontend переключается только на `frontend-release-f168c80`;
 - bots `3a64511` и nginx не пересоздаются;
-- использовать только `deploy-pinned-backend-frontend.sh`.
+- использовать только `deploy-pinned-frontend.sh`;
+- Prisma schema/migrations не меняются;
+- server-local `ai.ab-event.pro`, volumes и Telegram IPv6 runtime сохраняются.
+
+Сохраняется MAX source-preview контракт из PR #133 / CI #865: source channel приватный (`is_public=false`), MAX не возвращает `message.url`, поэтому `/join/...?...mid=...` нельзя выдавать за permalink конкретного поста. Защищённый `GET /events/admin/:id/source-preview` показывает исходный MAX-пост в редакторе, а для приватного канала действие называется «Открыть канал MAX». Repair-сервис кэширует visibility на 6 часов и не делает бессмысленные batch message-link запросы для приватного канала.
 
 Сохраняется canonical-city publication flow из PR #125 / CI #847: формы создания/редактирования физического события сохраняют согласованные `cityId + cityName`, readiness использует тот же контракт, что real publication guard, а legacy `cityName` без `cityId` может быть автоматически привязан только по единственному активному case-insensitive exact match. Fuzzy/contains и неоднозначная автопривязка запрещены. Сохраняются также контракт карусели «Главные события», редакционный кабинет, три MAX target и Telegram IPv6 runtime.
 
