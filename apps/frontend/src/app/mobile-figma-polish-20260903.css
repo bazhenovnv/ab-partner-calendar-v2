@@ -14,6 +14,48 @@ nav[aria-label='Навигация по главным событиям'] button
   transition-duration: 90ms !important;
 }
 
+/* The component keeps its direction state for 560 ms for interaction locking.
+   Visually return the indicator to the centre after 280 ms, i.e. exactly 2x
+   faster, without changing carousel semantics or click handling. */
+nav[aria-label='Навигация по главным событиям'] [role='group'] {
+  position: relative !important;
+}
+
+nav[aria-label='Навигация по главным событиям'] [role='group']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #515151;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+nav[aria-label='Навигация по главным событиям'] [role='group']:has(> button:first-child[aria-current='true'])::after,
+nav[aria-label='Навигация по главным событиям'] [role='group']:has(> button:last-child[aria-current='true'])::after {
+  animation: main-events-center-dot-return 560ms steps(1, end) forwards;
+}
+
+nav[aria-label='Навигация по главным событиям'] [role='group'] > button:first-child[aria-current='true'],
+nav[aria-label='Навигация по главным событиям'] [role='group'] > button:last-child[aria-current='true'] {
+  animation: main-events-side-dot-release 560ms steps(1, end) forwards;
+}
+
+@keyframes main-events-side-dot-release {
+  0%, 49.99% { background: #515151; }
+  50%, 100% { background: #a1a1a1; }
+}
+
+@keyframes main-events-center-dot-return {
+  0%, 49.99% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
 @media (max-width: 767px) {
   /* Use the approved Figma artwork as one intact mobile composition. */
   .pub-hero-mobile-figma-art {
@@ -38,6 +80,11 @@ nav[aria-label='Навигация по главным событиям'] button
 
   .pub-hero-content {
     z-index: 3 !important;
+  }
+
+  nav[aria-label='Навигация по главным событиям'] [role='group']::after {
+    width: 13px;
+    height: 13px;
   }
 
   /* Do not let touch/focus states create a second shadow or square corner
