@@ -11,15 +11,15 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `cf5581b339df49f3de1adcefec3ac58977c7baea`;
-- frontend image: `ab-afisha/frontend:frontend-release-cf5581b`;
+- frontend commit: `cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453`;
+- frontend image: `ab-afisha/frontend:frontend-release-cb0e2c2`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `cf5581b` сохраняет PR #151 / CI #907, PR #152 / CI #909 и PR #154 / CI #913, а также включает PR #156 / CI #919 с финальной корректировкой позиции mobile footer notebook. Текущая мобильная геометрия и взаимодействия:
+Текущая promotion — **frontend-only**. Application commit `cb0e2c2` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913 и PR #156 / CI #919, а также включает PR #158 / CI #925 с устранением мерцания direction indicator в «Главных событиях». Текущая мобильная геометрия и взаимодействия:
 
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - верхняя граница mobile hero artwork плавно растворяется в белой поверхности hero через CSS mask, при этом заголовок, описание и CTA остаются отдельным верхним слоем;
@@ -30,7 +30,7 @@
 - иконка телефона в «Контакты» увеличена оптически;
 - белая quote-band сохраняет более тёмную тень, а фигуры закреплены по левому/правому краям без отрицательного горизонтального смещения;
 - визуальное движение карусели «Главные события» ускорено в 2 раза: `520 -> 260 ms`, двухшаговое `780 -> 390 ms`;
-- визуальный direction indicator возвращается в центр через `280 ms`;
+- визуальный direction indicator возвращается в центр через `280 ms` на реальной центральной точке; временный `::after` overlay удалён, поэтому при финальном сбросе state на `560 ms` больше нет мерцания;
 - PR #152 удаляет CSS `!important` с `--card-motion-duration`, поэтому iOS Touch Events bridge по-прежнему может временно ставить `90 ms` во время drag и безопасно восстанавливать базовую скорость;
 - backend, bots и nginx этой promotion не меняются.
 
