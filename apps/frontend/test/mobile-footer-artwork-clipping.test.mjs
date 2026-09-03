@@ -18,18 +18,20 @@ test('mobile footer keeps notebook and plant as a separate clipped artwork view'
 });
 
 test('final mobile crop enlarges the notebook without leaking the cup source', () => {
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*2px\s*!important/);
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*134px\s*!important/);
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*190px\s*!important/);
-  assert.match(polish, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*185px\s*!important/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*0\s*!important/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*138px\s*!important/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*196px\s*!important/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.96\)/);
+  assert.match(polish, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*190px\s*!important/);
   assert.match(polish, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?left:\s*0\s*!important/);
   assert.match(tuning, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*10px\s*!important/);
   assert.doesNotMatch(polish, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?left:\s*-(?:8|10)px\s*!important/);
 });
 
 test('narrow mobile crop stays inside the viewport and keeps the cup separate', () => {
-  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*2px\s*!important/);
-  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*130px\s*!important/);
-  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.87\)/);
+  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*0\s*!important/);
+  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*132px\s*!important/);
+  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*192px\s*!important/);
+  assert.match(polish, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.91\)/);
   assert.match(tuning, /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*7px\s*!important/);
 });
