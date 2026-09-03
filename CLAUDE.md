@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73`;
-- frontend image: `ab-afisha/frontend:frontend-release-639e0cc`;
+- frontend commit: `66d616ebfc33c336575c3f5aa0bb04bfd3652718`;
+- frontend image: `ab-afisha/frontend:frontend-release-66d616e`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,12 +20,13 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `639e0cc` включает PR #151 / CI #907 и PR #152 / CI #909. Контракт текущей promotion:
+Текущая promotion — **frontend-only**. Application commit `66d616e` сохраняет PR #151 / CI #907 и PR #152 / CI #909 и добавляет PR #154 / CI #913. Контракт текущей promotion:
 
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
+- верхняя граница mobile artwork плавно растворяется в белой поверхности hero через CSS mask, а заголовок, описание и CTA остаются отдельным верхним слоем;
 - touch/hover/focus состояния hero, календаря и quote-area больше не создают лишнюю тень и квадратные артефакты на скруглениях;
 - footer brand/logo оптически сдвинут влево к вертикали описания;
-- блокнот/растение увеличены, но остаются внутри правой границы viewport;
+- блокнот/растение дополнительно увеличены и сдвинуты правее; для экранов до 350 px сохраняется отдельная безопасная геометрия;
 - телефон в «Контакты» увеличен оптически;
 - quote-band имеет более тёмную тень, а изображения людей закреплены по реальным левому/правому краям мобильного viewport;
 - карусель «Главные события» визуально движется в 2 раза быстрее: `520 -> 260 ms`, двухшаговое движение `780 -> 390 ms`;
@@ -40,7 +41,7 @@
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-639e0cc`;
+- frontend меняется только на `frontend-release-66d616e`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.

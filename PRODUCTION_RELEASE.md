@@ -7,35 +7,45 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73`
-- Frontend image: `ab-afisha/frontend:frontend-release-639e0cc`
+- Frontend commit: `66d616ebfc33c336575c3f5aa0bb04bfd3652718`
+- Frontend image: `ab-afisha/frontend:frontend-release-66d616e`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-03`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `639e0cc`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `66d616e`.
 
-## Текущая promotion — мобильный Figma polish и безопасное ускорение карусели
+## Текущая promotion — mobile hero blend и footer notebook polish
 
-Текущая promotion меняет **только frontend** до application merge commit `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73`.
+Текущая promotion меняет **только frontend** до application merge commit `66d616ebfc33c336575c3f5aa0bb04bfd3652718`.
 
-Application PR #151 / CI #907 вносит утверждённые мобильные правки:
+Application PR #154 / CI #913 добавляет финальный визуальный polish после проверки предыдущего production-релиза:
+
+- верхняя граница mobile Figma artwork плавно растворяется в белой поверхности hero через CSS `mask-image` / `-webkit-mask-image`;
+- заголовок, описание и CTA остаются отдельным верхним слоем над artwork;
+- mobile hero сохраняет утверждённый artwork `hero-mobile-figma-20260903.webp` с календарём, книгами и вазой;
+- блокнот/растение в мобильном футере дополнительно увеличены и сдвинуты немного правее;
+- для экранов до 350 px сохраняется отдельная безопасная геометрия, чтобы artwork не выходил за видимый viewport;
+- independent cup artwork не меняется;
+- desktop footer, desktop hero, backend, bots и nginx не меняются.
+
+Сохраняется application PR #151 / CI #907:
 
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - исходная desktop-композиция hero сохраняется и на mobile не рендерится;
 - у hero, календаря и quote-area на touch-устройствах убраны переходы состояний, создававшие вторую тень и артефакты скруглённых углов;
 - footer brand/logo оптически сдвинут влево к вертикали текста «Мероприятия для бухгалтеров по всей России»;
-- блокнот/растение увеличены и закреплены у правой границы без выхода за видимый viewport;
+- блокнот/растение увеличены и закреплены у правой границы;
 - иконка телефона в «Контакты» увеличена оптически без сдвига текста;
 - тень белой quote-band сделана темнее;
 - изображения людей закреплены по реальным левому и правому краям mobile viewport без отрицательных горизонтальных offsets;
 - direction indicator карусели визуально возвращается в центр через `280 ms`.
 
-Application PR #152 / CI #909 устраняет обнаруженный после review конфликт ускорения с iOS swipe:
+Сохраняется application PR #152 / CI #909, устраняющий конфликт ускорения с iOS swipe:
 
-- stylesheet больше не задаёт `--card-motion-duration: 260ms !important`;
+- stylesheet не задаёт `--card-motion-duration: 260ms !important`;
 - обычный шаг карусели визуально нормализуется `520 -> 260 ms`;
 - двухшаговое движение нормализуется `780 -> 390 ms`;
 - iOS Touch Events bridge сохраняет возможность временно ставить `--card-motion-duration: 90ms` во время drag;
@@ -136,7 +146,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-639e0cc`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-66d616e`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -154,7 +164,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73` в detached worktree;
+2. собрать frontend из commit `66d616ebfc33c336575c3f5aa0bb04bfd3652718` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -167,15 +177,16 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-639e0cc`;
-- frontend revision = `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73`;
+- frontend image = `ab-afisha/frontend:frontend-release-66d616e`;
+- frontend revision = `66d616ebfc33c336575c3f5aa0bb04bfd3652718`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
 - на mobile hero отображается утверждённый artwork с календарём, книгами и вазой;
+- верх artwork не образует прямую видимую границу: изображение плавно переходит в белую hero-поверхность, а текст и CTA остаются поверх;
 - при касании/клике hero, календаря и quote-area не появляется дополнительная тень или квадратные артефакты скругления;
 - footer logo/brand находится на утверждённой левой вертикали;
-- блокнот/растение увеличены, но не обрезаются правой границей viewport;
+- блокнот/растение дополнительно увеличены и смещены правее без критического выхода из viewport;
 - иконка телефона визуально соответствует масштабу соседних contact icons;
 - тень quote-band темнее предыдущей и симметрична;
 - изображения людей не уезжают за левый/правый край mobile viewport;
@@ -199,7 +210,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-639e0cc`;
+- frontend release кроме `frontend-release-66d616e`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;

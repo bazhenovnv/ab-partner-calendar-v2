@@ -11,20 +11,21 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73`;
-- frontend image: `ab-afisha/frontend:frontend-release-639e0cc`;
+- frontend commit: `66d616ebfc33c336575c3f5aa0bb04bfd3652718`;
+- frontend image: `ab-afisha/frontend:frontend-release-66d616e`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `639e0cc` включает PR #151 / CI #907 и защитную корректировку PR #152 / CI #909. Текущая мобильная геометрия и взаимодействия:
+Текущая promotion — **frontend-only**. Application commit `66d616e` сохраняет PR #151 / CI #907 и PR #152 / CI #909, а также включает PR #154 / CI #913 с последним mobile visual polish. Текущая мобильная геометрия и взаимодействия:
 
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
+- верхняя граница mobile hero artwork плавно растворяется в белой поверхности hero через CSS mask, при этом заголовок, описание и CTA остаются отдельным верхним слоем;
 - на touch-устройствах у hero, календаря и quote-area убраны лишние hover/active/focus переходы, создававшие вторую тень и артефакты скругления;
 - footer brand/logo оптически сдвинут влево к вертикали описания;
-- блокнот/растение увеличены с жёстким удержанием внутри правой границы viewport;
+- блокнот/растение дополнительно увеличены и смещены правее, для узких экранов сохраняется отдельная безопасная геометрия;
 - иконка телефона в «Контакты» увеличена оптически;
 - белая quote-band сохраняет более тёмную тень, а фигуры закреплены по левому/правому краям без отрицательного горизонтального смещения;
 - визуальное движение карусели «Главные события» ускорено в 2 раза: `520 -> 260 ms`, двухшаговое `780 -> 390 ms`;
