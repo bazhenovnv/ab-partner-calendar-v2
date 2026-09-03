@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `cf5581b339df49f3de1adcefec3ac58977c7baea`;
-- frontend image: `ab-afisha/frontend:frontend-release-cf5581b`;
+- frontend commit: `cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453`;
+- frontend image: `ab-afisha/frontend:frontend-release-cb0e2c2`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,7 +20,7 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `cf5581b` сохраняет PR #151 / CI #907, PR #152 / CI #909 и PR #154 / CI #913 и добавляет PR #156 / CI #919. Контракт текущей promotion:
+Текущая promotion — **frontend-only**. Application commit `cb0e2c2` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913 и PR #156 / CI #919 и добавляет PR #158 / CI #925. Контракт текущей promotion:
 
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - верхняя граница mobile artwork плавно растворяется в белой поверхности hero через CSS mask, а заголовок, описание и CTA остаются отдельным верхним слоем;
@@ -31,7 +31,7 @@
 - телефон в «Контакты» увеличен оптически;
 - quote-band имеет более тёмную тень, а изображения людей закреплены по реальным левому/правому краям мобильного viewport;
 - карусель «Главные события» визуально движется в 2 раза быстрее: `520 -> 260 ms`, двухшаговое движение `780 -> 390 ms`;
-- direction indicator визуально возвращается в центр через `280 ms`;
+- direction indicator визуально возвращается в центр через `280 ms` на реальной центральной точке; pseudo-element overlay удалён, поэтому финальный state reset на `560 ms` не даёт короткого blink;
 - PR #152 сохраняет iOS drag workaround: CSS больше не блокирует `--card-motion-duration` через `!important`, поэтому native Touch Events path может временно использовать `90 ms` и затем восстановить `260 ms`;
 - backend, bots, nginx, volumes и server-local конфигурация не меняются.
 
@@ -42,7 +42,7 @@
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-cf5581b`;
+- frontend меняется только на `frontend-release-cb0e2c2`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.

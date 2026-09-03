@@ -68,8 +68,8 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = 'cf5581b339df49f3de1adcefec3ac58977c7baea';
-const FRONTEND_TAG = 'frontend-release-cf5581b';
+const FRONTEND_COMMIT = 'cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453';
+const FRONTEND_TAG = 'frontend-release-cb0e2c2';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
@@ -100,6 +100,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #158/);
+    assert.match(RELEASE, /CI #925/);
     assert.match(RELEASE, /PR #156/);
     assert.match(RELEASE, /CI #919/);
     assert.match(RELEASE, /PR #154/);
@@ -119,6 +121,9 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /mask-image/);
     assert.match(RELEASE, /translateX\(4px\)/);
     assert.match(RELEASE, /top: -8px/);
+    assert.match(RELEASE, /real-centre-dot|реальной центральной точке/i);
+    assert.match(RELEASE, /::after/);
+    assert.match(RELEASE, /560 ms/);
     assert.match(RELEASE, /Главные события/i);
     assert.match(RELEASE, /rotateY/);
     assert.match(RELEASE, /rotateZ/);
@@ -151,10 +156,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, cf5581b frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, cb0e2c2 frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-cf5581b\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-cb0e2c2\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
@@ -162,7 +167,7 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('locks mobile hero blend and final footer notebook position', () => {
+  test('locks mobile hero blend, footer notebook position and flicker-free direction dot', () => {
     assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-hero-mobile-figma-art\s*\{[\s\S]*?-webkit-mask-image:\s*linear-gradient\(/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-hero-mobile-figma-art\s*\{[\s\S]*?mask-image:\s*linear-gradient\(/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /transparent 0%/);
@@ -186,6 +191,23 @@ describe('Pinned production component release', () => {
     assert.match(narrowNotebookBlock, /top:\s*-4px !important;/);
     assert.match(narrowNotebookBlock, /right:\s*-3px !important;/);
     assert.match(narrowNotebookBlock, /transform:\s*translateX\(3px\) scale\(0\.94\) !important;/);
+
+    assert.match(
+      MOBILE_FIGMA_POLISH_CSS,
+      /\[role='group'\]:has\(> button:first-child\[aria-current='true'\]\) > button:nth-child\(2\)/,
+    );
+    assert.match(
+      MOBILE_FIGMA_POLISH_CSS,
+      /\[role='group'\]:has\(> button:last-child\[aria-current='true'\]\) > button:nth-child\(2\)/,
+    );
+    assert.match(
+      MOBILE_FIGMA_POLISH_CSS,
+      /animation:\s*main-events-center-dot-return 560ms steps\(1, end\) forwards;/,
+    );
+    assert.doesNotMatch(
+      MOBILE_FIGMA_POLISH_CSS,
+      /nav\[aria-label='Навигация по главным событиям'\] \[role='group'\]::after/,
+    );
   });
 
   test('locks iOS swipe handling and the safe 2x carousel motion path', () => {
