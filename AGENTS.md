@@ -11,24 +11,26 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`;
-- frontend image: `ab-afisha/frontend:frontend-release-698cd59`;
+- frontend commit: `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8`;
+- frontend image: `ab-afisha/frontend:frontend-release-4aa0bd5`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `698cd59` включает PR #144 / CI #891 и PR #146 / CI #894. PR #144 корректирует только мобильный quote/footer: серая зона с фигурами, белая quote-band с симметричной тенью, выравнивание «Контакты», положение brand title и безопасно увеличенный crop блокнота/растения. PR #146 добавляет iOS/iPadOS-specific native Touch Events path на всю gallery-зону карусели «Главные события»: axis lock `7 px`, swipe threshold `28 px`, `passive: false` только для horizontal touchmove, подавление случайного click после swipe и повторное использование существующего ArrowLeft/ArrowRight carousel path. Android Pointer Events path не меняется. Desktop carousel/footer/quotes не меняются.
+Текущая promotion — **frontend-only**. Application commit `4aa0bd5` включает все предыдущие мобильные исправления и PR #148 / CI #898. Текущая мобильная геометрия:
 
-Контракт текущего релиза:
+- белая quote-band накрывает нижнюю часть изображений ног; сами ноги остаются на сером фоне выше полосы;
+- высота белой quote-band уменьшена до `114 px`, нижний отступ `8 px`, чтобы верхний и нижний запас вокруг мятной рамки выглядели симметрично;
+- белая quote-band имеет `z-index: 2`, фигуры `z-index: 1`, а мятная рамка/цитата `z-index: 3`;
+- колонка «Контакты» больше не поднята на `-2px` и визуально выровнена с «Наши проекты»;
+- footer title «Афиша бухгалтера» опущен до `top: 7px` относительно логотипа;
+- верхний mobile header title «Афиша Бухгалтера» опущен до `top: 4px` относительно логотипа;
+- безопасный crop блокнота/растения сохраняется без лишней чашки справа;
+- desktop header/footer/quotes не меняются.
 
-- backend `213e507` не пересоздаётся;
-- frontend переключается только на `frontend-release-698cd59`;
-- bots `3a64511` и nginx не пересоздаются;
-- использовать только `deploy-pinned-frontend.sh`;
-- Prisma schema/migrations не меняются;
-- server-local `ai.ab-event.pro`, volumes и Telegram IPv6 runtime сохраняются.
+Сохраняется PR #146 / CI #894: iOS/iPadOS использует отдельный native Touch Events path на всю gallery-зону карусели «Главные события», axis lock `7 px`, swipe threshold `28 px`, `passive: false` только для horizontal touchmove, подавление случайного click после swipe и повторное использование существующего ArrowLeft/ArrowRight carousel path. Android Pointer Events path не меняется.
 
 Сохраняется PR #142 / CI #887: compact-карусель «Главные события» остаётся без `rotateY` и `rotateZ`, при этом translate/scale/opacity/brightness/blur/z-index и эффект глубины сохраняются.
 
