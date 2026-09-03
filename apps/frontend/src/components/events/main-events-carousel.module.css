@@ -213,7 +213,7 @@
   background: #a1a1a1;
   cursor: pointer;
   appearance: none;
-  transition: background-color 180ms ease;
+  transition: background-color 90ms ease;
 }
 
 .dot:hover,
