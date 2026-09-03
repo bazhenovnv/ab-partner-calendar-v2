@@ -7,39 +7,40 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `0f731e1724387b566abcba98652df808635cc13b`
-- Frontend image: `ab-afisha/frontend:frontend-release-0f731e1`
+- Frontend commit: `9e37708f0b9d62648f02c4e9218d73a37560357d`
+- Frontend image: `ab-afisha/frontend:frontend-release-9e37708`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Дата утверждения: `2026-09-02`
+- Дата утверждения: `2026-09-03`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `0f731e1`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `9e37708`.
 
-## Текущая promotion — горизонтальное выравнивание карточек «Главные события»
+## Текущая promotion — мобильный блок цитат и футер
 
-Текущая promotion меняет **только frontend** до application merge commit `0f731e1724387b566abcba98652df808635cc13b` из PR #142. Изменение прошло полный CI #887.
+Текущая promotion меняет **только frontend** до application merge commit `9e37708f0b9d62648f02c4e9218d73a37560357d` из PR #144. Изменение прошло полный CI #891.
 
-Исправление относится к compact-режиму карусели (`max-width: 1023px`):
+Исправление относится только к мобильному viewport (`max-width: 767px`):
 
-- боковые карточки больше не имеют пространственного наклона `rotateY`;
-- боковые карточки больше не имеют углового наклона `rotateZ`;
-- верхние и нижние края карточек остаются горизонтальными, боковые края — вертикальными;
-- сохраняются существующие `translateX`, `translateY`, `translateZ`, `scale`, `opacity`, `brightness`, `blur` и `z-index`, поэтому эффект глубины и перекрытия карусели не теряется;
-- desktop-геометрия не меняется;
+- зона с изображениями ног/людей в блоке цитат возвращена на серый фон `#f1f1f1`, совпадающий с мобильным canvas;
+- белый фон непосредственно под цитатой сохранён отдельной нижней полосой;
+- белая полоса цитаты получила симметричную тень `0 0 10px`, поэтому тень видна и сверху, и снизу;
+- колонка `Контакты` оптически поднята на 2 px и выровнена по верхнему уровню с `Наши проекты`;
+- надпись `Афиша бухгалтера` опущена на 4 px относительно логотипа без смещения самого логотипа;
+- блокнот/растение увеличены примерно на 5%, но crop остаётся внутри правой границы и не захватывает область отдельной чашки;
+- для экранов до 350 px сохранена отдельная безопасная геометрия;
+- desktop-версии блока цитат и футера не меняются;
 - backend, Prisma schema/migrations, bots и nginx не меняются.
 
-## Сохраняемая коррекция мобильного футера
+## Сохраняемая коррекция карусели «Главные события»
 
-Сохраняются PR #138 / CI #873 и PR #140 / CI #879:
+Сохраняется PR #142 / CI #887:
 
-- блокнот расположен у правой границы мобильного viewport;
-- отрицательный внутренний сдвиг source bitmap удалён;
-- crop блокнота не показывает лишний фрагмент чашки справа;
-- нижние мятные листья остаются видимыми;
-- для экранов до 350 px используется отдельная безопасная геометрия;
-- desktop footer не меняется.
+- в compact-режиме боковые карточки не имеют `rotateY` и `rotateZ`;
+- верхние и нижние края карточек горизонтальны, боковые края вертикальны;
+- сохраняются `translateX`, `translateY`, `translateZ`, `scale`, `opacity`, `brightness`, `blur` и `z-index`, поэтому глубина и перекрытие карусели сохраняются;
+- desktop-геометрия не меняется.
 
 ## Сохраняемый контракт приватного MAX source preview
 
@@ -67,7 +68,7 @@
 
 ## Сохраняемый контракт карусели «Главные события»
 
-Сохраняется PR #123 / CI #842 и дополняется PR #142 / CI #887:
+Сохраняется PR #123 / CI #842 и PR #142 / CI #887:
 
 - backend отдаёт полный упорядоченный список опубликованных `mainEvent=true` с `PLANNED` или `LIVE`;
 - одновременно показывается до пяти карточек;
@@ -99,7 +100,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-0f731e1`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-9e37708`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -117,7 +118,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `0f731e1724387b566abcba98652df808635cc13b` в detached worktree;
+2. собрать frontend из commit `9e37708f0b9d62648f02c4e9218d73a37560357d` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -130,15 +131,18 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-0f731e1`;
-- frontend revision = `0f731e1724387b566abcba98652df808635cc13b`;
+- frontend image = `ab-afisha/frontend:frontend-release-9e37708`;
+- frontend revision = `9e37708f0b9d62648f02c4e9218d73a37560357d`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
-- на мобильном/tablet viewport боковые карточки «Главные события» стоят ровно без наклона по углам;
-- эффект глубины, масштаб и перекрытие боковых карточек сохранены;
-- мобильный футер сохраняет предыдущую исправленную геометрию;
-- desktop carousel и footer визуально не изменены.
+- мобильная зона под изображениями ног серая, а белая полоса цитаты сохранена;
+- тень белой полосы видна равномерно сверху и снизу;
+- `Контакты` визуально выровнены с `Наши проекты`;
+- название `Афиша бухгалтера` немного ниже относительно логотипа;
+- увеличенный блокнот не обрезан справа, не показывает фрагмент чашки и не перекрывает название;
+- compact-карусель сохраняет ровные боковые карточки;
+- desktop carousel, quotes и footer визуально не изменены.
 
 ## Обязательное правило
 
@@ -155,7 +159,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-0f731e1`;
+- frontend release кроме `frontend-release-9e37708`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
