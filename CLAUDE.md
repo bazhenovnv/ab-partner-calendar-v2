@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8`;
-- frontend image: `ab-afisha/frontend:frontend-release-4aa0bd5`;
+- frontend commit: `639e0cc7dbc2c4bd4945602711cbc5d81efe2b73`;
+- frontend image: `ab-afisha/frontend:frontend-release-639e0cc`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,24 +20,27 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `4aa0bd5` включает PR #148 / CI #898 и сохраняет все ранее утверждённые мобильные исправления. Контракт PR #148:
+Текущая promotion — **frontend-only**. Application commit `639e0cc` включает PR #151 / CI #907 и PR #152 / CI #909. Контракт текущей promotion:
 
-- белая quote-band находится поверх нижней части изображений ног, поэтому ноги визуально уходят под белый фон цитаты;
-- зона ног выше quote-band остаётся серой `#f1f1f1`;
-- quote-band: `height: 114px`, `bottom: 8px`, `z-index: 2`;
-- изображения людей: `z-index: 1`, мятная рамка/цитата: `z-index: 3`;
-- симметричная тень quote-band сохраняется;
-- «Контакты» выровнены с «Наши проекты» (`top: 0` вместо прежнего `-2px`);
-- footer title «Афиша бухгалтера» опущен до `top: 7px`;
-- верхний mobile header title «Афиша Бухгалтера» опущен до `top: 4px`;
-- notebook crop и desktop geometry не меняются.
+- мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
+- touch/hover/focus состояния hero, календаря и quote-area больше не создают лишнюю тень и квадратные артефакты на скруглениях;
+- footer brand/logo оптически сдвинут влево к вертикали описания;
+- блокнот/растение увеличены, но остаются внутри правой границы viewport;
+- телефон в «Контакты» увеличен оптически;
+- quote-band имеет более тёмную тень, а изображения людей закреплены по реальным левому/правому краям мобильного viewport;
+- карусель «Главные события» визуально движется в 2 раза быстрее: `520 -> 260 ms`, двухшаговое движение `780 -> 390 ms`;
+- direction indicator визуально возвращается в центр через `280 ms`;
+- PR #152 сохраняет iOS drag workaround: CSS больше не блокирует `--card-motion-duration` через `!important`, поэтому native Touch Events path может временно использовать `90 ms` и затем восстановить `260 ms`;
+- backend, bots, nginx, volumes и server-local конфигурация не меняются.
+
+Сохраняется PR #148 / CI #898: белая quote-band находится поверх нижней части изображений ног, зона выше остаётся серой `#f1f1f1`, «Контакты» выровнены с «Наши проекты», а notebook crop не показывает лишний фрагмент чашки.
 
 Сохраняется PR #146 / CI #894: iOS/iPadOS swipe «Главных событий» использует native Touch Events на всей gallery-зоне, axis lock `7 px`, swipe threshold `28 px`, horizontal `touchmove` с `passive: false`/`preventDefault()` только после direction lock, подавление случайного card click и существующий ArrowLeft/ArrowRight carousel path. Android Pointer Events path сохраняется.
 
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-4aa0bd5`;
+- frontend меняется только на `frontend-release-639e0cc`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
