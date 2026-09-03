@@ -4,7 +4,88 @@
    grey canvas while the white quote band overlays their lower edge, and the
    header/footer receive small optical alignment/artwork corrections. */
 
+/* The Figma hero bitmap is mobile-only. Desktop keeps the existing split
+   vase/books + calendar composition. */
+.pub-hero-mobile-figma {
+  display: none;
+}
+
 @media (max-width: 767px) {
+  /* Use the exact supplied Figma artwork for the mobile hero. The source image
+     already contains the approved calendar/books/vase composition and its soft
+     neutral background. Keep it bottom-anchored so the intentionally empty top
+     part of the bitmap remains behind the hero copy. */
+  .pub-hero-books,
+  .pub-hero-calendar {
+    display: none !important;
+  }
+
+  .pub-hero-visual::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  .pub-hero-mobile-figma {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 2 !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    pointer-events: none !important;
+  }
+
+  /* Primary homepage windows must remain visually static on tap. Mobile
+     browsers can retain :hover after a touch, which previously made shadows
+     jump and exposed square-looking artefacts around rounded corners. */
+  .pub-hero-panel,
+  .pub-events-calendar-col,
+  .pub-main-quotes-inner,
+  .quotes-section,
+  .quotes-layout {
+    transition: none !important;
+    animation: none !important;
+    filter: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .pub-hero-panel {
+    isolation: isolate !important;
+    background-clip: padding-box !important;
+  }
+
+  .pub-hero-panel:hover,
+  .pub-hero-panel:active,
+  .pub-hero-panel:focus-within {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: var(--pub-hero-shadow) !important;
+  }
+
+  .pub-events-calendar-col:hover,
+  .pub-events-calendar-col:active,
+  .pub-events-calendar-col:focus-within {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: 0 4px 12px rgba(13, 35, 68, 0.17) !important;
+  }
+
+  .pub-main-quotes-inner:hover,
+  .pub-main-quotes-inner:active,
+  .pub-main-quotes-inner:focus-within,
+  .quotes-section:hover,
+  .quotes-section:active,
+  .quotes-layout:hover,
+  .quotes-layout:active {
+    transform: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+
   /* Keep the people/legs on the same grey canvas as the surrounding mobile
      page. The white quote band is layered above their lower edge so the cutout
      artwork visually disappears under the quote background, matching Figma. */
@@ -26,12 +107,22 @@
     z-index: 2 !important;
     height: 114px !important;
     background: #fff !important;
-    box-shadow: 0 0 10px rgba(13, 35, 68, 0.12) !important;
+    box-shadow: 0 0 12px rgba(13, 35, 68, 0.24) !important;
     pointer-events: none !important;
   }
 
   .quotes-person {
     z-index: 1 !important;
+  }
+
+  /* Figma corner lock: do not push either cut-out outside the viewport. The
+     previous negative offsets visually cropped both figures on mobile. */
+  .quotes-person-left {
+    left: 0 !important;
+  }
+
+  .quotes-person-right {
+    right: 0 !important;
   }
 
   .quotes-card--approved-frame {
@@ -58,6 +149,14 @@
     padding-top: 0 !important;
   }
 
+  /* Align the complete footer logo lockup with the left edge of the footer
+     description. The visible logo mark has a small transparent optical inset,
+     so a 4px lift to the left puts mark/title and description on one vertical. */
+  .pub-footer-logo {
+    position: relative !important;
+    left: -4px !important;
+  }
+
   /* Lower the footer title a little further relative to the logo mark without
      moving the mark or the footer description. */
   .pub-footer-logo-text {
@@ -65,20 +164,28 @@
     top: 7px !important;
   }
 
-  /* Enlarge the notebook/plant by roughly five percent while keeping the crop
-     inside the right edge. At a 185 px source width the cup begins beyond the
-     134 px notebook crop, so the independent cup cannot leak into this piece. */
+  /* Enlarge the notebook/plant a little more while keeping the clipped piece
+     entirely inside the visible viewport. The crop remains narrower than the
+     cup region of the shared source bitmap, so no cup fragment leaks in. */
   .pub-footer-stationery-piece--notebook {
-    right: 2px !important;
-    width: 134px !important;
-    height: 190px !important;
-    transform: scale(0.92) !important;
+    right: 0 !important;
+    width: 138px !important;
+    height: 196px !important;
+    transform: scale(0.96) !important;
     transform-origin: right top !important;
   }
 
   .pub-footer-stationery-source--notebook {
-    width: 185px !important;
+    width: 190px !important;
     left: 0 !important;
+  }
+
+  /* The phone bitmap has more internal transparent padding than the email and
+     location icons. A small optical scale correction makes all three contact
+     icons read at the same apparent size without changing row geometry. */
+  .pub-footer-contact-icon--phone {
+    transform: scale(1.16) !important;
+    transform-origin: center !important;
   }
 }
 
@@ -87,14 +194,26 @@
     top: 3px !important;
   }
 
+  .pub-footer-logo {
+    left: -3px !important;
+  }
+
   .pub-footer-logo-text {
     top: 6px !important;
   }
 
   .pub-footer-stationery-piece--notebook {
-    right: 2px !important;
-    width: 130px !important;
-    height: 188px !important;
-    transform: scale(0.87) !important;
+    right: 0 !important;
+    width: 132px !important;
+    height: 192px !important;
+    transform: scale(0.91) !important;
+  }
+
+  .quotes-person-left {
+    left: 0 !important;
+  }
+
+  .quotes-person-right {
+    right: 0 !important;
   }
 }
