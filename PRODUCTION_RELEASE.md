@@ -7,46 +7,45 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`
-- Frontend image: `ab-afisha/frontend:frontend-release-698cd59`
+- Frontend commit: `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8`
+- Frontend image: `ab-afisha/frontend:frontend-release-4aa0bd5`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-03`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `698cd59`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `4aa0bd5`.
 
-## Текущая promotion — мобильные цитаты/футер и стабильный свайп «Главных событий» на iOS
+## Текущая promotion — мобильная quote-band и выравнивание бренда/контактов
 
-Текущая promotion меняет **только frontend** до application merge commit `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`.
+Текущая promotion меняет **только frontend** до application merge commit `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8`.
 
-В application commit входят две последовательные мобильные коррекции:
+Application PR #148 / CI #898 вносит мобильные коррекции:
 
-- PR #144 / CI #891 — мобильный блок цитат и футер;
-- PR #146 / CI #894 — iOS/iPadOS swipe для карусели «Главные события».
+- зона с изображениями ног выше quote-band остаётся серой `#f1f1f1`;
+- белая quote-band накрывает нижнюю часть изображений ног, поэтому ноги визуально уходят **под** белый фон цитаты;
+- quote-band имеет `height: 114px`, `bottom: 8px`, `z-index: 2`;
+- изображения людей имеют `z-index: 1`, мятная рамка/цитата `z-index: 3`;
+- верхний и нижний визуальный отступы белой quote-band относительно мятной рамки выравниваются;
+- симметричная тень quote-band сверху и снизу сохраняется;
+- колонка «Контакты» больше не поднята на `-2px` и выровнена с «Наши проекты»;
+- footer title «Афиша бухгалтера» опущен до `top: 7px` относительно логотипа;
+- верхний mobile header title «Афиша Бухгалтера» опущен до `top: 4px` относительно логотипа;
+- notebook crop, desktop header, desktop footer и desktop quotes не меняются.
 
-Контракт мобильного блока цитат/футера:
+## Сохраняемый iOS swipe
 
-- зона с фигурами/ногами возвращена на серый мобильный фон;
-- белая полоса непосредственно под цитатой сохранена;
-- у белой полосы есть симметричная тень сверху и снизу;
-- колонка «Контакты» оптически выровнена с «Наши проекты»;
-- подпись «Афиша бухгалтера» немного опущена относительно логотипа;
-- блокнот/растение увеличены консервативно и остаются внутри правой границы без лишнего фрагмента чашки;
-- desktop footer и desktop quote geometry не меняются.
-
-Контракт iOS swipe:
+Сохраняется PR #146 / CI #894:
 
 - Android, мышь и pen продолжают использовать существующий Pointer Events path;
 - только iOS/iPadOS получает отдельный native Touch Events path на **всю gallery-зону** карусели;
 - direction lock срабатывает после `7 px`, поэтому вертикальная прокрутка страницы сохраняется;
 - подтверждённый горизонтальный жест использует `touchmove` с `passive: false` и `preventDefault()` только после определения горизонтального направления;
-- iOS swipe threshold = `28 px`, вместо необходимости длинного протягивания;
+- iOS swipe threshold = `28 px`;
 - drag feedback сохраняется через существующие `--drag-offset` и `--card-motion-duration`;
 - после горизонтального swipe подавляется случайный click по карточке;
-- переход выполняется через существующий `ArrowLeft` / `ArrowRight` path, без дублирования carousel state;
-- физические крайние пиксели экрана iPhone могут оставаться зарезервированы Safari под системный back/forward gesture, но рабочая зона самой карусели остаётся полной.
+- переход выполняется через существующий `ArrowLeft` / `ArrowRight` path.
 
 ## Сохраняемое выравнивание compact-карусели
 
@@ -58,9 +57,9 @@
 - эффект глубины и перекрытия карусели сохраняется;
 - desktop-геометрия не меняется.
 
-## Сохраняемая коррекция мобильного футера
+## Сохраняемый мобильный футер
 
-Сохраняются PR #138 / CI #873 и PR #140 / CI #879, дополненные PR #144 / CI #891:
+Сохраняются PR #138 / CI #873, PR #140 / CI #879 и PR #144 / CI #891:
 
 - блокнот расположен у правой границы мобильного viewport;
 - отрицательный внутренний сдвиг source bitmap удалён;
@@ -93,21 +92,9 @@
 - legacy `cityName` без `cityId` автоматически связывается только при единственном активном case-insensitive exact match;
 - fuzzy/contains и неоднозначная автопривязка запрещены.
 
-## Сохраняемый контракт карусели «Главные события»
-
-Сохраняются PR #123 / CI #842, PR #142 / CI #887 и добавляется PR #146 / CI #894:
-
-- backend отдаёт полный упорядоченный список опубликованных `mainEvent=true` с `PLANNED` или `LIVE`;
-- одновременно показывается до пяти карточек;
-- окно циклически сдвигается на одну карточку;
-- завершённые события используются только как fallback, если активных меньше пяти;
-- в compact-режиме боковые карточки выровнены без `rotateY`/`rotateZ`, но глубина за счёт translate/scale сохраняется;
-- iOS/iPadOS использует отдельный устойчивый touch path с threshold 28 px и axis lock 7 px;
-- Android path функционально не меняется.
-
 ## Сохраняемый редакционный функционал
 
-Сохраняются application PR #119 / CI #832 и PR #121 / CI #836, включая:
+Сохраняются application PR #119 / CI #832 и PR #121 / CI #836:
 
 - `Разместить сейчас` / `Запланировать`;
 - очередь публикаций каждые 15 секунд;
@@ -129,7 +116,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-698cd59`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-4aa0bd5`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -147,7 +134,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `698cd59e689e3c5abe38182dfa445aa9efe2a4ce` в detached worktree;
+2. собрать frontend из commit `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -160,18 +147,20 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-698cd59`;
-- frontend revision = `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`;
+- frontend image = `ab-afisha/frontend:frontend-release-4aa0bd5`;
+- frontend revision = `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
+- на мобильном белая quote-band накрывает нижнюю часть ног;
+- серый фон над quote-band сохраняется;
+- верхний и нижний отступы белой полосы относительно мятной рамки визуально сбалансированы;
+- «Контакты» находятся на уровне «Наши проекты»;
+- footer title «Афиша бухгалтера» опущен ниже относительно логотипа;
+- header title «Афиша Бухгалтера» опущен ниже относительно логотипа;
 - на Android свайп «Главных событий» работает как до promotion;
-- на iPhone/iPad короткий горизонтальный swipe уверенно переключает карточку без необходимости тянуть через весь экран;
-- swipe работает по всей gallery-зоне карусели, кроме возможного системного edge gesture Safari в крайних пикселях экрана;
-- вертикальный скролл страницы через область карусели сохраняется;
-- мобильная зона с фигурами под цитатой серая, белая quote-band и симметричная тень сохранены;
-- мобильный футер сохраняет исправленное выравнивание и crop блокнота/растения;
-- desktop carousel, quotes и footer визуально не изменены.
+- на iPhone/iPad короткий горизонтальный swipe уверенно переключает карточку;
+- desktop carousel, quotes, header и footer визуально не изменены.
 
 ## Обязательное правило
 
@@ -188,7 +177,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-698cd59`;
+- frontend release кроме `frontend-release-4aa0bd5`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
