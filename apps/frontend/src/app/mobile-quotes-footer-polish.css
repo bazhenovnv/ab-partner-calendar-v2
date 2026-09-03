@@ -2,7 +2,7 @@
    This file is intentionally loaded after the previous mobile tuning layer.
    It changes only the <=767 px presentation: the quote people stay on the
    grey canvas while the white quote band overlays their lower edge, and the
-   footer receives small optical alignment/artwork corrections. */
+   header/footer receive small optical alignment/artwork corrections. */
 
 @media (max-width: 767px) {
   /* Keep the people/legs on the same grey canvas as the surrounding mobile
@@ -38,6 +38,13 @@
     z-index: 3 !important;
   }
 
+  /* Lower the mobile header title slightly relative to the brand mark while
+     keeping the existing header height and button row geometry unchanged. */
+  .pub-header-brand-title {
+    position: relative !important;
+    top: 4px !important;
+  }
+
   /* Both second-row footer columns share the same visual top. Contacts no
      longer receive the previous upward optical lift. */
   .pub-footer-top > .pub-footer-col:nth-child(2),
@@ -51,8 +58,8 @@
     padding-top: 0 !important;
   }
 
-  /* Lower the title a little further relative to the logo mark without moving
-     the mark or the footer description. */
+  /* Lower the footer title a little further relative to the logo mark without
+     moving the mark or the footer description. */
   .pub-footer-logo-text {
     position: relative !important;
     top: 7px !important;
@@ -76,6 +83,10 @@
 }
 
 @media (max-width: 350px) {
+  .pub-header-brand-title {
+    top: 3px !important;
+  }
+
   .pub-footer-logo-text {
     top: 6px !important;
   }
