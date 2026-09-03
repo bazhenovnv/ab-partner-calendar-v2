@@ -5,11 +5,8 @@
   display: none;
 }
 
-/* Main-events movement is intentionally twice as fast on all breakpoints. */
-[role='region'][aria-roledescription='карусель'][aria-label^='Главные события'] {
-  --card-motion-duration: 260ms !important;
-}
-
+/* Card motion speed is normalized by MainEventsCarouselBridge so the iOS
+   touch bridge can still override --card-motion-duration inline while dragging. */
 nav[aria-label='Навигация по главным событиям'] button {
   transition-duration: 90ms !important;
 }
