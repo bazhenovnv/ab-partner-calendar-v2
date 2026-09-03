@@ -50,6 +50,15 @@ describe('Main events carousel', () => {
     assert.doesNotMatch(carouselCardType, /\bvirtualIndex\s*:/);
   });
 
+  test('uses the approved two-times-faster direction-dot timing', () => {
+    const component = readFileSync(COMPONENT, 'utf8');
+    const styles = readFileSync(STYLES, 'utf8');
+    const dot = styles.match(/\.dot \{[\s\S]*?\n\}/)?.[0] ?? '';
+
+    assert.match(component, /const MOTION_INDICATOR_MS = 280;/);
+    assert.match(dot, /transition: background-color 90ms ease;/);
+  });
+
   test('has no card border and uses one dense omnidirectional shadow', () => {
     const styles = readFileSync(STYLES, 'utf8');
     const card = styles.match(/\.card \{[\s\S]*?\n\}/)?.[0] ?? '';
