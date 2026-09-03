@@ -67,13 +67,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '698cd59e689e3c5abe38182dfa445aa9efe2a4ce';
-const FRONTEND_TAG = 'frontend-release-698cd59';
+const FRONTEND_COMMIT = '4aa0bd5f32889a92c4afa332b8a15e32df2c13b8';
+const FRONTEND_TAG = 'frontend-release-4aa0bd5';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for combined mobile frontend promotion', () => {
+  test('defines independent machine-readable pins for mobile frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -99,6 +99,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #148/);
+    assert.match(RELEASE, /CI #898/);
     assert.match(RELEASE, /PR #144/);
     assert.match(RELEASE, /CI #891/);
     assert.match(RELEASE, /PR #146/);
@@ -113,7 +115,7 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /28 px/);
     assert.match(RELEASE, /7 px/);
     assert.match(RELEASE, /Touch Events/);
-    assert.match(RELEASE, /мобильного футера/i);
+    assert.match(RELEASE, /мобильный футер/i);
     assert.match(RELEASE, /desktop footer/i);
     assert.match(RELEASE, /is_public=false/);
     assert.match(RELEASE, /message\.url/);
@@ -137,10 +139,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, 698cd59 frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, 4aa0bd5 frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-698cd59\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-4aa0bd5\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
