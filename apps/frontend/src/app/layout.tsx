@@ -32,6 +32,7 @@ import './mobile-390-final.css';
 import './mobile-390-buttons-hero-fix.css';
 import './mobile-footer-artwork-final.css';
 import './mobile-figma-final-tuning.css';
+import './mobile-quotes-footer-polish.css';
 import CookieBannerGate from '@/components/CookieBannerGate';
 import { MetrikaPageview } from '@/components/MetrikaPageview';
 
