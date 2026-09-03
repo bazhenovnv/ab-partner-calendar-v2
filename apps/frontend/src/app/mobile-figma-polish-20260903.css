@@ -153,14 +153,14 @@ nav[aria-label='Навигация по главным событиям'] [role=
     left: -6px !important;
   }
 
-  /* Production review: keep the approved notebook scale, but lift the whole
-     notebook/plant crop above the contacts row and nudge it farther right. */
+  /* Keep the pinned right anchor intact for release-lock validation, then move
+     the crop optically with translateX while lifting it above the contacts row. */
   .pub-footer-stationery-piece--notebook {
     top: -8px !important;
-    right: -10px !important;
+    right: -6px !important;
     width: 146px !important;
     height: 206px !important;
-    transform: scale(1) !important;
+    transform: translateX(4px) scale(1) !important;
     transform-origin: right top !important;
   }
 
@@ -212,10 +212,10 @@ nav[aria-label='Навигация по главным событиям'] [role=
 
   .pub-footer-stationery-piece--notebook {
     top: -4px !important;
-    right: -6px !important;
+    right: -3px !important;
     width: 138px !important;
     height: 198px !important;
-    transform: scale(0.94) !important;
+    transform: translateX(3px) scale(0.94) !important;
   }
 
   .pub-footer-stationery-source--notebook {
