@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `0f731e1724387b566abcba98652df808635cc13b`;
-- frontend image: `ab-afisha/frontend:frontend-release-0f731e1`;
+- frontend commit: `9e37708f0b9d62648f02c4e9218d73a37560357d`;
+- frontend image: `ab-afisha/frontend:frontend-release-9e37708`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,17 +20,17 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `0f731e1` включает PR #142, финально проверенный CI #887. Исправление касается compact-карусели «Главные события» (`max-width: 1023px`): боковые карточки выровнены без `rotateY` и `rotateZ`, при этом существующие translate/scale/opacity/brightness/blur/z-index и эффект глубины сохраняются. Desktop-геометрия не меняется.
+Текущая promotion — **frontend-only**. Application commit `9e37708` включает PR #144, финально проверенный CI #891. На мобильном viewport серый canvas восстановлен под изображениями ног в блоке цитат, белая полоса непосредственно под цитатой сохранена и получила равномерную верхнюю/нижнюю тень; `Контакты` оптически выровнены с `Наши проекты`; название `Афиша бухгалтера` немного опущено относительно логотипа; блокнот/растение слегка увеличены без выхода за правую границу и без появления фрагмента отдельной чашки. Desktop не меняется.
 
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-0f731e1`;
+- frontend меняется только на `frontend-release-9e37708`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
 
-Сохраняются PR #138 / CI #873 и PR #140 / CI #879 по мобильному футеру: блокнот остаётся у правой границы, лишний фрагмент чашки справа не показывается, нижние мятные листья видимы, desktop footer не меняется.
+Сохраняется PR #142 / CI #887 по compact-карусели «Главные события»: боковые карточки выровнены без `rotateY` и `rotateZ`, при этом существующие translate/scale/opacity/brightness/blur/z-index и эффект глубины сохраняются.
 
 Сохраняется MAX source-preview контракт из PR #133 / CI #865. Production runtime подтвердил, что source channel MAX приватный (`type=channel`, `is_public=false`) и точный `GET /messages/{mid}` не возвращает `message.url`, поэтому join URL с `?mid=` не является прямым permalink отдельного поста. Backend предоставляет защищённый `GET /events/admin/:id/source-preview`; frontend показывает блок «Исходный пост MAX»; для приватного канала действие называется «Открыть канал MAX»; repair-сервис проверяет `is_public`, кэширует visibility на 6 часов и не выполняет бессмысленные batch message-link запросы.
 
