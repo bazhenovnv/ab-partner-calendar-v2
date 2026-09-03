@@ -30,6 +30,9 @@ const MAIN_EVENTS_ROLLING_TEST = read('apps/frontend/test/main-events-rolling-wi
 const MAIN_EVENTS_CAROUSEL_CSS = read(
   'apps/frontend/src/components/events/main-events-carousel.module.css',
 );
+const MOBILE_QUOTES_FOOTER_POLISH = read(
+  'apps/frontend/src/app/mobile-quotes-footer-polish.css',
+);
 const EVENT_EDIT_PAGE = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
 const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-link.test.mjs');
 const MAX_SOURCE_POST_LINK_SERVICE = read(
@@ -63,13 +66,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '0f731e1724387b566abcba98652df808635cc13b';
-const FRONTEND_TAG = 'frontend-release-0f731e1';
+const FRONTEND_COMMIT = '9e37708f0b9d62648f02c4e9218d73a37560357d';
+const FRONTEND_TAG = 'frontend-release-9e37708';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for compact carousel frontend promotion', () => {
+  test('defines independent machine-readable pins for mobile quotes/footer frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -80,7 +83,7 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_COMMIT=${FRONTEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_TAG=${FRONTEND_TAG}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_IMAGE=${FRONTEND_IMAGE}`));
-    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-02/);
+    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-03/);
   });
 
   test('documents exact component pins and frontend-only deployment', () => {
@@ -95,14 +98,19 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #144/);
+    assert.match(RELEASE, /CI #891/);
+    assert.match(RELEASE, /мобильный блок цитат и футер/i);
+    assert.match(RELEASE, /серый фон `#f1f1f1`/i);
+    assert.match(RELEASE, /симметричную тень/i);
+    assert.match(RELEASE, /Контакты/);
+    assert.match(RELEASE, /Афиша бухгалтера/);
+    assert.match(RELEASE, /блокнот/i);
     assert.match(RELEASE, /PR #142/);
     assert.match(RELEASE, /CI #887/);
-    assert.match(RELEASE, /Главные события/i);
     assert.match(RELEASE, /rotateY/);
     assert.match(RELEASE, /rotateZ/);
-    assert.match(RELEASE, /compact/i);
-    assert.match(RELEASE, /мобильного футера/i);
-    assert.match(RELEASE, /desktop footer/i);
+    assert.match(RELEASE, /desktop.*footer/i);
     assert.match(RELEASE, /is_public=false/);
     assert.match(RELEASE, /message\.url/);
     assert.match(RELEASE, /Исходный пост MAX/);
@@ -125,15 +133,25 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, 0f731e1 frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, 9e37708 frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-0f731e1\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-9e37708\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('locks the promoted mobile quote band and footer polish', () => {
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /\.quotes-section,[\s\S]*?background:\s*#f1f1f1 !important/);
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /\.quotes-layout::after[\s\S]*?background:\s*#fff !important/);
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /box-shadow:\s*0 0 10px rgba\(13, 35, 68, 0\.12\) !important/);
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /nth-child\(3\)[\s\S]*?top:\s*-2px !important/);
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /\.pub-footer-logo-text[\s\S]*?top:\s*4px !important/);
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /\.pub-footer-stationery-piece--notebook[\s\S]*?width:\s*134px !important/);
+    assert.match(MOBILE_QUOTES_FOOTER_POLISH, /\.pub-footer-stationery-source--notebook[\s\S]*?width:\s*185px !important/);
   });
 
   test('skips canonical MAX link repair for private channels and caches visibility', () => {
