@@ -54,7 +54,13 @@ nav[aria-label='Навигация по главным событиям'] [role=
 }
 
 @media (max-width: 767px) {
-  /* Use the approved Figma artwork as one intact mobile composition. */
+  /* Blend the approved Figma artwork into the white hero surface instead of
+     exposing the bitmap's straight top edge. The copy stays above the artwork,
+     matching the layered Figma composition. */
+  .pub-hero-panel {
+    background: #fff !important;
+  }
+
   .pub-hero-mobile-figma-art {
     position: absolute !important;
     left: 0 !important;
@@ -69,6 +75,26 @@ nav[aria-label='Навигация по главным событиям'] [role=
     object-position: center bottom !important;
     pointer-events: none !important;
     user-select: none !important;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.18) 10%,
+      rgba(0, 0, 0, 0.52) 20%,
+      rgba(0, 0, 0, 0.86) 30%,
+      #000 40%
+    ) !important;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.18) 10%,
+      rgba(0, 0, 0, 0.52) 20%,
+      rgba(0, 0, 0, 0.86) 30%,
+      #000 40%
+    ) !important;
+    -webkit-mask-repeat: no-repeat !important;
+    mask-repeat: no-repeat !important;
+    -webkit-mask-size: 100% 100% !important;
+    mask-size: 100% 100% !important;
   }
 
   .pub-hero-visual {
@@ -76,6 +102,7 @@ nav[aria-label='Навигация по главным событиям'] [role=
   }
 
   .pub-hero-content {
+    position: relative !important;
     z-index: 3 !important;
   }
 
@@ -126,18 +153,18 @@ nav[aria-label='Навигация по главным событиям'] [role=
     left: -6px !important;
   }
 
-  /* Increase the notebook/plant slightly while anchoring its right edge to the
-     viewport so the enlarged artwork cannot spill beyond the visible field. */
+  /* Move the notebook/plant a little farther right and enlarge it one more
+     optical step while keeping the independent cup artwork untouched. */
   .pub-footer-stationery-piece--notebook {
-    right: 0 !important;
-    width: 140px !important;
-    height: 198px !important;
-    transform: scale(0.96) !important;
+    right: -6px !important;
+    width: 146px !important;
+    height: 206px !important;
+    transform: scale(1) !important;
     transform-origin: right top !important;
   }
 
   .pub-footer-stationery-source--notebook {
-    width: 194px !important;
+    width: 202px !important;
     left: 0 !important;
   }
 
@@ -183,12 +210,13 @@ nav[aria-label='Навигация по главным событиям'] [role=
   }
 
   .pub-footer-stationery-piece--notebook {
-    width: 134px !important;
-    height: 192px !important;
-    transform: scale(0.91) !important;
+    right: -3px !important;
+    width: 138px !important;
+    height: 198px !important;
+    transform: scale(0.94) !important;
   }
 
   .pub-footer-stationery-source--notebook {
-    width: 188px !important;
+    width: 196px !important;
   }
 }
