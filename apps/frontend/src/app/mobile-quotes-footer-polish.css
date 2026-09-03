@@ -1,13 +1,13 @@
 /* Mobile polish from the 2026-09-03 production-vs-Figma review.
    This file is intentionally loaded after the previous mobile tuning layer.
-   It changes only the <=767 px presentation: the quote people return to the
-   grey canvas while the quote band stays white, and the footer receives small
-   optical alignment/artwork corrections. */
+   It changes only the <=767 px presentation: the quote people stay on the
+   grey canvas while the white quote band overlays their lower edge, and the
+   footer receives small optical alignment/artwork corrections. */
 
 @media (max-width: 767px) {
   /* Keep the people/legs on the same grey canvas as the surrounding mobile
-     page. The white quote band itself is recreated separately below so the
-     approved quote-frame area remains white. */
+     page. The white quote band is layered above their lower edge so the cutout
+     artwork visually disappears under the quote background, matching Figma. */
   .quotes-section,
   .quotes-layout {
     background: #f1f1f1 !important;
@@ -23,23 +23,23 @@
     left: 0 !important;
     right: 0 !important;
     bottom: 8px !important;
-    z-index: 0 !important;
-    height: 130px !important;
+    z-index: 2 !important;
+    height: 114px !important;
     background: #fff !important;
     box-shadow: 0 0 10px rgba(13, 35, 68, 0.12) !important;
     pointer-events: none !important;
   }
 
   .quotes-person {
-    z-index: 2 !important;
+    z-index: 1 !important;
   }
 
   .quotes-card--approved-frame {
     z-index: 3 !important;
   }
 
-  /* Both second-row footer columns share the same visual top. The contacts
-     column needs only a 2 px optical lift on the supplied mobile screenshot. */
+  /* Both second-row footer columns share the same visual top. Contacts no
+     longer receive the previous upward optical lift. */
   .pub-footer-top > .pub-footer-col:nth-child(2),
   .pub-footer-top > .pub-footer-col:nth-child(3) {
     align-self: start !important;
@@ -47,15 +47,15 @@
 
   .pub-footer-top > .pub-footer-col:nth-child(3) {
     position: relative !important;
-    top: -2px !important;
+    top: 0 !important;
     padding-top: 0 !important;
   }
 
-  /* Lower the title slightly relative to the logo mark without moving the
-     mark or the footer description. */
+  /* Lower the title a little further relative to the logo mark without moving
+     the mark or the footer description. */
   .pub-footer-logo-text {
     position: relative !important;
-    top: 4px !important;
+    top: 7px !important;
   }
 
   /* Enlarge the notebook/plant by roughly five percent while keeping the crop
@@ -77,7 +77,7 @@
 
 @media (max-width: 350px) {
   .pub-footer-logo-text {
-    top: 3px !important;
+    top: 6px !important;
   }
 
   .pub-footer-stationery-piece--notebook {
