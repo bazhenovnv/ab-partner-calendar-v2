@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `66d616ebfc33c336575c3f5aa0bb04bfd3652718`;
-- frontend image: `ab-afisha/frontend:frontend-release-66d616e`;
+- frontend commit: `cf5581b339df49f3de1adcefec3ac58977c7baea`;
+- frontend image: `ab-afisha/frontend:frontend-release-cf5581b`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,13 +20,14 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `66d616e` сохраняет PR #151 / CI #907 и PR #152 / CI #909 и добавляет PR #154 / CI #913. Контракт текущей promotion:
+Текущая promotion — **frontend-only**. Application commit `cf5581b` сохраняет PR #151 / CI #907, PR #152 / CI #909 и PR #154 / CI #913 и добавляет PR #156 / CI #919. Контракт текущей promotion:
 
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - верхняя граница mobile artwork плавно растворяется в белой поверхности hero через CSS mask, а заголовок, описание и CTA остаются отдельным верхним слоем;
 - touch/hover/focus состояния hero, календаря и quote-area больше не создают лишнюю тень и квадратные артефакты на скруглениях;
 - footer brand/logo оптически сдвинут влево к вертикали описания;
-- блокнот/растение дополнительно увеличены и сдвинуты правее; для экранов до 350 px сохраняется отдельная безопасная геометрия;
+- блокнот/растение сохраняют размер `146×206`, подняты выше через `top: -8px` и смещены вправо через `translateX(4px)` при сохранении anchor `right: -6px`; для экранов до 350 px используется `top: -4px`, `right: -3px`, `translateX(3px)`, `scale(0.94)`;
+- regression-test проверяет standard/narrow notebook declaration blocks отдельно и не допускает ложного прохождения release lock через более поздний media query;
 - телефон в «Контакты» увеличен оптически;
 - quote-band имеет более тёмную тень, а изображения людей закреплены по реальным левому/правому краям мобильного viewport;
 - карусель «Главные события» визуально движется в 2 раза быстрее: `520 -> 260 ms`, двухшаговое движение `780 -> 390 ms`;
@@ -41,7 +42,7 @@
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-66d616e`;
+- frontend меняется только на `frontend-release-cf5581b`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
