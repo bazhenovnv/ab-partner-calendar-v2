@@ -11,24 +11,26 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `0f731e1724387b566abcba98652df808635cc13b`;
-- frontend image: `ab-afisha/frontend:frontend-release-0f731e1`;
+- frontend commit: `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`;
+- frontend image: `ab-afisha/frontend:frontend-release-698cd59`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only** из PR #142, финально проверенного CI #887. Исправление касается compact-карусели «Главные события» (`max-width: 1023px`): боковые карточки выровнены без `rotateY` и `rotateZ`, при этом существующие translate/scale/opacity/brightness/blur/z-index и эффект глубины сохраняются. Desktop-геометрия не меняется.
+Текущая promotion — **frontend-only**. Application commit `698cd59` включает PR #144 / CI #891 и PR #146 / CI #894. PR #144 корректирует только мобильный quote/footer: серая зона с фигурами, белая quote-band с симметричной тенью, выравнивание «Контакты», положение brand title и безопасно увеличенный crop блокнота/растения. PR #146 добавляет iOS/iPadOS-specific native Touch Events path на всю gallery-зону карусели «Главные события»: axis lock `7 px`, swipe threshold `28 px`, `passive: false` только для horizontal touchmove, подавление случайного click после swipe и повторное использование существующего ArrowLeft/ArrowRight carousel path. Android Pointer Events path не меняется. Desktop carousel/footer/quotes не меняются.
 
 Контракт текущего релиза:
 
 - backend `213e507` не пересоздаётся;
-- frontend переключается только на `frontend-release-0f731e1`;
+- frontend переключается только на `frontend-release-698cd59`;
 - bots `3a64511` и nginx не пересоздаются;
 - использовать только `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются;
 - server-local `ai.ab-event.pro`, volumes и Telegram IPv6 runtime сохраняются.
+
+Сохраняется PR #142 / CI #887: compact-карусель «Главные события» остаётся без `rotateY` и `rotateZ`, при этом translate/scale/opacity/brightness/blur/z-index и эффект глубины сохраняются.
 
 Сохраняются PR #138 / CI #873 и PR #140 / CI #879 по мобильному футеру: блокнот остаётся у правой границы, лишний фрагмент чашки справа не показывается, нижние мятные листья видимы, desktop footer не меняется.
 

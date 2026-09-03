@@ -95,7 +95,7 @@ services:
       start_period: 30s
 
   frontend:
-    image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-0f731e1}
+    image: ${FRONTEND_IMAGE:-ab-afisha/frontend:frontend-release-698cd59}
     restart: always
     environment:
       NODE_ENV: production
