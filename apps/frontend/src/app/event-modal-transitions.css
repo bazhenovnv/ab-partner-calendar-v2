@@ -175,6 +175,22 @@
   visibility: hidden;
 }
 
+/*
+ * Opening contract: the real modal artwork is visible immediately at the
+ * exact final stage geometry. The temporary flight clone is suppressed only
+ * while opening, so it cannot grow past the destination and then snap back.
+ * Closing keeps the existing reverse flight to the source card.
+ */
+[data-event-modal-surface][data-event-composite-motion='opening']
+  [data-event-composite-part='image-stage'] {
+  visibility: visible;
+}
+
+body:has([data-event-modal-surface][data-event-composite-motion='opening'])
+  > img[aria-hidden='true'][draggable='false'] {
+  display: none !important;
+}
+
 [data-event-composite-part='content'] {
   position: relative;
   z-index: 3;
