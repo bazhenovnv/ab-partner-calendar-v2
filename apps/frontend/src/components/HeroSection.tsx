@@ -18,6 +18,18 @@ export function HeroSection() {
             Главные события →
           </a>
         </div>
+
+        <Image
+          src="/hero/hero-mobile-figma-20260903.webp"
+          alt=""
+          width={348}
+          height={291}
+          priority
+          unoptimized
+          className="pub-hero-mobile-figma-art"
+          aria-hidden
+        />
+
         <div className="pub-hero-visual" aria-hidden="true">
           <Image
             src="/hero/hero-vase-books.png"
