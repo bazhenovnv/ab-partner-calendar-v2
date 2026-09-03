@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`;
-- frontend image: `ab-afisha/frontend:frontend-release-698cd59`;
+- frontend commit: `4aa0bd5f32889a92c4afa332b8a15e32df2c13b8`;
+- frontend image: `ab-afisha/frontend:frontend-release-4aa0bd5`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,12 +20,24 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `698cd59` включает PR #144 / CI #891 и PR #146 / CI #894. PR #144 исправляет мобильную quote/footer geometry: фигуры находятся на сером фоне, белая quote-band сохраняется с симметричной тенью, «Контакты» выровнены, brand title немного опущен, блокнот/растение увеличены без выхода crop за правую границу и без лишней чашки. PR #146 исправляет iOS/iPadOS swipe «Главных событий»: native Touch Events работают на всей gallery-зоне, axis lock `7 px`, swipe threshold `28 px`, горизонтальный `touchmove` использует `passive: false`/`preventDefault()` только после direction lock, случайный card click после swipe подавляется, а переключение переиспользует ArrowLeft/ArrowRight carousel path. Android Pointer Events path сохраняется. Desktop carousel/footer/quotes не меняются.
+Текущая promotion — **frontend-only**. Application commit `4aa0bd5` включает PR #148 / CI #898 и сохраняет все ранее утверждённые мобильные исправления. Контракт PR #148:
+
+- белая quote-band находится поверх нижней части изображений ног, поэтому ноги визуально уходят под белый фон цитаты;
+- зона ног выше quote-band остаётся серой `#f1f1f1`;
+- quote-band: `height: 114px`, `bottom: 8px`, `z-index: 2`;
+- изображения людей: `z-index: 1`, мятная рамка/цитата: `z-index: 3`;
+- симметричная тень quote-band сохраняется;
+- «Контакты» выровнены с «Наши проекты» (`top: 0` вместо прежнего `-2px`);
+- footer title «Афиша бухгалтера» опущен до `top: 7px`;
+- верхний mobile header title «Афиша Бухгалтера» опущен до `top: 4px`;
+- notebook crop и desktop geometry не меняются.
+
+Сохраняется PR #146 / CI #894: iOS/iPadOS swipe «Главных событий» использует native Touch Events на всей gallery-зоне, axis lock `7 px`, swipe threshold `28 px`, horizontal `touchmove` с `passive: false`/`preventDefault()` только после direction lock, подавление случайного card click и существующий ArrowLeft/ArrowRight carousel path. Android Pointer Events path сохраняется.
 
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-698cd59`;
+- frontend меняется только на `frontend-release-4aa0bd5`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
