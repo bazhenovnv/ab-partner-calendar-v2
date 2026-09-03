@@ -1,0 +1,150 @@
+/* 2026-09-03 mobile Figma polish.
+   Loaded last so these rules only resolve the reviewed optical differences. */
+
+.pub-hero-mobile-figma-art {
+  display: none;
+}
+
+/* Main-events movement is intentionally twice as fast on all breakpoints. */
+[role='region'][aria-roledescription='карусель'][aria-label^='Главные события'] {
+  --card-motion-duration: 260ms !important;
+}
+
+nav[aria-label='Навигация по главным событиям'] button {
+  transition-duration: 90ms !important;
+}
+
+@media (max-width: 767px) {
+  /* Use the approved Figma artwork as one intact mobile composition. */
+  .pub-hero-mobile-figma-art {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    pointer-events: none !important;
+    user-select: none !important;
+  }
+
+  .pub-hero-visual {
+    display: none !important;
+  }
+
+  .pub-hero-content {
+    z-index: 3 !important;
+  }
+
+  /* Do not let touch/focus states create a second shadow or square corner
+     artefact on the reviewed rounded panels. Their resting shadow stays fixed. */
+  .pub-header,
+  .pub-header-inner,
+  .pub-hero-panel,
+  .pub-events-calendar-col,
+  .pub-main-quotes-inner,
+  .quotes-section,
+  .quotes-layout,
+  .quotes-card--approved-frame {
+    -webkit-tap-highlight-color: transparent !important;
+    transition: none !important;
+  }
+
+  .pub-hero-panel,
+  .pub-events-calendar-col {
+    background-clip: padding-box !important;
+    transform: none !important;
+  }
+
+  /* Quote background shadow: darker than the previous 0.12 alpha. */
+  .quotes-layout::after {
+    box-shadow: 0 0 12px rgba(13, 35, 68, 0.24) !important;
+    transition: none !important;
+  }
+
+  /* Keep both cut-out people completely inside the viewport: no negative
+     horizontal offsets, so the legs meet the true mobile corners. */
+  .quotes-person-left {
+    left: 0 !important;
+  }
+
+  .quotes-person-right {
+    right: 0 !important;
+  }
+
+  /* Optically align the footer logo/title with the description line. */
+  .pub-footer-logo {
+    position: relative !important;
+    left: -6px !important;
+  }
+
+  /* Increase the notebook/plant slightly while anchoring its right edge to the
+     viewport so the enlarged artwork cannot spill beyond the visible field. */
+  .pub-footer-stationery-piece--notebook {
+    right: 0 !important;
+    width: 140px !important;
+    height: 198px !important;
+    transform: scale(0.96) !important;
+    transform-origin: right top !important;
+  }
+
+  .pub-footer-stationery-source--notebook {
+    width: 194px !important;
+    left: 0 !important;
+  }
+
+  /* The phone bitmap has more transparent padding than the other footer icons;
+     enlarge it optically without moving the contact text. */
+  .pub-footer-contact-icon--phone {
+    transform: scale(1.18) !important;
+    transform-origin: center !important;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (max-width: 767px) {
+  .pub-hero-panel:hover,
+  .pub-hero-panel:active,
+  .pub-hero-panel:focus-within {
+    box-shadow: var(--pub-hero-shadow) !important;
+    transform: none !important;
+  }
+
+  .pub-events-calendar-col:hover,
+  .pub-events-calendar-col:active,
+  .pub-events-calendar-col:focus-within {
+    box-shadow: 0 4px 12px rgba(13, 35, 68, 0.17) !important;
+    transform: none !important;
+  }
+
+  .pub-main-quotes-inner:hover,
+  .pub-main-quotes-inner:active,
+  .pub-main-quotes-inner:focus-within,
+  .quotes-section:hover,
+  .quotes-section:active,
+  .quotes-layout:hover,
+  .quotes-layout:active {
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .pub-footer-logo {
+    left: -4px !important;
+  }
+
+  .pub-footer-stationery-piece--notebook {
+    width: 134px !important;
+    height: 192px !important;
+    transform: scale(0.91) !important;
+  }
+
+  .pub-footer-stationery-source--notebook {
+    width: 188px !important;
+  }
+}
