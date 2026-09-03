@@ -11,6 +11,10 @@ const IOS_AXIS_LOCK_PX = 7;
 const IOS_DRAG_LIMIT_PX = 96;
 const IOS_DRAG_MOTION_MS = '90ms';
 const IOS_CLICK_SUPPRESS_MS = 450;
+const LEGACY_SINGLE_STEP_MOTION_MS = '520ms';
+const LEGACY_TWO_STEP_MOTION_MS = '780ms';
+const FAST_SINGLE_STEP_MOTION_MS = '260ms';
+const FAST_TWO_STEP_MOTION_MS = '390ms';
 
 type SwipeAxis = 'horizontal' | 'vertical' | null;
 
@@ -60,6 +64,12 @@ function getTrackedTouch(touches: TouchList, identifier: number): Touch | null {
  * - the initial five-card window follows backend order without pre-wrapping
  *   events from the end of the sequence into the first view.
  *
+ * The approved UI now runs main-event card motion at twice the old visual
+ * speed. Keep that normalization as an inline style so the iOS Touch Events
+ * bridge can still temporarily replace --card-motion-duration during a drag.
+ * A stylesheet !important on that custom property would block this workaround
+ * and can bring back ghost cards during rapid/coalesced iOS swipes.
+ *
  * iOS Safari is less tolerant than Chromium when Pointer Events share a target
  * with vertical scrolling. A small diagonal movement can terminate the pointer
  * stream before MainEventsBanner reaches its generic swipe threshold. On iOS
@@ -92,6 +102,46 @@ export function MainEventsCarouselBridge({
     }));
 
   useEffect(() => {
+    if (!canonicalEvents.length) return;
+
+    const gallery = document.querySelector<HTMLElement>(
+      '#main-events [aria-roledescription="карусель"]',
+    );
+    if (!gallery) return;
+
+    const normalizeMotionDuration = () => {
+      const currentDuration = gallery.style
+        .getPropertyValue('--card-motion-duration')
+        .trim();
+
+      if (currentDuration === LEGACY_SINGLE_STEP_MOTION_MS) {
+        gallery.style.setProperty(
+          '--card-motion-duration',
+          FAST_SINGLE_STEP_MOTION_MS,
+        );
+        return;
+      }
+
+      if (currentDuration === LEGACY_TWO_STEP_MOTION_MS) {
+        gallery.style.setProperty(
+          '--card-motion-duration',
+          FAST_TWO_STEP_MOTION_MS,
+        );
+      }
+    };
+
+    normalizeMotionDuration();
+
+    const observer = new MutationObserver(normalizeMotionDuration);
+    observer.observe(gallery, {
+      attributes: true,
+      attributeFilter: ['style'],
+    });
+
+    return () => observer.disconnect();
+  }, [canonicalEvents.length]);
+
+  useEffect(() => {
     if (!canonicalEvents.length || !isIosTouchDevice()) return;
 
     const gallery = document.querySelector<HTMLElement>(
@@ -111,7 +161,7 @@ export function MainEventsCarouselBridge({
       gallery.style.setProperty('--drag-offset', '0px');
       gallery.style.setProperty(
         '--card-motion-duration',
-        previousMotionDuration || '520ms',
+        previousMotionDuration || FAST_SINGLE_STEP_MOTION_MS,
       );
     };
 
