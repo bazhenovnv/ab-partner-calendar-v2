@@ -68,8 +68,8 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '66d616ebfc33c336575c3f5aa0bb04bfd3652718';
-const FRONTEND_TAG = 'frontend-release-66d616e';
+const FRONTEND_COMMIT = 'cf5581b339df49f3de1adcefec3ac58977c7baea';
+const FRONTEND_TAG = 'frontend-release-cf5581b';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
@@ -100,6 +100,8 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #156/);
+    assert.match(RELEASE, /CI #919/);
     assert.match(RELEASE, /PR #154/);
     assert.match(RELEASE, /CI #913/);
     assert.match(RELEASE, /PR #151/);
@@ -115,6 +117,8 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /PR #142/);
     assert.match(RELEASE, /CI #887/);
     assert.match(RELEASE, /mask-image/);
+    assert.match(RELEASE, /translateX\(4px\)/);
+    assert.match(RELEASE, /top: -8px/);
     assert.match(RELEASE, /Главные события/i);
     assert.match(RELEASE, /rotateY/);
     assert.match(RELEASE, /rotateZ/);
@@ -147,10 +151,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, 66d616e frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, cf5581b frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-66d616e\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-cf5581b\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
@@ -158,16 +162,30 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('locks mobile hero blend and enlarged footer notebook', () => {
+  test('locks mobile hero blend and final footer notebook position', () => {
     assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-hero-mobile-figma-art\s*\{[\s\S]*?-webkit-mask-image:\s*linear-gradient\(/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-hero-mobile-figma-art\s*\{[\s\S]*?mask-image:\s*linear-gradient\(/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /transparent 0%/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /#000 40%/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-hero-content\s*\{[\s\S]*?position:\s*relative !important;[\s\S]*?z-index:\s*3 !important;/);
-    assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*-6px !important;/);
-    assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*146px !important;/);
-    assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*206px !important;/);
+
+    const standardNotebookBlock = MOBILE_FIGMA_POLISH_CSS.match(
+      /@media \(max-width: 767px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{([^}]*)\}/,
+    )?.[1] ?? '';
+    const narrowNotebookBlock = MOBILE_FIGMA_POLISH_CSS.match(
+      /@media \(max-width: 350px\)[\s\S]*?\.pub-footer-stationery-piece--notebook\s*\{([^}]*)\}/,
+    )?.[1] ?? '';
+
+    assert.match(standardNotebookBlock, /top:\s*-8px !important;/);
+    assert.match(standardNotebookBlock, /right:\s*-6px !important;/);
+    assert.match(standardNotebookBlock, /width:\s*146px !important;/);
+    assert.match(standardNotebookBlock, /height:\s*206px !important;/);
+    assert.match(standardNotebookBlock, /transform:\s*translateX\(4px\) scale\(1\) !important;/);
     assert.match(MOBILE_FIGMA_POLISH_CSS, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*202px !important;/);
+
+    assert.match(narrowNotebookBlock, /top:\s*-4px !important;/);
+    assert.match(narrowNotebookBlock, /right:\s*-3px !important;/);
+    assert.match(narrowNotebookBlock, /transform:\s*translateX\(3px\) scale\(0\.94\) !important;/);
   });
 
   test('locks iOS swipe handling and the safe 2x carousel motion path', () => {

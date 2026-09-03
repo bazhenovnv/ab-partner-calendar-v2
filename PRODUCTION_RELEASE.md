@@ -7,27 +7,37 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `66d616ebfc33c336575c3f5aa0bb04bfd3652718`
-- Frontend image: `ab-afisha/frontend:frontend-release-66d616e`
+- Frontend commit: `cf5581b339df49f3de1adcefec3ac58977c7baea`
+- Frontend image: `ab-afisha/frontend:frontend-release-cf5581b`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-03`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `66d616e`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `cf5581b`.
 
-## Текущая promotion — mobile hero blend и footer notebook polish
+## Текущая promotion — mobile footer notebook position correction
 
-Текущая promotion меняет **только frontend** до application merge commit `66d616ebfc33c336575c3f5aa0bb04bfd3652718`.
+Текущая promotion меняет **только frontend** до application merge commit `cf5581b339df49f3de1adcefec3ac58977c7baea`.
 
-Application PR #154 / CI #913 добавляет финальный визуальный polish после проверки предыдущего production-релиза:
+Application PR #156 / CI #919 вносит финальную корректировку mobile footer notebook после визуальной проверки production:
+
+- размер блокнота/растения сохраняется `146×206`;
+- стандартная mobile-композиция поднята выше через `top: -8px`;
+- production anchor `right: -6px` сохранён, а дополнительный визуальный сдвиг вправо выполняется через `translateX(4px)`;
+- для экранов до 350 px используется отдельная безопасная геометрия: `top: -4px`, `right: -3px`, `translateX(3px)`, `scale(0.94)`;
+- independent cup artwork не меняется;
+- regression-test извлекает standard/narrow declaration blocks отдельно, поэтому более поздний narrow media query больше не может ложно удовлетворить проверку стандартной mobile-геометрии;
+- desktop footer, hero, backend, bots и nginx не меняются.
+
+Сохраняется application PR #154 / CI #913:
 
 - верхняя граница mobile Figma artwork плавно растворяется в белой поверхности hero через CSS `mask-image` / `-webkit-mask-image`;
 - заголовок, описание и CTA остаются отдельным верхним слоем над artwork;
 - mobile hero сохраняет утверждённый artwork `hero-mobile-figma-20260903.webp` с календарём, книгами и вазой;
-- блокнот/растение в мобильном футере дополнительно увеличены и сдвинуты немного правее;
-- для экранов до 350 px сохраняется отдельная безопасная геометрия, чтобы artwork не выходил за видимый viewport;
+- блокнот/растение в мобильном футере дополнительно увеличены;
+- для экранов до 350 px сохраняется отдельная безопасная геометрия;
 - independent cup artwork не меняется;
 - desktop footer, desktop hero, backend, bots и nginx не меняются.
 
@@ -146,7 +156,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-66d616e`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-cf5581b`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -164,7 +174,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `66d616ebfc33c336575c3f5aa0bb04bfd3652718` в detached worktree;
+2. собрать frontend из commit `cf5581b339df49f3de1adcefec3ac58977c7baea` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -177,8 +187,8 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-66d616e`;
-- frontend revision = `66d616ebfc33c336575c3f5aa0bb04bfd3652718`;
+- frontend image = `ab-afisha/frontend:frontend-release-cf5581b`;
+- frontend revision = `cf5581b339df49f3de1adcefec3ac58977c7baea`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
@@ -186,7 +196,8 @@ Backend остаётся на `213e507` и продолжает использо
 - верх artwork не образует прямую видимую границу: изображение плавно переходит в белую hero-поверхность, а текст и CTA остаются поверх;
 - при касании/клике hero, календаря и quote-area не появляется дополнительная тень или квадратные артефакты скругления;
 - footer logo/brand находится на утверждённой левой вертикали;
-- блокнот/растение дополнительно увеличены и смещены правее без критического выхода из viewport;
+- блокнот/растение находятся выше предыдущего положения и немного правее, при этом сохраняют утверждённый размер и не перекрывают критически строку контактов;
+- для экранов до 350 px сохраняется безопасная отдельная геометрия блокнота;
 - иконка телефона визуально соответствует масштабу соседних contact icons;
 - тень quote-band темнее предыдущей и симметрична;
 - изображения людей не уезжают за левый/правый край mobile viewport;
@@ -210,7 +221,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-66d616e`;
+- frontend release кроме `frontend-release-cf5581b`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
