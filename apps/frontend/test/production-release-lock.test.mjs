@@ -33,6 +33,7 @@ const MAIN_EVENTS_CAROUSEL_CSS = read(
 const MAIN_EVENTS_CAROUSEL_BRIDGE = read(
   'apps/frontend/src/components/events/MainEventsCarouselBridge.tsx',
 );
+const MOBILE_FIGMA_POLISH_CSS = read('apps/frontend/src/app/mobile-figma-polish-20260903.css');
 const IOS_SWIPE_TEST = read('apps/frontend/test/ios-main-events-swipe.test.mjs');
 const EVENT_EDIT_PAGE = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
 const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-link.test.mjs');
@@ -67,8 +68,8 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '4aa0bd5f32889a92c4afa332b8a15e32df2c13b8';
-const FRONTEND_TAG = 'frontend-release-4aa0bd5';
+const FRONTEND_COMMIT = '639e0cc7dbc2c4bd4945602711cbc5d81efe2b73';
+const FRONTEND_TAG = 'frontend-release-639e0cc';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
@@ -99,6 +100,10 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #151/);
+    assert.match(RELEASE, /CI #907/);
+    assert.match(RELEASE, /PR #152/);
+    assert.match(RELEASE, /CI #909/);
     assert.match(RELEASE, /PR #148/);
     assert.match(RELEASE, /CI #898/);
     assert.match(RELEASE, /PR #144/);
@@ -139,10 +144,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, 4aa0bd5 frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, 639e0cc frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-4aa0bd5\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-639e0cc\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
@@ -150,9 +155,15 @@ describe('Pinned production component release', () => {
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
   });
 
-  test('locks iOS swipe handling while preserving the existing carousel movement path', () => {
+  test('locks iOS swipe handling and the safe 2x carousel motion path', () => {
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /IOS_SWIPE_THRESHOLD_PX = 28/);
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /IOS_AXIS_LOCK_PX = 7/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /IOS_DRAG_MOTION_MS = '90ms'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /FAST_SINGLE_STEP_MOTION_MS = '260ms'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /FAST_TWO_STEP_MOTION_MS = '390ms'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /LEGACY_SINGLE_STEP_MOTION_MS = '520ms'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /LEGACY_TWO_STEP_MOTION_MS = '780ms'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /MutationObserver/);
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /iPad\|iPhone\|iPod/);
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /touchmove/);
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /passive: false/);
@@ -160,6 +171,10 @@ describe('Pinned production component release', () => {
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /event\.pointerType === 'touch'/);
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /deltaX > 0 \? 'ArrowLeft' : 'ArrowRight'/);
     assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /#main-events \[aria-roledescription="карусель"\]/);
+    assert.doesNotMatch(
+      MOBILE_FIGMA_POLISH_CSS,
+      /--card-motion-duration:\s*260ms\s*!important/,
+    );
     assert.match(IOS_SWIPE_TEST, /suppresses accidental card clicks/);
   });
 
