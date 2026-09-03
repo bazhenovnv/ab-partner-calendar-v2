@@ -7,32 +7,60 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `0f731e1724387b566abcba98652df808635cc13b`
-- Frontend image: `ab-afisha/frontend:frontend-release-0f731e1`
+- Frontend commit: `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`
+- Frontend image: `ab-afisha/frontend:frontend-release-698cd59`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Дата утверждения: `2026-09-02`
+- Дата утверждения: `2026-09-03`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `0f731e1`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `698cd59`.
 
-## Текущая promotion — горизонтальное выравнивание карточек «Главные события»
+## Текущая promotion — мобильные цитаты/футер и стабильный свайп «Главных событий» на iOS
 
-Текущая promotion меняет **только frontend** до application merge commit `0f731e1724387b566abcba98652df808635cc13b` из PR #142. Изменение прошло полный CI #887.
+Текущая promotion меняет **только frontend** до application merge commit `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`.
 
-Исправление относится к compact-режиму карусели (`max-width: 1023px`):
+В application commit входят две последовательные мобильные коррекции:
 
-- боковые карточки больше не имеют пространственного наклона `rotateY`;
-- боковые карточки больше не имеют углового наклона `rotateZ`;
+- PR #144 / CI #891 — мобильный блок цитат и футер;
+- PR #146 / CI #894 — iOS/iPadOS swipe для карусели «Главные события».
+
+Контракт мобильного блока цитат/футера:
+
+- зона с фигурами/ногами возвращена на серый мобильный фон;
+- белая полоса непосредственно под цитатой сохранена;
+- у белой полосы есть симметричная тень сверху и снизу;
+- колонка «Контакты» оптически выровнена с «Наши проекты»;
+- подпись «Афиша бухгалтера» немного опущена относительно логотипа;
+- блокнот/растение увеличены консервативно и остаются внутри правой границы без лишнего фрагмента чашки;
+- desktop footer и desktop quote geometry не меняются.
+
+Контракт iOS swipe:
+
+- Android, мышь и pen продолжают использовать существующий Pointer Events path;
+- только iOS/iPadOS получает отдельный native Touch Events path на **всю gallery-зону** карусели;
+- direction lock срабатывает после `7 px`, поэтому вертикальная прокрутка страницы сохраняется;
+- подтверждённый горизонтальный жест использует `touchmove` с `passive: false` и `preventDefault()` только после определения горизонтального направления;
+- iOS swipe threshold = `28 px`, вместо необходимости длинного протягивания;
+- drag feedback сохраняется через существующие `--drag-offset` и `--card-motion-duration`;
+- после горизонтального swipe подавляется случайный click по карточке;
+- переход выполняется через существующий `ArrowLeft` / `ArrowRight` path, без дублирования carousel state;
+- физические крайние пиксели экрана iPhone могут оставаться зарезервированы Safari под системный back/forward gesture, но рабочая зона самой карусели остаётся полной.
+
+## Сохраняемое выравнивание compact-карусели
+
+Сохраняется PR #142 / CI #887:
+
+- боковые карточки в compact-режиме (`max-width: 1023px`) не имеют `rotateY` и `rotateZ`;
 - верхние и нижние края карточек остаются горизонтальными, боковые края — вертикальными;
-- сохраняются существующие `translateX`, `translateY`, `translateZ`, `scale`, `opacity`, `brightness`, `blur` и `z-index`, поэтому эффект глубины и перекрытия карусели не теряется;
-- desktop-геометрия не меняется;
-- backend, Prisma schema/migrations, bots и nginx не меняются.
+- сохраняются `translateX`, `translateY`, `translateZ`, `scale`, `opacity`, `brightness`, `blur` и `z-index`;
+- эффект глубины и перекрытия карусели сохраняется;
+- desktop-геометрия не меняется.
 
 ## Сохраняемая коррекция мобильного футера
 
-Сохраняются PR #138 / CI #873 и PR #140 / CI #879:
+Сохраняются PR #138 / CI #873 и PR #140 / CI #879, дополненные PR #144 / CI #891:
 
 - блокнот расположен у правой границы мобильного viewport;
 - отрицательный внутренний сдвиг source bitmap удалён;
@@ -67,13 +95,15 @@
 
 ## Сохраняемый контракт карусели «Главные события»
 
-Сохраняется PR #123 / CI #842 и дополняется PR #142 / CI #887:
+Сохраняются PR #123 / CI #842, PR #142 / CI #887 и добавляется PR #146 / CI #894:
 
 - backend отдаёт полный упорядоченный список опубликованных `mainEvent=true` с `PLANNED` или `LIVE`;
 - одновременно показывается до пяти карточек;
 - окно циклически сдвигается на одну карточку;
 - завершённые события используются только как fallback, если активных меньше пяти;
-- в compact-режиме боковые карточки выровнены без `rotateY`/`rotateZ`, но глубина за счёт translate/scale сохраняется.
+- в compact-режиме боковые карточки выровнены без `rotateY`/`rotateZ`, но глубина за счёт translate/scale сохраняется;
+- iOS/iPadOS использует отдельный устойчивый touch path с threshold 28 px и axis lock 7 px;
+- Android path функционально не меняется.
 
 ## Сохраняемый редакционный функционал
 
@@ -99,7 +129,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-0f731e1`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-698cd59`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -117,7 +147,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `0f731e1724387b566abcba98652df808635cc13b` в detached worktree;
+2. собрать frontend из commit `698cd59e689e3c5abe38182dfa445aa9efe2a4ce` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -130,15 +160,18 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-0f731e1`;
-- frontend revision = `0f731e1724387b566abcba98652df808635cc13b`;
+- frontend image = `ab-afisha/frontend:frontend-release-698cd59`;
+- frontend revision = `698cd59e689e3c5abe38182dfa445aa9efe2a4ce`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
-- на мобильном/tablet viewport боковые карточки «Главные события» стоят ровно без наклона по углам;
-- эффект глубины, масштаб и перекрытие боковых карточек сохранены;
-- мобильный футер сохраняет предыдущую исправленную геометрию;
-- desktop carousel и footer визуально не изменены.
+- на Android свайп «Главных событий» работает как до promotion;
+- на iPhone/iPad короткий горизонтальный swipe уверенно переключает карточку без необходимости тянуть через весь экран;
+- swipe работает по всей gallery-зоне карусели, кроме возможного системного edge gesture Safari в крайних пикселях экрана;
+- вертикальный скролл страницы через область карусели сохраняется;
+- мобильная зона с фигурами под цитатой серая, белая quote-band и симметричная тень сохранены;
+- мобильный футер сохраняет исправленное выравнивание и crop блокнота/растения;
+- desktop carousel, quotes и footer визуально не изменены.
 
 ## Обязательное правило
 
@@ -155,7 +188,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-0f731e1`;
+- frontend release кроме `frontend-release-698cd59`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
