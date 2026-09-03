@@ -38,7 +38,7 @@ export function HeroSection() {
             className="pub-hero-calendar"
           />
           <Image
-            src="/hero/hero-mobile-figma-20260903.png"
+            src="/hero/hero-mobile-figma-20260903.webp"
             alt=""
             width={349}
             height={291}
