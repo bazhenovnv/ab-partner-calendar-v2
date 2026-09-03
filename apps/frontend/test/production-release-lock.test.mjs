@@ -30,6 +30,10 @@ const MAIN_EVENTS_ROLLING_TEST = read('apps/frontend/test/main-events-rolling-wi
 const MAIN_EVENTS_CAROUSEL_CSS = read(
   'apps/frontend/src/components/events/main-events-carousel.module.css',
 );
+const MAIN_EVENTS_CAROUSEL_BRIDGE = read(
+  'apps/frontend/src/components/events/MainEventsCarouselBridge.tsx',
+);
+const IOS_SWIPE_TEST = read('apps/frontend/test/ios-main-events-swipe.test.mjs');
 const EVENT_EDIT_PAGE = read('apps/frontend/src/app/admin/events/[id]/page.tsx');
 const SOURCE_LINK_TEST = read('apps/frontend/test/needs-attention-max-source-link.test.mjs');
 const MAX_SOURCE_POST_LINK_SERVICE = read(
@@ -63,13 +67,13 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = '0f731e1724387b566abcba98652df808635cc13b';
-const FRONTEND_TAG = 'frontend-release-0f731e1';
+const FRONTEND_COMMIT = '698cd59e689e3c5abe38182dfa445aa9efe2a4ce';
+const FRONTEND_TAG = 'frontend-release-698cd59';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
 describe('Pinned production component release', () => {
-  test('defines independent machine-readable pins for compact carousel frontend promotion', () => {
+  test('defines independent machine-readable pins for combined mobile frontend promotion', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_RELEASE_COMMIT=${RELEASE_ANCHOR}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_COMMIT=${BACKEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_BACKEND_TAG=${BACKEND_TAG}`));
@@ -80,7 +84,7 @@ describe('Pinned production component release', () => {
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_COMMIT=${FRONTEND_COMMIT}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_TAG=${FRONTEND_TAG}`));
     assert.match(LOCK, new RegExp(`PRODUCTION_FRONTEND_IMAGE=${FRONTEND_IMAGE}`));
-    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-02/);
+    assert.match(LOCK, /PRODUCTION_RELEASE_APPROVED_AT=2026-09-03/);
   });
 
   test('documents exact component pins and frontend-only deployment', () => {
@@ -95,12 +99,20 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #144/);
+    assert.match(RELEASE, /CI #891/);
+    assert.match(RELEASE, /PR #146/);
+    assert.match(RELEASE, /CI #894/);
     assert.match(RELEASE, /PR #142/);
     assert.match(RELEASE, /CI #887/);
     assert.match(RELEASE, /Главные события/i);
     assert.match(RELEASE, /rotateY/);
     assert.match(RELEASE, /rotateZ/);
     assert.match(RELEASE, /compact/i);
+    assert.match(RELEASE, /iOS\/iPadOS/i);
+    assert.match(RELEASE, /28 px/);
+    assert.match(RELEASE, /7 px/);
+    assert.match(RELEASE, /Touch Events/);
     assert.match(RELEASE, /мобильного футера/i);
     assert.match(RELEASE, /desktop footer/i);
     assert.match(RELEASE, /is_public=false/);
@@ -125,15 +137,28 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, 0f731e1 frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, 698cd59 frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-0f731e1\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-698cd59\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
     assert.match(COMPOSE, /uploads:\/app\/apps\/backend\/uploads/);
     assert.doesNotMatch(COMPOSE, /APP_VERSION/);
+  });
+
+  test('locks iOS swipe handling while preserving the existing carousel movement path', () => {
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /IOS_SWIPE_THRESHOLD_PX = 28/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /IOS_AXIS_LOCK_PX = 7/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /iPad\|iPhone\|iPod/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /touchmove/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /passive: false/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /event\.preventDefault\(\)/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /event\.pointerType === 'touch'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /deltaX > 0 \? 'ArrowLeft' : 'ArrowRight'/);
+    assert.match(MAIN_EVENTS_CAROUSEL_BRIDGE, /#main-events \[aria-roledescription="карусель"\]/);
+    assert.match(IOS_SWIPE_TEST, /suppresses accidental card clicks/);
   });
 
   test('skips canonical MAX link repair for private channels and caches visibility', () => {
