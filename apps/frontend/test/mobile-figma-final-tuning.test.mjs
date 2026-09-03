@@ -21,6 +21,7 @@ test('moves the contacts divider left and levels the contacts column with projec
   assert.match(css, /nth-child\(3\)[\s\S]*?padding-left:\s*12px !important;/);
   assert.match(polish, /nth-child\(3\)[\s\S]*?top:\s*0 !important;/);
   assert.match(polish, /nth-child\(3\)[\s\S]*?padding-top:\s*0 !important;/);
+  assert.match(polish, /\.pub-footer-contact-icon--phone\s*\{[\s\S]*?scale\(1\.16\)/);
 });
 
 test('slightly reduces mobile calendar geometry so the right edge stays visible', () => {
@@ -29,7 +30,14 @@ test('slightly reduces mobile calendar geometry so the right edge stays visible'
   assert.match(css, /\.pub-calendar-table\s*\{[\s\S]*?min-height:\s*292px !important;/);
 });
 
-test('layers the white quote band over the people with balanced top and bottom clearance', () => {
+test('keeps hero, calendar and quotes visually static on mobile taps', () => {
+  assert.match(polish, /\.pub-hero-panel,[\s\S]*?\.pub-events-calendar-col,[\s\S]*?\.pub-main-quotes-inner[\s\S]*?transition:\s*none !important;/);
+  assert.match(polish, /\.pub-hero-panel:hover,[\s\S]*?\.pub-hero-panel:active,[\s\S]*?transform:\s*none !important;/);
+  assert.match(polish, /\.pub-events-calendar-col:hover,[\s\S]*?\.pub-events-calendar-col:active,[\s\S]*?transform:\s*none !important;/);
+  assert.match(polish, /-webkit-tap-highlight-color:\s*transparent !important;/);
+});
+
+test('layers the darker white quote band over corner-locked people', () => {
   assert.match(css, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?height:\s*352px !important;/);
   assert.match(css, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?min-height:\s*352px !important;/);
   assert.match(polish, /\.quotes-section,[\s\S]*?\.quotes-layout\s*\{[\s\S]*?background:\s*#f1f1f1 !important;/);
@@ -37,19 +45,22 @@ test('layers the white quote band over the people with balanced top and bottom c
   assert.match(polish, /\.quotes-layout::after\s*\{[\s\S]*?bottom:\s*8px !important;/);
   assert.match(polish, /\.quotes-layout::after\s*\{[\s\S]*?z-index:\s*2 !important;/);
   assert.match(polish, /\.quotes-layout::after\s*\{[\s\S]*?background:\s*#fff !important;/);
-  assert.match(polish, /\.quotes-layout::after\s*\{[\s\S]*?box-shadow:\s*0 0 10px rgba\(13, 35, 68, 0\.12\) !important;/);
+  assert.match(polish, /\.quotes-layout::after\s*\{[\s\S]*?box-shadow:\s*0 0 12px rgba\(13, 35, 68, 0\.24\) !important;/);
   assert.match(polish, /\.quotes-person\s*\{[\s\S]*?z-index:\s*1 !important;/);
+  assert.match(polish, /\.quotes-person-left\s*\{[\s\S]*?left:\s*0 !important;/);
+  assert.match(polish, /\.quotes-person-right\s*\{[\s\S]*?right:\s*0 !important;/);
   assert.match(polish, /\.quotes-card--approved-frame\s*\{[\s\S]*?z-index:\s*3 !important;/);
 });
 
-test('lowers both mobile brand titles and keeps the notebook enlarged safely', () => {
+test('aligns the footer brand left and keeps the enlarged notebook safely inside the viewport', () => {
   assert.match(polish, /\.pub-header-brand-title\s*\{[\s\S]*?top:\s*4px !important;/);
+  assert.match(polish, /\.pub-footer-logo\s*\{[\s\S]*?left:\s*-4px !important;/);
   assert.match(polish, /\.pub-footer-logo-text\s*\{[\s\S]*?top:\s*7px !important;/);
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*2px !important;/);
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*134px !important;/);
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*190px !important;/);
-  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.92\)/);
-  assert.match(polish, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*185px !important;/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?right:\s*0 !important;/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?width:\s*138px !important;/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?height:\s*196px !important;/);
+  assert.match(polish, /\.pub-footer-stationery-piece--notebook\s*\{[\s\S]*?scale\(0\.96\)/);
+  assert.match(polish, /\.pub-footer-stationery-source--notebook\s*\{[\s\S]*?width:\s*190px !important;/);
   assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?right:\s*10px !important;/);
   assert.match(css, /\.pub-footer-stationery-piece--cup\s*\{[\s\S]*?scale\(0\.88\)/);
 });

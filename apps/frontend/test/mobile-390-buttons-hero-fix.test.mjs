@@ -8,6 +8,7 @@ const read = (path) => readFileSync(resolve(root, path), 'utf8');
 
 const layout = read('apps/frontend/src/app/layout.tsx');
 const css = read('apps/frontend/src/app/mobile-390-buttons-hero-fix.css');
+const polish = read('apps/frontend/src/app/mobile-quotes-footer-polish.css');
 const hero = read('apps/frontend/src/components/HeroSection.tsx');
 
 test('mobile header button width fix is loaded after the 390 layout', () => {
@@ -15,10 +16,13 @@ test('mobile header button width fix is loaded after the 390 layout', () => {
   assert.ok(css.includes('max-width: none !important'));
 });
 
-test('mobile hero uses uncropped existing artwork with a white blend', () => {
-  assert.ok(css.includes('.pub-hero-visual::before'));
-  assert.ok(css.includes('linear-gradient('));
-  assert.ok(css.includes('object-fit: contain !important'));
-  assert.ok(css.includes('.pub-hero-calendar'));
+test('mobile hero replaces the split desktop artwork with the approved Figma image', () => {
+  assert.ok(hero.includes('hero-mobile-figma-20260903.webp'));
+  assert.ok(hero.includes('className="pub-hero-mobile-figma"'));
+  assert.match(polish, /\.pub-hero-books,[\s\S]*?\.pub-hero-calendar\s*\{[\s\S]*?display:\s*none !important;/);
+  assert.match(polish, /\.pub-hero-mobile-figma\s*\{[\s\S]*?display:\s*block !important;/);
+  assert.match(polish, /\.pub-hero-mobile-figma\s*\{[\s\S]*?width:\s*100% !important;/);
+  assert.match(polish, /\.pub-hero-mobile-figma\s*\{[\s\S]*?object-fit:\s*contain !important;/);
+  assert.match(polish, /\.pub-hero-visual::before\s*\{[\s\S]*?display:\s*none !important;/);
   assert.ok(hero.includes("роста,{' '}"));
 });
