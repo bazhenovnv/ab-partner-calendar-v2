@@ -171,24 +171,25 @@
   will-change: background-color;
 }
 
+/*
+ * During both opening and closing the real modal image stays hidden while the
+ * temporary clone is the single visible artwork. The clone is animated by
+ * exact getBoundingClientRect() coordinates from the source card to the final
+ * modal image rectangle, so the handoff happens at the same x/y/width/height.
+ */
 [data-event-composite-part='image-stage'] {
   visibility: hidden;
 }
 
 /*
- * Opening contract: the real modal artwork is visible immediately at the
- * exact final stage geometry. The temporary flight clone is suppressed only
- * while opening, so it cannot grow past the destination and then snap back.
- * Closing keeps the existing reverse flight to the source card.
+ * The approved final image stage has no shadow. Keep the opening flight clone
+ * shadowless too, otherwise its 48px animated shadow makes the endpoint look
+ * larger and then visually shrink when the real modal image is revealed.
  */
-[data-event-modal-surface][data-event-composite-motion='opening']
-  [data-event-composite-part='image-stage'] {
-  visibility: visible;
-}
-
 body:has([data-event-modal-surface][data-event-composite-motion='opening'])
   > img[aria-hidden='true'][draggable='false'] {
-  display: none !important;
+  display: block !important;
+  box-shadow: none !important;
 }
 
 [data-event-composite-part='content'] {
