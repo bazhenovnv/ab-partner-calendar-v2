@@ -24,6 +24,9 @@ function mobileBlock(css) {
 test('modal shows complete structured location and speaker details', () => {
   assert.match(modal, /function getEventModalLocation\(event: PublicEvent\)/);
   assert.match(modal, /function includesLocationPart\(container: string, part: string\)/);
+  assert.match(modal, /\.replace\(\/\[-–—\]\/g, ' '\)/);
+  assert.match(modal, /` \$\{normalizedContainer\} `\.includes\(` \$\{normalizedPart\} `\)/);
+  assert.doesNotMatch(modal, /normalizedContainer\.includes\(normalizedPart\)/);
   assert.match(modal, /city && !includesLocationPart\(address, city\)/);
   assert.match(modal, /`\$\{city\}, \$\{address\}`/);
   assert.match(modal, /city && !includesLocationPart\(venue, city\)/);
