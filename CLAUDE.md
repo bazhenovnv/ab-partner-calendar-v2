@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`;
-- frontend image: `ab-afisha/frontend:frontend-release-aa1bf06`;
+- frontend commit: `61b4525db6ff35f43081226fd2989e5b1023863e`;
+- frontend image: `ab-afisha/frontend:frontend-release-61b4525`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,11 +20,16 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `aa1bf06` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925 и добавляет PR #160 / CI #929. Контракт текущей promotion:
+Текущая promotion — **frontend-only**. Application commit `61b4525` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925 и PR #160 / CI #929 и добавляет PR #162 / CI #935. Контракт текущей promotion:
 
-- при открытии события реальная картинка модального окна сразу видна в своей конечной геометрии; opening image-flight clone подавлен, поэтому отсутствует лишнее увеличение сверх конечного размера и последующее уменьшение;
+- при открытии события картинка снова увеличивается от исходной картинки карточки к modal image-stage через временный image-flight clone;
+- старт flight берётся из `sourceRect`, конечная геометрия — напрямую из `elements.image.getBoundingClientRect()` после рендера modal, поэтому конечные `x/y/width/height` совпадают с фактическим положением и размером картинки;
+- промежуточных `scale`, `transform` и геометрического overshoot нет;
+- real modal image скрыта только на время opening-flight, затем clone удаляется и modal image остаётся в тех же конечных координатах без скачка размера;
+- opening clone не имеет финальной 48px shadow, которая раньше визуально создавала ощущение лишнего увеличения перед handoff;
+- при desktop 1920 максимальная утверждённая геометрия: modal `1496×788`, image `647×647`, около `x=65px`, `y=70.5px` относительно modal; mobile 390: modal `348×684`, image `309×309`, `x=19px`, `y=54px`;
 - при закрытии события существующий reverse image-flight к исходной карточке сохраняется;
-- новый opening-contract применяется ко всем breakpoint через общий `event-modal-transitions.css` и не меняет размеры самого modal layout;
+- общий opening/closing path применяется ко всем breakpoint и не меняет размеры самого modal layout;
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - верхняя граница mobile artwork плавно растворяется в белой поверхности hero через CSS mask, а заголовок, описание и CTA остаются отдельным верхним слоем;
 - touch/hover/focus состояния hero, календаря и quote-area больше не создают лишнюю тень и квадратные артефакты на скруглениях;
@@ -45,7 +50,7 @@
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-aa1bf06`;
+- frontend меняется только на `frontend-release-61b4525`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
