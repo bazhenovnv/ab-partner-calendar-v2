@@ -7,21 +7,41 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`
-- Frontend image: `ab-afisha/frontend:frontend-release-df7dd97`
+- Frontend commit: `e5a2d8a612e5991973de269e367b8e4788663450`
+- Frontend image: `ab-afisha/frontend:frontend-release-e5a2d8a`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-04`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `df7dd97`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `e5a2d8a`.
 
-## Текущая promotion — структурный текст модального окна без дублей
+## Текущая promotion — полный адрес и спикер в модальном окне
 
-Текущая promotion меняет **только frontend** до application merge commit `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`.
+Текущая promotion меняет **только frontend** до application merge commit `e5a2d8a612e5991973de269e367b8e4788663450`.
 
-Application PR #166 / CI #956 исправляет загрузку и очистку текста события в общем modal path для desktop, tablet и mobile:
+Application PR #168 / CI #960 расширяет structured detail rows общего modal path для desktop, tablet и mobile:
+
+- для `OFFLINE` и `HYBRID` используется полный structured `event.address`, а не только город;
+- если `address` уже содержит название города, city повторно не добавляется; если не содержит — строка формируется как `Город, адрес`;
+- если полного address нет, fallback `Место:` строится из structured city/venue;
+- `HYBRID` может одновременно показывать строку `Онлайн` и физический `Адрес:` / `Место:`;
+- при наличии speaker data modal показывает `Спикер:` / `Спикеры:` через общий `getEventModalSpeakers` path;
+- одна и та же логика применяется на desktop, tablet и mobile;
+- mobile Figma 390 сохраняет утверждённые размеры: modal `348×684`, image `309×309`, title `18px`, description `10px`, facts `309×52.79px`, fact icons `27×27px`, labels `6px`, values `7px`, detail text `11px`, detail icons `12×12px`, buttons `143×44px`, action icon `14×14px`;
+- CSS/layout geometry и отложенная animation issue открытия картинки этой promotion не меняются;
+- backend, bots, nginx, данные, Prisma schema и migrations не меняются.
+
+Application PR #170 / CI #965 усиливает dedupe city/address после review release PR #169:
+
+- city считается уже присутствующим в address только как отдельная нормализованная фраза, а не как произвольная подстрока;
+- punctuation и дефисы нормализуются в пробелы перед сравнением;
+- `Москва` корректно распознаётся внутри `г. Москва, ...`;
+- `Санкт-Петербург` и `Санкт Петербург` считаются одной city-фразой;
+- `Омск` внутри `Омская улица` больше не считается совпадением, поэтому город не теряется из отображаемого адреса.
+
+Сохраняется application PR #166 / CI #956 с очисткой текста события в общем modal path для desktop, tablet и mobile:
 
 - карточка может открыть modal на preview-данных, после чего `EventModalProvider` получает полное событие через `GET /api/events/public/:id` с `cache: no-store`;
 - short/full description проходят через единый `cleanEventModalDescription`, поэтому логика одинакова на desktop и mobile;
@@ -30,8 +50,7 @@ Application PR #166 / CI #956 исправляет загрузку и очис�
 - inline-tail `Где:`, `Дата:`, `Место:`, `Адрес:` удаляется консервативно только если хвост подтверждается реальными structured fields события;
 - числовые даты вида `09.09` корректно распознаются внутри schedule-предложения;
 - обычная редакционная проза, включая слова вроде `формат`, не обрезается без structured-match;
-- существующая очистка speaker/registration/messenger metadata сохраняется;
-- backend, bots, nginx, данные, Prisma schema и migrations не меняются.
+- существующая очистка speaker/registration/messenger metadata сохраняется.
 
 Regression-case PR #166 фиксирует конкретный сценарий:
 
@@ -189,7 +208,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-df7dd97`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-e5a2d8a`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -207,7 +226,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `df7dd97b248f8eec391227c2e5bf8c8e6dc40817` в detached worktree;
+2. собрать frontend из commit `e5a2d8a612e5991973de269e367b8e4788663450` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -220,13 +239,19 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-df7dd97`;
-- frontend revision = `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`;
+- frontend image = `ab-afisha/frontend:frontend-release-e5a2d8a`;
+- frontend revision = `e5a2d8a612e5991973de269e367b8e4788663450`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
-- на desktop открыть событие с текстом, содержащим schedule/location metadata: эти данные не должны повторяться в body;
-- на mobile открыть тот же тип события: результат очистки должен совпадать с desktop;
+- на desktop OFFLINE-событие с заполненным address показывает полный `Адрес:`, а не только город;
+- если address уже содержит city, город не дублируется;
+- `Омск` внутри `Омская улица` не считается совпадением city и не должен приводить к потере города;
+- `г. Москва` и `Санкт-Петербург` / `Санкт Петербург` распознаются корректно;
+- HYBRID может показывать одновременно `Онлайн` и physical address/location;
+- при наличии speaker data показывается `Спикер:` / `Спикеры:`;
+- на mobile результат address/speaker path совпадает с desktop, при этом сохраняются modal `348×684` и image `309×309`;
+- structured schedule/location metadata не повторяется в body;
 - `Где:`, `Дата:`, `Место:`, `Адрес:` не должны дублировать данные, уже выведенные в структурных плашках/строках;
 - обычный редакционный текст со словами `формат`, `место` и т.п. не должен обрезаться без совпадения со structured fields;
 - даты вида `09.09` внутри schedule-tail должны корректно очищаться при совпадении с событием;
@@ -250,7 +275,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-df7dd97`;
+- frontend release кроме `frontend-release-e5a2d8a`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
