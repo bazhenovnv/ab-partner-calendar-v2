@@ -13,6 +13,10 @@ export const EVENT_MODAL_CLOSE_DURATION_MS = 500;
 export const EVENT_MODAL_CONTENT_REVEAL_START = 0.28;
 export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 
+const EVENT_MODAL_CLOSE_IMAGE_EASING = 'cubic-bezier(0.55, 0, 1, 0.45)';
+const EVENT_MODAL_OPEN_IMAGE_EASING = 'cubic-bezier(0, 0.55, 0.45, 1)';
+const EVENT_MODAL_OPEN_IMAGE_DURATION_MS = EVENT_MODAL_CLOSE_DURATION_MS;
+
 type MotionDirection = 'opening' | 'closing';
 
 type MotionRect = {
@@ -273,8 +277,8 @@ function animateImageFlight(
 ): Animation | null {
   const easing =
     direction === 'opening'
-      ? 'cubic-bezier(0.16, 1, 0.3, 1)'
-      : 'cubic-bezier(0.55, 0, 1, 0.45)';
+      ? EVENT_MODAL_OPEN_IMAGE_EASING
+      : EVENT_MODAL_CLOSE_IMAGE_EASING;
 
   return animateElement(
     clone,
@@ -535,12 +539,23 @@ function finishOpeningMotion(
 ): void {
   if (sequence !== transitionSequence) return;
 
+  // Reveal the real modal image underneath the clone first. Keep the clone on
+  // its final filled frame for one painted frame, then remove it. This mirrors
+  // the clean close handoff and prevents a compositor-layer snap at the end.
   clearMotionElements(elements);
-  removeActiveClone();
-  cancelActiveAnimations();
   activeElements = null;
   activeDirection = null;
   activeMotionDone = null;
+
+  window.requestAnimationFrame(() => {
+    if (sequence !== transitionSequence) return;
+
+    window.requestAnimationFrame(() => {
+      if (sequence !== transitionSequence) return;
+      removeActiveClone();
+      cancelActiveAnimations();
+    });
+  });
 }
 
 function openWithoutImageOrigin(update: () => void): void {
@@ -600,11 +615,22 @@ export function openEventWithTransition(
       return;
     }
 
-    const finalImageRect = copyRect(elements.image.getBoundingClientRect());
+    const modalImage = getImageElement(elements.image);
+    if (!modalImage) {
+      restoreOriginImage();
+      return;
+    }
+
+    const finalImageRect = copyRect(modalImage.getBoundingClientRect());
     const sourceRadius = getBorderRadius(originImageElement.parentElement);
     const finalRadius = getBorderRadius(elements.imageStage, '20px');
+
+    // The close path creates its flight clone from the real modal image. Do
+    // the exact inverse on open: use that same modal image source/style, place
+    // it at the card rectangle, and animate it back to its own final rectangle.
+    // This makes the final clone frame pixel-compatible with the real image.
     const clone = createImageFlightClone(
-      originImageElement,
+      modalImage,
       sourceRect,
       sourceRadius,
     );
@@ -618,7 +644,7 @@ export function openEventWithTransition(
       finalImageRect,
       sourceRadius,
       finalRadius,
-      EVENT_MODAL_OPEN_DURATION_MS,
+      EVENT_MODAL_OPEN_IMAGE_DURATION_MS,
       'opening',
     );
     const shellAnimations = createShellOpeningAnimations(elements);
