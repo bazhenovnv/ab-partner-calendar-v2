@@ -13,19 +13,38 @@ const transition = readFileSync(
   'utf8',
 );
 
-test('event modal opens with the real image already at final geometry without the flight clone overshoot', () => {
+test('event modal image flies from the source rect to the exact final modal rect without a visual overshoot', () => {
   assert.match(
+    transition,
+    /finalImageRect = copyRect\(elements\.image\.getBoundingClientRect\(\)\)/,
+  );
+  assert.match(
+    transition,
+    /animateImageFlight\(\s*clone,\s*sourceRect,\s*finalImageRect,/,
+  );
+  assert.match(
+    transition,
+    /imageRectKeyframe\(\s*fromRect,[\s\S]*?0,\s*\),\s*imageRectKeyframe\(\s*toRect,[\s\S]*?1,\s*\),/,
+  );
+  assert.doesNotMatch(transition, /transformForRect|getIntermediateRect|scale\(/);
+
+  assert.match(
+    css,
+    /\[data-event-composite-part='image-stage'\]\s*\{\s*visibility:\s*hidden;/,
+  );
+  assert.doesNotMatch(
     css,
     /\[data-event-modal-surface\]\[data-event-composite-motion='opening'\][\s\S]*?\[data-event-composite-part='image-stage'\]\s*\{\s*visibility:\s*visible;/,
   );
   assert.match(
     css,
-    /body:has\(\[data-event-modal-surface\]\[data-event-composite-motion='opening'\]\)[\s\S]*?> img\[aria-hidden='true'\]\[draggable='false'\]\s*\{\s*display:\s*none !important;/,
+    /body:has\(\[data-event-modal-surface\]\[data-event-composite-motion='opening'\]\)[\s\S]*?> img\[aria-hidden='true'\]\[draggable='false'\]\s*\{[\s\S]*?display:\s*block !important;[\s\S]*?box-shadow:\s*none !important;/,
   );
-  assert.match(
+  assert.doesNotMatch(
     css,
-    /\[data-event-composite-part='image-stage'\]\s*\{\s*visibility:\s*hidden;/,
+    /body:has\(\[data-event-modal-surface\]\[data-event-composite-motion='opening'\]\)[\s\S]*?> img\[aria-hidden='true'\]\[draggable='false'\]\s*\{[\s\S]*?display:\s*none !important;/,
   );
+
   assert.match(transition, /markMotionElements\(elements, 'closing', true\)/);
   assert.match(transition, /animateImageFlight\([\s\S]*?'closing'/);
 });
