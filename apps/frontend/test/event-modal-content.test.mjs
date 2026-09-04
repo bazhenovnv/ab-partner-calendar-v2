@@ -166,6 +166,35 @@ describe('Event modal content', () => {
     assert.match(content, /removeRepeatedBreakSegments/);
   });
 
+  test('removes narrative schedule and inline location metadata from modal copy', () => {
+    const content = readFileSync(MODAL_CONTENT, 'utf8');
+
+    assert.ok(content.includes('(?:когда|где|дата'));
+    assert.match(content, /STRUCTURED_SCHEDULE_SENTENCE_SOURCE/);
+    assert.match(content, /function getEventDateSignals/);
+    assert.match(content, /function hasStructuredEventSignal/);
+    assert.match(content, /function removeStructuredSummaryFragments/);
+    assert.match(
+      content,
+      /hasStructuredEventSignal\(sentence, event\) \? '' : sentence/,
+    );
+    assert.match(content, /event\.address/);
+    assert.match(content, /event\.venue/);
+    assert.match(content, /event\.cityName/);
+    assert.equal(
+      (content.match(/removeStructuredSummaryFragments\(result, event\)/g) ?? []).length,
+      2,
+    );
+
+    const representativeSchedule =
+      'Мероприятие пройдет в два этапа: 9 сентября — онлайн-марафон регионов, 11 сентября — Всероссийская конференция в Москве.';
+    assert.match(
+      representativeSchedule,
+      /(?:мероприятие|событие|вебинар|семинар|конференция|встреча|марафон)\s+(?:пройд(?:ет|ёт)|состоится|начн(?:ется|ётся)|будет\s+проходить|проходит|проводится|запланирован(?:о|а)?)/i,
+    );
+    assert.match('Где: Москва, Космодамианская наб., 52/7', /^Где\s*:/i);
+  });
+
   test('keeps speaker and price metadata out of compact cards', () => {
     const modal = readFileSync(MODAL, 'utf8');
     const card = readFileSync(EVENT_CARD, 'utf8');
