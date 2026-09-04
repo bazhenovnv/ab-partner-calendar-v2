@@ -232,7 +232,7 @@ describe('Pinned production homepage', () => {
     assert.match(component, /<rect x="9" y="3" width="6" height="12" rx="3"/);
     assert.doesNotMatch(component, /ActionIcon name="participate"/);
     assert.match(component, /<ReminderIcon \/>/);
-    assert.match(modalContent, /\(\?:когда\|дата/);
+    assert.match(modalContent, /\(\?:когда\|где\|дата/);
     assert.ok(modalContent.includes('время(?:\\\\s+проведения)?'));
     assert.match(component, /className=\{v2\.textScroll\}/);
     assert.match(component, /statusLive/);
