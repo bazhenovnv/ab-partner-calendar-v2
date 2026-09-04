@@ -11,15 +11,15 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `8c13e9bd57fce7205cd6ea55223812061bf38d4e`;
-- frontend image: `ab-afisha/frontend:frontend-release-8c13e9b`;
+- frontend commit: `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`;
+- frontend image: `ab-afisha/frontend:frontend-release-df7dd97`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `8c13e9b` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929 и PR #162 / CI #935, а также включает PR #164 / CI #948 с зеркальным opening image-flight и безопасным handoff между card/modal artwork. Текущая геометрия и взаимодействия:
+Текущая promotion — **frontend-only**. Application commit `df7dd97` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935 и PR #164 / CI #948, а также включает PR #166 / CI #956 с очисткой body модального окна от дублирующих структурных schedule/location metadata. Текущая геометрия и взаимодействия:
 
 - opening image-flight начинается точной картинкой карточки (`originImageElement`) и сохраняет её `src/currentSrc`, `object-fit` и `object-position` в момент старта;
 - flight идёт от точного `sourceRect` к точному `finalImageRect`, который браузер получает через `modalImage.getBoundingClientRect()` после рендера модального окна;
@@ -29,6 +29,8 @@
 - при desktop 1920 утверждённая максимальная геометрия даёт modal `1496×788`, image `647×647`, примерно `x=65px`, `y=70.5px` относительно modal; при mobile 390 modal `348×684`, image `309×309`, `x=19px`, `y=54px`;
 - обратный image-flight при закрытии события сохраняется;
 - общий transition path действует для desktop, tablet и mobile;
+- desktop, tablet и mobile используют общий `cleanEventModalDescription`; structured schedule/location tails не должны дублироваться в body, если совпадают с реальными structured fields текущего события;
+- служебные хвосты `Где:`, `Дата:`, `Место:`, `Адрес:` и narrative schedule вида `Мероприятие пройдет ...` удаляются консервативно только при подтверждённом structured signal; обычный редакционный текст сохраняется;
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - верхняя граница mobile hero artwork плавно растворяется в белой поверхности hero через CSS mask, при этом заголовок, описание и CTA остаются отдельным верхним слоем;
 - на touch-устройствах у hero, календаря и quote-area убраны лишние hover/active/focus переходы, создававшие вторую тень и артефакты скругления;
