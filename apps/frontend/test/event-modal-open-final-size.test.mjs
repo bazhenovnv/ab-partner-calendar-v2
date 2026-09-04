@@ -13,7 +13,7 @@ const transition = readFileSync(
   'utf8',
 );
 
-test('event modal opening is the pixel-stable reverse of the closing image flight', () => {
+test('event modal opening mirrors closing geometry and hands card artwork off without a snap', () => {
   assert.match(
     transition,
     /const EVENT_MODAL_OPEN_IMAGE_DURATION_MS = EVENT_MODAL_CLOSE_DURATION_MS;/,
@@ -26,6 +26,10 @@ test('event modal opening is the pixel-stable reverse of the closing image fligh
     transition,
     /EVENT_MODAL_OPEN_IMAGE_EASING = 'cubic-bezier\(0, 0\.55, 0\.45, 1\)'/,
   );
+  assert.match(
+    transition,
+    /EVENT_MODAL_OPEN_HANDOFF_DURATION_MS = 90/,
+  );
 
   assert.match(
     transition,
@@ -36,10 +40,6 @@ test('event modal opening is the pixel-stable reverse of the closing image fligh
     /finalImageRect = copyRect\(modalImage\.getBoundingClientRect\(\)\)/,
   );
   assert.match(
-    transition,
-    /createImageFlightClone\(\s*modalImage,\s*sourceRect,\s*sourceRadius,?\s*\)/,
-  );
-  assert.doesNotMatch(
     transition,
     /createImageFlightClone\(\s*originImageElement,\s*sourceRect,\s*sourceRadius,?\s*\)/,
   );
@@ -55,7 +55,7 @@ test('event modal opening is the pixel-stable reverse of the closing image fligh
 
   assert.match(
     transition,
-    /clearMotionElements\(elements\);[\s\S]*?requestAnimationFrame\(\(\) => \{[\s\S]*?requestAnimationFrame\(\(\) => \{[\s\S]*?removeActiveClone\(\);/,
+    /clearMotionElements\(elements\);[\s\S]*?animateElement\(\s*clone,\s*\[[\s\S]*?\{ opacity: 1, offset: 0 \}[\s\S]*?\{ opacity: 0, offset: 1 \}[\s\S]*?EVENT_MODAL_OPEN_HANDOFF_DURATION_MS/,
   );
 
   assert.match(
