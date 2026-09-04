@@ -30,7 +30,15 @@ describe('Sharp event image flight into a static modal', () => {
     assert.doesNotMatch(transition, /transformForRect|getIntermediateRect/);
     assert.match(
       transition,
-      /finalImageRect = copyRect\(elements\.image\.getBoundingClientRect\(\)\)/,
+      /const modalImage = getImageElement\(elements\.image\);/,
+    );
+    assert.match(
+      transition,
+      /finalImageRect = copyRect\(modalImage\.getBoundingClientRect\(\)\)/,
+    );
+    assert.match(
+      transition,
+      /createImageFlightClone\(\s*modalImage,\s*sourceRect,\s*sourceRadius,?\s*\)/,
     );
     assert.match(
       transition,
@@ -42,11 +50,23 @@ describe('Sharp event image flight into a static modal', () => {
     );
   });
 
-  test('uses faster synchronized durations for the image flight and modal shell', () => {
+  test('uses mirrored image timing while the modal shell keeps its approved durations', () => {
     const transition = readFileSync(TRANSITION, 'utf8');
 
     assert.match(transition, /EVENT_MODAL_OPEN_DURATION_MS = 600/);
     assert.match(transition, /EVENT_MODAL_CLOSE_DURATION_MS = 500/);
+    assert.match(
+      transition,
+      /EVENT_MODAL_OPEN_IMAGE_DURATION_MS = EVENT_MODAL_CLOSE_DURATION_MS/,
+    );
+    assert.match(
+      transition,
+      /EVENT_MODAL_CLOSE_IMAGE_EASING = 'cubic-bezier\(0\.55, 0, 1, 0\.45\)'/,
+    );
+    assert.match(
+      transition,
+      /EVENT_MODAL_OPEN_IMAGE_EASING = 'cubic-bezier\(0, 0\.55, 0\.45, 1\)'/,
+    );
     assert.doesNotMatch(transition, /EVENT_IMAGE_SPEED_MULTIPLIER/);
     assert.match(transition, /\{\s*duration,\s*easing,\s*fill: 'both'/);
     assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.28/);
