@@ -7,21 +7,31 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453`
-- Frontend image: `ab-afisha/frontend:frontend-release-cb0e2c2`
+- Frontend commit: `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`
+- Frontend image: `ab-afisha/frontend:frontend-release-aa1bf06`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
-- Дата утверждения: `2026-09-03`
+- Дата утверждения: `2026-09-04`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `cb0e2c2`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `aa1bf06`.
 
-## Текущая promotion — устранение мерцания direction indicator «Главных событий»
+## Текущая promotion — картинка события сразу в конечном размере
 
-Текущая promotion меняет **только frontend** до application merge commit `cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453`.
+Текущая promotion меняет **только frontend** до application merge commit `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`.
 
-Application PR #158 / CI #925 устраняет короткое мерцание центральной точки после ускоренного возврата direction indicator:
+Application PR #160 / CI #929 устраняет лишнее увеличение картинки при открытии события:
+
+- реальная картинка внутри modal сразу отображается в точной конечной геометрии image-stage;
+- временный image-flight clone скрывается только на opening-фазе и больше не может визуально увеличиваться сверх конечного размера с последующим уменьшением;
+- shell-анимация, backdrop и появление текста сохраняются;
+- при закрытии события сохраняется существующий reverse image-flight к исходной карточке;
+- общий transition-layer действует одинаково для desktop, tablet и mobile;
+- отдельный regression-test фиксирует final-size opening contract;
+- backend, bots, nginx, данные, Prisma schema и migrations не меняются.
+
+Сохраняется application PR #158 / CI #925 с устранением короткого мерцания центральной точки после ускоренного возврата direction indicator:
 
 - визуальный возврат в центр по-прежнему происходит через `280 ms` внутри существующего `560 ms` indicator cycle;
 - временный `::after` overlay удалён;
@@ -29,7 +39,7 @@ Application PR #158 / CI #925 устраняет короткое мерцани
 - боковая активная точка в тот же момент возвращается к серому цвету;
 - к моменту финального React state reset на `560 ms` центральная точка уже имеет нужный тёмный цвет, поэтому больше нет краткого blink/провала яркости;
 - отдельный regression-test запрещает возврат pseudo-element overlay и проверяет real-centre-dot path;
-- скорость карусели, iOS swipe workaround, hero, footer notebook, backend, bots и nginx не меняются.
+- скорость карусели и iOS swipe workaround не меняются.
 
 Сохраняется application PR #156 / CI #919 с финальной корректировкой mobile footer notebook:
 
@@ -166,7 +176,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-cb0e2c2`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-aa1bf06`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -184,7 +194,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453` в detached worktree;
+2. собрать frontend из commit `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -197,11 +207,13 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-cb0e2c2`;
-- frontend revision = `cb0e2c2f5b8b3f60e77918aeb3b4264b98b74453`;
+- frontend image = `ab-afisha/frontend:frontend-release-aa1bf06`;
+- frontend revision = `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
+- при открытии события на desktop, tablet и mobile картинка сразу находится в конечном размере modal image-stage и не делает overshoot/обратное уменьшение;
+- при закрытии события reverse image-flight к исходной карточке сохраняется;
 - на mobile hero отображается утверждённый artwork с календарём, книгами и вазой;
 - верх artwork не образует прямую видимую границу: изображение плавно переходит в белую hero-поверхность, а текст и CTA остаются поверх;
 - при касании/клике hero, календаря и quote-area не появляется дополнительная тень или квадратные артефакты скругления;
@@ -233,7 +245,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-cb0e2c2`;
+- frontend release кроме `frontend-release-aa1bf06`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
