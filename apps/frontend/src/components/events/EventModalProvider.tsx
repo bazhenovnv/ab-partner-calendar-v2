@@ -183,6 +183,7 @@ type ModalLocation = {
 function normalizeLocationPart(value: string): string {
   return value
     .toLocaleLowerCase('ru-RU')
+    .replace(/[-–—]/g, ' ')
     .replace(/[.,;:()]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -191,11 +192,10 @@ function normalizeLocationPart(value: string): string {
 function includesLocationPart(container: string, part: string): boolean {
   const normalizedContainer = normalizeLocationPart(container);
   const normalizedPart = normalizeLocationPart(part);
-  return Boolean(
-    normalizedContainer &&
-      normalizedPart &&
-      normalizedContainer.includes(normalizedPart),
-  );
+
+  if (!normalizedContainer || !normalizedPart) return false;
+
+  return ` ${normalizedContainer} `.includes(` ${normalizedPart} `);
 }
 
 function getEventModalLocation(event: PublicEvent): ModalLocation | null {
