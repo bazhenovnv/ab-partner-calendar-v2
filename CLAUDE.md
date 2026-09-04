@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`;
-- frontend image: `ab-afisha/frontend:frontend-release-df7dd97`;
+- frontend commit: `e5a2d8a612e5991973de269e367b8e4788663450`;
+- frontend image: `ab-afisha/frontend:frontend-release-e5a2d8a`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,8 +20,14 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `df7dd97` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935 и PR #164 / CI #948 и добавляет PR #166 / CI #956. Контракт текущей promotion:
+Текущая promotion — **frontend-only**. Application commit `e5a2d8a` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935, PR #164 / CI #948, PR #166 / CI #956 и PR #168 / CI #960, а также добавляет PR #170 / CI #965. Контракт текущей promotion:
 
+- OFFLINE/HYBRID modal берёт полный structured `event.address`; если адрес уже содержит city как отдельную нормализованную фразу, city повторно не добавляется;
+- whole-city match использует границы нормализованных токенов, поэтому `Омск` не совпадает с `Омская улица`, а `г. Москва` и варианты `Санкт-Петербург` / `Санкт Петербург` распознаются корректно;
+- если `address` отсутствует, `Место:` строится из structured city/venue; HYBRID одновременно может показывать `Онлайн` и physical location;
+- при наличии speaker data строка `Спикер:` / `Спикеры:` формируется через общий `getEventModalSpeakers` path;
+- location/speaker path общий для desktop, tablet и mobile;
+- mobile 390 сохраняет утверждённую Figma-геометрию: modal `348×684`, image `309×309`, title `18px`, description `10px`, facts `309×52.79px`, fact icons `27×27px`, fact labels `6px`, values `7px`, detail text `11px`, detail icons `12×12px`, buttons `143×44px`, action icon `14×14px`;
 - opening image-flight начинается с точной картинки карточки (`originImageElement`) и сохраняет её исходные `src/currentSrc`, `object-fit` и `object-position`;
 - старт flight берётся из `sourceRect`, конечная геометрия — из `modalImage.getBoundingClientRect()` после рендера modal, поэтому конечные `x/y/width/height` совпадают с фактическим положением и размером картинки;
 - opening image duration = closing image duration (`500 ms`), opening easing `cubic-bezier(0, 0.55, 0.45, 1)` зеркален closing easing `cubic-bezier(0.55, 0, 1, 0.45)`;
@@ -53,7 +59,7 @@
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-df7dd97`;
+- frontend меняется только на `frontend-release-e5a2d8a`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
