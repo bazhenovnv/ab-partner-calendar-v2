@@ -11,16 +11,21 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`;
-- frontend image: `ab-afisha/frontend:frontend-release-df7dd97`;
+- frontend commit: `460b50cc7fed664ccf150c3bb35a3ae2bcce4750`;
+- frontend image: `ab-afisha/frontend:frontend-release-460b50c`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `df7dd97` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935 и PR #164 / CI #948, а также включает PR #166 / CI #956 с очисткой body модального окна от дублирующих структурных schedule/location metadata. Текущая геометрия и взаимодействия:
+Текущая promotion — **frontend-only**. Application commit `460b50c` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935, PR #164 / CI #948 и PR #166 / CI #956, а также включает PR #168 / CI #960 с полным structured address/speaker выводом в модальном окне. Текущая геометрия и взаимодействия:
 
+- OFFLINE/HYBRID modal выводит полный `event.address`; город добавляется только если его ещё нет внутри address, чтобы не создавать дубликат;
+- если полного address нет, строка `Место:` использует structured city/venue; HYBRID может одновременно показывать `Онлайн` и физический адрес/место;
+- при наличии speaker data modal показывает `Спикер:` / `Спикеры:` через общий `getEventModalSpeakers` path;
+- одна и та же structured location/speaker логика действует для desktop, tablet и mobile;
+- mobile Figma 390 сохраняет modal `348×684`, image/inner width `309×309`, title `18px`, description `10px`, facts `309×52.79px`, fact icons `27×27px`, detail text `11px`, detail icons `12×12px`, buttons `143×44px`;
 - opening image-flight начинается точной картинкой карточки (`originImageElement`) и сохраняет её `src/currentSrc`, `object-fit` и `object-position` в момент старта;
 - flight идёт от точного `sourceRect` к точному `finalImageRect`, который браузер получает через `modalImage.getBoundingClientRect()` после рендера модального окна;
 - opening image duration = closing image duration (`500 ms`), а opening easing `cubic-bezier(0, 0.55, 0.45, 1)` является обратной кривой к closing `cubic-bezier(0.55, 0, 1, 0.45)`;
