@@ -38,7 +38,7 @@ describe('Sharp event image flight into a static modal', () => {
     );
     assert.match(
       transition,
-      /createImageFlightClone\(\s*modalImage,\s*sourceRect,\s*sourceRadius,?\s*\)/,
+      /createImageFlightClone\(\s*originImageElement,\s*sourceRect,\s*sourceRadius,?\s*\)/,
     );
     assert.match(
       transition,
@@ -67,6 +67,7 @@ describe('Sharp event image flight into a static modal', () => {
       transition,
       /EVENT_MODAL_OPEN_IMAGE_EASING = 'cubic-bezier\(0, 0\.55, 0\.45, 1\)'/,
     );
+    assert.match(transition, /EVENT_MODAL_OPEN_HANDOFF_DURATION_MS = 90/);
     assert.doesNotMatch(transition, /EVENT_IMAGE_SPEED_MULTIPLIER/);
     assert.match(transition, /\{\s*duration,\s*easing,\s*fill: 'both'/);
     assert.match(transition, /EVENT_MODAL_CONTENT_REVEAL_START = 0\.28/);
