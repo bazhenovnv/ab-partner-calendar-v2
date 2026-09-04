@@ -16,6 +16,7 @@ export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 const EVENT_MODAL_CLOSE_IMAGE_EASING = 'cubic-bezier(0.55, 0, 1, 0.45)';
 const EVENT_MODAL_OPEN_IMAGE_EASING = 'cubic-bezier(0, 0.55, 0.45, 1)';
 const EVENT_MODAL_OPEN_IMAGE_DURATION_MS = EVENT_MODAL_CLOSE_DURATION_MS;
+const EVENT_MODAL_OPEN_HANDOFF_DURATION_MS = 90;
 
 type MotionDirection = 'opening' | 'closing';
 
@@ -241,7 +242,7 @@ function createImageFlightClone(
   clone.style.pointerEvents = 'none';
   clone.style.userSelect = 'none';
   clone.style.zIndex = '1205';
-  clone.style.willChange = 'top, left, width, height, border-radius, box-shadow';
+  clone.style.willChange = 'top, left, width, height, border-radius, box-shadow, opacity';
 
   document.body.appendChild(clone);
   activeClone = clone;
@@ -539,22 +540,46 @@ function finishOpeningMotion(
 ): void {
   if (sequence !== transitionSequence) return;
 
-  // Reveal the real modal image underneath the clone first. Keep the clone on
-  // its final filled frame for one painted frame, then remove it. This mirrors
-  // the clean close handoff and prevents a compositor-layer snap at the end.
+  // Reveal the real modal image at the exact endpoint while the source clone
+  // is still fixed over it, then dissolve only the artwork handoff. Geometry
+  // no longer changes during this final phase, so card/modal crop variants
+  // cannot produce a last-frame size or position snap.
   clearMotionElements(elements);
   activeElements = null;
   activeDirection = null;
   activeMotionDone = null;
 
-  window.requestAnimationFrame(() => {
-    if (sequence !== transitionSequence) return;
+  const clone = activeClone;
+  if (!clone) {
+    cancelActiveAnimations();
+    return;
+  }
 
-    window.requestAnimationFrame(() => {
-      if (sequence !== transitionSequence) return;
-      removeActiveClone();
-      cancelActiveAnimations();
-    });
+  const handoffAnimation = animateElement(
+    clone,
+    [
+      { opacity: 1, offset: 0 },
+      { opacity: 0, offset: 1 },
+    ],
+    {
+      duration: EVENT_MODAL_OPEN_HANDOFF_DURATION_MS,
+      easing: 'linear',
+      fill: 'both',
+    },
+  );
+
+  if (!handoffAnimation) {
+    removeActiveClone();
+    cancelActiveAnimations();
+    return;
+  }
+
+  activeAnimations.push(handoffAnimation);
+
+  void handoffAnimation.finished.finally(() => {
+    if (sequence !== transitionSequence) return;
+    removeActiveClone();
+    cancelActiveAnimations();
   });
 }
 
@@ -625,12 +650,12 @@ export function openEventWithTransition(
     const sourceRadius = getBorderRadius(originImageElement.parentElement);
     const finalRadius = getBorderRadius(elements.imageStage, '20px');
 
-    // The close path creates its flight clone from the real modal image. Do
-    // the exact inverse on open: use that same modal image source/style, place
-    // it at the card rectangle, and animate it back to its own final rectangle.
-    // This makes the final clone frame pixel-compatible with the real image.
+    // Preserve the exact card artwork and object-fit at the source rectangle.
+    // The geometry then follows the mathematical reverse of closing. At the
+    // endpoint the source artwork dissolves over the already-final modal image,
+    // so differing card/modal crops never create a hard handoff.
     const clone = createImageFlightClone(
-      modalImage,
+      originImageElement,
       sourceRect,
       sourceRadius,
     );
