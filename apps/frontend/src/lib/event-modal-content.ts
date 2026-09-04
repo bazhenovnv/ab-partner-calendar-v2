@@ -220,7 +220,7 @@ function getEventDateSignals(event: PublicEvent): string[] {
     signals.add(numericFormatter.format(date));
   }
 
-  return [...signals];
+  return Array.from(signals);
 }
 
 function hasStructuredEventSignal(value: string, event: PublicEvent): boolean {
