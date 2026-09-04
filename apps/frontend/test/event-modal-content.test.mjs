@@ -170,13 +170,19 @@ describe('Event modal content', () => {
     const content = readFileSync(MODAL_CONTENT, 'utf8');
 
     assert.ok(content.includes('(?:когда|где|дата'));
+    assert.match(content, /INLINE_STRUCTURED_LABEL/);
     assert.match(content, /STRUCTURED_SCHEDULE_SENTENCE_SOURCE/);
     assert.match(content, /function getEventDateSignals/);
+    assert.match(content, /return Array\.from\(signals\)/);
     assert.match(content, /function hasStructuredEventSignal/);
     assert.match(content, /function removeStructuredSummaryFragments/);
     assert.match(
       content,
       /hasStructuredEventSignal\(sentence, event\) \? '' : sentence/,
+    );
+    assert.match(
+      content,
+      /hasStructuredEventSignal\(tail, event\) \? '' : tail/,
     );
     assert.match(content, /event\.address/);
     assert.match(content, /event\.venue/);
@@ -186,13 +192,20 @@ describe('Event modal content', () => {
       2,
     );
 
-    const representativeSchedule =
-      'Мероприятие пройдет в два этапа: 9 сентября — онлайн-марафон регионов, 11 сентября — Всероссийская конференция в Москве.';
+    const schedulePattern =
+      /(?:мероприятие|событие|вебинар|семинар|конференция|встреча|марафон)\s+(?:пройд(?:ет|ёт)|состоится|начн(?:ется|ётся)|будет\s+проходить|проходит|проводится|запланирован(?:о|а)?)(?:\.(?=\d)|[^.!?…<])*(?:[!?…]+|\.(?=\s|<|$)|(?=<|$))/i;
     assert.match(
-      representativeSchedule,
-      /(?:мероприятие|событие|вебинар|семинар|конференция|встреча|марафон)\s+(?:пройд(?:ет|ёт)|состоится|начн(?:ется|ётся)|будет\s+проходить|проходит|проводится|запланирован(?:о|а)?)/i,
+      'Мероприятие пройдет в два этапа: 9 сентября — онлайн-марафон регионов, 11 сентября — Всероссийская конференция в Москве.',
+      schedulePattern,
     );
+    assert.match('Мероприятие пройдет 09.09 в Москве.', schedulePattern);
     assert.match('Где: Москва, Космодамианская наб., 52/7', /^Где\s*:/i);
+
+    const inlineHelper = content.match(
+      /function removeStructuredSummaryFragments[\s\S]*?\n\}/,
+    )?.[0] ?? '';
+    assert.match(inlineHelper, /INLINE_STRUCTURED_LABEL/);
+    assert.doesNotMatch(inlineHelper, /`\\s\+\$\{OPTIONAL_MARKERS\}\$\{SERVICE_LABEL\}/);
   });
 
   test('keeps speaker and price metadata out of compact cards', () => {
