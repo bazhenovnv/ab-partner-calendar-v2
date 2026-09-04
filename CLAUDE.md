@@ -11,8 +11,8 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `df7dd97b248f8eec391227c2e5bf8c8e6dc40817`;
-- frontend image: `ab-afisha/frontend:frontend-release-df7dd97`;
+- frontend commit: `e5a2d8a612e5991973de269e367b8e4788663450`;
+- frontend image: `ab-afisha/frontend:frontend-release-e5a2d8a`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
@@ -20,15 +20,21 @@
 - backend + bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `df7dd97` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935 и PR #164 / CI #948 и добавляет PR #166 / CI #956. Контракт текущей promotion:
+Текущая promotion — **frontend-only**. Application commit `e5a2d8a` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925, PR #160 / CI #929, PR #162 / CI #935, PR #164 / CI #948 и PR #166 / CI #956, добавляет PR #168 / CI #960 и safety fix PR #170 / CI #965. Контракт текущей promotion:
 
+- OFFLINE/HYBRID modal берёт полный structured `event.address`; если полное нормализованное имя города уже присутствует в address, city повторно не добавляется;
+- city matching token-aware: punctuation/дефисы нормализуются, `Санкт-Петербург` сопоставляется с `Санкт Петербург`, но `Омск` не совпадает с `Омская улица`;
+- если `address` отсутствует, `Место:` строится из structured city/venue; HYBRID одновременно может показывать `Онлайн` и physical location;
+- при наличии speaker data строка `Спикер:` / `Спикеры:` формируется через общий `getEventModalSpeakers` path;
+- location/speaker path общий для desktop, tablet и mobile;
+- mobile 390 сохраняет утверждённую Figma-геометрию: modal `348×684`, image `309×309`, title `18px`, description `10px`, facts `309×52.79px`, fact icons `27×27px`, fact labels `6px`, values `7px`, detail text `11px`, detail icons `12×12px`, buttons `143×44px`, action icon `14×14px`;
 - opening image-flight начинается с точной картинки карточки (`originImageElement`) и сохраняет её исходные `src/currentSrc`, `object-fit` и `object-position`;
 - старт flight берётся из `sourceRect`, конечная геометрия — из `modalImage.getBoundingClientRect()` после рендера modal, поэтому конечные `x/y/width/height` совпадают с фактическим положением и размером картинки;
 - opening image duration = closing image duration (`500 ms`), opening easing `cubic-bezier(0, 0.55, 0.45, 1)` зеркален closing easing `cubic-bezier(0.55, 0, 1, 0.45)`;
 - промежуточных `scale`, `transform` и геометрического overshoot нет;
-- real modal image скрыта на время opening-flight; после достижения конечной геометрии она раскрывается под clone, а clone остаётся неподвижным и растворяется за `90 ms` только по opacity, поэтому разные card/modal crop не создают скачка размера или координат;
+- real modal image скрыта на время opening-flight; после достижения конечной геометрии она раскрывается под clone, а clone остаётся неподвижным и растворяется за `90 ms` только по opacity;
 - при desktop 1920 максимальная утверждённая геометрия: modal `1496×788`, image `647×647`, около `x=65px`, `y=70.5px` относительно modal; mobile 390: modal `348×684`, image `309×309`, `x=19px`, `y=54px`;
-- при закрытии события существующий reverse image-flight к исходной карточке сохраняется;
+- при закрытии события существующий reverse image-flight к исходной карточке сохраняется; известный скачок opening animation остаётся отложенной отдельной задачей;
 - общий opening/closing path применяется ко всем breakpoint и не меняет размеры самого modal layout;
 - desktop, tablet и mobile используют общий `cleanEventModalDescription`;
 - duplicate schedule/location metadata удаляется из body только при подтверждённом совпадении с structured fields текущего события: датой/endDate, временем, городом, адресом, площадкой или форматом;
@@ -53,7 +59,7 @@
 Текущий контракт deployment:
 
 - backend `213e507` сохраняется и не пересоздаётся;
-- frontend меняется только на `frontend-release-df7dd97`;
+- frontend меняется только на `frontend-release-e5a2d8a`;
 - bots `3a64511`, nginx, volumes и server-local `ai.ab-event.pro` сохраняются;
 - deployment только через `deploy-pinned-frontend.sh`;
 - Prisma schema/migrations не меняются.
