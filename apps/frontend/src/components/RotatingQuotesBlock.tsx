@@ -63,7 +63,7 @@ export function RotatingQuotesBlock({ quotes }: Props) {
           />
           <div className={`quotes-body ${visible ? 'quotes-visible' : 'quotes-hidden'}`}>
             <blockquote className="quotes-blockquote">
-              <p className="quotes-text">{q.text}</p>
+              <p className="quotes-text" style={{ fontWeight: 500 }}>{q.text}</p>
               {q.author && <footer className="quotes-author">— {q.author}</footer>}
             </blockquote>
           </div>
