@@ -188,30 +188,14 @@ function normalizeLocationPart(value: string): string {
     .trim();
 }
 
-function joinUniqueLocationParts(parts: Array<string | null | undefined>): string {
-  const result: string[] = [];
-  const comparable: string[] = [];
-
-  for (const rawPart of parts) {
-    const part = rawPart?.trim();
-    if (!part) continue;
-
-    const normalized = normalizeLocationPart(part);
-    if (!normalized) continue;
-
-    if (
-      comparable.some(
-        (current) => current === normalized || current.includes(normalized) || normalized.includes(current),
-      )
-    ) {
-      continue;
-    }
-
-    result.push(part);
-    comparable.push(normalized);
-  }
-
-  return result.join(', ');
+function includesLocationPart(container: string, part: string): boolean {
+  const normalizedContainer = normalizeLocationPart(container);
+  const normalizedPart = normalizeLocationPart(part);
+  return Boolean(
+    normalizedContainer &&
+      normalizedPart &&
+      normalizedContainer.includes(normalizedPart),
+  );
 }
 
 function getEventModalLocation(event: PublicEvent): ModalLocation | null {
@@ -220,12 +204,22 @@ function getEventModalLocation(event: PublicEvent): ModalLocation | null {
   const venue = event.venue?.trim() || '';
 
   if (address) {
-    const value = joinUniqueLocationParts([city, venue, address]);
-    return value ? { label: 'Адрес:', value } : null;
+    const value =
+      city && !includesLocationPart(address, city)
+        ? `${city}, ${address}`
+        : address;
+    return { label: 'Адрес:', value };
   }
 
-  const value = joinUniqueLocationParts([city, venue]);
-  return value ? { label: 'Место:', value } : null;
+  if (venue) {
+    const value =
+      city && !includesLocationPart(venue, city)
+        ? `${city}, ${venue}`
+        : venue;
+    return { label: 'Место:', value };
+  }
+
+  return city ? { label: 'Место:', value: city } : null;
 }
 
 type LineIconName = 'online' | 'location' | 'speaker';
