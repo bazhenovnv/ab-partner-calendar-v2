@@ -175,6 +175,53 @@ function organizerActionUrl(event: PublicEvent): string | null {
   return null;
 }
 
+type ModalLocation = {
+  label: 'Адрес:' | 'Место:';
+  value: string;
+};
+
+function normalizeLocationPart(value: string): string {
+  return value
+    .toLocaleLowerCase('ru-RU')
+    .replace(/[.,;:()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function includesLocationPart(container: string, part: string): boolean {
+  const normalizedContainer = normalizeLocationPart(container);
+  const normalizedPart = normalizeLocationPart(part);
+  return Boolean(
+    normalizedContainer &&
+      normalizedPart &&
+      normalizedContainer.includes(normalizedPart),
+  );
+}
+
+function getEventModalLocation(event: PublicEvent): ModalLocation | null {
+  const city = event.cityName?.trim() || event.city?.name?.trim() || '';
+  const address = event.address?.trim() || '';
+  const venue = event.venue?.trim() || '';
+
+  if (address) {
+    const value =
+      city && !includesLocationPart(address, city)
+        ? `${city}, ${address}`
+        : address;
+    return { label: 'Адрес:', value };
+  }
+
+  if (venue) {
+    const value =
+      city && !includesLocationPart(venue, city)
+        ? `${city}, ${venue}`
+        : venue;
+    return { label: 'Место:', value };
+  }
+
+  return city ? { label: 'Место:', value: city } : null;
+}
+
 type LineIconName = 'online' | 'location' | 'speaker';
 
 function LineIcon({ name }: { name: LineIconName }) {
@@ -294,9 +341,10 @@ function EventModal({
   })
     .format(new Date(event.startDate))
     .replace(/\s*г\.$/, '');
-  const format =
-    event.format === 'ONLINE' ? 'Онлайн' : event.cityName ?? event.city?.name ?? 'Офлайн';
   const price = formatPrice(event.priceType, event.priceText);
+  const location = getEventModalLocation(event);
+  const showOnline = event.format === 'ONLINE' || event.format === 'HYBRID';
+  const showLocation = event.format !== 'ONLINE' && Boolean(location);
   const speakers = getEventModalSpeakers(event);
   const speakerLabel = speakers.length > 1 ? 'Спикеры:' : 'Спикер:';
   const rawLead = sanitizeEventHtml(
@@ -448,16 +496,18 @@ function EventModal({
             </div>
 
             <div className={v2.lines}>
-              {event.format === 'ONLINE' ? (
-                <span className={v2.detailLine}>
+              {showOnline && (
+                <span className={v2.detailLine} data-event-modal-online>
                   <LineIcon name="online" />
                   <span className={v2.detailLabel}>Онлайн</span>
                 </span>
-              ) : (
-                <span className={v2.detailLine}>
+              )}
+
+              {showLocation && location && (
+                <span className={v2.detailLine} data-event-modal-location>
                   <LineIcon name="location" />
-                  <span className={v2.detailLabel}>Место:</span>
-                  <span className={v2.detailValue}>{format}</span>
+                  <span className={v2.detailLabel}>{location.label}</span>
+                  <span className={v2.detailValue}>{location.value}</span>
                 </span>
               )}
 
