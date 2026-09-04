@@ -1,13 +1,15 @@
 import type { PublicEvent } from '@/types/event';
 
 const SERVICE_LABEL =
-  '(?:когда|дата(?:\\s+и\\s+время)?|время(?:\\s+проведения)?|начало|место(?:\\s+проведения)?|адрес|формат|стоимость|цена|участие|спикер(?:ы)?|ведущ(?:ий|ая)|онлайн)';
+  '(?:когда|где|дата(?:\\s+и\\s+время)?|время(?:\\s+проведения)?|начало|место(?:\\s+проведения)?|адрес|формат|стоимость|цена|участие|спикер(?:ы)?|ведущ(?:ий|ая)|онлайн)';
 const OPTIONAL_MARKERS = '[\\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]*';
 const BLOCK_TAGS = 'h1|h2|h3|h4|h5|h6|p|div|li|blockquote';
 const SPEAKER_MARKER_SOURCE = '(?:🎙️?|🎤️?)';
 const SPEAKER_WORD_SOURCE = "[A-ZА-ЯЁ][A-Za-zА-Яа-яЁё'’.-]+";
 const SPEAKER_NAME_SOURCE =
   `${SPEAKER_WORD_SOURCE}(?:\\s+${SPEAKER_WORD_SOURCE}){1,4}`;
+const STRUCTURED_SCHEDULE_SENTENCE_SOURCE =
+  '(?:мероприятие|событие|вебинар|семинар|конференция|встреча|марафон)\\s+(?:пройд(?:ет|ёт)|состоится|начн(?:ется|ётся)|будет\\s+проходить|проходит|проводится|запланирован(?:о|а)?)\\b';
 const INVALID_SPEAKER =
   /^(?:при\s+регистрации|уточняется|по\s+запросу|не\s+указан(?:о|а)?|бесплатно|платно)$/i;
 
@@ -197,6 +199,88 @@ function normalizeTime(value?: string | null): string {
     .replace(/[()]/g, '');
 }
 
+function getEventDateSignals(event: PublicEvent): string[] {
+  const signals = new Set<string>();
+  const formatter = new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'Europe/Moscow',
+  });
+  const numericFormatter = new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: 'Europe/Moscow',
+  });
+
+  for (const value of [event.startDate, event.endDate]) {
+    if (!value) continue;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) continue;
+    signals.add(formatter.format(date));
+    signals.add(numericFormatter.format(date));
+  }
+
+  return [...signals];
+}
+
+function hasStructuredEventSignal(value: string, event: PublicEvent): boolean {
+  const text = normalizeComparableText(value);
+  if (!text) return false;
+
+  const formatSignal =
+    event.format === 'ONLINE'
+      ? 'онлайн'
+      : event.format === 'HYBRID'
+        ? 'гибрид'
+        : 'офлайн';
+  const candidates = [
+    ...getEventDateSignals(event),
+    event.startTime,
+    event.cityName,
+    event.city?.name,
+    event.address,
+    event.venue,
+    formatSignal,
+  ];
+
+  return candidates.some((candidate) => {
+    const normalized = normalizeComparableText(candidate);
+    return normalized.length >= 3 && text.includes(normalized);
+  });
+}
+
+/**
+ * Removes narrative schedule/location tails that duplicate fields already shown
+ * by the modal facts/lines. This is deliberately conservative: an occurrence
+ * sentence is removed only when it contains a real structured event signal.
+ * It also removes trailing inline labels such as `Где:` that may live in the
+ * same paragraph as editorial copy rather than on their own line.
+ */
+function removeStructuredSummaryFragments(
+  value: string,
+  event: PublicEvent,
+): string {
+  let result = value;
+  const schedulePattern = new RegExp(
+    `${STRUCTURED_SCHEDULE_SENTENCE_SOURCE}[^.!?…<]*(?:[.!?…]+(?=\\s|<|$)|(?=<|$))`,
+    'gi',
+  );
+
+  result = result.replace(schedulePattern, (sentence) =>
+    hasStructuredEventSignal(sentence, event) ? '' : sentence,
+  );
+
+  result = result.replace(
+    new RegExp(
+      `\\s+${OPTIONAL_MARKERS}${SERVICE_LABEL}\\s*[:：—–-][\\s\\S]*?(?=<\\/(?:${BLOCK_TAGS})>|\\r?\\n|$)`,
+      'gi',
+    ),
+    '',
+  );
+
+  return result;
+}
+
 function isRepeatedEventMetadata(value: string, event: PublicEvent): boolean {
   const text = normalizeComparableText(value).replace(
     /^[\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]+/,
@@ -335,6 +419,7 @@ export function cleanEventModalDescription(
   if (!value) return '';
 
   let result = removeInlineSpeakerFragments(value);
+  result = removeStructuredSummaryFragments(result, event);
 
   result = removeRepeatedBlocks(result, event);
   result = removeRepeatedBreakSegments(result, event);
@@ -364,6 +449,7 @@ export function cleanEventModalDescription(
   );
 
   result = removeInlineSpeakerFragments(result);
+  result = removeStructuredSummaryFragments(result, event);
 
   // Registration blocks and messenger links are actions, not description copy.
   result = result.replace(
