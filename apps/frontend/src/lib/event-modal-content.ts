@@ -2,6 +2,8 @@ import type { PublicEvent } from '@/types/event';
 
 const SERVICE_LABEL =
   '(?:когда|где|дата(?:\\s+и\\s+время)?|время(?:\\s+проведения)?|начало|место(?:\\s+проведения)?|адрес|формат|стоимость|цена|участие|спикер(?:ы)?|ведущ(?:ий|ая)|онлайн)';
+const INLINE_STRUCTURED_LABEL =
+  '(?:когда|где|дата(?:\\s+и\\s+время)?|время(?:\\s+проведения)?|начало|место(?:\\s+проведения)?|адрес|стоимость|цена)';
 const OPTIONAL_MARKERS = '[\\s📅🗓⏰🕐📍🌐💻🏢💰💵🎙️🎤•▪▫–—-]*';
 const BLOCK_TAGS = 'h1|h2|h3|h4|h5|h6|p|div|li|blockquote';
 const SPEAKER_MARKER_SOURCE = '(?:🎙️?|🎤️?)';
@@ -252,9 +254,9 @@ function hasStructuredEventSignal(value: string, event: PublicEvent): boolean {
 /**
  * Removes narrative schedule/location tails that duplicate fields already shown
  * by the modal facts/lines. This is deliberately conservative: an occurrence
- * sentence is removed only when it contains a real structured event signal.
- * It also removes trailing inline labels such as `Где:` that may live in the
- * same paragraph as editorial copy rather than on their own line.
+ * sentence or inline metadata tail is removed only when it contains a real
+ * structured event signal. Labels that are common in prose (for example
+ * `формат`) are intentionally excluded from inline-tail matching.
  */
 function removeStructuredSummaryFragments(
   value: string,
@@ -262,7 +264,7 @@ function removeStructuredSummaryFragments(
 ): string {
   let result = value;
   const schedulePattern = new RegExp(
-    `${STRUCTURED_SCHEDULE_SENTENCE_SOURCE}[^.!?…<]*(?:[.!?…]+(?=\\s|<|$)|(?=<|$))`,
+    `${STRUCTURED_SCHEDULE_SENTENCE_SOURCE}(?:\\.(?=\\d)|[^.!?…<])*(?:[!?…]+|\\.(?=\\s|<|$)|(?=<|$))`,
     'gi',
   );
 
@@ -272,10 +274,10 @@ function removeStructuredSummaryFragments(
 
   result = result.replace(
     new RegExp(
-      `\\s+${OPTIONAL_MARKERS}${SERVICE_LABEL}\\s*[:：—–-][\\s\\S]*?(?=<\\/(?:${BLOCK_TAGS})>|\\r?\\n|$)`,
+      `(\\s+${OPTIONAL_MARKERS}${INLINE_STRUCTURED_LABEL}\\s*[:：—–-][\\s\\S]*?)(?=<\\/(?:${BLOCK_TAGS})>|\\r?\\n|$)`,
       'gi',
     ),
-    '',
+    (tail) => (hasStructuredEventSignal(tail, event) ? '' : tail),
   );
 
   return result;
