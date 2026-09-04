@@ -13,6 +13,11 @@ export const EVENT_MODAL_CLOSE_DURATION_MS = 500;
 export const EVENT_MODAL_CONTENT_REVEAL_START = 0.28;
 export const EVENT_MODAL_CONTENT_REVEAL_END = 0.88;
 
+const EVENT_MODAL_CLOSE_IMAGE_EASING = 'cubic-bezier(0.55, 0, 1, 0.45)';
+const EVENT_MODAL_OPEN_IMAGE_EASING = 'cubic-bezier(0, 0.55, 0.45, 1)';
+const EVENT_MODAL_OPEN_IMAGE_DURATION_MS = EVENT_MODAL_CLOSE_DURATION_MS;
+const EVENT_MODAL_OPEN_HANDOFF_DURATION_MS = 90;
+
 type MotionDirection = 'opening' | 'closing';
 
 type MotionRect = {
@@ -237,7 +242,7 @@ function createImageFlightClone(
   clone.style.pointerEvents = 'none';
   clone.style.userSelect = 'none';
   clone.style.zIndex = '1205';
-  clone.style.willChange = 'top, left, width, height, border-radius, box-shadow';
+  clone.style.willChange = 'top, left, width, height, border-radius, box-shadow, opacity';
 
   document.body.appendChild(clone);
   activeClone = clone;
@@ -273,8 +278,8 @@ function animateImageFlight(
 ): Animation | null {
   const easing =
     direction === 'opening'
-      ? 'cubic-bezier(0.16, 1, 0.3, 1)'
-      : 'cubic-bezier(0.55, 0, 1, 0.45)';
+      ? EVENT_MODAL_OPEN_IMAGE_EASING
+      : EVENT_MODAL_CLOSE_IMAGE_EASING;
 
   return animateElement(
     clone,
@@ -535,12 +540,47 @@ function finishOpeningMotion(
 ): void {
   if (sequence !== transitionSequence) return;
 
+  // Reveal the real modal image at the exact endpoint while the source clone
+  // is still fixed over it, then dissolve only the artwork handoff. Geometry
+  // no longer changes during this final phase, so card/modal crop variants
+  // cannot produce a last-frame size or position snap.
   clearMotionElements(elements);
-  removeActiveClone();
-  cancelActiveAnimations();
   activeElements = null;
   activeDirection = null;
   activeMotionDone = null;
+
+  const clone = activeClone;
+  if (!clone) {
+    cancelActiveAnimations();
+    return;
+  }
+
+  const handoffAnimation = animateElement(
+    clone,
+    [
+      { opacity: 1, offset: 0 },
+      { opacity: 0, offset: 1 },
+    ],
+    {
+      duration: EVENT_MODAL_OPEN_HANDOFF_DURATION_MS,
+      easing: 'linear',
+      fill: 'both',
+    },
+  );
+
+  if (!handoffAnimation) {
+    removeActiveClone();
+    cancelActiveAnimations();
+    return;
+  }
+
+  activeAnimations.push(handoffAnimation);
+
+  void handoffAnimation.finished.finally(() => {
+    if (sequence !== transitionSequence) return;
+    removeActiveClone();
+    cancelActiveAnimations();
+  });
 }
 
 function openWithoutImageOrigin(update: () => void): void {
@@ -600,9 +640,20 @@ export function openEventWithTransition(
       return;
     }
 
-    const finalImageRect = copyRect(elements.image.getBoundingClientRect());
+    const modalImage = getImageElement(elements.image);
+    if (!modalImage) {
+      restoreOriginImage();
+      return;
+    }
+
+    const finalImageRect = copyRect(modalImage.getBoundingClientRect());
     const sourceRadius = getBorderRadius(originImageElement.parentElement);
     const finalRadius = getBorderRadius(elements.imageStage, '20px');
+
+    // Preserve the exact card artwork and object-fit at the source rectangle.
+    // The geometry then follows the mathematical reverse of closing. At the
+    // endpoint the source artwork dissolves over the already-final modal image,
+    // so differing card/modal crops never create a hard handoff.
     const clone = createImageFlightClone(
       originImageElement,
       sourceRect,
@@ -618,7 +669,7 @@ export function openEventWithTransition(
       finalImageRect,
       sourceRadius,
       finalRadius,
-      EVENT_MODAL_OPEN_DURATION_MS,
+      EVENT_MODAL_OPEN_IMAGE_DURATION_MS,
       'opening',
     );
     const shellAnimations = createShellOpeningAnimations(elements);
