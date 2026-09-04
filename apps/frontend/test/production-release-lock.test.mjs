@@ -68,8 +68,8 @@ const BACKEND_IMAGE = `ab-afisha/backend:${BACKEND_TAG}`;
 const BOTS_COMMIT = '3a64511c98f7bf8cd59776dd5dce233939cd2988';
 const BOTS_TAG = 'bots-release-3a64511';
 const BOTS_IMAGE = `ab-afisha/bots:${BOTS_TAG}`;
-const FRONTEND_COMMIT = 'df7dd97b248f8eec391227c2e5bf8c8e6dc40817';
-const FRONTEND_TAG = 'frontend-release-df7dd97';
+const FRONTEND_COMMIT = 'e5a2d8a612e5991973de269e367b8e4788663450';
+const FRONTEND_TAG = 'frontend-release-e5a2d8a';
 const FRONTEND_IMAGE = `ab-afisha/frontend:${FRONTEND_TAG}`;
 const MAX3_URL = 'https://max.ru/join/iPKA4EFVMhPU9oJXqHDk7vRhD4Tl0BAswVkqfxW8iYA';
 
@@ -100,6 +100,16 @@ describe('Pinned production component release', () => {
     }
 
     assert.match(RELEASE, /единственный источник истины \(SSOT\)/i);
+    assert.match(RELEASE, /PR #170/);
+    assert.match(RELEASE, /CI #965/);
+    assert.match(RELEASE, /Омская улица/);
+    assert.match(RELEASE, /token-aware|целая нормализованная фраза/i);
+    assert.match(RELEASE, /PR #168/);
+    assert.match(RELEASE, /CI #960/);
+    assert.match(RELEASE, /полный structured `event\.address`|полный `event\.address`/i);
+    assert.match(RELEASE, /Спикер:|Спикеры:/);
+    assert.match(RELEASE, /348×684/);
+    assert.match(RELEASE, /309×309/);
     assert.match(RELEASE, /PR #166/);
     assert.match(RELEASE, /CI #956/);
     assert.match(RELEASE, /cleanEventModalDescription/);
@@ -172,10 +182,10 @@ describe('Pinned production component release', () => {
     assert.match(RELEASE, /ai\.ab-event\.pro/);
   });
 
-  test('compose pins 213e507 backend, df7dd97 frontend and preserves bots', () => {
+  test('compose pins 213e507 backend, e5a2d8a frontend and preserves bots', () => {
     assert.match(COMPOSE, /image: \$\{BACKEND_IMAGE:-ab-afisha\/backend:backend-release-213e507\}/);
     assert.match(COMPOSE, /image: \$\{BOTS_IMAGE:-ab-afisha\/bots:bots-release-3a64511\}/);
-    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-df7dd97\}/);
+    assert.match(COMPOSE, /image: \$\{FRONTEND_IMAGE:-ab-afisha\/frontend:frontend-release-e5a2d8a\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_1_ID: \$\{MAX_EDITORIAL_CHANNEL_1_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_2_ID: \$\{MAX_EDITORIAL_CHANNEL_2_ID:-\}/);
     assert.match(COMPOSE, /MAX_EDITORIAL_CHANNEL_3_ID: \$\{MAX_EDITORIAL_CHANNEL_3_ID:-\}/);
