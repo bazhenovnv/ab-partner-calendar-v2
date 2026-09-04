@@ -11,19 +11,23 @@
 
 - release anchor/backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`;
 - backend image: `ab-afisha/backend:backend-release-213e507`;
-- frontend commit: `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`;
-- frontend image: `ab-afisha/frontend:frontend-release-aa1bf06`;
+- frontend commit: `61b4525db6ff35f43081226fd2989e5b1023863e`;
+- frontend image: `ab-afisha/frontend:frontend-release-61b4525`;
 - bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`;
 - backend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend.sh`;
 - backend+frontend deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-frontend.sh`;
 - backend+bots deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-backend-bots.sh`;
 - frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`.
 
-Текущая promotion — **frontend-only**. Application commit `aa1bf06` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919 и PR #158 / CI #925, а также включает PR #160 / CI #929 с устранением лишнего overshoot картинки при открытии события. Текущая геометрия и взаимодействия:
+Текущая promotion — **frontend-only**. Application commit `61b4525` сохраняет PR #151 / CI #907, PR #152 / CI #909, PR #154 / CI #913, PR #156 / CI #919, PR #158 / CI #925 и PR #160 / CI #929, а также включает PR #162 / CI #935 с возвращением точного image-flight при открытии события. Текущая геометрия и взаимодействия:
 
-- при открытии события реальная картинка модального окна сразу отображается в своей конечной геометрии; временный image-flight clone на opening-фазе подавлен, поэтому картинка больше не увеличивается сверх конечного размера и не уменьшается обратно;
+- при открытии события временный image-flight clone снова видим и плавно увеличивается от точного `sourceRect` исходной картинки карточки до точного `finalImageRect`, который браузер получает через `elements.image.getBoundingClientRect()` после рендера модального окна;
+- конечные `x/y/width/height` flight полностью совпадают с фактической картинкой в modal image-stage; промежуточный `scale`, `transform` или geometry overshoot не используются;
+- реальная modal image скрыта на время opening-flight и становится видимой после достижения конечной геометрии, поэтому двойного изображения нет;
+- opening clone не получает увеличивающую визуальную площадь финальную тень, поэтому нет ложного «перераздувания» перед handoff;
+- при desktop 1920 утверждённая максимальная геометрия даёт modal `1496×788`, image `647×647`, примерно `x=65px`, `y=70.5px` относительно modal; при mobile 390 modal `348×684`, image `309×309`, `x=19px`, `y=54px`;
 - обратный image-flight при закрытии события сохраняется;
-- изменение действует для desktop, tablet и mobile через общий `event-modal-transitions.css`;
+- общий transition path действует для desktop, tablet и mobile;
 - мобильный hero использует утверждённый Figma artwork `hero-mobile-figma-20260903.webp`;
 - верхняя граница mobile hero artwork плавно растворяется в белой поверхности hero через CSS mask, при этом заголовок, описание и CTA остаются отдельным верхним слоем;
 - на touch-устройствах у hero, календаря и quote-area убраны лишние hover/active/focus переходы, создававшие вторую тень и артефакты скругления;
