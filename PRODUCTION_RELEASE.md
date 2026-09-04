@@ -7,29 +7,37 @@
 - Домен: `https://ab-event.pro`
 - Release anchor / backend commit: `213e5076fc274254abf9a56612bd086df2155ce5`
 - Backend image: `ab-afisha/backend:backend-release-213e507`
-- Frontend commit: `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`
-- Frontend image: `ab-afisha/frontend:frontend-release-aa1bf06`
+- Frontend commit: `61b4525db6ff35f43081226fd2989e5b1023863e`
+- Frontend image: `ab-afisha/frontend:frontend-release-61b4525`
 - Bots commit/image: `3a64511c98f7bf8cd59776dd5dce233939cd2988` / `ab-afisha/bots:bots-release-3a64511`
 - Дата утверждения: `2026-09-04`
 - Серверный корень: `/srv/ab-afisha`
 - Production Compose: `/srv/ab-afisha/docker-compose.production.v2.yml`
 - Frontend-only deploy: `/srv/ab-afisha/infra/scripts/deploy-pinned-frontend.sh`
 
-Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `aa1bf06`.
+Машиночитаемая фиксация находится в `infra/deploy/production-frontend.env`. Production-компоненты закрепляются независимо: release anchor остаётся на backend `213e507`, а frontend продвигается отдельно до `61b4525`.
 
-## Текущая promotion — картинка события сразу в конечном размере
+## Текущая promotion — точное увеличение картинки из карточки в modal
 
-Текущая promotion меняет **только frontend** до application merge commit `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`.
+Текущая promotion меняет **только frontend** до application merge commit `61b4525db6ff35f43081226fd2989e5b1023863e`.
 
-Application PR #160 / CI #929 устраняет лишнее увеличение картинки при открытии события:
+Application PR #162 / CI #935 возвращает opening image-flight и фиксирует его конечную геометрию точно по modal image:
 
-- реальная картинка внутри modal сразу отображается в точной конечной геометрии image-stage;
-- временный image-flight clone скрывается только на opening-фазе и больше не может визуально увеличиваться сверх конечного размера с последующим уменьшением;
-- shell-анимация, backdrop и появление текста сохраняются;
+- картинка снова плавно увеличивается от исходной картинки карточки к картинке в модальном окне;
+- стартовая геометрия берётся из `sourceRect` исходной картинки;
+- конечная геометрия берётся напрямую из `elements.image.getBoundingClientRect()` после рендера modal, поэтому конечные `x/y/width/height` совпадают с фактической картинкой в modal image-stage;
+- flight содержит только `fromRect -> toRect`, без промежуточного `scale`, `transform` или дополнительного геометрического overshoot;
+- реальная modal image скрыта на время opening-flight, а после достижения конечной геометрии clone удаляется и реальная картинка остаётся точно в том же размере и положении;
+- у opening clone нет финальной 48px box-shadow, которая ранее визуально делала изображение больше конечного размера перед handoff;
+- при desktop 1920 утверждённая максимальная геометрия: modal `1496×788`, финальная картинка `647×647`, примерно `x=65px`, `y=70.5px` относительно modal;
+- при mobile 390: modal `348×684`, финальная картинка `309×309`, `x=19px`, `y=54px` относительно modal;
+- runtime не хардкодит эти координаты: браузер каждый раз измеряет фактический `getBoundingClientRect()` для текущего viewport;
 - при закрытии события сохраняется существующий reverse image-flight к исходной карточке;
-- общий transition-layer действует одинаково для desktop, tablet и mobile;
-- отдельный regression-test фиксирует final-size opening contract;
+- общий transition path работает одинаково для desktop, tablet и mobile;
+- отдельный regression-test фиксирует exact sourceRect -> finalImageRect path и запрещает повторный geometry overshoot;
 - backend, bots, nginx, данные, Prisma schema и migrations не меняются.
+
+Сохраняется application PR #160 / CI #929, в котором была устранена предыдущая версия overshoot-проблемы. PR #162 намеренно уточняет этот контракт по явному решению владельца: opening-flight должен быть видимым, но завершаться строго в фактической конечной геометрии modal image без дополнительного увеличения.
 
 Сохраняется application PR #158 / CI #925 с устранением короткого мерцания центральной точки после ускоренного возврата direction indicator:
 
@@ -176,7 +184,7 @@ Backend остаётся на `213e507` и продолжает использо
 ## Production-гарантии
 
 - backend остаётся `ab-afisha/backend:backend-release-213e507` и не пересоздаётся;
-- frontend меняется только на `ab-afisha/frontend:frontend-release-aa1bf06`;
+- frontend меняется только на `ab-afisha/frontend:frontend-release-61b4525`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511` и не пересоздаются;
 - nginx не пересоздаётся;
 - server-local блок `ai.ab-event.pro` сохраняется;
@@ -194,7 +202,7 @@ Backend остаётся на `213e507` и продолжает использо
 Скрипт должен:
 
 1. прочитать точный frontend pin из production lock;
-2. собрать frontend из commit `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a` в detached worktree;
+2. собрать frontend из commit `61b4525db6ff35f43081226fd2989e5b1023863e` в detached worktree;
 3. проверить `org.opencontainers.image.revision`;
 4. выполнить frontend preflight;
 5. переключить только frontend;
@@ -207,12 +215,14 @@ Backend остаётся на `213e507` и продолжает использо
 Обязательно проверить:
 
 - `https://ab-event.pro/` → HTTP 200;
-- frontend image = `ab-afisha/frontend:frontend-release-aa1bf06`;
-- frontend revision = `aa1bf06765964bbd6bbcf29e0bb64bab0ccb796a`;
+- frontend image = `ab-afisha/frontend:frontend-release-61b4525`;
+- frontend revision = `61b4525db6ff35f43081226fd2989e5b1023863e`;
 - backend остаётся `ab-afisha/backend:backend-release-213e507`;
 - bots остаются `ab-afisha/bots:bots-release-3a64511`;
 - nginx не пересоздан;
-- при открытии события на desktop, tablet и mobile картинка сразу находится в конечном размере modal image-stage и не делает overshoot/обратное уменьшение;
+- при открытии события на desktop, tablet и mobile картинка видимо увеличивается из исходной карточки к modal image-stage;
+- последний кадр opening-flight совпадает с фактическими `x/y/width/height` конечной картинки модального окна и после handoff нет уменьшения или скачка;
+- opening-flight не создаёт визуального overshoot из-за дополнительной box-shadow;
 - при закрытии события reverse image-flight к исходной карточке сохраняется;
 - на mobile hero отображается утверждённый artwork с календарём, книгами и вазой;
 - верх artwork не образует прямую видимую границу: изображение плавно переходит в белую hero-поверхность, а текст и CTA остаются поверх;
@@ -245,7 +255,7 @@ Backend остаётся на `213e507` и продолжает использо
 
 - использовать `latest` для backend/frontend/bots;
 - backend release кроме `backend-release-213e507`;
-- frontend release кроме `frontend-release-aa1bf06`;
+- frontend release кроме `frontend-release-61b4525`;
 - bots release кроме `bots-release-3a64511`;
 - пересоздавать backend, bots или nginx;
 - терять server-local `ai.ab-event.pro`;
